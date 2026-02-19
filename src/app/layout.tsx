@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "AXIS OIL | Coffee Intelligence Layer",
+    title: "AXIS COFFEE PRO | Coffee Intelligence Layer",
     description: "Sistema Avanzado de Control Operacional para Tostadoras",
 };
 

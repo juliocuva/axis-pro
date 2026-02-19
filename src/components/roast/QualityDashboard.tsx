@@ -108,7 +108,7 @@ export default function QualityDashboard() {
                             <p className="text-[10px] text-gray-500 uppercase font-mono mb-2">Sello Digial de Calidad</p>
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 bg-brand-green/20 rounded flex items-center justify-center text-brand-green-bright text-[8px]">QR</div>
-                                <p className="text-[9px] text-gray-400 leading-tight">Autenticado por el Motor de Inteligencia AXIS OIL v2.0</p>
+                                <p className="text-[9px] text-gray-400 leading-tight">Autenticado por el Motor de Inteligencia AXIS COFFEE PRO v2.0</p>
                             </div>
                         </div>
                     </div>

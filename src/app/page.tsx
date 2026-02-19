@@ -6,10 +6,11 @@ import GreenExportForm from '@/components/export/GreenExportForm';
 import QualityDashboard from '@/components/roast/QualityDashboard';
 import AuthScreen from '@/components/auth/AuthScreen';
 import PurchaseForm from '@/components/inventory/PurchaseForm';
+import RoastCurveAnalysis from '@/components/roast/RoastCurveAnalysis';
 
 export default function Home() {
     const [user, setUser] = useState<string | null>(null);
-    const [view, setView] = useState<'dashboard' | 'entry' | 'export_green' | 'quality' | 'purchase'>('dashboard');
+    const [view, setView] = useState<'dashboard' | 'entry' | 'export_green' | 'quality' | 'purchase' | 'curves'>('dashboard');
 
     if (!user) {
         return <AuthScreen onLogin={(email) => setUser(email)} />;
@@ -25,45 +26,51 @@ export default function Home() {
                                 <path d="M12 2v20M2 12h20M12 2l4 4-4 4M12 22l-4-4 4-4" stroke="white" />
                             </svg>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight">AXIS OIL <span className="text-brand-green-bright text-lg ml-2 font-mono">V2.0 PRO</span></h1>
+                        <h1 className="text-3xl font-bold tracking-tight">AXIS COFFEE <span className="text-brand-green-bright text-lg ml-2 font-mono">PRO V2.0</span></h1>
                     </div>
                     <p className="text-sm text-gray-400">Sesión iniciada como: <span className="text-brand-green-bright font-mono">{user}</span></p>
                 </div>
 
-                <nav className="flex bg-bg-card p-1 rounded-xl border border-white/5 shadow-2xl">
+                <nav className="flex bg-bg-card p-1 rounded-xl border border-white/5 shadow-2xl overflow-x-auto max-w-full">
                     <button
                         onClick={() => setView('dashboard')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${view === 'dashboard' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${view === 'dashboard' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                     >
                         RESUMEN
                     </button>
                     <button
                         onClick={() => setView('purchase')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${view === 'purchase' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${view === 'purchase' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                     >
-                        INGRESO / ORIGEN
+                        INGRESO
                     </button>
                     <button
                         onClick={() => setView('quality')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${view === 'quality' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${view === 'quality' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                     >
-                        MONITOR CALIDAD
+                        CALIDAD
+                    </button>
+                    <button
+                        onClick={() => setView('curves')}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${view === 'curves' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                    >
+                        CURVAS
                     </button>
                     <button
                         onClick={() => setView('entry')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${view === 'entry' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${view === 'entry' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                     >
-                        REGISTRO TOSTADO
+                        TOSTADO
                     </button>
                     <button
                         onClick={() => setView('export_green')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${view === 'export_green' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${view === 'export_green' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                     >
-                        EXPORT VERDE
+                        EXPORT
                     </button>
                     <button
                         onClick={() => setUser(null)}
-                        className="px-4 py-2 rounded-lg text-xs font-bold text-brand-red-bright hover:bg-brand-red/10 transition-all"
+                        className="px-4 py-2 rounded-lg text-xs font-bold text-brand-red-bright hover:bg-brand-red/10 transition-all whitespace-nowrap"
                     >
                         SALIR
                     </button>
@@ -71,6 +78,7 @@ export default function Home() {
             </header>
 
             {view === 'dashboard' && (
+                // ... (existing dashboard code)
                 <div className="space-y-8 animate-in fade-in duration-700">
                     {/* Pipeline de Proceso */}
                     <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -167,6 +175,7 @@ export default function Home() {
             {view === 'export_green' && <GreenExportForm />}
             {view === 'quality' && <QualityDashboard />}
             {view === 'purchase' && <PurchaseForm />}
+            {view === 'curves' && <RoastCurveAnalysis />}
         </div>
     );
 }

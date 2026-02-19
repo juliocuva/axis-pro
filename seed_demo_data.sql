@@ -1,4 +1,4 @@
--- SCRIPT DE DATOS DE PRUEBA (DATA DEMO) PARA AXIS OIL
+-- SCRIPT DE DATOS DE PRUEBA (DATA DEMO) PARA AXIS COFFEE PRO
 -- Copia y pega esto en el SQL Editor de Supabase después de haber creado las tablas.
 
 -- 1. Insertar una empresa ficticia (Axis Demo)

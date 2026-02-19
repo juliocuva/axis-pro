@@ -33,7 +33,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </svg>
                     </div>
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tighter text-white">AXIS OIL</h2>
+                        <h2 className="text-3xl font-bold tracking-tighter text-white">AXIS COFFEE PRO</h2>
                         <p className="text-xs font-mono text-brand-green-bright uppercase tracking-[0.3em] mt-1">SaaS Intelligence</p>
                     </div>
                 </div>
