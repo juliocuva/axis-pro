@@ -50,6 +50,21 @@ CREATE TABLE roast_batches (
     company_id UUID NOT NULL
 );
 
+-- Tabla de Exportaciones de Café Verde
+CREATE TABLE green_exports (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    inventory_id UUID REFERENCES coffee_purchase_inventory(id),
+    lot_id TEXT NOT NULL,
+    moisture_content DECIMAL NOT NULL,
+    stabilization_days INTEGER NOT NULL,
+    destination TEXT NOT NULL,
+    transport_type TEXT CHECK (transport_type IN ('air', 'sea')),
+    company_id UUID NOT NULL
+);
+
+CREATE INDEX idx_green_exports_company ON green_exports(company_id);
+
 -- 2. Indexes for fast retrieval
 CREATE INDEX idx_roast_batches_company ON roast_batches(company_id);
 CREATE INDEX idx_roast_batches_date ON roast_batches(roast_date);

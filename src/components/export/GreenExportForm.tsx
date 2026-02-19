@@ -11,19 +11,47 @@ export default function GreenExportForm() {
         transportType: 'air' as 'air' | 'sea'
     });
 
-    const [riskLevel, setRiskLevel] = useState<'low' | 'medium' | 'high'>('low');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-    // Lógica de validación industrial para café en verde
-    const checkStability = (moisture: number, days: number) => {
-        if (moisture > 12.5) return 'high'; // Riesgo de hongos
-        if (days < 10) return 'medium'; // Falta de reposo
-        return 'low';
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setStatus(null);
+
+        try {
+            const { supabase } = await import('@/lib/supabase');
+
+            const { error } = await supabase
+                .from('green_exports')
+                .insert([{
+                    lot_id: formData.lotId,
+                    moisture_content: formData.moistureContent,
+                    stabilization_days: formData.stabilizationDays,
+                    destination: formData.destination,
+                    transport_type: formData.transportType,
+                    company_id: '99999999-9999-9999-9999-999999999999' // ID Temporal
+                }]);
+
+            if (error) throw error;
+            setStatus({ type: 'success', message: '¡Manifiesto de exportación guardado en la nube!' });
+        } catch (err: any) {
+            console.error(err);
+            setStatus({ type: 'error', message: 'Error al conectar con Supabase.' });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {status && (
+                <div className={`p-4 rounded-xl text-sm font-bold border ${status.type === 'success' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright' : 'bg-brand-red/10 border-brand-red/30 text-brand-red-bright'}`}>
+                    {status.message}
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Quality Controls */}
                 <section className="bg-bg-card border border-white/5 p-8 rounded-3xl">
                     <h3 className="text-brand-green-bright font-bold mb-6 flex items-center gap-2">
                         <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
@@ -39,6 +67,7 @@ export default function GreenExportForm() {
                                 value={formData.moistureContent}
                                 onChange={(e) => setFormData({ ...formData, moistureContent: parseFloat(e.target.value) })}
                                 className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all"
+                                disabled={isSubmitting}
                             />
                         </div>
 
@@ -49,12 +78,12 @@ export default function GreenExportForm() {
                                 value={formData.stabilizationDays}
                                 onChange={(e) => setFormData({ ...formData, stabilizationDays: parseInt(e.target.value) })}
                                 className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all"
+                                disabled={isSubmitting}
                             />
                         </div>
                     </div>
                 </section>
 
-                {/* Logistics Prediction */}
                 <section className="bg-bg-card border border-white/5 p-8 rounded-3xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full"></div>
                     <h3 className="text-brand-green-bright font-bold mb-6">Predicción de Exportación</h3>
@@ -72,31 +101,22 @@ export default function GreenExportForm() {
                                     : 'Apto para tránsito internacional prolongado.'}
                             </p>
                         </div>
-
-                        <div className="p-6 rounded-2xl bg-bg-main border border-white/5">
-                            <span className="text-[10px] text-gray-500 uppercase font-mono">Planificación de Tránsito</span>
-                            <p className="text-sm font-medium mt-1">Destino: <span className="text-brand-green-bright">{formData.destination}</span></p>
-                            <div className="mt-4 flex gap-2">
-                                <div className="flex-1 bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-                                    <p className="text-[10px] text-gray-500 uppercase">Salida Sugerida</p>
-                                    <p className="font-bold text-xs mt-1">T + 3 días</p>
-                                </div>
-                                <div className="flex-1 bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-                                    <p className="text-[10px] text-gray-500 uppercase">Impacto Humedad</p>
-                                    <p className="font-bold text-xs mt-1 text-brand-green-bright">Bajo (-0.2%)</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </section>
             </div>
 
-            <button className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 group">
-                GENERAR MANIFIESTO DE EXPORTACIÓN
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:translate-x-1 transition-transform">
-                    <path d="M12 2l3.5 3.5L12 9M19 12l-14 0" stroke="white" strokeWidth="2.5" />
-                </svg>
+            <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 group disabled:opacity-50"
+            >
+                {isSubmitting ? 'GENERANDO EN LA NUBE...' : 'GENERAR MANIFIESTO DE EXPORTACIÓN'}
+                {!isSubmitting && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:translate-x-1 transition-transform">
+                        <path d="M12 2l3.5 3.5L12 9M19 12l-14 0" stroke="white" strokeWidth="2.5" />
+                    </svg>
+                )}
             </button>
-        </div>
+        </form>
     );
 }
