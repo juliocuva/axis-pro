@@ -27,13 +27,9 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-700">
                 {/* Logo Section */}
                 <div className="text-center space-y-4">
-                    <div className="mx-auto w-24 h-24 bg-white/5 rounded-[2rem] flex items-center justify-center p-2 shadow-2xl relative overflow-hidden group">
+                    <div className="mx-auto w-48 h-48 bg-white/5 rounded-[3rem] flex items-center justify-center p-4 shadow-2xl relative overflow-hidden group">
                         <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain relative z-10" />
-                        <div className="absolute inset-0 bg-brand-green/20 blur-2xl group-hover:bg-brand-green/30 transition-all"></div>
-                    </div>
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tighter text-white">AXIS COFFEE PRO</h2>
-                        <p className="text-xs font-mono text-brand-green-bright uppercase tracking-[0.3em] mt-1">SaaS Intelligence</p>
+                        <div className="absolute inset-0 bg-brand-green/20 blur-3xl group-hover:bg-brand-green/30 transition-all"></div>
                     </div>
                 </div>
 
