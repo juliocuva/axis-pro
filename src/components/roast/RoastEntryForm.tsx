@@ -52,8 +52,11 @@ export default function RoastEntryForm() {
 
             setStatus({ type: 'success', message: '¡Lote guardado exitosamente en la nube!' });
         } catch (err: any) {
-            console.error(err);
-            setStatus({ type: 'error', message: 'Error: Configura las credenciales de Supabase en .env.local' });
+            console.error("DEBUG ROAST:", err);
+            setStatus({
+                type: 'error',
+                message: `Error de Conexión: ${err.message || 'No se pudo contactar con Supabase'}. Revisa tus credenciales en Vercel.`
+            });
         } finally {
             setIsSubmitting(false);
         }
