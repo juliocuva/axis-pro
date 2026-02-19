@@ -137,13 +137,14 @@ export default function RoastCurveAnalysis() {
                             />
                             <Tooltip content={<CustomTooltip />} />
 
-                            {/* Airflow Area (Background) */}
+                            {/* Airflow Curve (Smooth) */}
                             <Line
                                 yAxisId="right"
-                                type="stepAfter"
+                                type="monotone"
                                 dataKey="airflow"
-                                stroke="#22d3ee50"
+                                stroke="#22d3ee"
                                 strokeWidth={2}
+                                strokeOpacity={0.6}
                                 dot={false}
                             />
 
