@@ -3,7 +3,8 @@ import { ProcessType, ProcessRule, DegassingResult, RoastBatch } from '@/types';
 const PROCESS_RULES: Record<ProcessType, ProcessRule> = {
     washed: { min: 7, optimal: 10, risk: 1 },
     honey: { min: 10, optimal: 14, risk: 2 },
-    natural: { min: 14, optimal: 18, risk: 3 }
+    natural: { min: 14, optimal: 18, risk: 3 },
+    'semi-washed': { min: 8, optimal: 12, risk: 1 }
 };
 
 export function calculateDegassing(
