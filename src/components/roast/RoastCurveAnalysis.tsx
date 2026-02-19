@@ -57,7 +57,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-export default function RoastCurveAnalysis() {
+interface RoastCurveProps {
+    batchId?: string;
+}
+
+export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW' }: RoastCurveProps) {
     return (
         <div className="space-y-6 animate-in fade-in duration-1000">
             <div className="bg-bg-card border border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden">
@@ -67,12 +71,12 @@ export default function RoastCurveAnalysis() {
 
                 <div className="flex flex-wrap justify-between items-end gap-6 mb-8 relative z-10">
                     <div>
-                        <h3 className="text-2xl font-bold flex items-center gap-3">
+                        <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
                             Análisis Espectral de Tostión
-                            <span className="text-[10px] bg-brand-green/20 text-brand-green-bright px-2 py-1 rounded-md font-mono">LIVE_TELEMETRY</span>
+                            <span className="text-[10px] bg-brand-green/20 text-brand-green-bright px-2 py-1 rounded-md font-mono">MODO_RESULTADO</span>
                         </h3>
                         <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-mono">
-                            Lote: AX-9432 • Variedad: Pink Bourbon • Máquina: Probat G45
+                            Lote: <span className="text-brand-green-bright">{batchId}</span> • Variedad: Pink Bourbon • Máquina: Probat G45
                         </p>
                     </div>
 
