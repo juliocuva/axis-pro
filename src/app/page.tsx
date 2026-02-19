@@ -1,16 +1,54 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RoastEntryForm from '@/components/roast/RoastEntryForm';
 import GreenExportForm from '@/components/export/GreenExportForm';
 import QualityDashboard from '@/components/roast/QualityDashboard';
 import AuthScreen from '@/components/auth/AuthScreen';
 import PurchaseForm from '@/components/inventory/PurchaseForm';
 import RoastCurveAnalysis from '@/components/roast/RoastCurveAnalysis';
+import { supabase } from '@/lib/supabase';
+import { calculateDegassing } from '@/lib/engine/degassing';
+import { RoastBatch } from '@/types';
 
 export default function Home() {
     const [user, setUser] = useState<string | null>(null);
     const [view, setView] = useState<'dashboard' | 'entry' | 'export_green' | 'quality' | 'purchase' | 'curves'>('dashboard');
+    const [batches, setBatches] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (user && view === 'dashboard') {
+            fetchBatches();
+        }
+    }, [user, view]);
+
+    const fetchBatches = async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('roast_batches')
+                .select('*')
+                .order('roast_date', { ascending: false })
+                .limit(5);
+
+            if (data) {
+                // Transformamos a camelCase para que coincida con lo que espera el motor
+                const transformed = data.map(b => ({
+                    id: b.batch_id_label,
+                    roastDate: b.roast_date,
+                    process: b.process,
+                    greenWeight: b.green_weight,
+                    roastedWeight: b.roasted_weight
+                }));
+                setBatches(transformed);
+            }
+        } catch (err) {
+            console.error("Error fetching batches:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     if (!user) {
         return <AuthScreen onLogin={(email) => setUser(email)} />;
@@ -24,9 +62,13 @@ export default function Home() {
                         <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center overflow-hidden">
                             <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain p-1" />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight uppercase">AXIS COFFEE <span className="text-brand-green-bright text-lg ml-2 font-mono">PRO V2.0</span></h1>
+                        <h1 className="text-base font-bold tracking-tight uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-mono">PRO V2.0</span></h1>
                     </div>
                     <p className="text-sm text-gray-400">Sesión iniciada como: <span className="text-brand-green-bright font-mono">{user}</span></p>
+                    <div className="flex items-center gap-2 mt-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-brand-green-bright animate-pulse"></div>
+                        <span className="text-[10px] text-gray-500 font-mono uppercase tracking-widest">Supabase Cloud: Conectado</span>
+                    </div>
                 </div>
 
                 <nav className="flex bg-bg-card p-1 rounded-xl border border-white/5 shadow-2xl overflow-x-auto max-w-full">
@@ -121,33 +163,44 @@ export default function Home() {
                             </h3>
 
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between p-4 bg-bg-main rounded-2xl border border-white/5">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center font-bold text-xs">DXB</div>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">Lote: BOG-DXB-94</p>
-                                            <p className="text-[10px] text-gray-500 uppercase">Dubai Express • 450kg</p>
-                                        </div>
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center p-12 text-gray-600 font-mono text-xs">
+                                        SINCRONIZANDO DATOS INDUSTRIALES...
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-xs font-bold text-brand-green-bright">LISTO (10 d reposo)</p>
-                                        <p className="text-[10px] text-gray-500">Sale en: 48h</p>
-                                    </div>
-                                </div>
+                                ) : batches.length > 0 ? (
+                                    batches.map((batch) => {
+                                        const analysis = calculateDegassing(batch);
+                                        const roastDate = new Date(batch.roastDate);
+                                        const today = new Date();
+                                        const diffTime = Math.abs(today.getTime() - roastDate.getTime());
+                                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-                                <div className="flex items-center justify-between p-4 bg-bg-main rounded-2xl border border-white/5 opacity-60">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center font-bold text-xs">EUR</div>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">Lote: MAD-GEI-02</p>
-                                            <p className="text-[10px] text-gray-500 uppercase">Madrid Specialty • 120kg</p>
-                                        </div>
+                                        return (
+                                            <div key={batch.id} className="flex items-center justify-between p-4 bg-bg-main rounded-2xl border border-white/5 hover:border-brand-green/30 transition-all group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center font-bold text-[10px] uppercase">
+                                                        {batch.process.substring(0, 3)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white">Lote: {batch.id}</p>
+                                                        <p className="text-[10px] text-gray-500 uppercase">{batch.process} • {batch.roastedWeight}kg</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className={`text-xs font-bold ${analysis.dispatchBlocked ? 'text-orange-500' : 'text-brand-green-bright'}`}>
+                                                        {analysis.dispatchBlocked ? 'ESTABILIZANDO' : 'LISTO'} ({diffDays} d reposo)
+                                                    </p>
+                                                    <p className="text-[10px] text-gray-500">Opt: {analysis.optimalPackDate}</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="p-8 text-center text-gray-600 border border-dashed border-white/5 rounded-2xl">
+                                        <p className="text-xs uppercase font-mono mb-2">Sin datos recientes</p>
+                                        <button onClick={() => setView('entry')} className="text-[10px] text-brand-green-bright hover:underline">REGISTRAR PRIMER LOTE</button>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-xs font-bold text-orange-500">ESTABILIZANDO (2d)</p>
-                                        <p className="text-[10px] text-gray-500">Sale en: 6 días</p>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 

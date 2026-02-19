@@ -41,7 +41,8 @@ CREATE TABLE roast_batches (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     inventory_id UUID REFERENCES coffee_purchase_inventory(id),
     batch_id_label TEXT NOT NULL, 
-    roast_date DATE NOT NULL,
+    process TEXT NOT NULL, -- Ej: Lavado, Honey, Natural
+    roast_date DATE NOT NULL DEFAULT CURRENT_DATE,
     green_weight DECIMAL NOT NULL, -- Viene del inventario trillado
     roasted_weight DECIMAL NOT NULL,
     yield_loss DECIMAL GENERATED ALWAYS AS ((green_weight - roasted_weight) / green_weight * 100) STORED,
@@ -61,6 +62,7 @@ CREATE TABLE green_exports (
     stabilization_days INTEGER NOT NULL,
     destination TEXT NOT NULL,
     transport_type TEXT CHECK (transport_type IN ('air', 'sea')),
+    export_date DATE DEFAULT CURRENT_DATE,
     company_id UUID NOT NULL
 );
 

@@ -140,17 +140,28 @@ export default function PurchaseForm() {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Región / Departamento</label>
-                                <select
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fecha de Compra</label>
+                                <input
+                                    type="date"
                                     required
-                                    value={formData.region}
-                                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                                    value={formData.purchaseDate}
+                                    onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
                                     className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none"
                                     disabled={isSubmitting}
-                                >
-                                    {COLOMBIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                                </select>
+                                />
                             </div>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Región / Departamento</label>
+                            <select
+                                required
+                                value={formData.region}
+                                onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                                className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none"
+                                disabled={isSubmitting}
+                            >
+                                {COLOMBIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                            </select>
                         </div>
                     </div>
                 </section>

@@ -11,7 +11,8 @@ export default function RoastEntryForm() {
         greenWeight: 0,
         roastedWeight: 0,
         profileId: 'SUPREMO-DXB-01',
-        developmentPct: 18.5
+        developmentPct: 18.5,
+        roastDate: new Date().toISOString().split('T')[0]
     });
 
     const [yieldLoss, setYieldLoss] = useState<number | null>(null);
@@ -41,6 +42,7 @@ export default function RoastEntryForm() {
                     {
                         batch_id_label: formData.batchId,
                         process: formData.process,
+                        roast_date: formData.roastDate,
                         green_weight: formData.greenWeight,
                         roasted_weight: formData.roastedWeight,
                         profile_id: '88888888-8888-8888-8888-888888888888',
@@ -123,6 +125,18 @@ export default function RoastEntryForm() {
                                     value={formData.batchId}
                                     onChange={(e) => setFormData({ ...formData, batchId: e.target.value })}
                                     className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-brand-green outline-none transition-all font-mono text-brand-green-bright"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Fecha de Tostión</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={formData.roastDate}
+                                    onChange={(e) => setFormData({ ...formData, roastDate: e.target.value })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-brand-green outline-none transition-all"
                                     disabled={isSubmitting}
                                 />
                             </div>

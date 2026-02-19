@@ -8,7 +8,8 @@ export default function GreenExportForm() {
         moistureContent: 11.5,
         stabilizationDays: 15,
         destination: 'DXB - Dubai',
-        transportType: 'air' as 'air' | 'sea'
+        transportType: 'air' as 'air' | 'sea',
+        exportDate: new Date().toISOString().split('T')[0]
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +31,7 @@ export default function GreenExportForm() {
                     stabilization_days: formData.stabilizationDays,
                     destination: formData.destination,
                     transport_type: formData.transportType,
+                    export_date: formData.exportDate,
                     company_id: '99999999-9999-9999-9999-999999999999' // ID Temporal
                 }]);
 
@@ -77,6 +79,18 @@ export default function GreenExportForm() {
                                 type="number"
                                 value={formData.stabilizationDays}
                                 onChange={(e) => setFormData({ ...formData, stabilizationDays: parseInt(e.target.value) })}
+                                className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all"
+                                disabled={isSubmitting}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha de Exportación</label>
+                            <input
+                                type="date"
+                                required
+                                value={formData.exportDate}
+                                onChange={(e) => setFormData({ ...formData, exportDate: e.target.value })}
                                 className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all"
                                 disabled={isSubmitting}
                             />
