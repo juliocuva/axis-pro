@@ -12,6 +12,12 @@ const COFFEE_VARIETIES: CoffeeVariety[] = [
 
 const PROCESS_TYPES: ProcessType[] = ['washed', 'honey', 'natural', 'semi-washed'];
 
+const COLOMBIAN_REGIONS = [
+    'Huila', 'Antioquia', 'Tolima', 'Cauca', 'Caldas', 'Santander',
+    'Valle del Cauca', 'Risaralda', 'Nariño', 'Quindío', 'Cundinamarca',
+    'Sierra Nevada', 'Cesar', 'Boyacá', 'Casanare', 'Meta', 'Caquetá'
+];
+
 export default function PurchaseForm() {
     const [formData, setFormData] = useState({
         farmerName: '',
@@ -132,14 +138,15 @@ export default function PurchaseForm() {
                             </div>
                             <div>
                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Región / Departamento</label>
-                                <input
-                                    type="text"
+                                <select
                                     required
                                     value={formData.region}
                                     onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                                     className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none"
                                     disabled={isSubmitting}
-                                />
+                                >
+                                    {COLOMBIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                                </select>
                             </div>
                         </div>
                     </div>
