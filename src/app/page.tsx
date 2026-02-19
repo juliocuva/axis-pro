@@ -21,12 +21,10 @@ export default function Home() {
             <header className="mb-12 flex justify-between items-center flex-wrap gap-6">
                 <div>
                     <div className="flex items-center gap-4 mb-2">
-                        <div className="w-10 h-10 bg-brand-green rounded-lg flex items-center justify-center">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <path d="M12 2v20M2 12h20M12 2l4 4-4 4M12 22l-4-4 4-4" stroke="white" />
-                            </svg>
+                        <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center overflow-hidden">
+                            <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain p-1" />
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight">AXIS COFFEE <span className="text-brand-green-bright text-lg ml-2 font-mono">PRO V2.0</span></h1>
+                        <h1 className="text-3xl font-bold tracking-tight uppercase">AXIS COFFEE <span className="text-brand-green-bright text-lg ml-2 font-mono">PRO V2.0</span></h1>
                     </div>
                     <p className="text-sm text-gray-400">Sesión iniciada como: <span className="text-brand-green-bright font-mono">{user}</span></p>
                 </div>
