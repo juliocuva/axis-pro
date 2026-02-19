@@ -16,19 +16,19 @@ import {
 
 // Datos simulados de una curva de tostión profesional (12 minutos)
 const roastData = [
-    { time: '00:00', temp: 200, ror: 0, event: 'CHARGE' },
-    { time: '01:00', temp: 95, ror: -25, event: 'TP' }, // Turning Point
-    { time: '02:00', temp: 110, ror: 15 },
-    { time: '03:00', temp: 125, ror: 15 },
-    { time: '04:00', temp: 140, ror: 14 },
-    { time: '05:00', temp: 155, ror: 13, event: 'DRY' }, // Dry End
-    { time: '06:00', temp: 168, ror: 12 },
-    { time: '07:00', temp: 180, ror: 10 },
-    { time: '08:00', temp: 190, ror: 9 },
-    { time: '09:00', temp: 202, ror: 8, event: 'FC' }, // First Crack
-    { time: '10:00', temp: 210, ror: 6 },
-    { time: '11:00', temp: 218, ror: 4 },
-    { time: '12:00', temp: 225, ror: 3, event: 'DROP' },
+    { time: '00:00', temp: 200, ror: 0, airflow: 20, event: 'CHARGE' },
+    { time: '01:00', temp: 95, ror: -25, airflow: 20, event: 'TP' },
+    { time: '02:00', temp: 110, ror: 15, airflow: 30 },
+    { time: '03:00', temp: 125, ror: 15, airflow: 30 },
+    { time: '04:00', temp: 140, ror: 14, airflow: 40 },
+    { time: '05:00', temp: 155, ror: 13, airflow: 50, event: 'DRY' },
+    { time: '06:00', temp: 168, ror: 12, airflow: 60 },
+    { time: '07:00', temp: 180, ror: 10, airflow: 70 },
+    { time: '08:00', temp: 190, ror: 9, airflow: 80 },
+    { time: '09:00', temp: 202, ror: 8, airflow: 90, event: 'FC' },
+    { time: '10:00', temp: 210, ror: 6, airflow: 90 },
+    { time: '11:00', temp: 218, ror: 4, airflow: 100 },
+    { time: '12:00', temp: 225, ror: 3, airflow: 100, event: 'DROP' },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -36,14 +36,21 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         return (
             <div className="bg-bg-card border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
                 <p className="text-xs font-mono text-gray-500 mb-2">{`TIEMPO: ${label}`}</p>
-                <p className="text-sm font-bold text-brand-green-bright">
-                    Temp: <span className="text-white">{payload[0].value}°C</span>
-                </p>
-                {payload[1] && (
-                    <p className="text-sm font-bold text-orange-400">
-                        RoR: <span className="text-white">{payload[1].value} Δ/m</span>
+                <div className="space-y-1">
+                    <p className="text-sm font-bold text-brand-green-bright flex justify-between gap-4">
+                        Temp: <span className="text-white">{payload[0].value}°C</span>
                     </p>
-                )}
+                    {payload[1] && (
+                        <p className="text-sm font-bold text-orange-400 flex justify-between gap-4">
+                            RoR: <span className="text-white">{payload[1].value} Δ</span>
+                        </p>
+                    )}
+                    {payload[2] && (
+                        <p className="text-sm font-bold text-cyan-400 flex justify-between gap-4">
+                            Aire: <span className="text-white">{payload[2].value}%</span>
+                        </p>
+                    )}
+                </div>
             </div>
         );
     }
@@ -91,6 +98,10 @@ export default function RoastCurveAnalysis() {
                         <div className="w-3 h-0.5 bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></div>
                         <span className="text-gray-300">Rate of Rise (RoR)</span>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></div>
+                        <span className="text-gray-300">Flujo de Aire</span>
+                    </div>
                 </div>
 
                 <div className="h-[400px] w-full relative z-10">
@@ -121,10 +132,20 @@ export default function RoastCurveAnalysis() {
                                 fontSize={10}
                                 tickLine={false}
                                 axisLine={false}
-                                domain={[-30, 30]}
+                                domain={[-30, 100]}
                                 tick={{ fill: '#4b5563' }}
                             />
                             <Tooltip content={<CustomTooltip />} />
+
+                            {/* Airflow Area (Background) */}
+                            <Line
+                                yAxisId="right"
+                                type="stepAfter"
+                                dataKey="airflow"
+                                stroke="#22d3ee50"
+                                strokeWidth={2}
+                                dot={false}
+                            />
 
                             {/* Roast Curve (BT) */}
                             <Line
