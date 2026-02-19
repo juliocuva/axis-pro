@@ -68,8 +68,11 @@ export default function PurchaseForm() {
             if (error) throw error;
             setStatus({ type: 'success', message: '¡Ingreso de café registrado exitosamente en la nube!' });
         } catch (err: any) {
-            console.error(err);
-            setStatus({ type: 'error', message: 'Error al conectar con Supabase. Verifica tus credenciales.' });
+            console.error("DEBUG SUPABASE:", err);
+            setStatus({
+                type: 'error',
+                message: `Error de Conexión: ${err.message || 'No se pudo contactar con Supabase'}. Verifica que las tablas existan en SQL Editor.`
+            });
         } finally {
             setIsSubmitting(false);
         }

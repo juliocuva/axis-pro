@@ -1,4 +1,5 @@
 -- AXIS OIL - Professional Database Schema
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Enable Row Level Security (RLS) for Multi-Tenancy
 CREATE TABLE machines (
