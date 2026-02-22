@@ -5,12 +5,14 @@ import PurchaseForm from './PurchaseForm';
 import ThrashingForm from './thrashing/ThrashingForm';
 import PhysicalAnalysisForm from './analysis/PhysicalAnalysisForm';
 import SCACuppingForm from './cupping/SCACuppingForm';
+import LotCertificate from './analysis/LotCertificate';
 import { supabase } from '@/shared/lib/supabase';
 
 export default function SupplyModuleContainer() {
     const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping'>('purchase');
     const [selectedLot, setSelectedLot] = useState<any>(null);
     const [recentLots, setRecentLots] = useState<any[]>([]);
+    const [showCertificate, setShowCertificate] = useState(false);
 
     useEffect(() => {
         fetchRecentLots();
@@ -28,9 +30,15 @@ export default function SupplyModuleContainer() {
 
     const handleLotSelect = (lot: any) => {
         setSelectedLot(lot);
-        if (lot.status === 'purchased') setActiveTab('thrashing');
-        else if (lot.status === 'thrashed') setActiveTab('analysis');
-        else setActiveTab('cupping');
+        if (lot.status === 'completed') {
+            setShowCertificate(true);
+        } else if (lot.status === 'purchased') {
+            setActiveTab('thrashing');
+        } else if (lot.status === 'thrashed') {
+            setActiveTab('analysis');
+        } else {
+            setActiveTab('cupping');
+        }
     };
 
     return (
@@ -130,8 +138,7 @@ export default function SupplyModuleContainer() {
                                     await fetchRecentLots();
                                     await supabase.from('coffee_purchase_inventory').update({ status: 'completed' }).eq('id', selectedLot.id);
                                     fetchRecentLots();
-                                    setSelectedLot(null);
-                                    setActiveTab('purchase');
+                                    setShowCertificate(true); // Mostrar certificado al terminar
                                 }}
                             />
                             <div className="flex justify-start">
@@ -140,6 +147,19 @@ export default function SupplyModuleContainer() {
                                     Volver a Lab Físico
                                 </button>
                             </div>
+                        </div>
+                    )}
+
+                    {showCertificate && selectedLot && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm overflow-y-auto">
+                            <LotCertificate
+                                inventoryId={selectedLot.id}
+                                onClose={() => {
+                                    setShowCertificate(false);
+                                    setSelectedLot(null);
+                                    setActiveTab('purchase');
+                                }}
+                            />
                         </div>
                     )}
                     {!selectedLot && activeTab !== 'purchase' && (

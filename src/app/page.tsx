@@ -12,14 +12,15 @@ import QualityDashboard from '@/modules/production/components/QualityDashboard';
 import RoastCurveAnalysis from '@/modules/production/components/RoastCurveAnalysis';
 import GreenExportForm from '@/modules/export/components/GreenExportForm';
 import ComparisonCalibrationDashboard from '@/modules/export/components/ComparisonCalibrationDashboard';
+import DegassingPredictor from '@/modules/export/components/DegassingPredictor';
 import RetailModuleContainer from '@/modules/retail/components/RetailModuleContainer';
 
 import { supabase } from '@/shared/lib/supabase';
-import { calculateDegassing } from '@/shared/lib/engine/degassing';
+import { calculateAdvancedDegassing } from '@/shared/lib/engine/degassing';
 
 export default function Home() {
     const [user, setUser] = useState<string | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'production' | 'export' | 'retail' | 'quality' | 'curves' | 'entry' | 'calibration'>('launcher');
+    const [view, setView] = useState<'launcher' | 'supply' | 'production' | 'export' | 'retail' | 'quality' | 'curves' | 'entry' | 'calibration' | 'degassing'>('launcher');
     const [batches, setBatches] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -86,7 +87,7 @@ export default function Home() {
                             <span className="text-brand-green-bright text-[10px] font-bold uppercase tracking-[0.2em]">
                                 {view === 'supply' ? 'Supply & Quality' :
                                     ['production', 'entry', 'quality', 'curves'].includes(view) ? 'Roast Intelligence' :
-                                        ['export', 'calibration'].includes(view) ? 'Global Trade' :
+                                        ['export', 'calibration', 'degassing'].includes(view) ? 'Global Trade' :
                                             view.toUpperCase()}
                             </span>
                         </div>
@@ -153,7 +154,11 @@ export default function Home() {
                             </h3>
                             <div className="space-y-4">
                                 {batches.map((batch) => {
-                                    const analysis = calculateDegassing(batch);
+                                    const analysis = calculateAdvancedDegassing(
+                                        { id: batch.id, roastDate: batch.roastDate },
+                                        { process: batch.process, roastDevelopment: 'medium', packagingType: 'valve', routeTemperature: 'temperate' }
+                                    );
+                                    const isBlocked = analysis.pressureCurve[0].pressure > 0.8; // Simplified for dashboard
                                     return (
                                         <div key={batch.id} className="flex items-center justify-between p-4 bg-bg-main rounded-2xl border border-white/5 group hover:border-brand-green/30 transition-all">
                                             <div className="flex items-center gap-4">
@@ -166,10 +171,10 @@ export default function Home() {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className={`text-[10px] font-bold uppercase tracking-widest ${analysis.dispatchBlocked ? 'text-orange-500' : 'text-brand-green-bright'}`}>
-                                                    {analysis.dispatchBlocked ? 'ESTABILIZANDO' : 'LISTO'}
+                                                <p className={`text-[10px] font-bold uppercase tracking-widest ${isBlocked ? 'text-orange-500' : 'text-brand-green-bright'}`}>
+                                                    {isBlocked ? 'ESTABILIZANDO' : 'LISTO'}
                                                 </p>
-                                                <p className="text-[9px] text-gray-600 font-bold uppercase mt-1">Expira: {analysis.optimalPackDate}</p>
+                                                <p className="text-[9px] text-gray-600 font-bold uppercase mt-1">Envío: {analysis.recommendedShipDate}</p>
                                             </div>
                                         </div>
                                     );
@@ -247,7 +252,7 @@ export default function Home() {
                 </div>
             )}
 
-            {(view === 'export' || view === 'calibration') && (
+            {(view === 'export' || view === 'calibration' || view === 'degassing') && (
                 <div className="max-w-7xl mx-auto space-y-8">
                     <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
                         <div className="flex bg-bg-card p-1 rounded-2xl border border-white/5 shadow-xl">
@@ -263,12 +268,19 @@ export default function Home() {
                             >
                                 Exportación Verde
                             </button>
+                            <button
+                                onClick={() => setView('degassing')}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'degassing' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                            >
+                                Predictor $CO_2$
+                            </button>
                         </div>
                     </div>
 
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {view === 'calibration' && <ComparisonCalibrationDashboard />}
                         {view === 'export' && <GreenExportForm />}
+                        {view === 'degassing' && <DegassingPredictor />}
                     </div>
                 </div>
             )}

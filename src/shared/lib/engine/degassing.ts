@@ -1,67 +1,88 @@
-import { ProcessType, ProcessRule, DegassingResult, RoastBatch } from '@/shared/types';
+import { ProcessType, RoastBatch } from '@/shared/types';
 
-const PROCESS_RULES: Record<ProcessType, ProcessRule> = {
-    washed: { min: 7, optimal: 10, risk: 1 },
-    honey: { min: 10, optimal: 14, risk: 2 },
-    natural: { min: 14, optimal: 18, risk: 3 },
-    'semi-washed': { min: 8, optimal: 12, risk: 1 }
+export interface DegassingConfig {
+    process: ProcessType;
+    roastDevelopment: 'light' | 'medium' | 'dark'; // Darker = more CO2
+    packagingType: 'valve' | 'no-valve' | 'sealed-tin';
+    routeTemperature: 'arctic' | 'temperate' | 'tropical'; // High temp = faster gas release/higher pressure
+}
+
+export interface AdvancedDegassingResult {
+    batchId: string;
+    pressureCurve: { day: number; pressure: number; limit: number }[];
+    daysToSafety: number;
+    recommendedShipDate: string;
+    criticalWarning: string | null;
+    safetyFactor: number;
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+}
+
+const BASE_PRESSURE: Record<'light' | 'medium' | 'dark', number> = {
+    light: 1.2,
+    medium: 1.8,
+    dark: 2.5
 };
 
-export function calculateDegassing(
-    batch: Pick<RoastBatch, 'id' | 'roastDate' | 'process'>,
-    route: string = 'BOG-DXB',
-    flightFrequencyDays: number = 7
-): DegassingResult {
-    const rule = PROCESS_RULES[batch.process];
+const DECAY_K: Record<ProcessType, number> = {
+    washed: 0.15,
+    honey: 0.12,
+    natural: 0.10, // Naturals degas slower
+    'semi-washed': 0.14
+};
 
-    if (!rule) {
-        throw new Error(`Proceso "${batch.process}" no reconocido por el sistema.`);
-    }
+const TEMP_FACTOR: Record<'arctic' | 'temperate' | 'tropical', number> = {
+    arctic: 0.7,
+    temperate: 1.0,
+    tropical: 1.4 // Speed up decay but also increases instant pressure risk
+};
 
-    let extraDays = 0;
-    let riskScore = rule.risk;
+export function calculateAdvancedDegassing(
+    batch: { id: string; roastDate: string },
+    config: DegassingConfig
+): AdvancedDegassingResult {
+    const k = DECAY_K[config.process] * TEMP_FACTOR[config.routeTemperature];
+    const p0 = BASE_PRESSURE[config.roastDevelopment];
+    const safetyLimit = config.packagingType === 'valve' ? 0.8 : 0.3; // Valve allows more initial gas
 
-    // Ruta crítica (ejemplo Dubái)
-    if (route.includes("DXB")) {
-        extraDays += 2;
-        riskScore += 1;
-    }
-
-    // Frecuencia de vuelo baja incrementa el riesgo logístico
-    if (flightFrequencyDays > 3) {
-        riskScore += 1;
-    }
-
-    // Determinar nivel de riesgo
-    let riskLevel: 'low' | 'medium' | 'high' = 'low';
-    if (riskScore >= 3) riskLevel = 'medium';
-    if (riskScore >= 5) riskLevel = 'high';
-
-    let dispatchBlocked = false;
-    let blockReason = "";
-
-    if (riskLevel === "high") {
-        dispatchBlocked = true;
-        blockReason = "ALERTA: Riesgo crítico por desgasificación insuficiente para ruta aérea prolongada.";
-    }
-
+    const pressureCurve = [];
+    let daysToSafety = 0;
     const roastDate = new Date(batch.roastDate);
 
-    // Cálculo de fechas
-    const optimalPackDate = new Date(roastDate);
-    optimalPackDate.setDate(roastDate.getDate() + rule.optimal + extraDays);
+    for (let day = 0; day <= 21; day++) {
+        // P(t) = P0 * e^(-kt)
+        const pressure = p0 * Math.exp(-k * day);
+        pressureCurve.push({
+            day,
+            pressure: parseFloat(pressure.toFixed(3)),
+            limit: safetyLimit
+        });
 
-    const latestSafeDate = new Date(roastDate);
-    latestSafeDate.setDate(roastDate.getDate() + rule.optimal + extraDays + 5);
+        if (pressure > safetyLimit) {
+            daysToSafety = day + 1;
+        }
+    }
+
+    const shipDate = new Date(roastDate);
+    shipDate.setDate(roastDate.getDate() + daysToSafety + 2); // 2 days extra safety margin
+
+    let riskLevel: AdvancedDegassingResult['riskLevel'] = 'low';
+    let warning = null;
+
+    if (daysToSafety > 14) {
+        riskLevel = 'critical';
+        warning = "ALERTA: Tiempo de estabilización excesivo. Riesgo de rancidez o ruptura de empaque en clima tropical.";
+    } else if (daysToSafety > 7) {
+        riskLevel = 'medium';
+    }
 
     return {
         batchId: batch.id,
-        optimalPackDate: optimalPackDate.toISOString().split("T")[0],
-        latestSafeDispatch: latestSafeDate.toISOString().split("T")[0],
-        riskLevel,
-        dispatchBlocked,
-        blockReason,
-        reasoning: `Análisis para ${batch.process}: Ruta ${route} (+2d), Frecuencia ${flightFrequencyDays}d. Score: ${riskScore}`
+        pressureCurve,
+        daysToSafety,
+        recommendedShipDate: shipDate.toISOString().split('T')[0],
+        criticalWarning: warning,
+        safetyFactor: parseFloat(((1 - (p0 * Math.exp(-k * daysToSafety)) / safetyLimit) * 100).toFixed(1)),
+        riskLevel
     };
 }
 

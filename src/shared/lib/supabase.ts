@@ -8,7 +8,14 @@ const supabaseKey = (
 ).trim();
 
 if (!supabaseUrl || !supabaseKey) {
-    console.warn("⚠️ AXIS OIL: Faltan credenciales de Supabase.");
+    console.warn("⚠️ AXIS OIL: Faltan credenciales de Supabase en variables de entorno.");
+} else {
+    // Log partially for debugging in development (without exposing full key)
+    if (process.env.NODE_ENV === 'development') {
+        process.nextTick(() => {
+            console.log(`📡 AXIS Cloud: Conectado a ${supabaseUrl.substring(0, 15)}...`);
+        });
+    }
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
