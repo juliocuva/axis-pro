@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ProcessType } from '@/types';
+import { ProcessType } from '@/shared/types';
 import RoastCurveAnalysis from './RoastCurveAnalysis';
 
 export default function RoastEntryForm() {
@@ -35,7 +35,7 @@ export default function RoastEntryForm() {
         setStatus(null);
 
         try {
-            const { supabase } = await import('@/lib/supabase');
+            const { supabase } = await import('@/shared/lib/supabase');
             const { error } = await supabase
                 .from('roast_batches')
                 .insert([
@@ -98,6 +98,13 @@ export default function RoastEntryForm() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <button
+                onClick={() => window.dispatchEvent(new CustomEvent('change-view', { detail: 'production' }))}
+                className="flex items-center gap-2 text-[10px] font-bold uppercase text-gray-500 hover:text-white transition-all mb-4"
+            >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                Volver a Monitor
+            </button>
             <div className="text-center mb-10">
                 <h2 className="text-3xl font-bold text-white mb-2">Registro de Salida de Tostión</h2>
                 <p className="text-gray-500 text-sm">Ingresa los pesos finales para generar el reporte de curva y rendimiento.</p>
@@ -216,3 +223,4 @@ export default function RoastEntryForm() {
         </div>
     );
 }
+

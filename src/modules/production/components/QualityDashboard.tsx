@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import ExportReportButton from '@/components/ui/ExportReportButton';
+import ExportReportButton from '@/shared/components/ui/ExportReportButton';
 
 interface QualityMetricProps {
     label: string;
@@ -77,7 +77,7 @@ export default function QualityDashboard() {
                             <div className="space-y-6">
                                 <div className="flex flex-col items-center">
                                     <div className="w-full h-24 rounded-2xl bg-gradient-to-r from-[#4d3319] via-[#3d2914] to-[#2d1e0f] border border-white/10 shadow-inner flex items-center justify-center">
-                                        <span className="text-2xl font-black text-white/20 tracking-tighter">AGTRON</span>
+                                        <span className="text-2xl font-bold text-white/20 tracking-tighter">AGTRON</span>
                                     </div>
                                     <div className="w-full flex justify-between mt-3 px-2">
                                         <div className="text-center">
@@ -119,3 +119,4 @@ export default function QualityDashboard() {
         </div>
     );
 }
+

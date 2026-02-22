@@ -1,4 +1,4 @@
-import { ProcessType, ProcessRule, DegassingResult, RoastBatch } from '@/types';
+import { ProcessType, ProcessRule, DegassingResult, RoastBatch } from '@/shared/types';
 
 const PROCESS_RULES: Record<ProcessType, ProcessRule> = {
     washed: { min: 7, optimal: 10, risk: 1 },
@@ -64,3 +64,4 @@ export function calculateDegassing(
         reasoning: `Análisis para ${batch.process}: Ruta ${route} (+2d), Frecuencia ${flightFrequencyDays}d. Score: ${riskScore}`
     };
 }
+

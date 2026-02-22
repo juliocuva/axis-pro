@@ -7,6 +7,14 @@ module.exports = {
         extend: {
             fontFamily: {
                 sans: ["var(--font-montserrat)", "sans-serif"],
+                mono: ["var(--font-montserrat)", "monospace"],
+            },
+            letterSpacing: {
+                tighter: "-0.05em",
+                tight: "-0.025em",
+                wide: "0.05em",
+                widest: "0.1em",
+                "ultra-wide": "0.3em",
             },
             colors: {
                 brand: {

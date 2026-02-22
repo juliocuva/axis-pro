@@ -21,7 +21,7 @@ export default function GreenExportForm() {
         setStatus(null);
 
         try {
-            const { supabase } = await import('@/lib/supabase');
+            const { supabase } = await import('@/shared/lib/supabase');
 
             const { error } = await supabase
                 .from('green_exports')
@@ -134,3 +134,4 @@ export default function GreenExportForm() {
         </form>
     );
 }
+
