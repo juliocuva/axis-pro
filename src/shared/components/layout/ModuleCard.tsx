@@ -14,7 +14,7 @@ interface ModuleCardProps {
 export default function ModuleCard({ title, description, icon, status, onClick, color }: ModuleCardProps) {
     const isLocked = status === 'locked';
 
-    // Map for Tailwind dynamic classes (Tailwind doesn't support string concatenation for classes)
+    // Map for Tailwind dynamic classes
     const colorStyles: Record<string, { border: string, bg: string, text: string, shadow: string, glow: string }> = {
         'brand-green': {
             border: 'hover:border-brand-green/30',
@@ -50,15 +50,16 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
 
     return (
         <div
-            onClick={!isLocked ? onClick : undefined}
-            className={`relative group bg-bg-card border border-white/5 rounded-3xl p-8 transition-all duration-500 ${!isLocked ? `cursor-pointer ${currentStyle.border} hover:shadow-2xl ${currentStyle.shadow} hover:-translate-y-1` : 'opacity-60 grayscale'}`}
+            onClick={onClick}
+            className={`relative group bg-bg-card border border-white/5 rounded-3xl p-8 transition-all duration-500 cursor-pointer ${currentStyle.border} hover:shadow-2xl ${currentStyle.shadow} hover:-translate-y-1 ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}`}
         >
             {/* Decorative Hover Line */}
             <div className={`absolute top-0 left-0 w-full h-[2px] rounded-full transition-all duration-500 opacity-0 group-hover:opacity-100 ${currentStyle.glow} z-20`} />
 
             {isLocked && (
-                <div className="absolute top-6 right-6">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500">
+                <div className="absolute top-6 right-6 flex items-center gap-2">
+                    <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md">Activación Requerida</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                         <path d="M7 11V7a5 5 0 0110 0v4" />
                     </svg>
@@ -73,25 +74,19 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
                 </div>
             )}
 
-            <div className={`w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-6 transition-all duration-500 ${!isLocked ? `${currentStyle.bg} ${currentStyle.text}` : 'text-gray-600'}`}>
+            <div className={`w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-6 transition-all duration-500 ${!isLocked ? `${currentStyle.bg} ${currentStyle.text}` : 'text-gray-500'}`}>
                 {icon}
             </div>
 
             <h3 className="text-xl font-bold mb-3">{title}</h3>
             <p className="text-sm text-gray-500 leading-relaxed mb-6">{description}</p>
 
-            {!isLocked ? (
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-500 group-hover:translate-x-2">
-                    <span className={currentStyle.text}>Acceder al Módulo</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={currentStyle.text}>
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                </div>
-            ) : (
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">
-                    Reservado (Próxima Fase)
-                </div>
-            )}
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-500 group-hover:translate-x-2">
+                <span className={currentStyle.text}>{isLocked ? 'Desbloquear con Activación' : 'Acceder al Módulo'}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={currentStyle.text}>
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </div>
         </div>
     );
 }

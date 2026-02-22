@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/shared/lib/supabase';
+import { processThrashingAction } from '../../actions/thrashing';
 
 interface ThrashingFormProps {
     inventoryId: string;
@@ -12,18 +12,17 @@ interface ThrashingFormProps {
 export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashingComplete }: ThrashingFormProps) {
     const [formData, setFormData] = useState({
         excelsoWeight: 0,
-        ciscoWeight: 0,
-        pasillaWeight: 0
+        pasillaWeight: 0,
+        ciscoWeight: 0
     });
 
     const [yieldFactor, setYieldFactor] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
+    // Estimación visual en el cliente (solo para UX, no se guarda)
     useEffect(() => {
         if (formData.excelsoWeight > 0) {
-            // Fórmula de Factor de Rendimiento Colombiano:
-            // (Peso Pergamino (70kg base) / Peso Excelso) * 70
-            // O más simple: (Peso Pergamino Total / Peso Excelso Total) * 70
             const factor = (parchmentWeight / formData.excelsoWeight) * 70;
             setYieldFactor(factor);
         } else {
@@ -34,21 +33,23 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError(null);
 
         try {
-            const { error } = await supabase
-                .from('coffee_purchase_inventory')
-                .update({
-                    thrashed_weight: formData.excelsoWeight,
-                    thrashing_yield: yieldFactor,
-                    status: 'thrashed'
-                    // Nota: Podríamos extender el esquema para guardar pasilla y cisco
-                })
-                .eq('id', inventoryId);
+            const result = await processThrashingAction(
+                inventoryId,
+                formData.excelsoWeight,
+                formData.pasillaWeight,
+                formData.ciscoWeight
+            );
 
-            if (error) throw error;
+            if (!result.success) {
+                throw new Error(result.message);
+            }
+
             onThrashingComplete();
-        } catch (err) {
+        } catch (err: any) {
+            setError(err.message);
             console.error("Error en trilla:", err);
         } finally {
             setIsSubmitting(false);
@@ -56,74 +57,91 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     };
 
     return (
-        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl space-y-6">
-            <header>
+        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full"></div>
+
+            <header className="relative z-10">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                     <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
-                    Proceso de Trilla Industrial
+                    Módulo de Trilla Industrial
                 </h3>
-                <p className="text-xs text-gray-500 mt-1 uppercase font-mono">Transformación: Pergamino → Verde (Excelso)</p>
+                <p className="text-xs text-gray-500 mt-1 uppercase font-mono tracking-widest">Procedimiento: Pergamino → Oro (Excelso)</p>
             </header>
 
-            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex justify-between items-center">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Entrada Pergamino:</span>
+            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex justify-between items-center relative z-10">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fuente de Verdad (Pergamino):</span>
                 <span className="text-lg font-bold text-white font-mono">{parchmentWeight} KG</span>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                {error && (
+                    <div className="p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl text-brand-red-bright text-[10px] font-bold uppercase">
+                        {error}
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Peso Excelso (KG)</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Peso Excelso (KG)</label>
                         <input
                             type="number"
                             step="0.1"
                             required
-                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-brand-green outline-none font-bold text-xl"
+                            disabled={isSubmitting}
+                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-brand-green outline-none font-black text-2xl text-brand-green-bright transition-all"
                             onChange={(e) => setFormData({ ...formData, excelsoWeight: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
-                    <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Pasilla (KG)</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Pasilla (KG)</label>
                         <input
                             type="number"
                             step="0.1"
-                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-white/20 outline-none text-gray-400"
+                            disabled={isSubmitting}
+                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-white/20 outline-none text-gray-400 font-bold"
                             onChange={(e) => setFormData({ ...formData, pasillaWeight: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
-                    <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Cisco / Merma (KG)</label>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Cisco (KG)</label>
                         <input
                             type="number"
                             step="0.1"
-                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-white/20 outline-none text-gray-400"
+                            disabled={isSubmitting}
+                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-white/20 outline-none text-gray-400 font-bold"
                             onChange={(e) => setFormData({ ...formData, ciscoWeight: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
                 </div>
 
                 {yieldFactor !== null && (
-                    <div className={`p-6 rounded-2xl border flex flex-col items-center transition-all ${yieldFactor <= 94 ? 'bg-brand-green/10 border-brand-green/30' : 'bg-orange-500/10 border-orange-500/30'}`}>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1">Factor de Rendimiento</span>
-                        <span className={`text-4xl font-bold font-mono ${yieldFactor <= 94 ? 'text-brand-green-bright' : 'text-orange-500 text-shadow-glow'}`}>
+                    <div className={`p-8 rounded-3xl border flex flex-col items-center transition-all animate-in zoom-in duration-500 ${yieldFactor <= 94 ? 'bg-brand-green/10 border-brand-green/30' : 'bg-orange-500/10 border-orange-500/30'}`}>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500 mb-2">Factor de Rendimiento Est.</span>
+                        <span className={`text-6xl font-black font-mono tracking-tighter ${yieldFactor <= 94 ? 'text-brand-green-bright' : 'text-orange-500'}`}>
                             {yieldFactor.toFixed(2)}
                         </span>
-                        <p className="text-[9px] mt-2 uppercase font-mono font-bold tracking-widest">
-                            {yieldFactor <= 94 ? '✓ ALTA CALIDAD EXPORTABLE' : '⚠ REVISAR MERMA / PASILLA'}
-                        </p>
+                        <div className="mt-4 flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${yieldFactor <= 94 ? 'bg-brand-green-bright animate-pulse' : 'bg-orange-500'}`}></div>
+                            <p className="text-[10px] uppercase font-bold tracking-[0.2em]">
+                                {yieldFactor <= 94 ? 'Lote de Alta Calidad Para Exportación' : 'Rendimiento Fuera de Rango Estándar'}
+                            </p>
+                        </div>
                     </div>
                 )}
 
                 <button
                     type="submit"
                     disabled={isSubmitting || !formData.excelsoWeight}
-                    className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-brand-green hover:text-white transition-all disabled:opacity-30 flex items-center justify-center gap-3"
+                    className="w-full bg-white hover:bg-brand-green-bright text-black hover:text-white font-black py-6 rounded-2xl transition-all disabled:opacity-30 flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl"
                 >
-                    {isSubmitting ? 'PROCESANDO...' : 'REGISTRAR SALIDA DE TRILLA'}
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    {isSubmitting ? 'SINCRONIZANDO CON SERVIDOR AXIS...' : 'SELLAR SALIDA DE TRILLA'}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
+                        <path d="M5 12h14M12 5l7 7-7-7" />
                     </svg>
                 </button>
+                <p className="text-center text-[8px] text-gray-600 font-bold uppercase tracking-widest">
+                    Nota: El factor oficial se calcula en el servidor para garantizar la trazabilidad.
+                </p>
             </form>
         </div>
     );

@@ -136,8 +136,6 @@ export default function SupplyModuleContainer() {
                                 inventoryId={selectedLot.id}
                                 onCuppingComplete={async () => {
                                     await fetchRecentLots();
-                                    await supabase.from('coffee_purchase_inventory').update({ status: 'completed' }).eq('id', selectedLot.id);
-                                    fetchRecentLots();
                                     setShowCertificate(true); // Mostrar certificado al terminar
                                 }}
                             />

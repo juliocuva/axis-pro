@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { registerRetailInventory, getRetailInventory, getBatchStory } from '../actions/retailActions';
+import { supabase } from '@/shared/lib/supabase';
 
 type RetailView = 'inventory' | 'labels' | 'traceability' | 'sales';
 
@@ -48,75 +50,273 @@ export default function RetailModuleContainer() {
 // --- Sub-componentes Temporales (Se moverán a archivos propios) ---
 
 function InventoryManager() {
-    const [mockConversion] = useState([
-        { id: 'SKU-001', batch: 'AX-2130', size: '250g', stock: 45, freshDays: 12, status: 'fresh' },
-        { id: 'SKU-002', batch: 'AX-1942', size: '500g', stock: 12, freshDays: 32, status: 'warning' },
-    ]);
+    const [inventory, setInventory] = useState<any[]>([]);
+    const [roastBatches, setRoastBatches] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isPackaging, setIsPackaging] = useState(false);
+    const [showPackager, setShowPackager] = useState(false);
+    const [sourceType, setSourceType] = useState<'internal' | 'external'>('internal');
+
+    // Formulario de empaque
+    const [packData, setPackData] = useState({
+        roastBatchId: '',
+        sku: 'SKU-' + Math.floor(Math.random() * 9000 + 1000),
+        unitSizeGrams: 250,
+        unitsProduced: 20,
+        packerName: 'Retail Manager',
+        externalRoaster: '',
+        externalOrigin: '',
+        externalProcess: '',
+        externalNotes: ''
+    });
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        setIsLoading(true);
+        const inv = await getRetailInventory();
+        setInventory(inv);
+
+        // Cargar lotes de tueste disponibles para empacar
+        const { data: batches } = await supabase
+            .from('roast_batches')
+            .select('*')
+            .order('roast_date', { ascending: false })
+            .limit(10);
+
+        if (batches) setRoastBatches(batches);
+        setIsLoading(false);
+    };
+
+    const handlePackage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsPackaging(true);
+
+        const payload = {
+            ...packData,
+            isExternal: sourceType === 'external',
+            externalNotes: packData.externalNotes.split(',').map(n => n.trim())
+        };
+
+        const result = await registerRetailInventory(payload as any);
+        if (result.success) {
+            await loadData();
+            setShowPackager(false);
+        }
+        setIsPackaging(false);
+    };
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
                 <div className="bg-bg-card border border-white/10 rounded-[2.5rem] p-10">
-                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
-                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                        Stock de Producto Terminado
-                    </h3>
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                            Stock de Producto Terminado
+                        </h3>
+                        <button onClick={loadData} className="text-gray-500 hover:text-white transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
+                        </button>
+                    </div>
+
                     <div className="space-y-4">
-                        {mockConversion.map((item) => (
-                            <div key={item.id} className="p-6 bg-bg-main border border-white/5 rounded-2xl flex items-center justify-between group hover:border-purple-500/30 transition-all">
-                                <div className="flex gap-4 items-center">
-                                    <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 font-bold text-xs uppercase">
-                                        {item.size}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold uppercase">SKU: {item.id}</p>
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Batch: {item.batch}</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-3xl font-bold tracking-tighter">{item.stock} <span className="text-[10px] text-gray-500 font-bold">UDS</span></p>
-                                    <span className={`text-[8px] px-2 py-1 rounded-full uppercase font-mono ${item.status === 'fresh' ? 'bg-brand-green/10 text-brand-green-bright' : 'bg-orange-500/10 text-orange-500'
-                                        }`}>
-                                        {item.status === 'fresh' ? 'Sabor Óptimo' : 'Consumo Próximo'}
-                                    </span>
-                                </div>
+                        {isLoading ? (
+                            <div className="py-20 text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">Consultando Inventario Cloud...</div>
+                        ) : inventory.length === 0 ? (
+                            <div className="py-20 text-center border border-dashed border-white/10 rounded-3xl">
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Sin stock registrado.</p>
                             </div>
-                        ))}
+                        ) : (
+                            inventory.map((item) => (
+                                <div key={item.id} className="p-6 bg-bg-main border border-white/5 rounded-2xl flex items-center justify-between group hover:border-purple-500/30 transition-all">
+                                    <div className="flex gap-4 items-center">
+                                        <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 font-bold text-xs uppercase">
+                                            {item.unit_size_grams}g
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-xs font-bold uppercase">SKU: {item.sku}</p>
+                                                {item.metadata?.is_external && <span className="text-[7px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
+                                            </div>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                                                {item.metadata?.is_external ? `Roaster: ${item.metadata.roaster}` : `Batch: ${item.roast_batch_id}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-3xl font-bold tracking-tighter">{item.units_produced} <span className="text-[10px] text-gray-500 font-bold">UDS</span></p>
+                                        <span className="text-[9px] bg-brand-green/10 text-brand-green-bright px-2 py-0.5 rounded-full uppercase font-bold">Listo para Venta</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-purple-900/20 to-transparent border border-purple-500/20 rounded-3xl p-8">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h4 className="text-sm font-bold uppercase tracking-widest">Conversión Automática</h4>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase opacity-60 mt-1">Transformar Kgs Tostados en Unidades de Retail</p>
+                {showPackager ? (
+                    <form onSubmit={handlePackage} className="bg-gradient-to-br from-purple-900/40 to-bg-card border border-purple-500/30 rounded-[2.5rem] p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="text-xl font-bold uppercase tracking-widest text-white">Ingreso de Producto al Retail</h4>
+                            <button type="button" onClick={() => setShowPackager(false)} className="text-gray-500 hover:text-white">✕</button>
                         </div>
-                        <button className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[10px] font-bold uppercase transition-all shadow-xl shadow-purple-900/20">
-                            Nuevo Empaque
+
+                        {/* Selector de Origen */}
+                        <div className="flex bg-bg-main p-1 rounded-xl border border-white/10 mb-6">
+                            <button
+                                type="button"
+                                onClick={() => setSourceType('internal')}
+                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'internal' ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-white'}`}
+                            >
+                                Producción AXIS (Interno)
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSourceType('external')}
+                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'external' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-white'}`}
+                            >
+                                Roaster Aliado (Externo)
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            {sourceType === 'internal' ? (
+                                <div className="col-span-2">
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Lote de Tueste (Materia Prima)</label>
+                                    <select
+                                        required
+                                        value={packData.roastBatchId}
+                                        onChange={(e) => setPackData({ ...packData, roastBatchId: e.target.value })}
+                                        className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 text-sm font-bold"
+                                    >
+                                        <option value="">Seleccionar lote...</option>
+                                        {roastBatches.map(b => (
+                                            <option key={b.batch_id_label} value={b.batch_id_label}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="col-span-2">
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Empresa Roaster (Marca)</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="v.g. Café Pergamino, Amor Perfecto..."
+                                            value={packData.externalRoaster}
+                                            onChange={(e) => setPackData({ ...packData, externalRoaster: e.target.value })}
+                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Origen / Finca / Región</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Cauca, Tolima..."
+                                            value={packData.externalOrigin}
+                                            onChange={(e) => setPackData({ ...packData, externalOrigin: e.target.value })}
+                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Proceso de Beneficio</label>
+                                        <select
+                                            value={packData.externalProcess}
+                                            onChange={(e) => setPackData({ ...packData, externalProcess: e.target.value })}
+                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                        >
+                                            <option value="Lavado">Lavado</option>
+                                            <option value="Natural">Natural</option>
+                                            <option value="Honey">Honey</option>
+                                            <option value="Anaeróbico">Anaeróbico</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Notas de Cata (Separadas por coma)</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Vainilla, Caramelo, Lima..."
+                                            value={packData.externalNotes}
+                                            onChange={(e) => setPackData({ ...packData, externalNotes: e.target.value })}
+                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold font-mono text-[10px]"
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Unidades (Bolsas)</label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={packData.unitsProduced}
+                                    onChange={(e) => setPackData({ ...packData, unitsProduced: parseInt(e.target.value) })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 font-bold"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Tamaño Unitario (g)</label>
+                                <select
+                                    value={packData.unitSizeGrams}
+                                    onChange={(e) => setPackData({ ...packData, unitSizeGrams: parseInt(e.target.value) })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 font-bold"
+                                >
+                                    <option value="250">250g</option>
+                                    <option value="340">340g (12oz)</option>
+                                    <option value="500">500g</option>
+                                    <option value="1000">1000g</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isPackaging}
+                            className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-purple-600 hover:bg-purple-500 shadow-purple-900/40' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/40'}`}
+                        >
+                            {isPackaging ? 'PROCESANDO REGISTRO...' : `REGISTRAR CAFÉ ${sourceType === 'internal' ? 'PROPIO' : 'ADQUIRIDO'}`}
                         </button>
+                    </form>
+                ) : (
+                    <div className="bg-gradient-to-r from-purple-900/20 to-transparent border border-purple-500/20 rounded-3xl p-8">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h4 className="text-xl font-bold uppercase tracking-widest text-white">Gestión Multi-Origen</h4>
+                                <p className="text-[10px] text-gray-500 font-bold uppercase opacity-60 mt-1">Registra producción propia o café de aliados comerciales</p>
+                            </div>
+                            <button
+                                onClick={() => setShowPackager(true)}
+                                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[10px] font-bold uppercase transition-all shadow-xl shadow-purple-900/20 hover:scale-105"
+                            >
+                                Registrar Entrada
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
             <div className="bg-bg-card border border-white/10 rounded-[2.5rem] p-10 space-y-8">
-                <h3 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-4">Alertas de Frescura</h3>
+                <h3 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-4">Alertas de Frescura AI</h3>
                 <div className="space-y-6">
-                    <div className="p-6 bg-orange-500/5 border border-orange-500/20 rounded-2xl">
-                        <p className="text-[10px] text-orange-500 uppercase font-bold mb-2">⚠ Lote en Límite</p>
+                    <div className="p-6 bg-brand-green/5 border border-brand-green/20 rounded-2xl">
+                        <p className="text-[10px] text-brand-green uppercase font-bold mb-2">✓ Calidad Óptima</p>
                         <p className="text-xs leading-relaxed text-gray-300">
-                            El lote <strong>AX-1942</strong> cumplirá 45 días mañana. Se recomienda liquidación o cambio a Cold Brew.
+                            95% de su inventario se encuentra en la ventana de frescura ideal (7-21 días post-tueste).
                         </p>
                     </div>
                     <div className="h-px bg-white/5"></div>
                     <div>
                         <p className="text-[10px] text-gray-500 uppercase mb-4">Métricas de Empaque (Mes)</p>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-bg-main rounded-xl border border-white/5">
-                                <p className="text-2xl font-bold tracking-tighter">182</p>
+                            <div className="p-4 bg-bg-main rounded-xl border border-white/5 text-center">
+                                <p className="text-2xl font-black tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 250 ? curr.units_produced : 0), 0) || 182}</p>
                                 <p className="text-[8px] text-gray-600 font-bold uppercase">Bolsas 250g</p>
                             </div>
-                            <div className="p-4 bg-bg-main rounded-xl border border-white/5">
-                                <p className="text-2xl font-bold tracking-tighter">54</p>
+                            <div className="p-4 bg-bg-main rounded-xl border border-white/5 text-center">
+                                <p className="text-2xl font-black tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 500 ? curr.units_produced : 0), 0) || 54}</p>
                                 <p className="text-[8px] text-gray-600 font-bold uppercase">Bolsas 500g</p>
                             </div>
                         </div>
@@ -195,53 +395,100 @@ function LabelGenerator() {
 }
 
 function TraceabilityPreview() {
+    const [searchBatch, setSearchBatch] = useState('AX-2130');
+    const [story, setStory] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        handleSearch();
+    }, []);
+
+    const handleSearch = async () => {
+        setIsLoading(true);
+        const data = await getBatchStory(searchBatch);
+        if (data) setStory(data);
+        setIsLoading(false);
+    };
+
     return (
-        <div className="max-w-md mx-auto bg-bg-main border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative">
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white/5 rounded-full flex items-center justify-center text-[8px] font-mono text-gray-500 uppercase">AXIS Mobile App</div>
+        <div className="space-y-8">
+            <div className="max-w-md mx-auto flex gap-2">
+                <input
+                    type="text"
+                    value={searchBatch}
+                    onChange={(e) => setSearchBatch(e.target.value)}
+                    placeholder="Buscar Lote (v.g. AX-2130)"
+                    className="flex-1 bg-bg-card border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 text-xs font-bold uppercase"
+                />
+                <button
+                    onClick={handleSearch}
+                    className="px-6 py-3 bg-purple-600 rounded-xl text-[10px] font-black uppercase"
+                >
+                    Explorar
+                </button>
+            </div>
 
-            <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=3540&auto=format&fit=crop" className="w-full h-64 object-cover grayscale" alt="Farm" />
+            <div className="max-w-md mx-auto bg-bg-main border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white/5 rounded-full flex items-center justify-center text-[8px] font-mono text-gray-500 uppercase z-20">AXIS Mobile App</div>
 
-            <div className="p-8 -mt-12 bg-bg-main rounded-t-[3rem] relative space-y-8">
-                <header>
-                    <div className="flex justify-between items-start">
-                        <h3 className="text-3xl font-bold uppercase">Sagrado<br />Corazón</h3>
-                        <span className="bg-brand-green text-white text-[10px] font-bold px-3 py-1 rounded-full">Lote AX-2130</span>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-4 leading-relaxed">
-                        Este café fue cultivado por <strong>Alejandra Pérez</strong> en la finca <strong>Alejandría</strong> a 1.850 msnm.
-                    </p>
-                </header>
-
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                        <p className="text-[8px] text-gray-500 uppercase mb-1">Proceso</p>
-                        <p className="text-xs font-bold uppercase">Natural</p>
-                    </div>
-                    <div className="text-center border-x border-white/10">
-                        <p className="text-[8px] text-gray-500 uppercase mb-1">Puntaje</p>
-                        <p className="text-xs font-bold text-brand-green-bright">87.5 SCA</p>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-[8px] text-gray-500 uppercase mb-1">Tueste</p>
-                        <p className="text-xs font-bold uppercase">Perfil Oro</p>
-                    </div>
+                <div className="h-64 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=3540&auto=format&fit=crop" className="w-full h-full object-cover grayscale" alt="Farm" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg-main via-transparent blur-sm"></div>
                 </div>
 
-                <div className="space-y-4">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-green-bright">Notas del Tostador</h4>
-                    <div className="flex flex-wrap gap-2 text-[10px]">
-                        <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10">Chocolate Amargo</span>
-                        <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10">Frutos Rojos</span>
-                        <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10">Nuez</span>
-                    </div>
-                </div>
+                <div className="p-8 -mt-12 bg-bg-main rounded-t-[3rem] relative space-y-8">
+                    {isLoading ? (
+                        <div className="py-20 text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">Consultando Origen...</div>
+                    ) : (
+                        <>
+                            <header>
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Sagrado'}<br />{story?.producer?.split(' ')[1] || 'Corazón'}</h3>
+                                    <span className="bg-brand-green/20 text-brand-green text-[10px] font-black px-3 py-1 rounded-full uppercase border border-brand-green/20">Lote {story?.roast?.batch_id_label || searchBatch}</span>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-6 leading-relaxed font-medium">
+                                    Este café fue cultivado en la finca <strong>{story?.farm || 'Alejandría'}</strong> a {story?.height || '1.850 msnm'}.
+                                </p>
+                            </header>
 
-                <div className="p-6 bg-brand-green-bright text-black rounded-3xl space-y-2">
-                    <h4 className="text-[10px] font-bold uppercase">Recomendación Sagrada</h4>
-                    <p className="text-xs font-medium uppercase font-bold text-[8px]">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez cítrica.</p>
-                </div>
+                            <div className="grid grid-cols-3 gap-4 py-6 border-y border-white/5">
+                                <div className="text-center">
+                                    <p className="text-[8px] text-gray-500 uppercase font-black mb-1">Proceso</p>
+                                    <p className="text-xs font-black uppercase text-white">{story?.process || 'Natural'}</p>
+                                </div>
+                                <div className="text-center border-x border-white/10">
+                                    <p className="text-[8px] text-gray-500 uppercase font-black mb-1">Puntaje</p>
+                                    <p className="text-xs font-black text-brand-green-bright">{story?.sensoryScore || 87.5} SCA</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-[8px] text-gray-500 uppercase font-black mb-1">Tueste</p>
+                                    <p className="text-xs font-black uppercase text-white">Perfil Oro</p>
+                                </div>
+                            </div>
 
-                <button className="w-full py-4 border-2 border-white/10 rounded-2xl text-[10px] font-bold uppercase hover:bg-white text-white hover:text-black transition-all">Ver Curva de Tueste Real</button>
+                            <div className="space-y-4">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-400">Notas Catadas</h4>
+                                <div className="flex flex-wrap gap-2 text-[9px]">
+                                    {story?.notes?.map((note: string) => (
+                                        <span key={note} className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">{note}</span>
+                                    )) || (
+                                            <>
+                                                <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">Chocolate</span>
+                                                <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">Frutos Rojos</span>
+                                            </>
+                                        )}
+                                </div>
+                            </div>
+
+                            <div className="p-6 bg-purple-600/10 border border-purple-500/20 text-white rounded-3xl space-y-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-purple-400">Recomendación Sagrada</h4>
+                                <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
+                            </div>
+
+                            <button className="w-full py-4 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Ver Telemetría Roaster</button>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

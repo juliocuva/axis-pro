@@ -14,15 +14,47 @@ import GreenExportForm from '@/modules/export/components/GreenExportForm';
 import ComparisonCalibrationDashboard from '@/modules/export/components/ComparisonCalibrationDashboard';
 import DegassingPredictor from '@/modules/export/components/DegassingPredictor';
 import RetailModuleContainer from '@/modules/retail/components/RetailModuleContainer';
+import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 
 import { supabase } from '@/shared/lib/supabase';
 import { calculateAdvancedDegassing } from '@/shared/lib/engine/degassing';
 
 export default function Home() {
     const [user, setUser] = useState<string | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'production' | 'export' | 'retail' | 'quality' | 'curves' | 'entry' | 'calibration' | 'degassing'>('launcher');
+    const [view, setView] = useState<'launcher' | 'supply' | 'production' | 'export' | 'retail' | 'quality' | 'curves' | 'entry' | 'calibration' | 'degassing' | 'archive'>('launcher');
     const [batches, setBatches] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isDemoUnlocked, setIsDemoUnlocked] = useState(false);
+    const [clickCount, setClickCount] = useState(0);
+
+    // Estado para activación in-situ de módulos finales
+    const [activatedModules, setActivatedModules] = useState<Set<string>>(new Set());
+    const [pendingActivation, setPendingActivation] = useState<{ id: string, title: string } | null>(null);
+
+    const handleLogoClick = () => {
+        const newCount = clickCount + 1;
+        setClickCount(newCount);
+        if (newCount === 5) {
+            setIsDemoUnlocked(true);
+            setClickCount(0);
+        }
+    };
+
+    const requestActivation = (id: string, title: string) => {
+        if (activatedModules.has(id)) {
+            setView(id as any);
+            return;
+        }
+        setPendingActivation({ id, title });
+    };
+
+    const confirmActivation = () => {
+        if (pendingActivation) {
+            setActivatedModules(prev => new Set(prev).add(pendingActivation.id));
+            setView(pendingActivation.id as any);
+            setPendingActivation(null);
+        }
+    };
 
     useEffect(() => {
         if (user && view === 'launcher') {
@@ -63,12 +95,13 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-bg-main text-white p-8">
             <header className="mb-12 flex justify-between items-center flex-wrap gap-6">
-                <div onClick={() => setView('launcher')} className="cursor-pointer">
+                <div onClick={handleLogoClick} className="cursor-pointer group select-none">
                     <div className="flex items-center gap-4 mb-2">
-                        <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center overflow-hidden border border-white/5">
+                        <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center overflow-hidden border border-white/5 group-hover:border-brand-green/30 transition-all">
                             <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain p-1" />
                         </div>
-                        <h1 className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-bold">PRO V2.0</span></h1>
+                        <h1 className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-bold font-bold">PRO V2.0</span></h1>
+                        {isDemoUnlocked && <span className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-md animate-pulse">DEMO UNLOCKED</span>}
                     </div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Sesión: <span className="text-brand-green-bright">{user}</span></p>
                 </div>
@@ -113,7 +146,7 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <ModuleCard
                                 title="Supply & Quality"
-                                description="Recepción de café, trilla, factor de rendimiento y análisis SCA. TRL 7 Industrial."
+                                description="Consolidado: Recepción, trilla automatizada y protocolos SCA blindados. Alta fidelidad operativa."
                                 status="trl7"
                                 color="brand-green"
                                 onClick={() => setView('supply')}
@@ -121,30 +154,67 @@ export default function Home() {
                             />
                             <ModuleCard
                                 title="Roast Intelligence"
-                                description="Control de producción, perfiles predictivos y consistencia de tostión predictiva."
-                                status="active"
+                                description="Consolidado: IA de comparación de curvas (Ghost Profile) y asistente de perillas con lógica blindada en servidor."
+                                status={activatedModules.has('production') ? "trl7" : "locked"}
                                 color="orange-500"
-                                onClick={() => setView('production')}
+                                onClick={() => requestActivation('production', 'Roast Intelligence')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>}
                             />
                             <ModuleCard
                                 title="Global Trade"
-                                description="Documentación internacional, trazabilidad QR y cumplimiento normativo UE/USA."
-                                status="active"
+                                description="Próximamente: Pasaporte digital del café, certificados de exportación y trazabilidad internacional."
+                                status={activatedModules.has('export') ? "trl7" : "locked"}
                                 color="blue-500"
-                                onClick={() => setView('calibration')}
+                                onClick={() => requestActivation('export', 'Global Trade')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>}
                             />
                             <ModuleCard
                                 title="Retail Connect"
-                                description="Control de inventario final, gestión de empaques y tracking directo al consumidor."
-                                status="active"
+                                description="Concepto: Gestión de inventario terminado y storytelling interactivo con el consumidor final."
+                                status={activatedModules.has('retail') ? "active" : "locked"}
                                 color="purple-500"
-                                onClick={() => setView('retail')}
+                                onClick={() => requestActivation('retail', 'Retail Connect')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
                             />
                         </div>
                     </section>
+
+                    {/* Ventana de Activación Pop-up */}
+                    {pendingActivation && (
+                        <div className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[200] flex items-center justify-center p-6 sm:p-12">
+                            <div className="bg-bg-card border border-white/10 w-full max-w-lg rounded-[3rem] p-12 text-center shadow-3xl animate-in zoom-in-95 duration-500 relative overflow-hidden">
+                                {/* Decoración de fondo */}
+                                <div className="absolute -top-20 -right-20 w-48 h-48 bg-brand-green/10 blur-[80px] rounded-full"></div>
+                                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-blue-500/10 blur-[80px] rounded-full"></div>
+
+                                <div className="w-20 h-20 bg-white/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-white/10 ring-4 ring-white/5">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green-bright animate-pulse"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                                </div>
+
+                                <h3 className="text-3xl font-bold uppercase tracking-tighter text-white mb-4">
+                                    Activar Módulo In-Situ
+                                </h3>
+                                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-8 leading-relaxed">
+                                    ¿Deseas activar el módulo <span className="text-brand-green-bright">{pendingActivation.title}</span> para esta sesión operativa? Este proceso habilita las capacidades TRL 7 en tiempo real.
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <button
+                                        onClick={confirmActivation}
+                                        className="flex-1 py-5 bg-brand-green text-white font-bold rounded-2xl uppercase tracking-widest text-xs shadow-2xl shadow-brand-green/20 hover:bg-brand-green-bright hover:scale-[1.02] transition-all"
+                                    >
+                                        SÍ, ACTIVAR AHORA
+                                    </button>
+                                    <button
+                                        onClick={() => setPendingActivation(null)}
+                                        className="flex-1 py-5 bg-white/5 text-gray-400 font-bold rounded-2xl uppercase tracking-widest text-xs hover:bg-white/10 transition-all border border-white/5"
+                                    >
+                                        CANCELAR
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 bg-bg-card border border-white/5 rounded-3xl p-8">
@@ -252,21 +322,27 @@ export default function Home() {
                 </div>
             )}
 
-            {(view === 'export' || view === 'calibration' || view === 'degassing') && (
+            {(view === 'export' || view === 'calibration' || view === 'degassing' || view === 'archive') && (
                 <div className="max-w-7xl mx-auto space-y-8">
                     <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
                         <div className="flex bg-bg-card p-1 rounded-2xl border border-white/5 shadow-xl">
+                            <button
+                                onClick={() => setView('export')}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'export' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                            >
+                                Manifiestos
+                            </button>
+                            <button
+                                onClick={() => setView('archive')}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'archive' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                            >
+                                Historial Cloud
+                            </button>
                             <button
                                 onClick={() => setView('calibration')}
                                 className={`px-6 py-2.5 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'calibration' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
                                 Calibración Espectral
-                            </button>
-                            <button
-                                onClick={() => setView('export')}
-                                className={`px-6 py-2.5 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'export' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                            >
-                                Exportación Verde
                             </button>
                             <button
                                 onClick={() => setView('degassing')}
@@ -281,6 +357,7 @@ export default function Home() {
                         {view === 'calibration' && <ComparisonCalibrationDashboard />}
                         {view === 'export' && <GreenExportForm />}
                         {view === 'degassing' && <DegassingPredictor />}
+                        {view === 'archive' && <GlobalHistoryArchive />}
                     </div>
                 </div>
             )}

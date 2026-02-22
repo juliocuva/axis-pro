@@ -61,56 +61,70 @@ interface RoastCurveProps {
     batchId?: string;
 }
 
-export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW' }: RoastCurveProps) {
+export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW', isLive = true }: { batchId?: string, isLive?: boolean }) {
     return (
-        <div className="space-y-6 animate-in fade-in duration-1000">
-            <div className="bg-bg-card border border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 blur-[100px] rounded-full"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500/5 blur-[100px] rounded-full"></div>
-
-                <div className="flex flex-wrap justify-between items-end gap-6 mb-8 relative z-10">
-                    <div>
-                        <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
+        <div className="space-y-8 animate-in fade-in duration-1000">
+            {/* Header de Análisis Espectral */}
+            <div className="flex flex-wrap justify-between items-end gap-6 relative z-10 px-4">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-brand-green'}`}></div>
+                        <h3 className="text-3xl font-bold uppercase tracking-tighter text-white">
                             Análisis Espectral de Tostión
-                            <span className="text-[10px] bg-brand-green/20 text-brand-green-bright px-2 py-1 rounded-md font-mono">MODO_RESULTADO</span>
                         </h3>
-                        <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-mono">
-                            Lote: <span className="text-brand-green-bright">{batchId}</span> • Variedad: Pink Bourbon • Máquina: Probat G45
-                        </p>
                     </div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] ml-5">
+                        {isLive ? 'Monitoreo de Termografía Infrarroja en Vivo' : 'Análisis Post-Proceso de Curva de Calor'}
+                    </p>
+                </div>
 
-                    <div className="flex gap-4">
-                        <div className="bg-bg-main/50 border border-white/5 px-4 py-2 rounded-2xl">
-                            <p className="text-[10px] text-gray-500 uppercase font-mono">Tiempo Total</p>
-                            <p className="text-lg font-bold text-white">12:00 <span className="text-[10px] text-gray-400 font-normal">min</span></p>
+                <div className="flex gap-3">
+                    <div className="bg-bg-card border border-white/5 px-6 py-3 rounded-2xl flex flex-col items-center">
+                        <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest mb-1">Carga Sensorial</p>
+                        <p className="text-xl font-bold text-white leading-none">88.5</p>
+                    </div>
+                    <div className="bg-brand-green/10 border border-brand-green/20 px-6 py-3 rounded-2xl flex flex-col items-center">
+                        <p className="text-[8px] text-brand-green font-black tracking-widest mb-1">Consistencia</p>
+                        <p className="text-xl font-bold text-brand-green-bright leading-none">99%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-bg-card border border-white/5 rounded-[3rem] p-10 relative overflow-hidden shadow-2xl">
+                {/* Background Spectral Gradient */}
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 via-red-500 via-orange-500 to-yellow-500 opacity-50"></div>
+
+                {/* Simulated Heat Signature Overlay */}
+                <div className="absolute -top-24 -right-24 w-96 h-96 bg-orange-500/5 blur-[120px] rounded-full animate-pulse-slow"></div>
+                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-brand-green/5 blur-[120px] rounded-full"></div>
+
+                <div className="flex flex-wrap justify-between gap-8 mb-10 relative z-10">
+                    <div className="flex gap-12">
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Tiempo de Tueste</p>
+                            <p className="text-4xl font-bold text-white tracking-tighter">09:12<span className="text-xs text-gray-500 ml-2">min</span></p>
                         </div>
-                        <div className="bg-bg-main/50 border border-white/5 px-4 py-2 rounded-2xl">
-                            <p className="text-[10px] text-gray-500 uppercase font-mono">Desarrollo</p>
-                            <p className="text-lg font-bold text-brand-green-bright">18.5 <span className="text-[10px] text-gray-400 font-normal">%</span></p>
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Temp. Grano</p>
+                            <p className="text-4xl font-bold text-brand-green-bright tracking-tighter">202.4<span className="text-xs text-gray-500 ml-2">°C</span></p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">RoR Actual</p>
+                            <p className="text-4xl font-bold text-orange-500 tracking-tighter">8.4<span className="text-xs text-gray-500 ml-2">Δ/min</span></p>
                         </div>
                     </div>
                 </div>
 
-                {/* Legend */}
-                <div className="flex gap-6 mb-6 text-[10px] font-mono uppercase tracking-widest">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-0.5 bg-brand-green-bright shadow-[0_0_8px_rgba(0,166,81,0.8)]"></div>
-                        <span className="text-gray-300">Temp. Grano (BT)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-0.5 bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></div>
-                        <span className="text-gray-300">Rate of Rise (RoR)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></div>
-                        <span className="text-gray-300">Flujo de Aire</span>
-                    </div>
-                </div>
-
-                <div className="h-[400px] w-full relative z-10">
+                <div className="h-[450px] w-full relative z-10">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={roastData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                        <LineChart data={roastData.slice(0, 10)} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="spectralGradient" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stopColor="#3b82f6" />
+                                    <stop offset="50%" stopColor="#ef4444" />
+                                    <stop offset="100%" stopColor="#eab308" />
+                                </linearGradient>
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                             <XAxis
                                 dataKey="time"
@@ -118,7 +132,7 @@ export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW' }: RoastCurv
                                 fontSize={10}
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fill: '#4b5563' }}
+                                tick={{ fill: '#4b5563', fontWeight: 700 }}
                             />
                             <YAxis
                                 yAxisId="left"
@@ -127,7 +141,7 @@ export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW' }: RoastCurv
                                 tickLine={false}
                                 axisLine={false}
                                 domain={[80, 240]}
-                                tick={{ fill: '#4b5563' }}
+                                tick={{ fill: '#4b5563', fontWeight: 700 }}
                             />
                             <YAxis
                                 yAxisId="right"
@@ -137,35 +151,39 @@ export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW' }: RoastCurv
                                 tickLine={false}
                                 axisLine={false}
                                 domain={[-30, 100]}
-                                tick={{ fill: '#4b5563' }}
+                                tick={{ fill: '#4b5563', fontWeight: 700 }}
                             />
                             <Tooltip content={<CustomTooltip />} />
 
-                            {/* Airflow Curve (Smooth) */}
+                            {/* Spectral Area Background (simulating thermal energy) */}
+                            <AreaChart data={roastData.slice(0, 10)}>
+                                <Area type="monotone" dataKey="temp" stroke="none" fill="url(#spectralGradient)" fillOpacity={0.05} />
+                            </AreaChart>
+
                             <Line
                                 yAxisId="right"
                                 type="monotone"
                                 dataKey="airflow"
                                 stroke="#22d3ee"
                                 strokeWidth={2}
-                                strokeOpacity={0.6}
+                                strokeOpacity={0.4}
                                 dot={false}
                             />
 
-                            {/* Roast Curve (BT) */}
                             <Line
                                 yAxisId="left"
                                 type="monotone"
                                 dataKey="temp"
                                 stroke="#00a651"
-                                strokeWidth={4}
+                                strokeWidth={5}
+                                strokeLinecap="round"
                                 dot={(props: any) => {
                                     const { cx, cy, payload } = props;
                                     if (payload.event) {
                                         return (
                                             <g key={payload.time}>
-                                                <circle cx={cx} cy={cy} r={6} fill="#00a651" stroke="#fff" strokeWidth={2} />
-                                                <text x={cx} y={cy - 15} textAnchor="middle" fill="#00a651" fontSize={10} fontWeight="bold" className="font-mono">
+                                                <circle cx={cx} cy={cy} r={6} fill="#00a651" stroke="#fff" strokeWidth={2} className="animate-pulse" />
+                                                <text x={cx} y={cy - 18} textAnchor="middle" fill="#00a651" fontSize={10} fontWeight="900" className="font-mono">
                                                     {payload.event}
                                                 </text>
                                             </g>
@@ -173,48 +191,56 @@ export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW' }: RoastCurv
                                     }
                                     return <circle cx={cx} cy={cy} r={2} fill="#00a651" opacity={0} />;
                                 }}
-                                activeDot={{ r: 8, fill: '#00a651', stroke: '#fff', strokeWidth: 2 }}
+                                activeDot={{ r: 10, fill: '#00a651', stroke: '#fff', strokeWidth: 3 }}
                             />
 
-                            {/* RoR Curve */}
                             <Line
                                 yAxisId="right"
                                 type="monotone"
                                 dataKey="ror"
                                 stroke="#f97316"
-                                strokeWidth={2}
-                                strokeDasharray="5 5"
+                                strokeWidth={3}
+                                strokeDasharray="6 4"
                                 dot={false}
-                                activeDot={{ r: 6, fill: '#f97316' }}
+                                activeDot={{ r: 8, fill: '#f97316' }}
                             />
-
-                            {/* Events Landmarks */}
-                            {roastData.filter(d => d.event).map((event, idx) => (
-                                <ReferenceLine
-                                    key={idx}
-                                    x={event.time}
-                                    stroke="#ffffff10"
-                                    strokeDasharray="3 3"
-                                    yAxisId="left"
-                                />
-                            ))}
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
+
+                {/* Live Scanning Line Simulation */}
+                {isLive && (
+                    <div className="absolute bottom-8 right-10 flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-brand-green-bright animate-pulse">
+                        <div className="flex gap-1 items-end h-4">
+                            {[...Array(5)].map((_, i) => (
+                                <div key={i} className="w-1 bg-brand-green-bright animate-bounce" style={{ animationDelay: `${i * 0.1}s`, height: `${40 + Math.random() * 60}%` }}></div>
+                            ))}
+                        </div>
+                        Scanning Spectral Signatures
+                    </div>
+                )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl">
-                    <p className="text-[10px] text-brand-green-bright font-mono uppercase tracking-[0.2em] mb-2">Punto de Giro (TP)</p>
-                    <p className="text-xl font-bold">01:00 <span className="text-xs text-gray-500 ml-1">95°C</span></p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-cyan-400 opacity-50"></div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Punto de Giro (TP)</p>
+                    <p className="text-2xl font-bold text-white tracking-tight">01:00 <span className="text-xs text-gray-500 ml-1">95°C</span></p>
                 </div>
-                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl">
-                    <p className="text-[10px] text-gray-500 font-mono uppercase tracking-[0.2em] mb-2">Primer Crack (FC)</p>
-                    <p className="text-xl font-bold text-orange-400">09:00 <span className="text-xs text-gray-500 ml-1">202°C</span></p>
+                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-orange-500 opacity-50"></div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Primer Crack (FC)</p>
+                    <p className="text-2xl font-bold text-orange-400 tracking-tight">09:00 <span className="text-xs text-gray-500 ml-1">202°C</span></p>
                 </div>
-                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl border-l-brand-red">
-                    <p className="text-[10px] text-brand-red-bright font-mono uppercase tracking-[0.2em] mb-2">Tiempo de Desarrollo</p>
-                    <p className="text-xl font-bold">03:00 <span className="text-xs text-gray-500 ml-1">225°C Final</span></p>
+                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-50"></div>
+                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.2em] mb-2">Energy Stability</p>
+                    <p className="text-2xl font-bold text-white tracking-tight">98.2<span className="text-xs text-gray-500 ml-1">%</span></p>
+                </div>
+                <div className="bg-brand-red/5 border border-brand-red/10 p-6 rounded-3xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-brand-red opacity-50"></div>
+                    <p className="text-[10px] text-brand-red font-bold uppercase tracking-[0.2em] mb-2">Development</p>
+                    <p className="text-2xl font-bold text-white tracking-tight">18.5<span className="text-xs text-gray-500 ml-1">%</span></p>
                 </div>
             </div>
         </div>
