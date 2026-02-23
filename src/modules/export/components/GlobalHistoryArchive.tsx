@@ -17,7 +17,7 @@ export default function GlobalHistoryArchive() {
 
     const fetchGlobalHistory = async () => {
         setIsLoading(true);
-        // En una demo real, uniría varias tablas. Aquí simulamos el historial consolidado.
+        let allHistory: any[] = [];
         try {
             const { data: exports } = await supabase
                 .from('green_exports')
@@ -27,14 +27,35 @@ export default function GlobalHistoryArchive() {
             if (exports) {
                 const formatted = exports.map(exp => ({
                     id: exp.id,
-                    type: 'MANIFIESTO',
+                    type: 'EXPORT',
                     label: exp.lot_id,
                     date: exp.export_date,
-                    status: 'Nube Verificada',
+                    status: 'Exportado',
                     raw: exp
                 }));
-                setHistory(formatted);
+                allHistory = [...allHistory, ...formatted];
             }
+
+            // También traemos los certificados de materia prima
+            const { data: lots } = await supabase
+                .from('coffee_purchase_inventory')
+                .select('*')
+                .eq('status', 'completed')
+                .order('created_at', { ascending: false });
+
+            if (lots) {
+                const formatted = lots.map(lot => ({
+                    id: lot.id,
+                    type: 'CERTIFICADO',
+                    label: lot.farmer_name,
+                    date: new Date(lot.created_at).toISOString().split('T')[0],
+                    status: 'Calidad SCA',
+                    raw: lot
+                }));
+                allHistory = [...allHistory, ...formatted];
+            }
+
+            setHistory(allHistory);
         } catch (error) {
             console.error("Error fetching history:", error);
         } finally {
@@ -44,7 +65,8 @@ export default function GlobalHistoryArchive() {
 
     const openReport = (item: any) => {
         setSelectedItem(item);
-        setViewMode(item.type === 'MANIFIESTO' ? 'passport' : 'certificate');
+        // Si es un manifiesto de exportación, ver pasaporte. Si es un lote de inventario, ver certificado.
+        setViewMode(item.type === 'MANIFIESTO' || item.type === 'EXPORT' ? 'passport' : 'certificate');
     };
 
     return (
@@ -54,6 +76,15 @@ export default function GlobalHistoryArchive() {
                     lotData={{ batch_id: selectedItem.label }}
                     onClose={() => { setSelectedItem(null); setViewMode(null); }}
                 />
+            )}
+
+            {selectedItem && viewMode === 'certificate' && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl overflow-y-auto">
+                    <LotCertificate
+                        inventoryId={selectedItem.id}
+                        onClose={() => { setSelectedItem(null); setViewMode(null); }}
+                    />
+                </div>
             )}
 
             <header className="flex justify-between items-end">

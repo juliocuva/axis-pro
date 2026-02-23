@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import ExportReportButton from '@/shared/components/ui/ExportReportButton';
 
 interface CoffeePassportProps {
     lotData: any;
@@ -68,7 +69,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                 </div>
 
                 {/* Contenido Principal: Data Analítica */}
-                <div className="flex-1 p-12 overflow-y-auto max-h-[90vh] md:max-h-none">
+                <div className="flex-1 p-12 overflow-y-auto max-h-[90vh] md:max-h-none" id="passport-document-area">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
                         {/* Sección A: Perfil Sensorial */}
@@ -136,7 +137,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                         </div>
                         <div className="flex gap-4 w-full md:w-auto">
                             <button className="flex-1 md:flex-none px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all">Compartir Digital</button>
-                            <button className="flex-1 md:flex-none px-12 py-4 bg-brand-green hover:bg-brand-green-bright text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-brand-green/20 transition-all">Exportar PDF Oficial</button>
+                            <ExportReportButton elementId="passport-document-area" fileName={`PASSPORT-${passportId}`} />
                         </div>
                     </footer>
                 </div>
