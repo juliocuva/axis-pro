@@ -106,7 +106,7 @@ export default function DegassingPredictor() {
                                 <button
                                     key={temp}
                                     onClick={() => setConfig({ ...config, routeTemperature: temp })}
-                                    className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all border ${config.routeTemperature === temp ? 'bg-orange-500 border-orange-500 text-white' : 'border-white/5 text-gray-500 hover:text-white hover:bg-white/5'}`}
+                                    className={`flex-1 py-3 rounded-xl text-[9px] font-bold uppercase tracking-tighter transition-all border ${config.routeTemperature === temp ? 'bg-orange-500 border-orange-500 text-white' : 'border-white/5 text-gray-500 hover:text-white hover:bg-white/5'}`}
                                 >
                                     {temp}
                                 </button>
@@ -119,11 +119,11 @@ export default function DegassingPredictor() {
                     <div className="pt-6 border-t border-white/5 space-y-6">
                         <div className="text-center">
                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Días de Estabilización</p>
-                            <p className="text-6xl font-black text-white tracking-tighter">{result.daysToSafety} <span className="text-lg text-orange-500">DÍAS</span></p>
+                            <p className="text-6xl font-bold text-white tracking-tighter">{result.daysToSafety} <span className="text-lg text-orange-500">DÍAS</span></p>
                         </div>
 
                         <div className={`p-4 rounded-2xl border flex flex-col items-center text-center gap-2 ${result.riskLevel === 'critical' ? 'bg-brand-red/10 border-brand-red/30' : result.riskLevel === 'medium' ? 'bg-orange-500/10 border-orange-500/30' : 'bg-brand-green/10 border-brand-green/30'}`}>
-                            <span className="text-[10px] font-black uppercase tracking-widest">Status de Despacho</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Status de Despacho</span>
                             <span className={`text-sm font-bold uppercase ${result.riskLevel === 'critical' ? 'text-brand-red-bright' : result.riskLevel === 'medium' ? 'text-orange-500' : 'text-brand-green-bright'}`}>
                                 {result.riskLevel === 'critical' ? 'DESPACHO BLOQUEADO' : 'PENDIENTE DE REPOSO'}
                             </span>
@@ -175,16 +175,16 @@ export default function DegassingPredictor() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/5">
                     <div className="p-6 bg-bg-main rounded-3xl border border-white/5">
                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Fecha Recomendada</p>
-                        <p className="text-lg font-black text-white">{result?.recommendedShipDate}</p>
+                        <p className="text-lg font-bold text-white">{result?.recommendedShipDate}</p>
                         <p className="text-[9px] text-brand-green-bright font-bold uppercase mt-1">✓ Optimizada para la ruta</p>
                     </div>
                     <div className="p-6 bg-bg-main rounded-3xl border border-white/5">
                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Factor de Seguridad</p>
-                        <p className="text-lg font-black text-white">{result?.safetyFactor}%</p>
+                        <p className="text-lg font-bold text-white">{result?.safetyFactor}%</p>
                         <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Margen vs Ruptura</p>
                     </div>
                     <div className="p-6 bg-gradient-to-br from-bg-main to-orange-500/10 rounded-3xl border border-orange-500/10 flex items-center justify-center">
-                        <button className="w-full h-full text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 hover:text-white transition-all flex items-center justify-center gap-3">
+                        <button className="w-full h-full text-[10px] font-bold uppercase tracking-[0.2em] text-orange-500 hover:text-white transition-all flex items-center justify-center gap-3">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
                             Exportar Plan Logístico
                         </button>

@@ -80,11 +80,11 @@ export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW', isLive = tr
 
                 <div className="flex gap-3">
                     <div className="bg-bg-card border border-white/5 px-6 py-3 rounded-2xl flex flex-col items-center">
-                        <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest mb-1">Carga Sensorial</p>
+                        <p className="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-1">Carga Sensorial</p>
                         <p className="text-xl font-bold text-white leading-none">88.5</p>
                     </div>
                     <div className="bg-brand-green/10 border border-brand-green/20 px-6 py-3 rounded-2xl flex flex-col items-center">
-                        <p className="text-[8px] text-brand-green font-black tracking-widest mb-1">Consistencia</p>
+                        <p className="text-[8px] text-brand-green font-bold tracking-widest mb-1">Consistencia</p>
                         <p className="text-xl font-bold text-brand-green-bright leading-none">99%</p>
                     </div>
                 </div>
@@ -183,7 +183,7 @@ export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW', isLive = tr
                                         return (
                                             <g key={payload.time}>
                                                 <circle cx={cx} cy={cy} r={6} fill="#00a651" stroke="#fff" strokeWidth={2} className="animate-pulse" />
-                                                <text x={cx} y={cy - 18} textAnchor="middle" fill="#00a651" fontSize={10} fontWeight="900" className="font-mono">
+                                                <text x={cx} y={cy - 18} textAnchor="middle" fill="#00a651" fontSize={10} fontWeight="700" className="font-mono">
                                                     {payload.event}
                                                 </text>
                                             </g>
@@ -210,7 +210,7 @@ export default function RoastCurveAnalysis({ batchId = 'AX-PREVIEW', isLive = tr
 
                 {/* Live Scanning Line Simulation */}
                 {isLive && (
-                    <div className="absolute bottom-8 right-10 flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-brand-green-bright animate-pulse">
+                    <div className="absolute bottom-8 right-10 flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-brand-green-bright animate-pulse">
                         <div className="flex gap-1 items-end h-4">
                             {[...Array(5)].map((_, i) => (
                                 <div key={i} className="w-1 bg-brand-green-bright animate-bounce" style={{ animationDelay: `${i * 0.1}s`, height: `${40 + Math.random() * 60}%` }}></div>

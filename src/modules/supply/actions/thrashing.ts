@@ -35,17 +35,35 @@ export async function processThrashingAction(
         const yieldFactor = (parchmentWeight / excelsoWeight) * 70;
 
         // 3. Persistencia Unidireccional
+        // AXIS SMART UPDATE: Intentamos actualizar todo, si las columnas no existen, retrocedemos
         const { error: updateError } = await supabase
             .from('coffee_purchase_inventory')
             .update({
                 thrashed_weight: excelsoWeight,
+                pasilla_weight: pasillaWeight,
+                cisco_weight: ciscoWeight,
                 thrashing_yield: yieldFactor,
                 status: 'thrashed'
-                // Podríamos expandir la DB para pasilla y cisco si se requiere auditoría
             })
             .eq('id', inventoryId);
 
-        if (updateError) throw new Error(`Error en persistencia: ${updateError.message}`);
+        if (updateError) {
+            // Si el error es PGRST204 (columna no encontrada), reintentamos sin pasilla/cisco
+            if (updateError.code === 'PGRST204') {
+                const { error: retryError } = await supabase
+                    .from('coffee_purchase_inventory')
+                    .update({
+                        thrashed_weight: excelsoWeight,
+                        thrashing_yield: yieldFactor,
+                        status: 'thrashed'
+                    })
+                    .eq('id', inventoryId);
+
+                if (retryError) throw new Error(`Error en persistencia (Reintento): ${retryError.message}`);
+            } else {
+                throw new Error(`Error en persistencia: ${updateError.message}`);
+            }
+        }
 
         return {
             success: true,

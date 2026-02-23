@@ -64,7 +64,7 @@ export default function GreenExportForm() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassport(true)}
-                                className="bg-brand-green text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-green-bright transition-all"
+                                className="bg-brand-green text-white px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-brand-green-bright transition-all"
                             >
                                 Ver Pasaporte Digital
                             </button>
@@ -74,14 +74,14 @@ export default function GreenExportForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <section className="bg-bg-card border border-white/5 p-8 rounded-3xl">
-                        <h3 className="text-brand-green-bright text-[10px] font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <h3 className="text-brand-green-bright text-[10px] font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
                             <span className="w-1 h-4 bg-brand-green rounded-full"></span>
                             Control de Calidad (Verde)
                         </h3>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Humedad (%)</label>
+                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Humedad (%)</label>
                                 <input
                                     type="number"
                                     step="0.1"
@@ -93,7 +93,7 @@ export default function GreenExportForm() {
                             </div>
 
                             <div>
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Días de Estabilización (Reposo)</label>
+                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Días de Estabilización (Reposo)</label>
                                 <input
                                     type="number"
                                     value={formData.stabilizationDays}
@@ -104,7 +104,7 @@ export default function GreenExportForm() {
                             </div>
 
                             <div>
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Fecha de Exportación</label>
+                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Fecha de Exportación</label>
                                 <input
                                     type="date"
                                     required
@@ -120,14 +120,14 @@ export default function GreenExportForm() {
                     <section className="bg-bg-card border border-white/5 p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-[80px] rounded-full"></div>
                         <div>
-                            <h3 className="text-brand-green-bright text-[10px] font-black uppercase tracking-widest mb-6">Predicción de Exportación</h3>
+                            <h3 className="text-brand-green-bright text-[10px] font-bold uppercase tracking-widest mb-6">Predicción de Exportación</h3>
 
                             <div className="p-6 rounded-2xl bg-bg-main border border-white/5 space-y-4">
                                 <div>
                                     <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest">Status de Estabilidad</span>
                                     <div className="flex items-center gap-3 mt-1">
                                         <div className={`w-2.5 h-2.5 rounded-full ${formData.moistureContent > 12 ? 'bg-brand-red animate-pulse' : 'bg-brand-green-bright shadow-[0_0_8px_rgba(0,255,136,0.3)]'}`}></div>
-                                        <span className="text-xl font-black uppercase tracking-tighter">{formData.moistureContent > 12 ? 'Riesgo Crítico' : 'Estabilizado'}</span>
+                                        <span className="text-xl font-bold uppercase tracking-tighter">{formData.moistureContent > 12 ? 'Riesgo Crítico' : 'Estabilizado'}</span>
                                     </div>
                                 </div>
                                 <p className="text-[9px] text-gray-500 font-bold uppercase leading-relaxed tracking-wider">
@@ -140,11 +140,11 @@ export default function GreenExportForm() {
 
                         <div className="mt-8 flex gap-4">
                             <div className="flex-1 p-3 bg-white/2 rounded-xl border border-white/5 text-center">
-                                <p className="text-[8px] text-gray-600 uppercase font-black">Transporte</p>
+                                <p className="text-[8px] text-gray-600 uppercase font-bold">Transporte</p>
                                 <p className="text-[10px] text-white font-bold uppercase">{formData.transportType}</p>
                             </div>
                             <div className="flex-1 p-3 bg-white/2 rounded-xl border border-white/5 text-center">
-                                <p className="text-[8px] text-gray-600 uppercase font-black">Certificado</p>
+                                <p className="text-[8px] text-gray-600 uppercase font-bold">Certificado</p>
                                 <p className="text-[10px] text-brand-green font-bold uppercase">Axis A-1</p>
                             </div>
                         </div>
@@ -154,7 +154,7 @@ export default function GreenExportForm() {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-brand-green/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-[10px] uppercase tracking-widest"
+                    className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-brand-green/20 flex items-center justify-center gap-3 group disabled:opacity-50 text-[10px] uppercase tracking-widest"
                 >
                     {isSubmitting ? 'GENERANDO EN LA NUBE...' : 'EJECUTAR Y GENERAR PASAPORTE DE EXPORTACIÓN'}
                     {!isSubmitting && (

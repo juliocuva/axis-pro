@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { supabase } from '@/shared/lib/supabase';
 import { processThrashingAction } from '../../actions/thrashing';
 
 interface ThrashingFormProps {
@@ -19,6 +20,39 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     const [yieldFactor, setYieldFactor] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchThrashingData = async () => {
+            if (!inventoryId) return;
+            setIsLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('coffee_purchase_inventory')
+                    .select('*')
+                    .eq('id', inventoryId.trim())
+                    .maybeSingle();
+
+                if (error) {
+                    console.error("AXIS DB ERROR (Trilla):", error);
+                } else if (data) {
+                    console.log("AXIS DB SUCCESS (Trilla):", data);
+                    setFormData({
+                        excelsoWeight: Number(data.thrashed_weight) || 0,
+                        pasillaWeight: Number(data.pasilla_weight) || 0,
+                        ciscoWeight: Number(data.cisco_weight) || 0
+                    });
+                }
+            } catch (err) {
+                console.error("AXIS CRITICAL ERROR (Trilla):", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchThrashingData();
+    }, [inventoryId]);
 
     // Estimación visual en el cliente (solo para UX, no se guarda)
     useEffect(() => {
@@ -57,7 +91,15 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     };
 
     return (
-        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl space-y-6 relative overflow-hidden">
+        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl space-y-6 relative overflow-hidden min-h-[300px]">
+            {isLoading && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-3xl">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-green-bright animate-pulse">Recuperando datos de trilla...</p>
+                    </div>
+                </div>
+            )}
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full"></div>
 
             <header className="relative z-10">
@@ -87,8 +129,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             type="number"
                             step="0.1"
                             required
+                            value={formData.excelsoWeight || ''}
                             disabled={isSubmitting}
-                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-brand-green outline-none font-black text-2xl text-brand-green-bright transition-all"
+                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-brand-green outline-none font-bold text-2xl text-brand-green-bright transition-all"
                             onChange={(e) => setFormData({ ...formData, excelsoWeight: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
@@ -97,6 +140,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <input
                             type="number"
                             step="0.1"
+                            value={formData.pasillaWeight || ''}
                             disabled={isSubmitting}
                             className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-white/20 outline-none text-gray-400 font-bold"
                             onChange={(e) => setFormData({ ...formData, pasillaWeight: parseFloat(e.target.value) || 0 })}
@@ -107,6 +151,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <input
                             type="number"
                             step="0.1"
+                            value={formData.ciscoWeight || ''}
                             disabled={isSubmitting}
                             className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-white/20 outline-none text-gray-400 font-bold"
                             onChange={(e) => setFormData({ ...formData, ciscoWeight: parseFloat(e.target.value) || 0 })}
@@ -117,7 +162,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 {yieldFactor !== null && (
                     <div className={`p-8 rounded-3xl border flex flex-col items-center transition-all animate-in zoom-in duration-500 ${yieldFactor <= 94 ? 'bg-brand-green/10 border-brand-green/30' : 'bg-orange-500/10 border-orange-500/30'}`}>
                         <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-500 mb-2">Factor de Rendimiento Est.</span>
-                        <span className={`text-6xl font-black font-mono tracking-tighter ${yieldFactor <= 94 ? 'text-brand-green-bright' : 'text-orange-500'}`}>
+                        <span className={`text-6xl font-bold font-mono tracking-tighter ${yieldFactor <= 94 ? 'text-brand-green-bright' : 'text-orange-500'}`}>
                             {yieldFactor.toFixed(2)}
                         </span>
                         <div className="mt-4 flex items-center gap-3">
@@ -132,7 +177,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 <button
                     type="submit"
                     disabled={isSubmitting || !formData.excelsoWeight}
-                    className="w-full bg-white hover:bg-brand-green-bright text-black hover:text-white font-black py-6 rounded-2xl transition-all disabled:opacity-30 flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl"
+                    className="w-full bg-white hover:bg-brand-green-bright text-black hover:text-white font-bold py-6 rounded-2xl transition-all disabled:opacity-30 flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl"
                 >
                     {isSubmitting ? 'SINCRONIZANDO CON SERVIDOR AXIS...' : 'SELLAR SALIDA DE TRILLA'}
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">

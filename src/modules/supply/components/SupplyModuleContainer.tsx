@@ -6,10 +6,11 @@ import ThrashingForm from './thrashing/ThrashingForm';
 import PhysicalAnalysisForm from './analysis/PhysicalAnalysisForm';
 import SCACuppingForm from './cupping/SCACuppingForm';
 import LotCertificate from './analysis/LotCertificate';
+import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 import { supabase } from '@/shared/lib/supabase';
 
 export default function SupplyModuleContainer() {
-    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping'>('purchase');
+    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'archive'>('purchase');
     const [selectedLot, setSelectedLot] = useState<any>(null);
     const [recentLots, setRecentLots] = useState<any[]>([]);
     const [showCertificate, setShowCertificate] = useState(false);
@@ -30,8 +31,9 @@ export default function SupplyModuleContainer() {
 
     const handleLotSelect = (lot: any) => {
         setSelectedLot(lot);
+        // Sugerimos la pestaña según el estado, pero permitimos navegar
         if (lot.status === 'completed') {
-            setShowCertificate(true);
+            setActiveTab('cupping');
         } else if (lot.status === 'purchased') {
             setActiveTab('thrashing');
         } else if (lot.status === 'thrashed') {
@@ -43,6 +45,37 @@ export default function SupplyModuleContainer() {
 
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
+            {/* HUB DE GESTIÓN DE LOTES (NUEVO) */}
+            <section className="bg-bg-card border border-white/5 rounded-[3rem] p-10 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 blur-[120px] rounded-full group-hover:bg-brand-green/10 transition-all"></div>
+
+                <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
+                    <div>
+                        <h3 className="text-2xl font-bold uppercase tracking-tighter text-white">Hub de Originación</h3>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mt-1">Control Maestro de Materia Prima</p>
+                    </div>
+
+                    <div className="flex gap-4 w-full md:w-auto">
+                        <button
+                            onClick={() => { setSelectedLot(null); setActiveTab('purchase'); }}
+                            className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-5 bg-brand-green text-black font-bold uppercase text-[10px] tracking-widest rounded-2xl hover:bg-brand-green-bright hover:scale-105 transition-all shadow-xl shadow-brand-green/10"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14" /></svg>
+                            Crear Nuevo Lote
+                        </button>
+                        {selectedLot?.status === 'completed' && (
+                            <button
+                                onClick={() => setShowCertificate(true)}
+                                className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-5 bg-white/5 text-white font-bold uppercase text-[10px] tracking-widest rounded-2xl border border-brand-green-bright/30 hover:bg-white/10 transition-all shadow-lg shadow-brand-green/10"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v10m0 0l-3-3m3 3l3-3" /><path d="M22 10a10 10 0 11-20 0" /></svg>
+                                Ver Certificado
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </section>
+
             <nav className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex bg-bg-card p-1 rounded-2xl border border-white/5 shadow-xl">
                     <button
@@ -54,23 +87,30 @@ export default function SupplyModuleContainer() {
                     <button
                         onClick={() => setActiveTab('thrashing')}
                         className={`px-8 py-3 rounded-xl text-xs font-bold transition-all uppercase tracking-widest ${activeTab === 'thrashing' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                        disabled={!selectedLot && activeTab !== 'thrashing'}
+                        disabled={!selectedLot}
                     >
                         02. Trilla
                     </button>
                     <button
                         onClick={() => setActiveTab('analysis')}
                         className={`px-8 py-3 rounded-xl text-xs font-bold transition-all uppercase tracking-widest ${activeTab === 'analysis' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                        disabled={!selectedLot && activeTab !== 'analysis'}
+                        disabled={!selectedLot}
                     >
                         03. Lab Físico
                     </button>
                     <button
                         onClick={() => setActiveTab('cupping')}
                         className={`px-8 py-3 rounded-xl text-xs font-bold transition-all uppercase tracking-widest ${activeTab === 'cupping' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                        disabled={!selectedLot && activeTab !== 'cupping'}
+                        disabled={!selectedLot}
                     >
                         04. Catación
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('archive')}
+                        className={`px-8 py-3 rounded-xl text-xs font-bold transition-all uppercase tracking-widest flex items-center gap-2 ${activeTab === 'archive' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+                        05. Archivo Cloud
                     </button>
                 </div>
 
@@ -89,6 +129,7 @@ export default function SupplyModuleContainer() {
                 <div className="xl:col-span-3 space-y-8">
                     {activeTab === 'purchase' && (
                         <PurchaseForm
+                            selectedLot={selectedLot}
                             onPurchaseComplete={(lot) => {
                                 fetchRecentLots();
                                 setSelectedLot(lot);
@@ -120,7 +161,13 @@ export default function SupplyModuleContainer() {
                         <div className="space-y-6">
                             <PhysicalAnalysisForm
                                 inventoryId={selectedLot.id}
-                                onAnalysisComplete={() => { fetchRecentLots(); setActiveTab('cupping'); }}
+                                onAnalysisComplete={async () => {
+                                    await fetchRecentLots();
+                                    // Refrescamos el lote seleccionado para que la UI sepa que ya tiene análisis
+                                    const { data } = await supabase.from('coffee_purchase_inventory').select('*').eq('id', selectedLot.id).single();
+                                    if (data) setSelectedLot(data);
+                                    setActiveTab('cupping');
+                                }}
                             />
                             <div className="flex justify-start">
                                 <button onClick={() => setActiveTab('thrashing')} className="flex items-center gap-2 text-[10px] font-bold uppercase text-gray-500 hover:text-white transition-all">
@@ -136,6 +183,8 @@ export default function SupplyModuleContainer() {
                                 inventoryId={selectedLot.id}
                                 onCuppingComplete={async () => {
                                     await fetchRecentLots();
+                                    const { data } = await supabase.from('coffee_purchase_inventory').select('*').eq('id', selectedLot.id).single();
+                                    if (data) setSelectedLot(data);
                                     setShowCertificate(true); // Mostrar certificado al terminar
                                 }}
                             />
@@ -148,14 +197,15 @@ export default function SupplyModuleContainer() {
                         </div>
                     )}
 
+                    {activeTab === 'archive' && <GlobalHistoryArchive />}
+
                     {showCertificate && selectedLot && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm overflow-y-auto">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm overflow-y-auto font-bold uppercase tracking-widest text-[10px]">
                             <LotCertificate
                                 inventoryId={selectedLot.id}
                                 onClose={() => {
                                     setShowCertificate(false);
-                                    setSelectedLot(null);
-                                    setActiveTab('purchase');
+                                    // NO reseteamos el lote para permitir seguir viéndolo
                                 }}
                             />
                         </div>

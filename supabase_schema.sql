@@ -43,6 +43,8 @@ CREATE TABLE coffee_purchase_inventory (
     purchase_value DECIMAL, -- Valor en COP
     purchase_date DATE DEFAULT CURRENT_DATE,
     thrashed_weight DECIMAL, -- Excelso
+    pasilla_weight DECIMAL DEFAULT 0, -- Pasilla
+    cisco_weight DECIMAL DEFAULT 0, -- Cisco
     thrashing_yield DECIMAL, -- Factor
     status TEXT CHECK (status IN ('purchased', 'thrashed', 'roasting', 'completed')) DEFAULT 'purchased',
     company_id UUID NOT NULL

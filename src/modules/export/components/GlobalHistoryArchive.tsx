@@ -58,7 +58,7 @@ export default function GlobalHistoryArchive() {
 
             <header className="flex justify-between items-end">
                 <div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Archivo de Nube AXIS</h3>
+                    <h3 className="text-2xl font-bold text-white uppercase tracking-tighter">Archivo de Nube AXIS</h3>
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-1">Visualización de historial verificado in-situ</p>
                 </div>
                 <button onClick={fetchGlobalHistory} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5">
@@ -70,11 +70,11 @@ export default function GlobalHistoryArchive() {
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-white/2 border-b border-white/5">
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">Tipo de Documento</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">ID Lote / Lote</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">Fecha de Registro</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">Estado Asset</th>
-                            <th className="px-8 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none text-right">Acción</th>
+                            <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Tipo de Documento</th>
+                            <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">ID Lote / Lote</th>
+                            <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Fecha de Registro</th>
+                            <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Estado Asset</th>
+                            <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none text-right">Acción</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -101,7 +101,7 @@ export default function GlobalHistoryArchive() {
                                             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                                             </div>
-                                            <span className="text-xs font-black text-white">{item.type}</span>
+                                            <span className="text-xs font-bold text-white">{item.type}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
@@ -113,13 +113,13 @@ export default function GlobalHistoryArchive() {
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-2">
                                             <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
-                                            <span className="text-[9px] font-black text-brand-green uppercase tracking-widest">{item.status}</span>
+                                            <span className="text-[9px] font-bold text-brand-green uppercase tracking-widest">{item.status}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-right">
                                         <button
                                             onClick={() => openReport(item)}
-                                            className="px-6 py-2 bg-white/5 hover:bg-brand-green hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/5 transition-all"
+                                            className="px-6 py-2 bg-white/5 hover:bg-brand-green hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/5 transition-all"
                                         >
                                             Visualizar
                                         </button>
@@ -136,11 +136,11 @@ export default function GlobalHistoryArchive() {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full group-hover:bg-brand-green/10 transition-all"></div>
                     <div className="relative z-10 flex flex-col h-full justify-between">
                         <div className="space-y-4">
-                            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em]">Analytics Export</h4>
+                            <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.4em]">Analytics Export</h4>
                             <p className="text-xl font-bold text-white tracking-tight">Reporte Consolidado Mensual</p>
                             <p className="text-xs text-gray-500 leading-relaxed uppercase font-bold tracking-wider">Genera un PDF con todos los movimientos del mes, puntajes SCA promedio y yield de trilla acumulado.</p>
                         </div>
-                        <button className="mt-8 w-full py-4 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all">Sincronizar Reporte Completo</button>
+                        <button className="mt-8 w-full py-4 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all">Sincronizar Reporte Completo</button>
                     </div>
                 </div>
 
@@ -148,7 +148,7 @@ export default function GlobalHistoryArchive() {
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-green/10 blur-3xl rounded-full"></div>
                     <div className="relative z-10 flex h-full items-center justify-between">
                         <div className="space-y-2">
-                            <h4 className="text-[10px] font-black text-brand-green uppercase tracking-[0.4em]">Ready for Print</h4>
+                            <h4 className="text-[10px] font-bold text-brand-green uppercase tracking-[0.4em]">Ready for Print</h4>
                             <p className="text-xl font-bold text-white tracking-tight">Vista de Impresión Unificada</p>
                             <p className="text-xs text-brand-green/70 uppercase font-bold tracking-wider leading-relaxed">Configurado para papel certificado 250g.</p>
                         </div>

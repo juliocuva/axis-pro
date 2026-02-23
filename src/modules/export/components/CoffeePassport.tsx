@@ -44,7 +44,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                         </div>
                         <div>
-                            <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">Coffee<br />Passport</h2>
+                            <h2 className="text-3xl font-bold text-white tracking-tighter uppercase leading-none">Coffee<br />Passport</h2>
                             <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.4em] mt-2">Certified by AXIS Trade</p>
                         </div>
                     </div>
@@ -70,7 +70,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
 
                         {/* Sección A: Perfil Sensorial */}
                         <div className="space-y-6">
-                            <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3">
+                            <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-3">
                                 <span className="w-2 h-2 rounded-full bg-brand-green"></span>
                                 Análisis Sensorial SCA
                             </h3>
@@ -85,13 +85,13 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                             </div>
                             <div className="flex justify-between items-center px-4">
                                 <span className="text-xs text-gray-500 uppercase font-bold">Puntaje Total</span>
-                                <span className="text-4xl font-black text-white tracking-tighter">84.50</span>
+                                <span className="text-4xl font-bold text-white tracking-tighter">84.50</span>
                             </div>
                         </div>
 
                         {/* Sección B: Especificaciones de Origen */}
                         <div className="space-y-8">
-                            <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3">
+                            <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-3">
                                 <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                                 Especificaciones de Lote
                             </h3>
@@ -110,15 +110,15 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                                 <div className="p-4 bg-white/2 rounded-2xl border border-white/5">
                                     <p className="text-[9px] text-gray-500 uppercase mb-1">Humedad de Exportación</p>
                                     <div className="flex items-center justify-between">
-                                        <p className="text-xl font-black text-white">11.2%</p>
-                                        <span className="text-[8px] bg-brand-green/20 text-brand-green px-2 py-0.5 rounded font-black uppercase">Óptimo</span>
+                                        <p className="text-xl font-bold text-white">11.2%</p>
+                                        <span className="text-[8px] bg-brand-green/20 text-brand-green px-2 py-0.5 rounded font-bold uppercase">Óptimo</span>
                                     </div>
                                 </div>
                                 <div className="p-4 bg-white/2 rounded-2xl border border-white/5">
                                     <p className="text-[9px] text-gray-500 uppercase mb-1">Predictor CO2 (Global Trade)</p>
                                     <div className="flex items-center justify-between">
                                         <p className="text-sm font-bold text-white font-mono uppercase">Estable para Tránsito</p>
-                                        <span className="text-[10px] text-blue-400 font-black">20 Días Seguros</span>
+                                        <span className="text-[10px] text-blue-400 font-bold">20 Días Seguros</span>
                                     </div>
                                 </div>
                             </div>
@@ -132,8 +132,8 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Documento Protegido por Axis Cryptofolio</span>
                         </div>
                         <div className="flex gap-4 w-full md:w-auto">
-                            <button className="flex-1 md:flex-none px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all">Compartir Digital</button>
-                            <button className="flex-1 md:flex-none px-12 py-4 bg-brand-green hover:bg-brand-green-bright text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand-green/20 transition-all">Exportar PDF Oficial</button>
+                            <button className="flex-1 md:flex-none px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all">Compartir Digital</button>
+                            <button className="flex-1 md:flex-none px-12 py-4 bg-brand-green hover:bg-brand-green-bright text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-brand-green/20 transition-all">Exportar PDF Oficial</button>
                         </div>
                     </footer>
                 </div>

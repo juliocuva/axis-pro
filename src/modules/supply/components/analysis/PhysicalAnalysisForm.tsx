@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
+import { submitPhysicalAnalysis } from '../../actions/analysis';
 
 interface PhysicalAnalysisFormProps {
     inventoryId: string;
@@ -22,34 +23,80 @@ export default function PhysicalAnalysisForm({ inventoryId, onAnalysisComplete }
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchAnalysis = async () => {
+            if (!inventoryId) return;
+            setIsLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('physical_analysis')
+                    .select('*')
+                    .eq('inventory_id', inventoryId.trim())
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (error) {
+                    console.error("AXIS DB ERROR (Physical):", error);
+                    setError("Error al cargar datos de laboratorio.");
+                } else if (data && data.length > 0) {
+                    const record = data[0];
+                    setFormData({
+                        moisture: Number(record.moisture_pct) || 0,
+                        waterActivity: Number(record.water_activity) || 0,
+                        density: Number(record.density_gl) || 0,
+                        screenSize: record.screen_size_distribution || {
+                            size18: 0,
+                            size17: 0,
+                            size16: 0,
+                            size15: 0
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("AXIS CRITICAL ERROR (Physical):", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchAnalysis();
+    }, [inventoryId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError(null);
 
         try {
-            const { error } = await supabase
-                .from('physical_analysis')
-                .insert([{
-                    inventory_id: inventoryId,
-                    moisture_pct: formData.moisture,
-                    water_activity: formData.waterActivity,
-                    density_gl: formData.density,
-                    screen_size_distribution: formData.screenSize,
-                    company_id: '99999999-9999-9999-9999-999999999999'
-                }]);
+            const result = await submitPhysicalAnalysis(inventoryId, formData);
 
-            if (error) throw error;
+            if (!result.success) {
+                throw new Error(result.message);
+            }
+
             onAnalysisComplete();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error en análisis físico:", err);
+            setError(err.message || "Fallo en la conexión con AXIS Cloud.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl space-y-8 animate-in fade-in duration-500">
+        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl space-y-8 animate-in fade-in duration-500 relative min-h-[400px]">
+            {isLoading && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-3xl">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-400 animate-pulse">Consultando AXIS Laboratorio...</p>
+                    </div>
+                </div>
+            )}
             <header className="flex justify-between items-center">
                 <div>
                     <h3 className="text-xl font-bold uppercase tracking-tight">Análisis Físico de Laboratorio</h3>
@@ -59,6 +106,12 @@ export default function PhysicalAnalysisForm({ inventoryId, onAnalysisComplete }
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
                 </div>
             </header>
+
+            {error && (
+                <div className="bg-brand-red/10 border border-brand-red/20 p-4 rounded-2xl text-brand-red-bright text-[10px] font-bold uppercase tracking-widest">
+                    ⚠️ {error}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

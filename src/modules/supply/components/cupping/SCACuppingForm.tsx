@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { supabase } from '@/shared/lib/supabase';
 import { submitCuppingProtocol } from '../../actions/quality';
 import {
     Radar, RadarChart, PolarGrid,
@@ -44,20 +45,62 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCupping = async () => {
+            setIsLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('sca_cupping')
+                    .select('*')
+                    .eq('inventory_id', inventoryId.trim())
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (data && data.length > 0 && !error) {
+                    const record = data[0];
+                    console.log("AXIS DB SUCCESS (Catación):", record);
+                    setScores({
+                        fragrance_aroma: Number(record.fragrance_aroma) || 0.001,
+                        flavor: Number(record.flavor) || 0.001,
+                        aftertaste: Number(record.aftertaste) || 0.001,
+                        acidity: Number(record.acidity) || 0.001,
+                        body: Number(record.body) || 0.001,
+                        balance: Number(record.balance) || 0.001,
+                        uniformity: Number(record.uniformity) || 0.001,
+                        clean_cup: Number(record.clean_cup) || 0.001,
+                        sweetness: Number(record.sweetness) || 0.001,
+                        overall: Number(record.overall) || 0.001,
+                        defects_score: Number(record.defects_score) || 0
+                    });
+                    setTasterName(record.taster_name || 'Q-Grader Senior');
+                    setNotes(record.notes || '');
+                }
+            } catch (err) {
+                console.error("AXIS CRITICAL ERROR (Catación):", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (inventoryId) fetchCupping();
+    }, [inventoryId]);
+
     useEffect(() => {
         const sum =
-            scores.fragrance_aroma + scores.flavor + scores.aftertaste +
-            scores.acidity + scores.body + scores.balance +
-            scores.uniformity + scores.clean_cup + scores.sweetness +
-            scores.overall - (scores.defects_score * 2);
+            (Number(scores.fragrance_aroma) || 0) + (Number(scores.flavor) || 0) + (Number(scores.aftertaste) || 0) +
+            (Number(scores.acidity) || 0) + (Number(scores.body) || 0) + (Number(scores.balance) || 0) +
+            (Number(scores.uniformity) || 0) + (Number(scores.clean_cup) || 0) + (Number(scores.sweetness) || 0) +
+            (Number(scores.overall) || 0) - ((Number(scores.defects_score) || 0) * 2);
         setTotalScore(sum);
 
-        const data = CATEGORIES.map(cat => ({
+        const chartDataArray = CATEGORIES.map(cat => ({
             subject: cat.label,
-            A: scores[cat.id],
+            A: Number(scores[cat.id]) || 0,
             fullMark: 10,
         }));
-        setChartData(data);
+        setChartData(chartDataArray);
     }, [scores]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -65,10 +108,18 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
         setIsSubmitting(true);
         setError(null);
 
+        // Sanetización final de datos para asegurar números limpios
+        const cleanScores = Object.keys(scores).reduce((acc, key) => ({
+            ...acc,
+            [key]: Number(scores[key]) || 0
+        }), {});
+
+        console.log("AXIS ACTION (Catación Save):", { cleanScores, tasterName, notes });
+
         try {
             const result = await submitCuppingProtocol(
                 inventoryId,
-                scores,
+                cleanScores,
                 tasterName,
                 notes
             );
@@ -77,17 +128,26 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                 throw new Error(result.message);
             }
 
+            console.log("AXIS SUCCESS (Catación): Guardado exitosamente");
             onCuppingComplete();
         } catch (err: any) {
             setError(err.message);
-            console.error("Error en catación:", err);
+            console.error("AXIS ERROR (Catación):", err);
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in zoom-in duration-500">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in zoom-in duration-500 relative">
+            {isLoading && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-3xl">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-green-bright animate-pulse">Sincronizando con AXIS Cloud...</p>
+                    </div>
+                </div>
+            )}
             <div className="lg:col-span-2 bg-bg-card border border-white/5 p-8 rounded-3xl space-y-8 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 blur-3xl rounded-full"></div>
 
@@ -104,7 +164,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                     </div>
                     <div className="text-right">
                         <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Cali. Final</p>
-                        <p className={`text-6xl font-black tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-blue-400' : 'text-orange-500'}`}>
+                        <p className={`text-6xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-blue-400' : 'text-orange-500'}`}>
                             {totalScore.toFixed(2)}
                         </p>
                     </div>
@@ -122,10 +182,10 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                             <div key={cat.id} className="bg-bg-main/50 p-5 rounded-2xl border border-white/5 flex flex-col gap-4 group hover:border-brand-green/30 transition-all">
                                 <div className="flex justify-between items-center">
                                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{cat.label}</label>
-                                    <span className="text-brand-green-bright font-mono text-lg font-black">{scores[cat.id].toFixed(2)}</span>
+                                    <span className="text-brand-green-bright font-mono text-lg font-bold">{(scores[cat.id] || 0).toFixed(2)}</span>
                                 </div>
                                 <input
-                                    type="range" min="6" max="10" step="0.25" value={scores[cat.id]}
+                                    type="range" min="6" max="10" step="0.25" value={scores[cat.id] || 7.5}
                                     disabled={isSubmitting}
                                     className="w-full accent-brand-green-bright bg-white/5 h-1.5 rounded-full appearance-none outline-none cursor-pointer"
                                     onChange={(e) => setScores({ ...scores, [cat.id]: parseFloat(e.target.value) })}
@@ -136,7 +196,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                         <div className="bg-brand-red/5 p-5 rounded-2xl border border-brand-red/10 flex flex-col gap-4">
                             <div className="flex justify-between items-center">
                                 <label className="text-[10px] font-bold text-brand-red-bright uppercase tracking-widest">Tazas con Defectos</label>
-                                <span className="text-brand-red-bright font-mono text-lg font-black">-{scores.defects_score * 2} pts</span>
+                                <span className="text-brand-red-bright font-mono text-lg font-bold">-{(scores.defects_score || 0) * 2} pts</span>
                             </div>
                             <div className="flex gap-2">
                                 {[0, 1, 2, 3, 4, 5].map(num => (
@@ -181,7 +241,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full flex items-center justify-center gap-4 py-6 bg-white text-black hover:bg-brand-green-bright hover:text-white font-black rounded-2xl transition-all shadow-2xl group uppercase tracking-[0.2em] text-xs"
+                        className="w-full flex items-center justify-center gap-4 py-6 bg-white text-black hover:bg-brand-green-bright hover:text-white font-bold rounded-2xl transition-all shadow-2xl group uppercase tracking-[0.2em] text-xs"
                     >
                         {isSubmitting ? 'SELLANDO PROTOCOLO EN AXIS CLOUD...' : 'SELLAR LOTE Y FIRMAR CERTIFICADO'}
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
@@ -192,12 +252,12 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
             </div>
 
             <div className="space-y-6">
-                <div className="bg-bg-card border border-white/5 p-8 rounded-3xl h-full flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+                <div className="bg-bg-card border border-white/5 p-8 rounded-3xl h-full flex flex-col items-center justify-center relative overflow-hidden shadow-2xl min-h-[500px]">
                     <div className="absolute inset-0 bg-brand-green/5 blur-3xl opacity-50"></div>
                     <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-8 relative z-10">Huella Organoléptica Industrial</h4>
-                    <div className="w-full h-[300px] relative z-10">
+                    <div className="w-full h-[300px] min-h-[300px] relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
                                 <PolarGrid stroke="#ffffff10" />
                                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
                                 <PolarRadiusAxis angle={30} domain={[6, 10]} axisLine={false} tick={false} />
@@ -212,7 +272,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                         </ResponsiveContainer>
                     </div>
                     <div className="mt-8 text-center space-y-3 relative z-10">
-                        <span className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
+                        <span className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
                             {totalScore >= 85 ? '✓ SPECIALTY COFFEE' : '✓ PREMIUM GRADE'}
                         </span>
                         <div className="pt-4 border-t border-white/5 w-full">

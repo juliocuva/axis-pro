@@ -31,6 +31,10 @@ export default function Home() {
     const [activatedModules, setActivatedModules] = useState<Set<string>>(new Set());
     const [pendingActivation, setPendingActivation] = useState<{ id: string, title: string } | null>(null);
 
+    // Estado para el Portal Global de Documentos
+    const [showCloudVault, setShowCloudVault] = useState(false);
+    const [showFunctionalDocs, setShowFunctionalDocs] = useState(false);
+
     const handleLogoClick = () => {
         const newCount = clickCount + 1;
         setClickCount(newCount);
@@ -100,13 +104,30 @@ export default function Home() {
                         <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center overflow-hidden border border-white/5 group-hover:border-brand-green/30 transition-all">
                             <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain p-1" />
                         </div>
-                        <h1 className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-bold font-bold">PRO V2.0</span></h1>
+                        <h1 className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-bold">PRO V2.0</span></h1>
                         {isDemoUnlocked && <span className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-md animate-pulse">DEMO UNLOCKED</span>}
                     </div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Sesión: <span className="text-brand-green-bright">{user}</span></p>
                 </div>
 
                 <nav className="flex items-center gap-4">
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 mr-4 overflow-hidden">
+                        <button
+                            onClick={() => setShowCloudVault(true)}
+                            className="flex items-center gap-2 px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+                            Cloud Vault
+                        </button>
+                        <button
+                            onClick={() => setShowFunctionalDocs(true)}
+                            className="flex items-center gap-2 px-4 py-2 hover:bg-blue-500/10 text-blue-400 text-[9px] font-bold uppercase tracking-widest transition-all border-l border-white/5"
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                            Guía TRL 7
+                        </button>
+                    </div>
+
                     {view !== 'launcher' && (
                         <div className="flex items-center gap-2">
                             <button
@@ -179,39 +200,79 @@ export default function Home() {
                         </div>
                     </section>
 
-                    {/* Ventana de Activación Pop-up */}
+                    {/* Ventana de Activación Pop-up con Precios */}
                     {pendingActivation && (
-                        <div className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[200] flex items-center justify-center p-6 sm:p-12">
-                            <div className="bg-bg-card border border-white/10 w-full max-w-lg rounded-[3rem] p-12 text-center shadow-3xl animate-in zoom-in-95 duration-500 relative overflow-hidden">
+                        <div className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[200] flex items-center justify-center p-6 sm:p-12 animate-in fade-in duration-500">
+                            <div className="bg-bg-card border border-white/10 w-full max-w-xl rounded-[3rem] p-12 shadow-3xl relative overflow-hidden">
                                 {/* Decoración de fondo */}
-                                <div className="absolute -top-20 -right-20 w-48 h-48 bg-brand-green/10 blur-[80px] rounded-full"></div>
-                                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-blue-500/10 blur-[80px] rounded-full"></div>
+                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-green/10 blur-[100px] rounded-full"></div>
 
-                                <div className="w-20 h-20 bg-white/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-white/10 ring-4 ring-white/5">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green-bright animate-pulse"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                                <div className="w-20 h-20 bg-white/5 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-white/10 ring-4 ring-white/5 relative z-10">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green-bright"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
                                 </div>
 
-                                <h3 className="text-3xl font-bold uppercase tracking-tighter text-white mb-4">
-                                    Activar Módulo In-Situ
-                                </h3>
-                                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-[0.2em] mb-8 leading-relaxed">
-                                    ¿Deseas activar el módulo <span className="text-brand-green-bright">{pendingActivation.title}</span> para esta sesión operativa? Este proceso habilita las capacidades TRL 7 en tiempo real.
-                                </p>
+                                <div className="text-center relative z-10">
+                                    <h3 className="text-4xl font-bold uppercase tracking-tighter text-white mb-2">
+                                        Activar {pendingActivation.title}
+                                    </h3>
+                                    <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.4em] mb-10">Software-as-a-Service Industrial</p>
+                                </div>
 
-                                <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="grid grid-cols-2 gap-6 mb-10 relative z-10">
+                                    {/* Plan Standard */}
+                                    <div className="p-8 bg-white/2 border border-white/5 rounded-[2rem] hover:border-white/10 transition-all cursor-pointer group">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <p className="text-[10px] font-bold text-white uppercase tracking-widest">Plan Base</p>
+                                        </div>
+                                        <p className="text-3xl font-bold text-white">$49<span className="text-xs text-gray-600 font-bold ml-1">/mes</span></p>
+                                        <div className="mt-6 space-y-3">
+                                            <p className="text-[9px] text-gray-500 font-bold uppercase flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
+                                                Acceso 1 Usuario
+                                            </p>
+                                            <p className="text-[9px] text-gray-500 font-bold uppercase flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
+                                                Trazabilidad Manual
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Plan Pro */}
+                                    <div className="p-8 bg-brand-green/5 border border-brand-green/20 rounded-[2rem] hover:border-brand-green/40 transition-all cursor-pointer group relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 bg-brand-green text-black px-3 py-1 text-[8px] font-bold uppercase rounded-bl-xl">Máximo Valor</div>
+                                        <p className="text-[10px] font-bold text-brand-green uppercase tracking-widest mb-4">Enterprise</p>
+                                        <p className="text-3xl font-bold text-white">$129<span className="text-xs text-gray-600 font-bold ml-1">/mes</span></p>
+                                        <div className="mt-6 space-y-3">
+                                            <p className="text-[9px] text-gray-100 font-bold uppercase flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
+                                                Usuarios Ilimitados
+                                            </p>
+                                            <p className="text-[9px] text-gray-100 font-bold uppercase flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
+                                                Sincronización Cloud
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-4 relative z-10">
                                     <button
                                         onClick={confirmActivation}
-                                        className="flex-1 py-5 bg-brand-green text-white font-bold rounded-2xl uppercase tracking-widest text-xs shadow-2xl shadow-brand-green/20 hover:bg-brand-green-bright hover:scale-[1.02] transition-all"
+                                        className="w-full py-5 bg-brand-green text-black font-bold rounded-2xl uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-brand-green/20 hover:bg-brand-green-bright hover:scale-[1.02] transition-all"
                                     >
-                                        SÍ, ACTIVAR AHORA
+                                        SUSCRIBIRSE Y ACTIVAR MÓDULO
                                     </button>
                                     <button
                                         onClick={() => setPendingActivation(null)}
-                                        className="flex-1 py-5 bg-white/5 text-gray-400 font-bold rounded-2xl uppercase tracking-widest text-xs hover:bg-white/10 transition-all border border-white/5"
+                                        className="w-full py-4 text-gray-500 font-bold uppercase tracking-widest text-[9px] hover:text-white transition-all"
                                     >
-                                        CANCELAR
+                                        REGRESAR AL DASHBOARD
                                     </button>
                                 </div>
+
+                                <p className="text-center text-[8px] text-gray-600 font-bold uppercase tracking-[0.3em] mt-10">
+                                    Pagos Procesados por Stripe Secure Gateway
+                                </p>
                             </div>
                         </div>
                     )}
@@ -364,6 +425,89 @@ export default function Home() {
             {view === 'retail' && (
                 <div className="max-w-7xl mx-auto space-y-8">
                     <RetailModuleContainer />
+                </div>
+            )}
+
+            {/* --- PORTAL GLOBAL DE DOCUMENTOS (MODALES) --- */}
+
+            {/* 1. Cloud Vault: Acceso universal a activos generados */}
+            {showCloudVault && (
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[300] p-12 overflow-y-auto">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="flex justify-between items-center mb-12">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-brand-green-bright">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-4xl font-bold uppercase tracking-tighter">Portal Cloud AXIS</h2>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mt-1">Acceso Centralizado a Assets de Confianza</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowCloudVault(false)}
+                                className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-all border border-white/10"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="bg-bg-card border border-white/5 rounded-[3rem] p-12">
+                            <GlobalHistoryArchive />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 2. Guía TRL 7: Documentación Funcional del Sistema */}
+            {showFunctionalDocs && (
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[300] p-12 overflow-y-auto">
+                    <div className="max-w-4xl mx-auto space-y-12">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                                </div>
+                                <h2 className="text-4xl font-bold uppercase tracking-tighter text-white">Manual de Ingeniería Pro</h2>
+                            </div>
+                            <button
+                                onClick={() => setShowFunctionalDocs(false)}
+                                className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-all"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="bg-white/2 border border-white/5 rounded-[3rem] p-16 space-y-12 shadow-inner text-gray-300">
+                            <section className="space-y-4">
+                                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Estatus Tecnológico: TRL 7</h3>
+                                <p className="text-sm leading-relaxed">AXIS COFFEE PRO es una solución industrial operativa demostrada en entornos reales. El sistema centraliza la trazabilidad desde la recepción en finca hasta el retail transfronterizo.</p>
+                            </section>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="p-8 bg-white/3 rounded-3xl border border-white/5 space-y-3">
+                                    <h4 className="text-sm font-bold text-brand-green-bright uppercase">Supply & Quality</h4>
+                                    <p className="text-xs leading-relaxed">Control de trilla, factor de rendimiento y protocolos SCA ciegos con firma digital.</p>
+                                </div>
+                                <div className="p-8 bg-white/3 rounded-3xl border border-white/5 space-y-3">
+                                    <h4 className="text-sm font-bold text-orange-400 uppercase">Roast Intelligence</h4>
+                                    <p className="text-xs leading-relaxed">Monitoreo espectral en vivo, Ghost Profiles y asistente IA para control de variables físicas.</p>
+                                </div>
+                                <div className="p-8 bg-white/3 rounded-3xl border border-white/5 space-y-3">
+                                    <h4 className="text-sm font-bold text-blue-400 uppercase">Global Trade</h4>
+                                    <p className="text-xs leading-relaxed">Pasaportes digitales QR y motores dinámicos de desgasificación para logística segura.</p>
+                                </div>
+                                <div className="p-8 bg-white/3 rounded-3xl border border-white/5 space-y-3">
+                                    <h4 className="text-sm font-bold text-purple-400 uppercase">Retail Connect</h4>
+                                    <p className="text-xs leading-relaxed">Gestión multi-procedencia para retailers y etiquetado inteligente para storytelling B2C.</p>
+                                </div>
+                            </div>
+
+                            <div className="p-10 bg-brand-green/10 border border-brand-green/20 rounded-3xl">
+                                <h4 className="text-brand-green text-xs font-bold uppercase mb-2">Propuesta de Valor</h4>
+                                <p className="text-sm italic text-gray-100 leading-relaxed font-medium">"Transformamos la opacidad del agro en transparencia industrial, eliminando riesgos de calidad y maximizando el valor percibido del grano colombiano en el mundo."</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

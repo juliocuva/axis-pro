@@ -20,9 +20,10 @@ const COLOMBIAN_REGIONS = [
 
 interface PurchaseFormProps {
     onPurchaseComplete?: (lot: any) => void;
+    selectedLot?: any;
 }
 
-export default function PurchaseForm({ onPurchaseComplete }: PurchaseFormProps) {
+export default function PurchaseForm({ onPurchaseComplete, selectedLot }: PurchaseFormProps) {
     const [formData, setFormData] = useState({
         farmerName: '',
         farmName: '',
@@ -41,6 +42,24 @@ export default function PurchaseForm({ onPurchaseComplete }: PurchaseFormProps) 
     const [expectedYield, setExpectedYield] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+    useEffect(() => {
+        if (selectedLot) {
+            setFormData({
+                farmerName: selectedLot.farmer_name || '',
+                farmName: selectedLot.farm_name || '',
+                altitude: selectedLot.altitude || 1600,
+                region: selectedLot.region || 'Huila',
+                variety: (selectedLot.variety as CoffeeVariety) || 'Castillo',
+                process: (selectedLot.process as ProcessType) || 'washed',
+                purchaseWeight: Number(selectedLot.purchase_weight) || 0,
+                purchaseValue: Number(selectedLot.purchase_value) || 0,
+                purchaseDate: selectedLot.purchase_date || new Date().toISOString().split('T')[0],
+                lotNumber: selectedLot.lot_number || ''
+            });
+            setDisplayValue(formatCOP(String(selectedLot.purchase_value || 0)));
+        }
+    }, [selectedLot]);
 
     useEffect(() => {
         if (formData.purchaseWeight > 0) {

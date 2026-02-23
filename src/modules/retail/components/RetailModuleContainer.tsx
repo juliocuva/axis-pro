@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { registerRetailInventory, getRetailInventory, getBatchStory } from '../actions/retailActions';
+import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 import { supabase } from '@/shared/lib/supabase';
 
-type RetailView = 'inventory' | 'labels' | 'traceability' | 'sales';
+type RetailView = 'inventory' | 'labels' | 'traceability' | 'sales' | 'archive';
 
 export default function RetailModuleContainer() {
     const [activeTab, setActiveTab] = useState<RetailView>('inventory');
@@ -19,19 +20,21 @@ export default function RetailModuleContainer() {
                     </p>
                 </div>
 
-                <nav className="flex bg-bg-card p-1 rounded-2xl border border-white/5 shadow-2xl">
-                    {(['inventory', 'labels', 'traceability', 'sales'] as RetailView[]).map((tab) => (
+                <nav className="flex bg-bg-card p-1 rounded-2xl border border-white/5 shadow-2xl overflow-hidden">
+                    {(['inventory', 'labels', 'traceability', 'sales', 'archive'] as RetailView[]).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-8 py-3 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest ${activeTab === tab
+                            className={`px-6 py-3 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest flex items-center gap-2 ${activeTab === tab
                                 ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
                                 : 'text-gray-500 hover:text-white'
                                 }`}
                         >
+                            {tab === 'archive' && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>}
                             {tab === 'inventory' ? 'Inventario' :
                                 tab === 'labels' ? 'Etiquetas QR' :
-                                    tab === 'traceability' ? 'Trazabilidad' : 'Ventas'}
+                                    tab === 'traceability' ? 'Trazabilidad' :
+                                        tab === 'sales' ? 'Ventas' : 'Archivo Cloud'}
                         </button>
                     ))}
                 </nav>
@@ -42,6 +45,7 @@ export default function RetailModuleContainer() {
                 {activeTab === 'labels' && <LabelGenerator />}
                 {activeTab === 'traceability' && <TraceabilityPreview />}
                 {activeTab === 'sales' && <SalesDashboard />}
+                {activeTab === 'archive' && <GlobalHistoryArchive />}
             </main>
         </div>
     );
@@ -275,7 +279,7 @@ function InventoryManager() {
                         <button
                             type="submit"
                             disabled={isPackaging}
-                            className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-purple-600 hover:bg-purple-500 shadow-purple-900/40' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/40'}`}
+                            className={`w-full py-4 rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-purple-600 hover:bg-purple-500 shadow-purple-900/40' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/40'}`}
                         >
                             {isPackaging ? 'PROCESANDO REGISTRO...' : `REGISTRAR CAFÉ ${sourceType === 'internal' ? 'PROPIO' : 'ADQUIRIDO'}`}
                         </button>
@@ -312,11 +316,11 @@ function InventoryManager() {
                         <p className="text-[10px] text-gray-500 uppercase mb-4">Métricas de Empaque (Mes)</p>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-bg-main rounded-xl border border-white/5 text-center">
-                                <p className="text-2xl font-black tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 250 ? curr.units_produced : 0), 0) || 182}</p>
+                                <p className="text-2xl font-bold tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 250 ? curr.units_produced : 0), 0) || 182}</p>
                                 <p className="text-[8px] text-gray-600 font-bold uppercase">Bolsas 250g</p>
                             </div>
                             <div className="p-4 bg-bg-main rounded-xl border border-white/5 text-center">
-                                <p className="text-2xl font-black tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 500 ? curr.units_produced : 0), 0) || 54}</p>
+                                <p className="text-2xl font-bold tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 500 ? curr.units_produced : 0), 0) || 54}</p>
                                 <p className="text-[8px] text-gray-600 font-bold uppercase">Bolsas 500g</p>
                             </div>
                         </div>
@@ -422,7 +426,7 @@ function TraceabilityPreview() {
                 />
                 <button
                     onClick={handleSearch}
-                    className="px-6 py-3 bg-purple-600 rounded-xl text-[10px] font-black uppercase"
+                    className="px-6 py-3 bg-purple-600 rounded-xl text-[10px] font-bold uppercase"
                 >
                     Explorar
                 </button>
@@ -443,8 +447,8 @@ function TraceabilityPreview() {
                         <>
                             <header>
                                 <div className="flex justify-between items-start">
-                                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Sagrado'}<br />{story?.producer?.split(' ')[1] || 'Corazón'}</h3>
-                                    <span className="bg-brand-green/20 text-brand-green text-[10px] font-black px-3 py-1 rounded-full uppercase border border-brand-green/20">Lote {story?.roast?.batch_id_label || searchBatch}</span>
+                                    <h3 className="text-3xl font-bold uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Sagrado'}<br />{story?.producer?.split(' ')[1] || 'Corazón'}</h3>
+                                    <span className="bg-brand-green/20 text-brand-green text-[10px] font-bold px-3 py-1 rounded-full uppercase border border-brand-green/20">Lote {story?.roast?.batch_id_label || searchBatch}</span>
                                 </div>
                                 <p className="text-xs text-gray-400 mt-6 leading-relaxed font-medium">
                                     Este café fue cultivado en la finca <strong>{story?.farm || 'Alejandría'}</strong> a {story?.height || '1.850 msnm'}.
@@ -453,21 +457,21 @@ function TraceabilityPreview() {
 
                             <div className="grid grid-cols-3 gap-4 py-6 border-y border-white/5">
                                 <div className="text-center">
-                                    <p className="text-[8px] text-gray-500 uppercase font-black mb-1">Proceso</p>
-                                    <p className="text-xs font-black uppercase text-white">{story?.process || 'Natural'}</p>
+                                    <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Proceso</p>
+                                    <p className="text-xs font-bold uppercase text-white">{story?.process || 'Natural'}</p>
                                 </div>
                                 <div className="text-center border-x border-white/10">
-                                    <p className="text-[8px] text-gray-500 uppercase font-black mb-1">Puntaje</p>
-                                    <p className="text-xs font-black text-brand-green-bright">{story?.sensoryScore || 87.5} SCA</p>
+                                    <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Puntaje</p>
+                                    <p className="text-xs font-bold text-brand-green-bright">{story?.sensoryScore || 87.5} SCA</p>
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-[8px] text-gray-500 uppercase font-black mb-1">Tueste</p>
-                                    <p className="text-xs font-black uppercase text-white">Perfil Oro</p>
+                                    <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Tueste</p>
+                                    <p className="text-xs font-bold uppercase text-white">Perfil Oro</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-400">Notas Catadas</h4>
+                                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-purple-400">Notas Catadas</h4>
                                 <div className="flex flex-wrap gap-2 text-[9px]">
                                     {story?.notes?.map((note: string) => (
                                         <span key={note} className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">{note}</span>
@@ -481,11 +485,11 @@ function TraceabilityPreview() {
                             </div>
 
                             <div className="p-6 bg-purple-600/10 border border-purple-500/20 text-white rounded-3xl space-y-2">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-purple-400">Recomendación Sagrada</h4>
+                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Recomendación Sagrada</h4>
                                 <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                             </div>
 
-                            <button className="w-full py-4 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Ver Telemetría Roaster</button>
+                            <button className="w-full py-4 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all">Ver Telemetría Roaster</button>
                         </>
                     )}
                 </div>

@@ -124,15 +124,15 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto pt-8 relative z-10">
                     <div className="p-8 bg-white/2 rounded-3xl border border-white/5">
-                        <p className="text-[10px] text-gray-500 uppercase font-black mb-2">Tiempo Total</p>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Tiempo Total</p>
                         <p className="text-3xl font-bold text-white">{Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}</p>
                     </div>
                     <div className="p-8 bg-white/2 rounded-3xl border border-white/5">
-                        <p className="text-[10px] text-gray-500 uppercase font-black mb-2">Pérdida Masa</p>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Pérdida Masa</p>
                         <p className="text-3xl font-bold text-white">14.8%</p>
                     </div>
                     <div className="p-8 bg-white/2 rounded-3xl border border-white/5">
-                        <p className="text-[10px] text-gray-500 uppercase font-black mb-2">Repetibilidad</p>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Repetibilidad</p>
                         <p className="text-3xl font-bold text-brand-green-bright">98.2%</p>
                     </div>
                 </div>
@@ -156,7 +156,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] ml-6">Sincronización de Onda de Calor Infrarroja (AXIS-CORE)</p>
                 </div>
                 <div className="bg-bg-card border border-white/5 px-6 py-3 rounded-2xl">
-                    <p className="text-[8px] text-gray-500 uppercase font-black tracking-widest mb-1">Status Emisiones</p>
+                    <p className="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-1">Status Emisiones</p>
                     <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map(i => <div key={i} className={`w-3 h-1 rounded-full ${isRoasting ? 'bg-brand-green-bright animate-pulse' : 'bg-white/5'}`} style={{ animationDelay: `${i * 0.1}s` }}></div>)}
                     </div>
@@ -209,7 +209,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-red-500 opacity-50"></div>
 
                 {copilotData && (
-                    <div className={`absolute top-0 right-0 px-6 py-2 text-[9px] font-black uppercase tracking-widest rounded-bl-3xl ${copilotData.isSincronized ? 'bg-brand-green/10 text-brand-green border-l border-b border-brand-green/20' : 'bg-orange-500/10 text-orange-500 border-l border-b border-orange-500/20'}`}>
+                    <div className={`absolute top-0 right-0 px-6 py-2 text-[9px] font-bold uppercase tracking-widest rounded-bl-3xl ${copilotData.isSincronized ? 'bg-brand-green/10 text-brand-green border-l border-b border-brand-green/20' : 'bg-orange-500/10 text-orange-500 border-l border-b border-orange-500/20'}`}>
                         SPECTRAL SYNC: {lastSync}
                     </div>
                 )}
@@ -233,7 +233,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
 
                 {copilotData && (
                     <div className="w-full lg:w-80 space-y-5 relative z-10">
-                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-500">
+                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <span>Sincronía Térmica</span>
                             <span className={copilotData.isSincronized ? 'text-brand-green-bright' : 'text-orange-500'}>
                                 {copilotData.isSincronized ? 'OPTIMAL WAVE' : `±${Math.abs(copilotData.tempDiff).toFixed(1)}°C DELTA`}
@@ -265,7 +265,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
                             onChange={(e) => setGasPower(parseInt(e.target.value))}
                             className="w-full h-3 bg-red-950/30 rounded-full appearance-none accent-red-500 cursor-pointer border border-red-500/10"
                         />
-                        <div className="flex justify-between text-[8px] font-black text-gray-600 uppercase tracking-widest">
+                        <div className="flex justify-between text-[8px] font-bold text-gray-600 uppercase tracking-widest">
                             <span>IDLE</span>
                             <span>MAX LOAD</span>
                         </div>
@@ -281,7 +281,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
                             onChange={(e) => setAirflow(parseInt(e.target.value))}
                             className="w-full h-3 bg-blue-950/30 rounded-full appearance-none accent-blue-500 cursor-pointer border border-blue-500/10"
                         />
-                        <div className="flex justify-between text-[8px] font-black text-gray-600 uppercase tracking-widest">
+                        <div className="flex justify-between text-[8px] font-bold text-gray-600 uppercase tracking-widest">
                             <span>CLOSED</span>
                             <span>FULL CONVECTION</span>
                         </div>

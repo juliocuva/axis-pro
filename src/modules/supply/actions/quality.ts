@@ -15,11 +15,13 @@ export async function submitCuppingProtocol(
     notes: string
 ) {
     try {
-        // 1. Inserción Blindada
+        const cleanId = inventoryId.trim();
+
+        // 1. Inserción Blindada (Usamos upsert si es posible o insert)
         const { error: insertError } = await supabase
             .from('sca_cupping')
-            .insert([{
-                inventory_id: inventoryId,
+            .upsert([{
+                inventory_id: cleanId,
                 fragrance_aroma: scores.fragrance_aroma,
                 flavor: scores.flavor,
                 aftertaste: scores.aftertaste,
@@ -33,17 +35,38 @@ export async function submitCuppingProtocol(
                 defects_score: scores.defects_score,
                 notes,
                 taster_name: tasterName,
-                company_id: '99999999-9999-9999-9999-999999999999' // ID corporativo fijo por ahora
-            }]);
+                company_id: '99999999-9999-9999-9999-999999999999'
+            }], { onConflict: 'inventory_id' }); // Necesita constraint unique en DB, si no, fallará como insert
 
-        if (insertError) throw new Error(`Fallo en registro SCA: ${insertError.message}`);
+        if (insertError) {
+            // Si el upsert falla por falta de constraint, usamos insert normal
+            const { error: retryError } = await supabase
+                .from('sca_cupping')
+                .insert([{
+                    inventory_id: cleanId,
+                    fragrance_aroma: scores.fragrance_aroma,
+                    flavor: scores.flavor,
+                    aftertaste: scores.aftertaste,
+                    acidity: scores.acidity,
+                    body: scores.body,
+                    balance: scores.balance,
+                    uniformity: scores.uniformity,
+                    clean_cup: scores.clean_cup,
+                    sweetness: scores.sweetness,
+                    overall: scores.overall,
+                    defects_score: scores.defects_score,
+                    notes,
+                    taster_name: tasterName,
+                    company_id: '99999999-9999-9999-9999-999999999999'
+                }]);
+            if (retryError) throw new Error(`Fallo en registro SCA: ${retryError.message}`);
+        }
 
-        // 2. Transición Unidireccional de Estado
-        // Una vez catado, el lote se considera "Sellado" y pasa a historial industrial.
+        // 2. Transición de Estado
         const { error: updateError } = await supabase
             .from('coffee_purchase_inventory')
             .update({ status: 'completed' })
-            .eq('id', inventoryId);
+            .eq('id', cleanId);
 
         if (updateError) throw new Error(`Fallo en cierre de lote: ${updateError.message}`);
 

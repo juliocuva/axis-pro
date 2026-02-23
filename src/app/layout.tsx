@@ -10,6 +10,9 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
     title: "AXIS COFFEE PRO | Coffee Intelligence Layer",
     description: "Sistema Avanzado de Control Operacional para Tostadoras",
+    icons: {
+        icon: "/logo ico.png",
+    }
 };
 
 export default function RootLayout({
