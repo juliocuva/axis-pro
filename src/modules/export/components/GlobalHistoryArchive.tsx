@@ -79,7 +79,7 @@ export default function GlobalHistoryArchive() {
             )}
 
             {selectedItem && viewMode === 'certificate' && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl overflow-y-auto">
+                <div className="fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl overflow-y-auto">
                     <LotCertificate
                         inventoryId={selectedItem.id}
                         onClose={() => { setSelectedItem(null); setViewMode(null); }}

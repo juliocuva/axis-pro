@@ -26,7 +26,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
     const passportId = `AX-${lotData.batch_id || '9822'}-${new Date().getFullYear()}`;
 
     return (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[999] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
             <div className="bg-bg-card border border-white/10 w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-3xl flex flex-col md:flex-row relative">
 
                 {/* Botón Cerrar */}

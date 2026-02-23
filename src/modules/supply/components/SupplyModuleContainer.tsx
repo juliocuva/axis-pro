@@ -200,7 +200,7 @@ export default function SupplyModuleContainer() {
                     {activeTab === 'archive' && <GlobalHistoryArchive />}
 
                     {showCertificate && selectedLot && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm overflow-y-auto font-bold uppercase tracking-widest text-[10px]">
+                        <div className="fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm overflow-y-auto font-bold uppercase tracking-widest text-[10px]">
                             <LotCertificate
                                 inventoryId={selectedLot.id}
                                 onClose={() => {
