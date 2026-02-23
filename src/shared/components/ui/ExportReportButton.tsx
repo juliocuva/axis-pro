@@ -14,21 +14,41 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             const element = document.getElementById(elementId);
             if (!element) return;
 
+            // Almacenar estilos originales
+            const originalStyle = element.style.cssText;
+
+            // Forzar un ancho estándar para el renderizado del canvas (A4 ratio approx)
+            element.style.width = '1200px';
+            element.style.maxWidth = 'none';
+            element.style.position = 'relative';
+            element.style.transform = 'none';
+
             const canvas = await html2canvas(element, {
-                scale: 2,
+                scale: 3, // Mayor resolución
                 backgroundColor: '#050706',
                 logging: false,
-                useCORS: true
+                useCORS: true,
+                allowTaint: true,
+                windowWidth: 1200
             });
 
-            const imgData = canvas.toDataURL('image/png');
+            // Restaurar estilos
+            element.style.cssText = originalStyle;
+
+            const imgData = canvas.toDataURL('image/png', 1.0);
+
+            // Crear PDF tamaño A4
             const pdf = new jsPDF({
                 orientation: 'portrait',
-                unit: 'px',
-                format: [canvas.width / 2, canvas.height / 2]
+                unit: 'mm',
+                format: 'a4'
             });
 
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(`${fileName}.pdf`);
 
             if (btn) btn.innerText = 'PDF GENERADO ✓';
