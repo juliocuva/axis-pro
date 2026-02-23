@@ -231,7 +231,7 @@ export default function LotCertificate({ inventoryId, onClose }: LotCertificateP
                 <div className="flex items-center gap-6 flex-1 w-full md:w-auto">
                     <div className="w-20 h-20 bg-white p-2 rounded-xl shadow-2xl relative group shrink-0">
                         <img
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://axis-coffee.pro"
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-coffee.pro') + '/verify/lot/' + inventoryId)}`}
                             alt="QR Trazabilidad"
                             className="w-full h-full grayscale hover:grayscale-0 transition-all cursor-crosshair"
                         />

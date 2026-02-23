@@ -380,11 +380,12 @@ function LabelGenerator() {
                     </div>
 
                     <div className="flex items-end justify-between">
-                        <div className="w-24 h-24 bg-black flex items-center justify-center p-2">
-                            {/* QR Placeholder */}
-                            <div className="w-full h-full bg-white grid grid-cols-4 gap-1 p-1">
-                                {[...Array(16)].map((_, i) => <div key={i} className={`bg-black ${Math.random() > 0.5 ? 'opacity-100' : 'opacity-0'}`}></div>)}
-                            </div>
+                        <div className="w-24 h-24 bg-white flex items-center justify-center p-2 rounded-lg shadow-sm border border-black">
+                            <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-coffee.pro') + '/trace/AX-DEMO')}`}
+                                alt="QR Tracking"
+                                className="w-full h-full"
+                            />
                         </div>
                         <div className="text-right">
                             <p className="text-[7px] font-bold uppercase mb-1">Escanea para<br />Trazabilidad</p>

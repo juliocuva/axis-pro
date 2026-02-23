@@ -55,9 +55,12 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                             <p className="text-xl font-mono text-white font-bold">{passportId}</p>
                         </div>
                         <div className="flex justify-center">
-                            {/* QR Placeholder */}
+                            {/* QR Dynamic Verification */}
                             <div className="w-32 h-32 bg-white p-2 rounded-xl">
-                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://axis-coffee.pro/verify/${passportId}`} alt="QR Verification" />
+                                <img
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-coffee.pro') + '/verify/' + passportId)}`}
+                                    alt="QR Verification"
+                                />
                             </div>
                         </div>
                         <p className="text-[9px] text-gray-600 text-center font-bold uppercase tracking-widest">Escaneé para Trazabilidad On-Chain</p>
