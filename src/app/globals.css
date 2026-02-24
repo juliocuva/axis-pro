@@ -3,14 +3,29 @@
 @tailwind utilities;
 
 :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 5, 7, 6;
-    --background-end-rgb: 5, 7, 6;
+    --bg-main: 5, 7, 6;
+    --bg-card: 15, 20, 17;
+    --bg-card-hover: 22, 29, 25;
+    --text-main: 255, 255, 255;
+    --text-offset: 156, 163, 175;
+    --border-main: rgba(255, 255, 255, 0.05);
+    --bg-offset: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme='light'] {
+    --bg-main: 245, 247, 246;
+    --bg-card: 255, 255, 255;
+    --bg-card-hover: 240, 244, 242;
+    --text-main: 15, 20, 17;
+    --text-offset: 75, 85, 99;
+    --border-main: rgba(0, 0, 0, 0.1);
+    --bg-offset: rgba(0, 0, 0, 0.05);
 }
 
 body {
-    color: rgb(var(--foreground-rgb));
-    background: rgb(var(--background-start-rgb));
+    color: rgb(var(--text-main));
+    background: rgb(var(--bg-main));
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 /* Premium Industrial Scrollbar */

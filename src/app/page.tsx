@@ -26,6 +26,22 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(false);
     const [isDemoUnlocked, setIsDemoUnlocked] = useState(false);
     const [clickCount, setClickCount] = useState(0);
+    const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('axis-theme', newTheme);
+    };
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('axis-theme') as 'dark' | 'light' | null;
+        if (savedTheme) {
+            setTheme(savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+    }, []);
 
     // Estado para activación in-situ de módulos finales
     const [activatedModules, setActivatedModules] = useState<Set<string>>(new Set());
@@ -97,11 +113,11 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen bg-bg-main text-white p-8">
+        <div className="min-h-screen bg-bg-main text-rgb(var(--text-main)) p-8 transition-colors duration-400">
             <header className="mb-12 flex justify-between items-center flex-wrap gap-6">
                 <div onClick={handleLogoClick} className="cursor-pointer group select-none">
                     <div className="flex items-center gap-4 mb-2">
-                        <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center overflow-hidden border border-white/5 group-hover:border-brand-green/30 transition-all">
+                        <div className="w-12 h-12 bg-bg-offset rounded-xl flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-green/30 transition-all">
                             <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain p-1" />
                         </div>
                         <h1 className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-bold">PRO V2.0</span></h1>
@@ -111,7 +127,7 @@ export default function Home() {
                 </div>
 
                 <nav className="flex items-center gap-4">
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 mr-4 overflow-hidden">
+                    <div className="flex bg-bg-offset p-1 rounded-xl border border-border-main mr-4 overflow-hidden">
                         <button
                             onClick={() => setShowCloudVault(true)}
                             className="flex items-center gap-2 px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
@@ -121,7 +137,7 @@ export default function Home() {
                         </button>
                         <button
                             onClick={() => setShowFunctionalDocs(true)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-blue-500/10 text-blue-400 text-[9px] font-bold uppercase tracking-widest transition-all border-l border-white/5"
+                            className="flex items-center gap-2 px-4 py-2 hover:bg-blue-500/10 text-blue-400 text-[9px] font-bold uppercase tracking-widest transition-all border-l border-border-main"
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                             Guía TRL 7
@@ -132,7 +148,7 @@ export default function Home() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setView('launcher')}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-bold transition-all border border-white/5 uppercase tracking-widest text-gray-400 hover:text-white"
+                                className="flex items-center gap-2 px-4 py-2.5 bg-bg-offset hover:bg-white/10 rounded-xl text-[10px] font-bold transition-all border border-border-main uppercase tracking-widest text-gray-400 hover:text-white"
                             >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                                 Launcher
@@ -146,7 +162,22 @@ export default function Home() {
                             </span>
                         </div>
                     )}
-                    <div className="w-px h-6 bg-white/10 mx-2"></div>
+                    <div className="w-px h-6 bg-border-main mx-2"></div>
+                    <button
+                        onClick={toggleTheme}
+                        className="w-10 h-10 rounded-xl bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white/10 transition-all group mr-2"
+                        title={theme === 'dark' ? 'Activar modo Zen (Luz)' : 'Activar modo Industrial (Oscuro)'}
+                    >
+                        {theme === 'dark' ? (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-orange-400 group-hover:rotate-12 transition-transform">
+                                <circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                            </svg>
+                        ) : (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green group-hover:-rotate-12 transition-transform">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                            </svg>
+                        )}
+                    </button>
                     <button
                         onClick={() => setUser(null)}
                         className="px-6 py-2.5 bg-brand-red/10 text-brand-red-bright hover:bg-brand-red/20 rounded-xl text-xs font-bold transition-all border border-brand-red/10"

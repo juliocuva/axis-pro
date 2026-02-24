@@ -24,9 +24,13 @@ module.exports = {
                     "red-bright": "#ed1c24",
                 },
                 bg: {
-                    main: "#050706",
-                    card: "#0f1411",
-                    "card-hover": "#161d19",
+                    main: "rgb(var(--bg-main))",
+                    card: "rgb(var(--bg-card))",
+                    "card-hover": "rgb(var(--bg-card-hover))",
+                    offset: "var(--bg-offset)",
+                },
+                border: {
+                    main: "var(--border-main)",
                 }
             },
         },
