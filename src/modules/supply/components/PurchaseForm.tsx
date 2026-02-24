@@ -18,6 +18,10 @@ const COLOMBIAN_REGIONS = [
     'Sierra Nevada', 'Cesar', 'Boyacá', 'Casanare', 'Meta', 'Caquetá'
 ];
 
+const COUNTRIES = [
+    'Colombia', 'Etiopía', 'Brasil', 'Perú', 'Costa Rica', 'Panamá', 'Honduras', 'Guatemala'
+];
+
 interface PurchaseFormProps {
     onPurchaseComplete?: (lot: any) => void;
     selectedLot?: any;
@@ -28,8 +32,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot }: Purcha
         farmerName: '',
         farmName: '',
         altitude: 1600,
-        region: 'Huila',
-        variety: 'Castillo' as CoffeeVariety,
+        country: '',
+        region: '',
+        variety: '' as CoffeeVariety,
         process: 'washed' as ProcessType,
         purchaseWeight: 0,
         purchaseValue: 0,
@@ -49,8 +54,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot }: Purcha
                 farmerName: selectedLot.farmer_name || '',
                 farmName: selectedLot.farm_name || '',
                 altitude: selectedLot.altitude || 1600,
-                region: selectedLot.region || 'Huila',
-                variety: (selectedLot.variety as CoffeeVariety) || 'Castillo',
+                country: selectedLot.country || '',
+                region: selectedLot.region || '',
+                variety: (selectedLot.variety as CoffeeVariety) || '',
                 process: (selectedLot.process as ProcessType) || 'washed',
                 purchaseWeight: Number(selectedLot.purchase_weight) || 0,
                 purchaseValue: Number(selectedLot.purchase_value) || 0,
@@ -97,6 +103,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot }: Purcha
                     farm_name: formData.farmName,
                     lot_number: formData.lotNumber,
                     altitude: formData.altitude,
+                    country: formData.country,
                     region: formData.region,
                     variety: formData.variety,
                     process: formData.process,
@@ -248,7 +255,21 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot }: Purcha
                                 className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none"
                                 disabled={isSubmitting}
                             >
+                                <option value="">Seleccionar</option>
                                 {COLOMBIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">País</label>
+                            <select
+                                required
+                                value={formData.country}
+                                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none"
+                                disabled={isSubmitting}
+                            >
+                                <option value="">Seleccionar</option>
+                                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
                     </div>
@@ -265,11 +286,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot }: Purcha
                             <div>
                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Variedad</label>
                                 <select
+                                    required
                                     value={formData.variety}
                                     onChange={(e) => setFormData({ ...formData, variety: e.target.value as CoffeeVariety })}
                                     className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none"
                                     disabled={isSubmitting}
                                 >
+                                    <option value="">Seleccionar</option>
                                     {COFFEE_VARIETIES.map(v => <option key={v} value={v}>{v}</option>)}
                                 </select>
                             </div>

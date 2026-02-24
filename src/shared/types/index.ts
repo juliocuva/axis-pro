@@ -1,7 +1,7 @@
 export type ProcessType = 'washed' | 'honey' | 'natural' | 'semi-washed';
 
 export type CoffeeVariety =
-    | 'Castillo' | 'Caturra' | 'Colombia' | 'Tabi' | 'Bourbon'
+    | '' | 'Castillo' | 'Caturra' | 'Colombia' | 'Tabi' | 'Bourbon'
     | 'Geisha' | 'Typica' | 'Maragogype' | 'Pacamara' | 'Sidra'
     | 'Wush Wush' | 'Java' | 'SL28' | 'Pink Bourbon' | 'Laurina'
     | 'Mundo Novo' | 'Cenicafe 1' | 'Papayo' | 'Chiroso';
@@ -9,11 +9,12 @@ export type CoffeeVariety =
 export interface InventoryBatch {
     id: string;
     purchaseDate: string;
-    variety: CoffeeVariety;
+    variety: CoffeeVariety | string;
     process: ProcessType;
     farmerName: string;
     farmName: string;
     altitude: number;
+    country?: string;
     region: string;
     purchaseWeight: number; // Kilos in parchment (Verde/Pergamino)
     thrashedWeight?: number; // Kilos after thrashing (Excelso)

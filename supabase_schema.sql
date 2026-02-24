@@ -36,6 +36,7 @@ CREATE TABLE coffee_purchase_inventory (
     farmer_name TEXT NOT NULL,
     farm_name TEXT NOT NULL,
     altitude INTEGER,
+    country TEXT,
     region TEXT NOT NULL,
     variety TEXT NOT NULL,
     process TEXT NOT NULL,
