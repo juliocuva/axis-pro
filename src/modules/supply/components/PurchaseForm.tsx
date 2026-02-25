@@ -214,9 +214,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                     <div className="flex flex-col items-center justify-center p-8 bg-bg-main border border-white/5 rounded-industrial-sm group">
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-4">Identificador de Lote</p>
                         <div className="flex items-center gap-4">
-                            <span className="text-4xl font-bold tracking-tighter text-white group-hover:text-brand-green-bright transition-colors uppercase">
-                                {formData.lotNumber}
-                            </span>
+                            <input
+                                type="text"
+                                value={formData.lotNumber}
+                                onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
+                                className="bg-transparent text-4xl font-bold tracking-tighter text-white hover:text-brand-green-bright transition-colors uppercase outline-none text-center border-b border-white/10 focus:border-brand-green"
+                                disabled={isSubmitting}
+                            />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 gap-4">

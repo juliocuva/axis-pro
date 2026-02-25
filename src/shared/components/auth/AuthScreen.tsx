@@ -28,13 +28,18 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             // Si es un email de test conocido, asignamos IDs fijos
             let companyId = '99999999-9999-9999-9999-999999999999'; // Default AXIS
 
+            const publicDomains = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com'];
+
             if (domain === 'axiscoffee.pro') {
                 companyId = '99999999-9999-9999-9999-999999999999';
             } else if (domain === 'sagradocorazon.com') {
                 companyId = '11111111-1111-1111-1111-111111111111';
+            } else if (publicDomains.includes(domain)) {
+                // Para dominios públicos, generamos un ID basado en el EMAIL completo para separarlos
+                // Usamos un hash simple o la longitud combinada
+                companyId = '33333333-3333-3333-3333-' + email.length.toString().padStart(6, '0') + domain.length.toString().padStart(6, '0');
             } else {
-                // Generar un ID determinístico basado en el dominio para otros clientes
-                // Esto permite que usuarios del mismo dominio compartan historial
+                // Otros dominios corporativos comparten historial por defecto
                 companyId = '22222222-2222-2222-2222-' + domain.length.toString().padStart(12, '0');
             }
 
