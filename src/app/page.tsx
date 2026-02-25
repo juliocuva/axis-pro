@@ -15,6 +15,7 @@ import ComparisonCalibrationDashboard from '@/modules/export/components/Comparis
 import DegassingPredictor from '@/modules/export/components/DegassingPredictor';
 import RetailModuleContainer from '@/modules/retail/components/RetailModuleContainer';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
+import MasterControlCenter from '@/modules/admin/components/MasterControlCenter';
 
 import { supabase } from '@/shared/lib/supabase';
 import { calculateAdvancedDegassing } from '@/shared/lib/engine/degassing';
@@ -22,7 +23,7 @@ import UserDropdown from '@/shared/components/layout/UserDropdown';
 
 export default function Home() {
     const [user, setUser] = useState<{ name: string, email: string, companyId: string } | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'production' | 'export' | 'retail' | 'quality' | 'curves' | 'entry' | 'calibration' | 'degassing' | 'archive'>('launcher');
+    const [view, setView] = useState<'launcher' | 'supply' | 'production' | 'export' | 'retail' | 'quality' | 'curves' | 'entry' | 'calibration' | 'degassing' | 'archive' | 'master-control'>('launcher');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -171,6 +172,16 @@ export default function Home() {
                     )}
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden">
+                        {user?.email === 'juliocesaruba@gmail.com' && (
+                            <button
+                                onClick={() => setView(view === 'master-control' ? 'launcher' : 'master-control')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master-control' ? 'bg-brand-red/10 text-brand-red border border-brand-red/20' : 'hover:bg-brand-green/10 text-brand-green-bright'}`}
+                                title="Control Maestro"
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                Master Control
+                            </button>
+                        )}
                         <button
                             onClick={() => setShowCloudVault(true)}
                             className="flex items-center gap-2 px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
@@ -526,6 +537,12 @@ export default function Home() {
             {view === 'retail' && (
                 <div className="max-w-7xl mx-auto space-y-8">
                     <RetailModuleContainer user={user} />
+                </div>
+            )}
+
+            {view === 'master-control' && (
+                <div className="max-w-7xl mx-auto space-y-8">
+                    <MasterControlCenter />
                 </div>
             )}
 
