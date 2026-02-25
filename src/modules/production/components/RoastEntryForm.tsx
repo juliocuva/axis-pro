@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ProcessType } from '@/shared/types';
 import RoastCurveAnalysis from './RoastCurveAnalysis';
 
-export default function RoastEntryForm() {
+export default function RoastEntryForm({ user }: { user: { companyId: string } | null }) {
     const [formData, setFormData] = useState({
         batchId: 'AX-' + Math.floor(Math.random() * 9000 + 1000),
         process: 'washed' as ProcessType,
@@ -46,7 +46,7 @@ export default function RoastEntryForm() {
                         green_weight: formData.greenWeight,
                         roasted_weight: formData.roastedWeight,
                         profile_id: '88888888-8888-8888-8888-888888888888',
-                        company_id: '99999999-9999-9999-9999-999999999999'
+                        company_id: user?.companyId
                     }
                 ]);
 
@@ -68,7 +68,7 @@ export default function RoastEntryForm() {
     if (showResult) {
         return (
             <div className="max-w-6xl mx-auto space-y-8 animate-in zoom-in duration-500">
-                <div className="bg-brand-green/10 border border-brand-green/30 p-6 rounded-3xl text-center">
+                <div className="bg-brand-green/10 border border-brand-green/30 p-6 rounded-industrial text-center">
                     <h2 className="text-2xl font-bold text-brand-green-bright mb-2">¡Tostión Finalizada Exitosamente!</h2>
                     <p className="text-gray-400 text-sm">El lote <span className="text-white font-mono">{formData.batchId}</span> ha sido registrado y analizado.</p>
                 </div>
@@ -87,7 +87,7 @@ export default function RoastEntryForm() {
                             });
                             setStatus(null);
                         }}
-                        className="bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-2xl font-bold transition-all border border-white/10"
+                        className="bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-industrial-sm font-bold transition-all border border-white/10"
                     >
                         REGISTRAR OTRO LOTE
                     </button>
@@ -112,13 +112,13 @@ export default function RoastEntryForm() {
 
             <form onSubmit={handleSubmit} className="space-y-8">
                 {status && (
-                    <div className={`p-4 rounded-xl text-sm font-bold border ${status.type === 'success' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright' : 'bg-brand-red/10 border-brand-red/30 text-brand-red-bright'}`}>
+                    <div className={`p-4 rounded-industrial-sm text-sm font-bold border ${status.type === 'success' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright' : 'bg-brand-red/10 border-brand-red/30 text-brand-red-bright'}`}>
                         {status.message}
                     </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <section className="bg-bg-card border border-white/5 p-8 rounded-3xl">
+                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial">
                         <h3 className="text-brand-green-bright font-bold mb-6 flex items-center gap-2 text-sm uppercase tracking-widest">
                             <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
                             Identificación
@@ -131,21 +131,32 @@ export default function RoastEntryForm() {
                                     type="text"
                                     value={formData.batchId}
                                     onChange={(e) => setFormData({ ...formData, batchId: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-brand-green outline-none transition-all font-mono text-brand-green-bright"
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none transition-all font-mono text-brand-green-bright"
                                     disabled={isSubmitting}
                                 />
                             </div>
 
                             <div>
                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Fecha de Tostión</label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={formData.roastDate}
-                                    onChange={(e) => setFormData({ ...formData, roastDate: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-brand-green outline-none transition-all"
-                                    disabled={isSubmitting}
-                                />
+                                <div className="relative group/date">
+                                    <input
+                                        type="date"
+                                        required
+                                        value={formData.roastDate}
+                                        onChange={(e) => setFormData({ ...formData, roastDate: e.target.value })}
+                                        className={`w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none transition-all text-brand-green-bright font-bold scheme-dark pr-12 cursor-pointer
+                                                [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                                        disabled={isSubmitting}
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-green-bright opacity-60 group-focus-within/date:opacity-100 transition-opacity">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                            <line x1="16" y1="2" x2="16" y2="6" />
+                                            <line x1="8" y1="2" x2="8" y2="6" />
+                                            <line x1="3" y1="10" x2="21" y2="10" />
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
 
                             <div>
@@ -153,7 +164,7 @@ export default function RoastEntryForm() {
                                 <select
                                     value={formData.process}
                                     onChange={(e) => setFormData({ ...formData, process: e.target.value as ProcessType })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 focus:border-brand-green outline-none transition-all uppercase text-xs font-bold"
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none transition-all uppercase text-xs font-bold"
                                     disabled={isSubmitting}
                                 >
                                     <option value="washed">Lavado</option>
@@ -164,7 +175,7 @@ export default function RoastEntryForm() {
                         </div>
                     </section>
 
-                    <section className="bg-bg-card border border-white/5 p-8 rounded-3xl relative overflow-hidden">
+                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full"></div>
                         <h3 className="text-brand-green-bright font-bold mb-6 text-sm uppercase tracking-widest">Control Masivo</h3>
 
@@ -176,7 +187,7 @@ export default function RoastEntryForm() {
                                     step="0.1"
                                     required
                                     onChange={(e) => setFormData({ ...formData, greenWeight: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-brand-green outline-none text-xl font-bold"
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-4 focus:border-brand-green outline-none text-xl font-bold"
                                     placeholder="0.0"
                                     disabled={isSubmitting}
                                 />
@@ -189,14 +200,14 @@ export default function RoastEntryForm() {
                                     step="0.1"
                                     required
                                     onChange={(e) => setFormData({ ...formData, roastedWeight: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 focus:border-brand-green outline-none text-xl font-bold"
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-4 focus:border-brand-green outline-none text-xl font-bold"
                                     placeholder="0.0"
                                     disabled={isSubmitting}
                                 />
                             </div>
 
                             {yieldLoss !== null && (
-                                <div className={`mt-4 p-4 rounded-xl border flex justify-between items-center ${yieldLoss > 16 ? 'bg-brand-red/10 border-brand-red/30' : 'bg-brand-green/10 border-brand-green/30'}`}>
+                                <div className={`mt-4 p-4 rounded-industrial-sm border flex justify-between items-center ${yieldLoss > 16 ? 'bg-brand-red/10 border-brand-red/30' : 'bg-brand-green/10 border-brand-green/30'}`}>
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Merma:</span>
                                     <span className={`text-lg font-bold font-mono ${yieldLoss > 16 ? 'text-brand-red-bright' : 'text-brand-green-bright'}`}>
                                         {yieldLoss.toFixed(2)}%
@@ -210,7 +221,7 @@ export default function RoastEntryForm() {
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-5 rounded-2xl transition-all shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 group ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-5 rounded-industrial-sm transition-all shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 group ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {isSubmitting ? 'SINCRONIZANDO...' : 'FINALIZAR TOSTIÓN Y GENERAR REPORTE'}
                     {!isSubmitting && (

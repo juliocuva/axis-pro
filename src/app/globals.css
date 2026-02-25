@@ -12,14 +12,16 @@
     --bg-offset: rgba(255, 255, 255, 0.03);
 }
 
-[data-theme='light'] {
-    --bg-main: 245, 247, 246;
-    --bg-card: 255, 255, 255;
-    --bg-card-hover: 240, 244, 242;
-    --text-main: 15, 20, 17;
-    --text-offset: 75, 85, 99;
-    --border-main: rgba(0, 0, 0, 0.1);
-    --bg-offset: rgba(0, 0, 0, 0.05);
+html[data-theme='light'],
+[data-theme='light'],
+[data-theme='light'] body {
+    --bg-main: 193, 220, 206;
+    --bg-card: 210, 232, 222;
+    --bg-card-hover: 220, 240, 230;
+    --text-main: 15, 30, 25;
+    --text-offset: 70, 90, 85;
+    --border-main: rgba(0, 50, 30, 0.15);
+    --bg-offset: rgba(255, 255, 255, 0.4);
 }
 
 body {
@@ -69,6 +71,20 @@ body {
     }
 }
 
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-marquee {
+    animation: marquee 30s linear infinite;
+}
+
 .animate-in {
     animation-fill-mode: both;
     animation-duration: 0.6s;
@@ -80,4 +96,21 @@ body {
 
 .slide-in-from-bottom-4 {
     animation-name: slideUp;
+}
+
+/* Text Masking Utilities */
+.bg-clip-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.text-transparent {
+    -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-text {
+    background: linear-gradient(135deg, #fff 0%, #d4a373 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

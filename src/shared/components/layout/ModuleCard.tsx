@@ -9,9 +9,11 @@ interface ModuleCardProps {
     status: 'active' | 'locked' | 'trl7';
     onClick?: () => void;
     color: string;
+    isOptional?: boolean;
+    isRecommended?: boolean;
 }
 
-export default function ModuleCard({ title, description, icon, status, onClick, color }: ModuleCardProps) {
+export default function ModuleCard({ title, description, icon, status, onClick, color, isOptional, isRecommended }: ModuleCardProps) {
     const isLocked = status === 'locked';
 
     // Map for Tailwind dynamic classes
@@ -51,7 +53,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
     return (
         <div
             onClick={onClick}
-            className={`relative group bg-bg-card border border-border-main rounded-3xl p-8 transition-all duration-500 cursor-pointer ${currentStyle.border} hover:shadow-2xl ${currentStyle.shadow} hover:-translate-y-1 ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}`}
+            className={`relative group bg-bg-card border border-border-main rounded-industrial p-8 transition-all duration-500 cursor-pointer ${currentStyle.border} hover:shadow-2xl ${currentStyle.shadow} hover:-translate-y-1 ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}`}
         >
             {/* Decorative Hover Line */}
             <div className={`absolute top-0 left-0 w-full h-[2px] rounded-full transition-all duration-500 opacity-0 group-hover:opacity-100 ${currentStyle.glow} z-20`} />
@@ -66,7 +68,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
                 </div>
             )}
 
-            {status === 'trl7' && (
+            {status === 'trl7' && !isOptional && !isRecommended && (
                 <div className="absolute top-6 right-6">
                     <span className="bg-brand-green/20 text-brand-green-bright text-[10px] px-2 py-1 rounded-full font-mono font-bold tracking-widest uppercase">
                         TRL 7
@@ -74,7 +76,23 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
                 </div>
             )}
 
-            <div className={`w-14 h-14 rounded-2xl bg-bg-offset flex items-center justify-center mb-6 transition-all duration-500 ${!isLocked ? `${currentStyle.bg} ${currentStyle.text}` : 'text-gray-500'}`}>
+            {isOptional && (
+                <div className="absolute top-6 right-6">
+                    <span className="bg-white/5 text-gray-500 text-[9px] px-2 py-1 rounded-full border border-white/5 font-bold tracking-widest uppercase">
+                        Opcional (Flujo B)
+                    </span>
+                </div>
+            )}
+
+            {isRecommended && (
+                <div className="absolute top-6 right-6">
+                    <span className="bg-blue-500/20 text-blue-400 text-[9px] px-2 py-1 rounded-full border border-blue-500/20 font-bold tracking-widest uppercase animate-pulse">
+                        Sugerido para Exp.
+                    </span>
+                </div>
+            )}
+
+            <div className={`w-14 h-14 rounded-industrial-sm bg-bg-offset flex items-center justify-center mb-6 transition-all duration-500 ${!isLocked ? `${currentStyle.bg} ${currentStyle.text}` : 'text-gray-500'}`}>
                 {icon}
             </div>
 

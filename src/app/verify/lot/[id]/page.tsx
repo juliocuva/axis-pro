@@ -25,6 +25,7 @@ export default function PublicLotVerification() {
                 <LotCertificate
                     inventoryId={id}
                     onClose={() => window.location.href = '/'}
+                    user={null}
                 />
             </div>
 

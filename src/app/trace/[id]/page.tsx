@@ -16,7 +16,7 @@ export default function TraceabilityStoryPage() {
 
     const fetchStory = async () => {
         try {
-            const data = await getBatchStory(id);
+            const data = await getBatchStory(id, undefined);
             setStory(data);
         } catch (err) {
             console.error("Error fetching story:", err);

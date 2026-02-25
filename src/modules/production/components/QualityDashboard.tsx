@@ -15,7 +15,7 @@ const QualityMetric = ({ label, master, current, unit, deviation }: QualityMetri
     const isOk = deviation === undefined || Math.abs(deviation) < 5;
 
     return (
-        <div className="flex items-center justify-between p-4 bg-bg-main rounded-2xl border border-white/5 group hover:border-white/10 transition-all">
+        <div className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-white/5 group hover:border-white/10 transition-all">
             <div className="flex flex-col">
                 <span className="text-[10px] text-gray-500 uppercase font-mono tracking-widest">{label}</span>
                 <span className="text-sm font-bold mt-1 text-gray-200">{current} {unit}</span>
@@ -42,7 +42,7 @@ export default function QualityDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-4">
                     {/* Comparison Analysis */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl relative overflow-hidden">
+                        <div className="bg-bg-card border border-white/5 p-8 rounded-industrial relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-2 h-full bg-brand-green-bright"></div>
                             <div className="flex justify-between items-center mb-8">
                                 <h3 className="text-xl font-bold flex items-center gap-3">
@@ -59,7 +59,7 @@ export default function QualityDashboard() {
                                 <QualityMetric label="Pérdida (Yield)" master="15.5" current="16.2" unit="%" deviation={4.5} />
                             </div>
 
-                            <div className="mt-8 p-6 bg-brand-red/5 border border-brand-red/20 rounded-2xl flex items-start gap-4">
+                            <div className="mt-8 p-6 bg-brand-red/5 border border-brand-red/20 rounded-industrial-sm flex items-start gap-4">
                                 <div className="w-10 h-10 rounded-full bg-brand-red/20 flex items-center justify-center text-brand-red-bright">⚠️</div>
                                 <div>
                                     <p className="text-sm font-bold text-brand-red-bright">Desviación en Fase de Desarrollo</p>
@@ -71,12 +71,12 @@ export default function QualityDashboard() {
 
                     {/* Visual Color Analysis */}
                     <div className="space-y-6">
-                        <div className="bg-bg-card border border-white/5 p-8 rounded-3xl relative">
+                        <div className="bg-bg-card border border-white/5 p-8 rounded-industrial relative">
                             <h3 className="text-brand-green-bright font-bold mb-6 uppercase text-xs tracking-widest">Análisis Cromatográfico</h3>
 
                             <div className="space-y-6">
                                 <div className="flex flex-col items-center">
-                                    <div className="w-full h-24 rounded-2xl bg-gradient-to-r from-[#4d3319] via-[#3d2914] to-[#2d1e0f] border border-white/10 shadow-inner flex items-center justify-center">
+                                    <div className="w-full h-24 rounded-industrial-sm bg-gradient-to-r from-[#4d3319] via-[#3d2914] to-[#2d1e0f] border border-white/10 shadow-inner flex items-center justify-center">
                                         <span className="text-2xl font-bold text-white/20 tracking-tighter">AGTRON</span>
                                     </div>
                                     <div className="w-full flex justify-between mt-3 px-2">
@@ -104,7 +104,7 @@ export default function QualityDashboard() {
                             </div>
                         </div>
 
-                        <div className="bg-bg-card border border-white/5 p-6 rounded-2xl">
+                        <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm">
                             <p className="text-[10px] text-gray-500 uppercase font-mono mb-2">Sello Digial de Calidad</p>
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 bg-brand-green/20 rounded flex items-center justify-center text-brand-green-bright text-[8px]">QR</div>

@@ -6,14 +6,16 @@ import { getRoastRecommendation, finalizeRoastBatch } from '../actions/roastActi
 interface LiveRoastMonitorProps {
     lotData: any;
     masterProfile?: any;
+    user: { companyId: string } | null;
 }
 
-export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMonitorProps) {
+export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveRoastMonitorProps) {
     const [isRoasting, setIsRoasting] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [currentTemp, setCurrentTemp] = useState(200);
     const [btHistory, setBtHistory] = useState<{ t: number, temp: number }[]>([]);
     const [rorHistory, setRorHistory] = useState<{ t: number, temp: number }[]>([]);
+    const [alert, setAlert] = useState<{ type: 'warning' | 'critical', message: string } | null>(null);
 
     // Controles PLC
     const [gasPower, setGasPower] = useState(75);
@@ -34,20 +36,37 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
     // Simulación Física Sincronizada
     useEffect(() => {
         if (isRoasting && elapsedTime < MAX_TIME) {
+            // VELOCIDAD 10X PARA DEMOSTRACIÓN (100ms = 1s simulado)
             timerRef.current = setInterval(() => {
                 setElapsedTime(prev => prev + 1);
 
                 setCurrentTemp(prev => {
                     const heatGain = (gasPower * 0.016) - (airflow * 0.006);
                     const heatLoss = (prev * prev) * 0.00002;
-                    return prev + heatGain - heatLoss;
+                    const nextTemp = prev + heatGain - heatLoss;
+
+                    // Cálculo de ROR para alertas (usamos rorHistory del estado)
+                    const currentRor = rorHistory.length > 0 ? rorHistory[rorHistory.length - 1].temp : 0;
+
+                    // Lógica de Alertas de Seguridad Industrial
+                    if (nextTemp > 245) {
+                        setAlert({ type: 'critical', message: '¡EMERGENCIA! INCENDIO EN CÁMARA - DESCARGA INMEDIATA' });
+                    } else if (nextTemp > 230) {
+                        setAlert({ type: 'warning', message: 'ADVERTENCIA: TEMPERATURA CRÍTICA - RIESGO DE CARBONIZACIÓN' });
+                    } else if (nextTemp > 220 && currentRor > 10) {
+                        setAlert({ type: 'warning', message: 'AVISO: ROR EXCESIVO EN FINALIZACIÓN - POSIBLE ARREBATADO' });
+                    } else {
+                        setAlert(null);
+                    }
+
+                    return nextTemp;
                 });
-            }, 1000);
+            }, 100);
         } else {
             if (timerRef.current) clearInterval(timerRef.current);
         }
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }, [isRoasting, gasPower, airflow, elapsedTime]);
+    }, [isRoasting, gasPower, airflow, elapsedTime, rorHistory]);
 
     // Registro de Telemetría
     useEffect(() => {
@@ -76,7 +95,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
         }
     }, [elapsedTime, isRoasting, masterProfile]);
 
-    const startRoast = () => {
+    const prepareNextBatch = () => {
         setBtHistory([]);
         setRorHistory([]);
         setElapsedTime(0);
@@ -84,6 +103,12 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
         setRoastEnded(false);
         setDryEnded(null);
         setFirstCrack(null);
+        setAlert(null);
+        setIsRoasting(false);
+        setCopilotData(null);
+    };
+
+    const handleCharge = () => {
         setIsRoasting(true);
     };
 
@@ -101,7 +126,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
             roasted_weight: 29.8,
             total_time_seconds: elapsedTime,
             final_temp: currentTemp,
-            company_id: '99999999-9999-9999-9999-999999999999'
+            company_id: user?.companyId
         });
     };
 
@@ -114,31 +139,51 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
 
     if (roastEnded) {
         return (
-            <div className="bg-bg-card border border-white/10 rounded-[3rem] p-16 space-y-12 animate-in zoom-in-95 duration-700 shadow-3xl text-center relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-green via-blue-500 to-brand-green opacity-50"></div>
-                <div className="w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto mb-8 relative z-10">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00a651" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
-                </div>
-                <h3 className="text-4xl font-bold text-white uppercase tracking-tighter relative z-10">Lote Finalizado y Sellado</h3>
-                <p className="text-gray-500 uppercase font-bold text-[10px] tracking-[0.3em] relative z-10">Los datos de telemetría han sido vinculados al certificado digital del lote.</p>
+            <div className="bg-bg-card border border-white/10 rounded-3xl p-8 space-y-6 animate-in zoom-in-95 duration-700 shadow-3xl text-center relative overflow-hidden max-w-2xl mx-auto">
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-green via-blue-500 to-brand-green opacity-40"></div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto pt-8 relative z-10">
-                    <div className="p-8 bg-white/2 rounded-3xl border border-white/5">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Tiempo Total</p>
-                        <p className="text-3xl font-bold text-white">{Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}</p>
+                <div className="flex items-center justify-between gap-6 relative z-10 px-4">
+                    <div className="flex items-center gap-4 text-left">
+                        <div className="w-10 h-10 bg-brand-green/10 rounded-full flex items-center justify-center border border-brand-green/20">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-white uppercase tracking-tight">Lote Sellado</h3>
+                            <p className="text-[8px] text-gray-500 uppercase font-bold tracking-widest">VINCULADO A BLOCKCHAIN DE ORIGEN</p>
+                        </div>
                     </div>
-                    <div className="p-8 bg-white/2 rounded-3xl border border-white/5">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Pérdida Masa</p>
-                        <p className="text-3xl font-bold text-white">14.8%</p>
-                    </div>
-                    <div className="p-8 bg-white/2 rounded-3xl border border-white/5">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">Repetibilidad</p>
-                        <p className="text-3xl font-bold text-brand-green-bright">98.2%</p>
-                    </div>
+                    <button onClick={prepareNextBatch} className="px-6 py-2.5 bg-brand-green text-white font-bold rounded-xl uppercase tracking-widest text-[9px] shadow-lg hover:bg-brand-green-bright transition-all">Siguiente Turno</button>
                 </div>
 
-                <div className="pt-12 relative z-10">
-                    <button onClick={startRoast} className="px-12 py-5 bg-brand-green text-white font-bold rounded-2xl uppercase tracking-widest text-[10px] shadow-2xl hover:bg-brand-green-bright transition-all">Iniciar Siguiente Turno</button>
+                {/* Mini Summary Graph */}
+                <div className="h-24 bg-black/40 rounded-2xl border border-white/5 relative overflow-hidden group">
+                    <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <polyline fill="none" stroke="#22c55e" strokeWidth="1" points={generatePoints(btHistory, 250)} />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <p className="text-[7px] text-gray-600 font-bold uppercase tracking-[0.5em] group-hover:text-gray-400 transition-colors">Spectral Signature Archive</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 relative z-10">
+                    <div className="p-4 bg-white/2 rounded-2xl border border-white/5">
+                        <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Tiempo</p>
+                        <p className="text-xl font-bold text-white">{Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}</p>
+                    </div>
+                    <div className="p-4 bg-white/2 rounded-2xl border border-white/5">
+                        <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Masa</p>
+                        <p className="text-xl font-bold text-white">14.8%</p>
+                    </div>
+                    <div className="p-4 bg-white/2 rounded-2xl border border-white/5">
+                        <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Repetibilidad</p>
+                        <p className="text-xl font-bold text-brand-green-bright">98.2%</p>
+                    </div>
+                </div>
+
+                <div className="border-t border-white/5 pt-4">
+                    <p className="text-[8px] text-gray-600 font-bold uppercase tracking-widest leading-relaxed">
+                        ID DE SEGURIDAD: {Math.random().toString(36).substring(2, 12).toUpperCase()} • OPERADOR CLASE A
+                    </p>
                 </div>
             </div>
         );
@@ -150,85 +195,123 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
             <div className="flex justify-between items-end px-4">
                 <div className="space-y-1">
                     <div className="flex items-center gap-3">
-                        <div className={`w-2.5 h-2.5 rounded-full ${isRoasting ? 'bg-red-500 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.8)]' : 'bg-gray-700'}`}></div>
-                        <h2 className="text-3xl font-bold uppercase tracking-tighter text-white">Análisis de Termografía en Vivo</h2>
+                        <div className={`w-2 h-2 rounded-full ${isRoasting ? 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-gray-700'}`}></div>
+                        <h2 className="text-xl font-bold uppercase tracking-tight text-white">Análisis de Termografía en Vivo</h2>
                     </div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] ml-6">Sincronización de Onda de Calor Infrarroja (AXIS-CORE)</p>
+                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.3em] ml-5">Sincronización de Onda de Calor Infrarroja (AXIS-CORE)</p>
                 </div>
-                <div className="bg-bg-card border border-white/5 px-6 py-3 rounded-2xl">
-                    <p className="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-1">Status Emisiones</p>
-                    <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map(i => <div key={i} className={`w-3 h-1 rounded-full ${isRoasting ? 'bg-brand-green-bright animate-pulse' : 'bg-white/5'}`} style={{ animationDelay: `${i * 0.1}s` }}></div>)}
+                <div className="bg-bg-card border border-white/5 px-6 py-3 rounded-2xl flex items-center gap-6">
+                    {alert && (
+                        <div className={`flex items-center gap-2 animate-pulse`}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={alert.type === 'critical' ? '#ef4444' : '#f97316'} strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" /></svg>
+                            <span className={`text-[9px] font-bold uppercase tracking-widest ${alert.type === 'critical' ? 'text-red-500' : 'text-orange-500'}`}>{alert.message}</span>
+                        </div>
+                    )}
+                    <div className="border-l border-white/5 pl-6">
+                        <p className="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-1">Status Emisiones</p>
+                        <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map(i => <div key={i} className={`w-3 h-1 rounded-full ${isRoasting ? 'bg-brand-green-bright animate-pulse' : 'bg-white/5'}`} style={{ animationDelay: `${i * 0.1}s` }}></div>)}
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* HUD Central Premium */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="bg-bg-card border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden shadow-xl group">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-xl group">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 opacity-30"></div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Temp. Bean (BT)</p>
-                    <p className="text-5xl font-bold text-white tracking-tighter">{currentTemp.toFixed(1)}°</p>
-                    <div className="mt-4 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all" style={{ width: `${(currentTemp / 250) * 100}%` }}></div>
+                    <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2">Temp. Bean (BT)</p>
+                    <p className={`text-2xl font-bold tracking-tighter transition-colors ${alert?.type === 'critical' ? 'text-red-500' : alert?.type === 'warning' ? 'text-orange-500' : 'text-white'}`}>{currentTemp.toFixed(1)}°</p>
+                    <div className="mt-3 h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div className={`h-full shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all ${alert?.type === 'critical' ? 'bg-red-500' : alert?.type === 'warning' ? 'bg-orange-500' : 'bg-cyan-400'}`} style={{ width: `${(currentTemp / 250) * 100}%` }}></div>
                     </div>
                 </div>
 
-                <div className="bg-bg-card border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden shadow-xl">
+                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-xl">
                     <div className="absolute top-0 left-0 w-full h-1 bg-white opacity-10"></div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Cronómetro Telemetría</p>
-                    <p className="text-5xl font-bold text-white tracking-tighter">
+                    <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2">Cronómetro Telemetría</p>
+                    <p className="text-2xl font-bold text-white tracking-tighter">
                         {Math.floor(elapsedTime / 60).toString().padStart(2, '0')}:{(elapsedTime % 60).toString().padStart(2, '0')}
                     </p>
-                    <p className="text-[8px] text-gray-600 mt-4 font-bold uppercase tracking-widest">Sincronizado con PLC Industrial</p>
+                    <p className="text-[7px] text-gray-600 mt-3 font-bold uppercase tracking-widest">Sincronizado con PLC Industrial</p>
                 </div>
 
-                <div className="bg-bg-card border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden shadow-xl">
+                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-xl">
                     <div className="absolute top-0 left-0 w-full h-1 bg-orange-500 opacity-30"></div>
-                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mb-3">Rate of Rise (RoR)</p>
-                    <p className="text-5xl font-bold text-orange-400 tracking-tighter">{rorCurrent.toFixed(1)}</p>
-                    <div className="flex gap-1 mt-4">
-                        {[...Array(8)].map((_, i) => <div key={i} className={`h-1.5 flex-1 rounded-full ${rorCurrent > (i * 2) ? 'bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.4)]' : 'bg-white/5'}`}></div>)}
+                    <p className="text-[8px] text-orange-500 font-bold uppercase tracking-widest mb-2">Rate of Rise (RoR)</p>
+                    <p className="text-2xl font-bold text-orange-400 tracking-tighter">{rorCurrent.toFixed(1)}</p>
+                    <div className="flex gap-1 mt-3">
+                        {[...Array(8)].map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full ${rorCurrent > (i * 2) ? 'bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.4)]' : 'bg-white/5'}`}></div>)}
                     </div>
                 </div>
 
-                <div className="bg-bg-card border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden shadow-xl">
+                <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-xl">
                     <div className="absolute top-0 left-0 w-full h-1 bg-brand-green opacity-30"></div>
-                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-widest mb-3">Development (DTR)</p>
-                    <p className="text-5xl font-bold text-brand-green-bright tracking-tighter">{dtrCurrent.toFixed(1)}%</p>
-                    <div className="mt-4 flex gap-2">
-                        <div className={`h-1.5 flex-1 rounded-full ${dtrCurrent > 15 ? 'bg-brand-green-bright shadow-[0_0_5px_rgb(0,255,136)]' : 'bg-white/5'}`}></div>
-                        <div className={`h-1.5 flex-1 rounded-full ${dtrCurrent > 20 ? 'bg-brand-green-bright' : 'bg-white/5'}`}></div>
-                        <div className={`h-1.5 flex-1 rounded-full ${dtrCurrent > 25 ? 'bg-brand-green-bright' : 'bg-white/5'}`}></div>
+                    <p className="text-[8px] text-brand-green font-bold uppercase tracking-widest mb-2">Development (DTR)</p>
+                    <p className="text-2xl font-bold text-brand-green-bright tracking-tighter">{dtrCurrent.toFixed(1)}%</p>
+                    <div className="mt-3 flex gap-1.5">
+                        <div className={`h-1 flex-1 rounded-full ${dtrCurrent > 15 ? 'bg-brand-green-bright shadow-[0_0_5px_rgb(0,255,136)]' : 'bg-white/5'}`}></div>
+                        <div className={`h-1 flex-1 rounded-full ${dtrCurrent > 20 ? 'bg-brand-green-bright' : 'bg-white/5'}`}></div>
+                        <div className={`h-1 flex-1 rounded-full ${dtrCurrent > 25 ? 'bg-brand-green-bright' : 'bg-white/5'}`}></div>
                     </div>
                 </div>
             </div>
 
             {/* AI COPILOT SPECTRAL ASSISTANT */}
-            <div className={`bg-bg-card border rounded-[3rem] p-10 flex flex-col lg:flex-row items-center justify-between gap-10 transition-all duration-700 shadow-2xl relative overflow-hidden border-white/5`}>
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-red-500 opacity-50"></div>
+            <div className={`bg-bg-card border rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-6 transition-all duration-700 shadow-2xl relative overflow-hidden border-white/5`}>
+                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-red-500 opacity-40"></div>
 
                 {copilotData && (
-                    <div className={`absolute top-0 right-0 px-6 py-2 text-[9px] font-bold uppercase tracking-widest rounded-bl-3xl ${copilotData.isSincronized ? 'bg-brand-green/10 text-brand-green border-l border-b border-brand-green/20' : 'bg-orange-500/10 text-orange-500 border-l border-b border-orange-500/20'}`}>
+                    <div className={`absolute top-0 right-0 px-4 py-1.5 text-[8px] font-bold uppercase tracking-widest rounded-bl-2xl ${copilotData.isSincronized ? 'bg-brand-green/10 text-brand-green border-l border-b border-brand-green/20' : 'bg-orange-500/10 text-orange-500 border-l border-b border-orange-500/20'}`}>
                         SPECTRAL SYNC: {lastSync}
                     </div>
                 )}
 
-                <div className="flex items-center gap-10 flex-1 relative z-10">
-                    <div className={`w-24 h-24 rounded-[2.5rem] flex items-center justify-center shadow-2xl transition-all duration-500 ${copilotData?.actionCode === 'INCREASE_GAS' ? 'bg-blue-600/10 text-blue-400 ring-2 ring-blue-500/20' : copilotData?.actionCode === 'DECREASE_GAS' ? 'bg-red-600/10 text-red-400 ring-2 ring-red-500/20' : 'bg-white/5 text-gray-500'}`}>
-                        {copilotData?.actionCode === 'INCREASE_GAS' ? <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 5v14M5 12l7-7 7 7" /></svg> :
-                            copilotData?.actionCode === 'DECREASE_GAS' ? <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 19V5M19 12l-7 7-7-7" /></svg> :
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" /></svg>}
-                    </div>
-                    <div>
-                        <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.5em] mb-3 flex items-center gap-3">
-                            <span className="w-2.5 h-2.5 rounded-full bg-brand-green-bright animate-pulse"></span>
-                            Asistente de Curva Espectral AXIS
-                        </h4>
-                        <p className="text-2xl font-bold text-white tracking-tight leading-snug max-w-2xl">
-                            {copilotData?.recommendation || "Sintonizando la firma térmica del lote contra el modelo maestro..."}
-                        </p>
-                    </div>
+                <div className="flex items-center gap-6 flex-1 relative z-10 w-full">
+                    {!isRoasting && !roastEnded ? (
+                        <div className="flex-1 flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-2xl bg-brand-green/10 flex items-center justify-center border border-brand-green/20">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-[8px] font-bold text-brand-green uppercase tracking-[0.4em] mb-2 flex items-center gap-2">
+                                    Pre-Roast Strategy • Lote {lotData?.variety || 'Seleccionado'}
+                                </h4>
+                                <div className="grid grid-cols-3 gap-6">
+                                    <div className="space-y-1">
+                                        <p className="text-[7px] text-gray-500 uppercase font-bold">Charge Temp</p>
+                                        <p className="text-sm font-bold text-white">205°C ± 2°</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[7px] text-gray-500 uppercase font-bold">Initial Gas</p>
+                                        <p className="text-sm font-bold text-white">75% (HP)</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[7px] text-gray-500 uppercase font-bold">Airflow P1</p>
+                                        <p className="text-sm font-bold text-white">50% (PWM)</p>
+                                    </div>
+                                </div>
+                                <p className="text-[8px] text-gray-500 mt-2">Basado en humedad del {lotData?.moisture_pct || '11.5'}% y proceso {lotData?.process || 'Lavado'}.</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-6 flex-1">
+                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 ${copilotData?.actionCode === 'INCREASE_GAS' ? 'bg-blue-600/20 text-blue-400 ring-2 ring-blue-500/40 animate-pulse' : copilotData?.actionCode === 'DECREASE_GAS' ? 'bg-red-600/20 text-red-400 ring-2 ring-red-500/40 animate-pulse' : 'bg-white/5 text-gray-500'}`}>
+                                {copilotData?.actionCode === 'INCREASE_GAS' ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 5v14M5 12l7-7 7 7" /></svg> :
+                                    copilotData?.actionCode === 'DECREASE_GAS' ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 19V5M19 12l-7 7-7-7" /></svg> :
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" /></svg>}
+                            </div>
+                            <div>
+                                <h4 className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.4em] mb-2 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-green-bright animate-pulse"></span>
+                                    Asistente de Curva Espectral AXIS
+                                </h4>
+                                <p className="text-lg font-bold text-white tracking-tight leading-snug max-w-2xl">
+                                    {copilotData?.recommendation || "Sintonizando la firma térmica del lote..."}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {copilotData && (
@@ -250,77 +333,99 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
             </div>
 
             {/* Panel PLC y Graficador Espectral */}
-            <div className="bg-bg-card border border-white/5 rounded-[3.5rem] p-12 shadow-3xl space-y-12 relative overflow-hidden">
+            <div className="bg-bg-card border border-white/5 rounded-3xl p-8 shadow-3xl space-y-8 relative overflow-hidden">
                 {/* Spectral Background Heatmap */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-red-500/5 pointer-events-none opacity-50"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-red-500/5 pointer-events-none opacity-30"></div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 relative z-10">
-                    <div className="space-y-8 p-8 bg-bg-main/50 rounded-[2.5rem] border border-white/5 backdrop-blur-sm">
-                        <div className="flex justify-between items-center">
-                            <h4 className="text-[11px] font-bold uppercase text-red-500 tracking-[0.4em]">Inyección Gas HP</h4>
-                            <span className="text-5xl font-bold text-white tracking-tighter">{gasPower}%</span>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-10">
+                    <div className={`space-y-4 p-5 bg-bg-main/50 rounded-2xl border transition-all duration-500 backdrop-blur-sm ${copilotData?.actionCode === 'INCREASE_GAS' ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)] bg-blue-500/5' : copilotData?.actionCode === 'DECREASE_GAS' ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)] bg-red-500/5' : 'border-white/5'}`}>
+                        <div className="flex justify-between items-center text-center">
+                            <h4 className="text-[9px] font-bold uppercase text-red-500 tracking-[0.2em] flex items-center gap-2">
+                                {copilotData?.actionCode === 'DECREASE_GAS' && <svg className="animate-bounce" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 19V5M19 12l-7 7-7-7" /></svg>}
+                                Inyección Gas HP
+                                {copilotData?.actionCode === 'INCREASE_GAS' && <svg className="animate-bounce" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 5v14M5 12l7-7 7 7" /></svg>}
+                            </h4>
+                            <span className="text-xl font-bold text-white tracking-tighter">{gasPower}%</span>
                         </div>
                         <input
                             type="range" min="0" max="100" value={gasPower}
                             onChange={(e) => setGasPower(parseInt(e.target.value))}
-                            className="w-full h-3 bg-red-950/30 rounded-full appearance-none accent-red-500 cursor-pointer border border-red-500/10"
+                            className="w-full h-1.5 bg-red-950/30 rounded-full appearance-none accent-red-500 cursor-pointer border border-red-500/10"
                         />
-                        <div className="flex justify-between text-[8px] font-bold text-gray-600 uppercase tracking-widest">
+                        <div className="flex justify-between text-[7px] font-bold text-gray-600 uppercase tracking-widest px-1">
                             <span>IDLE</span>
-                            <span>MAX LOAD</span>
+                            <span className={copilotData?.actionCode ? 'text-white animate-pulse' : ''}>{copilotData?.actionCode === 'INCREASE_GAS' ? 'SUBIR GAS ↑' : copilotData?.actionCode === 'DECREASE_GAS' ? 'BAJAR GAS ↓' : 'MAX LOAD'}</span>
                         </div>
                     </div>
 
-                    <div className="space-y-8 p-8 bg-bg-main/50 rounded-[2.5rem] border border-white/5 backdrop-blur-sm">
+                    <div className="space-y-4 p-5 bg-bg-main/50 rounded-2xl border border-white/5 backdrop-blur-sm">
                         <div className="flex justify-between items-center">
-                            <h4 className="text-[11px] font-bold uppercase text-blue-400 tracking-[0.4em]">Flujo de Aire PWM</h4>
-                            <span className="text-5xl font-bold text-white tracking-tighter">{airflow}%</span>
+                            <h4 className="text-[9px] font-bold uppercase text-blue-400 tracking-[0.2em]">Flujo de Aire PWM</h4>
+                            <span className="text-xl font-bold text-white tracking-tighter">{airflow}%</span>
                         </div>
                         <input
                             type="range" min="0" max="100" value={airflow}
                             onChange={(e) => setAirflow(parseInt(e.target.value))}
-                            className="w-full h-3 bg-blue-950/30 rounded-full appearance-none accent-blue-500 cursor-pointer border border-blue-500/10"
+                            className="w-full h-1.5 bg-blue-950/30 rounded-full appearance-none accent-blue-500 cursor-pointer border border-blue-500/10"
                         />
-                        <div className="flex justify-between text-[8px] font-bold text-gray-600 uppercase tracking-widest">
+                        <div className="flex justify-between text-[7px] font-bold text-gray-600 uppercase tracking-widest">
                             <span>CLOSED</span>
                             <span>FULL CONVECTION</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="relative h-[480px] w-full bg-bg-main rounded-[3rem] border border-white/5 overflow-hidden shadow-inner p-10">
-                    <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(to right, #444 1px, transparent 1px), linear-gradient(to bottom, #444 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+                <div className="relative h-[480px] w-full bg-bg-main rounded-2xl border border-white/5 overflow-hidden shadow-inner p-4 pb-12">
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(to right, #444 1px, transparent 1px), linear-gradient(to bottom, #444 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
 
-                    <div className="flex justify-between items-center mb-10 relative z-10">
-                        <div className="flex gap-10">
-                            <div className="flex items-center gap-3"><span className="w-3.5 h-3.5 rounded-full bg-brand-green-bright shadow-[0_0_15px_rgba(0,255,136,0.6)]"></span> <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white">Beam Temp (BT)</span></div>
-                            <div className="flex items-center gap-3"><span className="w-3.5 h-3.5 border-2 border-dashed border-white/30 rounded-full"></span> <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">Master Ghost Profile</span></div>
+                    <div className="flex justify-between items-center mb-6 relative z-10 px-4">
+                        <div className="flex gap-8">
+                            <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-brand-green-bright shadow-[0_0_10px_rgba(0,255,136,0.6)]"></span> <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white">Beam Temp (BT)</span></div>
+                            <div className="flex items-center gap-2"><span className="w-2 h-2 border border-dashed border-white/30 rounded-full"></span> <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500">Master Ghost Profile</span></div>
                         </div>
 
-                        <div className="flex gap-4">
+                        <div className="flex gap-3">
                             {!isRoasting ? (
-                                <button onClick={startRoast} className="bg-white text-black px-14 py-5 rounded-2xl font-bold text-xs uppercase shadow-2xl hover:scale-105 transition-all tracking-[0.2em]">Ejecutar Carga (Charge)</button>
+                                <button onClick={handleCharge} className="bg-white text-black px-8 py-3 rounded-xl font-bold text-[10px] uppercase shadow-2xl hover:scale-105 transition-all tracking-[0.1em]">Carga (Charge)</button>
                             ) : (
-                                <div className="flex gap-4">
+                                <div className="flex gap-3">
                                     <button
                                         onClick={() => setFirstCrack(elapsedTime)}
-                                        className={`px-8 py-5 rounded-2xl font-bold text-[10px] uppercase border transition-all ${firstCrack ? 'bg-orange-500/20 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                                        className={`px-6 py-3 rounded-xl font-bold text-[9px] uppercase border transition-all ${firstCrack ? 'bg-orange-500/20 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                                     >
-                                        {firstCrack ? 'FC REGISTERED' : 'MARK FIRST CRACK'}
+                                        {firstCrack ? 'FC REG' : 'FC'}
                                     </button>
-                                    <button onClick={handleDrop} className="bg-red-600 hover:bg-red-500 text-white px-12 py-5 rounded-2xl font-bold text-[10px] uppercase shadow-2xl shadow-red-900/40 transition-all border border-red-500/20">Finalizar Tueste (Drop)</button>
+                                    <button onClick={handleDrop} className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-xl font-bold text-[9px] uppercase shadow-2xl transition-all border border-red-500/20">Drop</button>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="relative h-[300px]">
-                        <svg className="absolute inset-0 overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <div className="relative h-[340px] px-10">
+                        {/* Eje Y: Temperatura */}
+                        <div className="absolute left-0 inset-y-0 flex flex-col justify-between text-[8px] font-bold text-gray-600 h-full py-0">
+                            <span>250°C</span>
+                            <span>200°C</span>
+                            <span>150°C</span>
+                            <span>100°C</span>
+                            <span>0°C</span>
+                        </div>
+
+                        {/* Eje X: Tiempo */}
+                        <div className="absolute bottom-[-24px] inset-x-10 flex justify-between text-[8px] font-bold text-gray-600">
+                            <span>0 min</span>
+                            <span>3 min</span>
+                            <span>6 min</span>
+                            <span>9 min</span>
+                            <span>12 min</span>
+                        </div>
+
+                        <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
                             {/* Spectral Background Area */}
                             <path
                                 d={`M0,100 ${generatePoints(btHistory, 250)} L100,100 Z`}
                                 fill="url(#spectralGlow)"
-                                fillOpacity="0.05"
+                                fillOpacity="0.03"
                                 className="transition-all duration-1000"
                             />
                             <defs>
@@ -332,18 +437,18 @@ export default function LiveRoastMonitor({ lotData, masterProfile }: LiveRoastMo
 
                             {/* Ghost Profile */}
                             {masterProfile && (
-                                <polyline fill="none" stroke="white" strokeWidth="0.15" strokeDasharray="1.5,1.5" strokeOpacity="0.3" points={generatePoints(masterProfile.points, 250)} />
+                                <polyline fill="none" stroke="white" strokeWidth="0.15" strokeDasharray="1.5,1.5" strokeOpacity="0.2" points={generatePoints(masterProfile.points, 250)} />
                             )}
 
                             {/* BT Actual with thick glow line */}
-                            <polyline fill="none" stroke="#00ff88" strokeWidth="0.7" strokeLinecap="round" strokeLinejoin="round" points={generatePoints(btHistory, 250)} className="drop-shadow-[0_0_12px_rgba(0,255,136,0.6)]" />
+                            <polyline fill="none" stroke="#00ff88" strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round" points={generatePoints(btHistory, 250)} className="drop-shadow-[0_0_8px_rgba(0,255,136,0.5)]" />
                         </svg>
                     </div>
 
-                    <div className="mt-12 flex justify-between border-t border-white/5 pt-8 text-[10px] font-bold text-gray-600 uppercase tracking-[0.3em]">
-                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-cyan-500 opacity-50"></div> Drying Stage</span>
-                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-orange-500 opacity-50"></div> Maillard Stage</span>
-                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-500 opacity-50"></div> Development Stage</span>
+                    <div className="mt-14 flex justify-between border-t border-white/5 pt-4 text-[8px] font-bold text-gray-600 uppercase tracking-[0.2em] px-4">
+                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-cyan-500 opacity-40"></div> Drying</span>
+                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-orange-500 opacity-40"></div> Maillard</span>
+                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-500 opacity-40"></div> Development</span>
                     </div>
                 </div>
             </div>

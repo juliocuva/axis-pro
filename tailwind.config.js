@@ -10,11 +10,11 @@ module.exports = {
                 mono: ["var(--font-montserrat)", "monospace"],
             },
             letterSpacing: {
-                tighter: "-0.05em",
-                tight: "-0.025em",
-                wide: "0.05em",
-                widest: "0.1em",
-                "ultra-wide": "0.3em",
+                tighter: "0.0em",
+                tight: "0.0em",
+                wide: "0.0em",
+                widest: "0.0m",
+                "ultra-wide": "0.0em",
             },
             colors: {
                 brand: {
@@ -31,8 +31,12 @@ module.exports = {
                 },
                 border: {
                     main: "var(--border-main)",
-                }
+                },
             },
+            borderRadius: {
+                'industrial': '1.25rem',
+                'industrial-sm': '0.75rem',
+            }
         },
     },
     plugins: [],

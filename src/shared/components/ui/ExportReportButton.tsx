@@ -14,30 +14,74 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             const element = document.getElementById(elementId);
             if (!element) return;
 
-            // Almacenar estilos originales
+            // Almacenar estilos originales y de padres críticos
             const originalStyle = element.style.cssText;
+            const parent = element.parentElement;
+            const originalParentStyle = parent ? parent.style.cssText : '';
 
-            // Forzar un ancho estándar para el renderizado del canvas (A4 ratio approx)
+            // Forzar un estado de visualización limpio para la captura
+            // 1. Desactivar transiciones para evitar frames intermedios
+            element.style.transition = 'none';
+
+            // 2. Forzar ancho industrial (proporción A4 ideal)
             element.style.width = '1200px';
             element.style.maxWidth = 'none';
+            element.style.minWidth = '1200px';
             element.style.position = 'relative';
+            element.style.left = '0';
+            element.style.top = '0';
+            element.style.margin = '0';
             element.style.transform = 'none';
 
+            // 3. Relax parent constraints to avoid clipping
+            if (parent) {
+                parent.style.overflow = 'visible';
+                parent.style.maxWidth = 'none';
+                parent.style.width = 'auto';
+            }
+
+            // Pequeño delay para asegurar que el DOM se ajuste al nuevo ancho
+            await new Promise(r => setTimeout(r, 500));
+
             const canvas = await html2canvas(element, {
-                scale: 3, // Mayor resolución
+                scale: 2,
                 backgroundColor: '#050706',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
-                windowWidth: 1200
+                windowWidth: 1200,
+                x: 0,
+                y: 0,
+                scrollX: 0,
+                scrollY: 0,
+                onclone: (clonedDoc) => {
+                    const itemsToHide = clonedDoc.querySelectorAll('.no-export');
+                    itemsToHide.forEach((el: any) => el.style.display = 'none');
+
+                    // Force charts to have non-zero dimensions
+                    const charts = clonedDoc.querySelectorAll('.recharts-responsive-container');
+                    charts.forEach((chart: any) => {
+                        chart.style.width = '800px'; // Forced static width for capture
+                        chart.style.height = '400px'; // Forced static height for capture
+                        chart.style.visibility = 'visible';
+                        chart.style.opacity = '1';
+                    });
+
+                    // Avoid 0-size canvases which trigger InvalidStateError in createPattern
+                    const canvases = clonedDoc.querySelectorAll('canvas');
+                    canvases.forEach((canvas: any) => {
+                        if (canvas.width === 0) canvas.width = 1;
+                        if (canvas.height === 0) canvas.height = 1;
+                    });
+                }
             });
 
-            // Restaurar estilos
+            // Restaurar estilos inmediatamente
             element.style.cssText = originalStyle;
+            if (parent) parent.style.cssText = originalParentStyle;
 
             const imgData = canvas.toDataURL('image/png', 1.0);
 
-            // Crear PDF tamaño A4
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
@@ -48,7 +92,10 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            // Centrar si es más corto que la página, o empezar en 0 si es más largo
+            const yOffset = pdfHeight < pdf.internal.pageSize.getHeight() ? 5 : 0;
+
+            pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, pdfHeight);
             pdf.save(`${fileName}.pdf`);
 
             if (btn) btn.innerText = 'PDF GENERADO ✓';

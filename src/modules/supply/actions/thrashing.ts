@@ -12,7 +12,8 @@ export async function processThrashingAction(
     inventoryId: string,
     excelsoWeight: number,
     pasillaWeight: number,
-    ciscoWeight: number
+    ciscoWeight: number,
+    companyId: string
 ) {
     try {
         // 1. Obtener Peso Pergamino desde la fuente de verdad (DB)
@@ -20,6 +21,7 @@ export async function processThrashingAction(
             .from('coffee_purchase_inventory')
             .select('purchase_weight')
             .eq('id', inventoryId)
+            .eq('company_id', companyId)
             .single();
 
         if (fetchError || !lot) {
@@ -45,7 +47,8 @@ export async function processThrashingAction(
                 thrashing_yield: yieldFactor,
                 status: 'thrashed'
             })
-            .eq('id', inventoryId);
+            .eq('id', inventoryId)
+            .eq('company_id', companyId);
 
         if (updateError) {
             // Si el error es PGRST204 (columna no encontrada), reintentamos sin pasilla/cisco
@@ -57,7 +60,8 @@ export async function processThrashingAction(
                         thrashing_yield: yieldFactor,
                         status: 'thrashed'
                     })
-                    .eq('id', inventoryId);
+                    .eq('id', inventoryId)
+                    .eq('company_id', companyId);
 
                 if (retryError) throw new Error(`Error en persistencia (Reintento): ${retryError.message}`);
             } else {

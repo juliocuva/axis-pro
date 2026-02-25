@@ -11,6 +11,7 @@ import {
 interface SCACuppingFormProps {
     inventoryId: string;
     onCuppingComplete: () => void;
+    user: { companyId: string } | null;
 }
 
 const CATEGORIES = [
@@ -23,7 +24,7 @@ const CATEGORIES = [
     { id: 'overall', label: 'Global' }
 ];
 
-export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACuppingFormProps) {
+export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }: SCACuppingFormProps) {
     const [scores, setScores] = useState<Record<string, number>>({
         fragrance_aroma: 7.5,
         flavor: 7.5,
@@ -55,6 +56,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                     .from('sca_cupping')
                     .select('*')
                     .eq('inventory_id', inventoryId.trim())
+                    .eq('company_id', user?.companyId)
                     .order('created_at', { ascending: false })
                     .limit(1);
 
@@ -121,7 +123,8 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                 inventoryId,
                 cleanScores,
                 tasterName,
-                notes
+                notes,
+                user?.companyId || ''
             );
 
             if (!result.success) {
@@ -141,14 +144,14 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in zoom-in duration-500 relative">
             {isLoading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-3xl">
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-industrial">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-green-bright animate-pulse">Sincronizando con AXIS Cloud...</p>
                     </div>
                 </div>
             )}
-            <div className="lg:col-span-2 bg-bg-card border border-white/5 p-8 rounded-3xl space-y-8 shadow-2xl relative overflow-hidden">
+            <div className="lg:col-span-2 bg-bg-card border border-white/5 p-8 rounded-industrial space-y-8 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 blur-3xl rounded-full"></div>
 
                 <header className="flex justify-between items-end border-b border-white/5 pb-6 relative z-10">
@@ -179,7 +182,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {CATEGORIES.map(cat => (
-                            <div key={cat.id} className="bg-bg-main/50 p-5 rounded-2xl border border-white/5 flex flex-col gap-4 group hover:border-brand-green/30 transition-all">
+                            <div key={cat.id} className="bg-bg-main/50 p-5 rounded-industrial-sm border border-white/5 flex flex-col gap-4 group hover:border-brand-green/30 transition-all">
                                 <div className="flex justify-between items-center">
                                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{cat.label}</label>
                                     <span className="text-brand-green-bright font-mono text-lg font-bold">{(scores[cat.id] || 0).toFixed(2)}</span>
@@ -193,7 +196,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                             </div>
                         ))}
 
-                        <div className="bg-brand-red/5 p-5 rounded-2xl border border-brand-red/10 flex flex-col gap-4">
+                        <div className="bg-brand-red/5 p-5 rounded-industrial-sm border border-brand-red/10 flex flex-col gap-4">
                             <div className="flex justify-between items-center">
                                 <label className="text-[10px] font-bold text-brand-red-bright uppercase tracking-widest">Tazas con Defectos</label>
                                 <span className="text-brand-red-bright font-mono text-lg font-bold">-{(scores.defects_score || 0) * 2} pts</span>
@@ -241,7 +244,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full flex items-center justify-center gap-4 py-6 bg-white text-black hover:bg-brand-green-bright hover:text-white font-bold rounded-2xl transition-all shadow-2xl group uppercase tracking-[0.2em] text-xs"
+                        className="w-full flex items-center justify-center gap-4 py-6 bg-white text-black hover:bg-brand-green-bright hover:text-white font-bold rounded-industrial-sm transition-all shadow-2xl group uppercase tracking-[0.2em] text-xs"
                     >
                         {isSubmitting ? 'SELLANDO PROTOCOLO EN AXIS CLOUD...' : 'SELLAR LOTE Y FIRMAR CERTIFICADO'}
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
@@ -252,7 +255,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete }: SCACu
             </div>
 
             <div className="space-y-6">
-                <div className="bg-bg-card border border-white/5 p-8 rounded-3xl h-full flex flex-col items-center justify-center relative overflow-hidden shadow-2xl min-h-[500px]">
+                <div className="bg-bg-card border border-white/5 p-8 rounded-industrial h-full flex flex-col items-center justify-center relative overflow-hidden shadow-2xl min-h-[500px]">
                     <div className="absolute inset-0 bg-brand-green/5 blur-3xl opacity-50"></div>
                     <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-8 relative z-10">Huella Organoléptica Industrial</h4>
                     <div className="w-full h-[300px] min-h-[300px] relative z-10">

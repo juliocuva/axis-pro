@@ -5,7 +5,11 @@ import { supabase } from '@/shared/lib/supabase';
 import LiveRoastMonitor from './LiveRoastMonitor';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 
-export default function RoastIntelligenceContainer() {
+interface RoastIntelligenceContainerProps {
+    user: { email: string, name: string, companyId: string } | null;
+}
+
+export default function RoastIntelligenceContainer({ user }: RoastIntelligenceContainerProps) {
     const [view, setView] = useState<'live' | 'archive'>('live');
     const [selectedLot, setSelectedLot] = useState<any>(null);
     const [availableLots, setAvailableLots] = useState<any[]>([]);
@@ -58,6 +62,7 @@ export default function RoastIntelligenceContainer() {
             const { data, error } = await supabase
                 .from('coffee_purchase_inventory')
                 .select('*, physical_analysis(*), sca_cupping(*)')
+                .eq('company_id', user?.companyId)
                 .in('status', ['completed', 'thrashed', 'purchased'])
                 .order('created_at', { ascending: false });
 
@@ -74,6 +79,7 @@ export default function RoastIntelligenceContainer() {
             const { data } = await supabase
                 .from('roast_batches')
                 .select('*')
+                .eq('company_id', user?.companyId)
                 .order('roast_date', { ascending: false });
             if (data) setPastRoasts(data);
         } catch (err) {
@@ -83,14 +89,14 @@ export default function RoastIntelligenceContainer() {
 
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
-            <header className="flex justify-between items-center bg-bg-card p-6 rounded-3xl border border-white/5 shadow-xl">
+            <header className="flex justify-between items-center bg-bg-card p-6 rounded-industrial border border-white/5 shadow-xl">
                 <div>
                     <h2 className="text-2xl font-bold uppercase tracking-tighter text-white">AXIS Roast Intelligence</h2>
                     <p className="text-[10px] text-gray-500 font-mono uppercase tracking-[0.2em] mt-1">Control de Consistencia Industrial TRL 7</p>
                 </div>
 
                 <div className="flex gap-4">
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 mr-2">
+                    <div className="flex bg-white/5 p-1 rounded-industrial-sm border border-white/5 mr-2">
                         <button
                             onClick={() => setView('live')}
                             className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${view === 'live' ? 'bg-orange-500 text-white' : 'text-gray-500'}`}
@@ -108,14 +114,14 @@ export default function RoastIntelligenceContainer() {
 
                     <button
                         onClick={() => setDemoMode(!demoMode)}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase transition-all border ${demoMode ? 'bg-orange-500/20 border-orange-500/50 text-orange-500' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                        className={`px-4 py-2 rounded-industrial-sm text-[10px] font-bold uppercase transition-all border ${demoMode ? 'bg-orange-500/20 border-orange-500/50 text-orange-500' : 'bg-white/5 border-white/10 text-gray-400'}`}
                     >
                         {demoMode ? '✨ DEMO ON' : 'MODO REAL'}
                     </button>
 
                     {view === 'live' && (
                         <select
-                            className="bg-bg-main border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-gray-300 outline-none focus:border-brand-green min-w-[200px] appearance-none"
+                            className="bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-2 text-xs font-bold text-gray-300 outline-none focus:border-brand-green min-w-[200px] appearance-none"
                             onChange={(e) => {
                                 const lot = availableLots.find(l => l.id === e.target.value);
                                 setSelectedLot(lot);
@@ -131,7 +137,7 @@ export default function RoastIntelligenceContainer() {
                     {view === 'live' && (
                         <button
                             onClick={() => setShowHistoryModal(true)}
-                            className="bg-white/5 hover:bg-white/10 text-white px-6 py-2 rounded-xl text-xs font-bold transition-all border border-white/5 flex items-center gap-2 uppercase"
+                            className="bg-white/5 hover:bg-white/10 text-white px-6 py-2 rounded-industrial-sm text-xs font-bold transition-all border border-white/5 flex items-center gap-2 uppercase"
                         >
                             Cargar Histórico
                         </button>
@@ -144,7 +150,7 @@ export default function RoastIntelligenceContainer() {
                     {/* Modal de Histórico */}
                     {showHistoryModal && (
                         <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6">
-                            <div className="bg-bg-card border border-white/10 w-full max-w-2xl rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in-95">
+                            <div className="bg-bg-card border border-white/10 w-full max-w-2xl rounded-industrial overflow-hidden shadow-2xl animate-in zoom-in-95">
                                 <header className="p-10 border-b border-white/5 flex justify-between items-center">
                                     <div>
                                         <h3 className="text-2xl font-bold uppercase tracking-tight text-white">Archivo de Perfiles Maestro</h3>
@@ -157,9 +163,9 @@ export default function RoastIntelligenceContainer() {
 
                                 <div className="p-10 max-h-[60vh] overflow-y-auto space-y-4">
                                     {pastRoasts.length > 0 ? pastRoasts.map(roast => (
-                                        <div key={roast.id} className="p-6 bg-white/2 border border-white/5 rounded-[2rem] flex justify-between items-center hover:border-brand-green/40 transition-all group">
+                                        <div key={roast.id} className="p-6 bg-white/2 border border-white/5 rounded-industrial-sm flex justify-between items-center hover:border-brand-green/40 transition-all group">
                                             <div className="flex items-center gap-6">
-                                                <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center font-bold text-brand-green-bright text-sm border border-white/5">
+                                                <div className="w-14 h-14 bg-white/5 rounded-industrial-sm flex items-center justify-center font-bold text-brand-green-bright text-sm border border-white/5">
                                                     {roast.batch_id_label.split('-')[1]}
                                                 </div>
                                                 <div>
@@ -191,7 +197,7 @@ export default function RoastIntelligenceContainer() {
                     {selectedLot ? (
                         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
                             <aside className="space-y-6">
-                                <div className="bg-bg-card border border-white/10 p-8 rounded-[2.5rem] relative overflow-hidden">
+                                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial-sm relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-brand-green opacity-5 blur-3xl pointer-events-none"></div>
                                     <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-6">Ficha Técnica Lote</h4>
 
@@ -205,7 +211,7 @@ export default function RoastIntelligenceContainer() {
                                             <p className="text-2xl font-bold text-white tracking-tighter">{selectedLot.physical_analysis?.[0]?.moisture_pct || '11.2'}%</p>
                                         </div>
                                         {masterProfile && (
-                                            <div className="p-5 bg-blue-500/5 border border-blue-500/20 rounded-[1.5rem] animate-in slide-in-from-left duration-500">
+                                            <div className="p-5 bg-blue-500/5 border border-blue-500/20 rounded-industrial-sm animate-in slide-in-from-left duration-500">
                                                 <p className="text-[9px] font-bold uppercase text-blue-400 mb-2 flex items-center gap-2">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
                                                     Ghost Profile Activo
@@ -217,7 +223,7 @@ export default function RoastIntelligenceContainer() {
                                     </div>
                                 </div>
 
-                                <div className="bg-orange-500/5 border border-orange-500/10 p-8 rounded-[2.5rem]">
+                                <div className="bg-orange-500/5 border border-orange-500/10 p-8 rounded-industrial-sm">
                                     <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mb-3">Co-Piloto AI</p>
                                     <p className="text-[11px] text-gray-400 leading-relaxed font-medium">
                                         {masterProfile
@@ -229,11 +235,11 @@ export default function RoastIntelligenceContainer() {
                             </aside>
 
                             <div className="xl:col-span-3">
-                                <LiveRoastMonitor lotData={selectedLot} masterProfile={masterProfile} />
+                                <LiveRoastMonitor lotData={selectedLot} masterProfile={masterProfile} user={user} />
                             </div>
                         </div>
                     ) : (
-                        <div className="min-h-[500px] border border-dashed border-white/5 rounded-[4rem] flex flex-col items-center justify-center text-center p-20 bg-white/[0.01]">
+                        <div className="min-h-[500px] border border-dashed border-white/5 rounded-industrial flex flex-col items-center justify-center text-center p-20 bg-white/[0.01]">
                             <div className="w-32 h-32 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/5 animate-pulse">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-brand-green"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                             </div>
@@ -243,7 +249,7 @@ export default function RoastIntelligenceContainer() {
                     )}
                 </>
             ) : (
-                <GlobalHistoryArchive />
+                <GlobalHistoryArchive user={user} />
             )}
         </div>
     );

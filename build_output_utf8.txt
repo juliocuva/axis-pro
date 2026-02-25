@@ -1,0 +1,10 @@
+﻿
+> axis-pro@1.0.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 6.0s
+  Running TypeScript ...

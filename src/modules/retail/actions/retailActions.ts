@@ -12,6 +12,7 @@ export async function registerRetailInventory(data: {
     unitsProduced: number,
     packerName: string,
     isExternal: boolean,
+    companyId: string,
     // Para internos
     roastBatchId?: string,
     // Para externos
@@ -26,14 +27,14 @@ export async function registerRetailInventory(data: {
             unit_size_grams: data.unitSizeGrams,
             units_produced: data.unitsProduced,
             packer_name: data.packerName,
+            company_id: data.companyId,
             created_at: new Date().toISOString()
         };
 
         if (data.isExternal) {
-            payload.roast_batch_id = `EXT-${data.externalRoaster?.substring(0, 3).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
-            // En un sistema real, guardaríamos estos metadatos en una tabla de 'external_batches' o similar
-            // Por ahora los pasamos como metadatos si la tabla lo permite o simulamos el registro
+            payload.roast_batch_id = null; // No hay UUID de lote interno
             payload.metadata = {
+                external_batch_label: `EXT-${data.externalRoaster?.substring(0, 3).toUpperCase()}-${Math.floor(Math.random() * 1000)}`,
                 roaster: data.externalRoaster,
                 origin: data.externalOrigin,
                 process: data.externalProcess,
@@ -41,7 +42,7 @@ export async function registerRetailInventory(data: {
                 is_external: true
             };
         } else {
-            payload.roast_batch_id = data.roastBatchId;
+            payload.roast_batch_id = data.roastBatchId; // Ahora es el UUID
             payload.metadata = { is_external: false };
         }
 
@@ -62,11 +63,12 @@ export async function registerRetailInventory(data: {
 /**
  * Obtiene el inventario consolidado de retail.
  */
-export async function getRetailInventory() {
+export async function getRetailInventory(companyId: string) {
     try {
         const { data, error } = await supabase
             .from('retail_inventory')
             .select('*')
+            .eq('company_id', companyId)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -80,14 +82,19 @@ export async function getRetailInventory() {
 /**
  * Obtiene la telemetría completa de un lote para el Storytelling B2C.
  */
-export async function getBatchStory(batchIdLabel: string) {
+export async function getBatchStory(batchIdLabel: string, companyId?: string) {
     try {
         // Primero buscamos si es un lote de retail (podría ser externo)
-        const { data: retailItem } = await supabase
+        let query = supabase
             .from('retail_inventory')
             .select('*')
-            .eq('roast_batch_id', batchIdLabel)
-            .maybeSingle();
+            .eq('roast_batch_id', batchIdLabel);
+
+        if (companyId) {
+            query = query.eq('company_id', companyId);
+        }
+
+        const { data: retailItem } = await query.maybeSingle();
 
         if (retailItem?.metadata?.is_external) {
             const meta = retailItem.metadata;
@@ -104,11 +111,16 @@ export async function getBatchStory(batchIdLabel: string) {
         }
 
         // Si no es externo, buscamos en los lotes de tueste internos
-        const { data: roast } = await supabase
+        let roastQuery = supabase
             .from('roast_batches')
             .select('*')
-            .eq('batch_id_label', batchIdLabel)
-            .single();
+            .eq('batch_id_label', batchIdLabel);
+
+        if (companyId) {
+            roastQuery = roastQuery.eq('company_id', companyId);
+        }
+
+        const { data: roast } = await roastQuery.single();
 
         return {
             roast,

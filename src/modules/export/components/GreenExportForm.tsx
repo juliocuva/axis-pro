@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import CoffeePassport from './CoffeePassport';
 
-export default function GreenExportForm() {
+export default function GreenExportForm({ user }: { user: { companyId: string } | null }) {
     const [formData, setFormData] = useState({
         lotId: 'LOT-' + Math.floor(Math.random() * 9000 + 1000),
         moistureContent: 11.5,
@@ -34,7 +34,7 @@ export default function GreenExportForm() {
                     destination: formData.destination,
                     transport_type: formData.transportType,
                     export_date: formData.exportDate,
-                    company_id: '99999999-9999-9999-9999-999999999999'
+                    company_id: user?.companyId
                 }]);
 
             if (error) throw error;

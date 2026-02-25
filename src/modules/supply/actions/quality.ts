@@ -12,7 +12,8 @@ export async function submitCuppingProtocol(
     inventoryId: string,
     scores: any,
     tasterName: string,
-    notes: string
+    notes: string,
+    companyId: string
 ) {
     try {
         const cleanId = inventoryId.trim();
@@ -35,7 +36,7 @@ export async function submitCuppingProtocol(
                 defects_score: scores.defects_score,
                 notes,
                 taster_name: tasterName,
-                company_id: '99999999-9999-9999-9999-999999999999'
+                company_id: companyId
             }], { onConflict: 'inventory_id' }); // Necesita constraint unique en DB, si no, fallará como insert
 
         if (insertError) {
@@ -57,7 +58,7 @@ export async function submitCuppingProtocol(
                     defects_score: scores.defects_score,
                     notes,
                     taster_name: tasterName,
-                    company_id: '99999999-9999-9999-9999-999999999999'
+                    company_id: companyId
                 }]);
             if (retryError) throw new Error(`Fallo en registro SCA: ${retryError.message}`);
         }
@@ -66,7 +67,8 @@ export async function submitCuppingProtocol(
         const { error: updateError } = await supabase
             .from('coffee_purchase_inventory')
             .update({ status: 'completed' })
-            .eq('id', cleanId);
+            .eq('id', cleanId)
+            .eq('company_id', companyId);
 
         if (updateError) throw new Error(`Fallo en cierre de lote: ${updateError.message}`);
 

@@ -29,7 +29,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
         <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[999] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
             <div className="bg-bg-card border border-white/10 w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-3xl flex flex-col md:flex-row relative">
                 {/* Botón Cerrar */}
-                <button onClick={onClose} className="absolute top-8 right-8 text-gray-500 hover:text-white z-20">
+                <button onClick={onClose} className="absolute top-8 right-8 text-gray-500 hover:text-white z-20 no-export">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
 
@@ -135,7 +135,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                 </div>
 
                 {/* Footer: Acciones PDF - AHORA FUERA DE passport-document-area */}
-                <footer className="absolute bottom-0 left-0 right-0 bg-bg-card/80 backdrop-blur-md p-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 z-20">
+                <footer className="absolute bottom-0 left-0 right-0 bg-bg-card/80 backdrop-blur-md p-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 z-20 no-export">
                     <div className="flex items-center gap-4">
                         <span className="w-3 h-3 rounded-full bg-brand-green animate-pulse"></span>
                         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Documento Protegido por Axis Cryptofolio</span>

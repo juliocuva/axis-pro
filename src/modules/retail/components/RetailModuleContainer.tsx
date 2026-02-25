@@ -7,7 +7,11 @@ import { supabase } from '@/shared/lib/supabase';
 
 type RetailView = 'inventory' | 'labels' | 'traceability' | 'sales' | 'archive';
 
-export default function RetailModuleContainer() {
+interface RetailModuleContainerProps {
+    user: { email: string, name: string, companyId: string } | null;
+}
+
+export default function RetailModuleContainer({ user }: RetailModuleContainerProps) {
     const [activeTab, setActiveTab] = useState<RetailView>('inventory');
 
     return (
@@ -20,7 +24,7 @@ export default function RetailModuleContainer() {
                     </p>
                 </div>
 
-                <nav className="flex bg-bg-card p-1 rounded-2xl border border-white/5 shadow-2xl overflow-hidden">
+                <nav className="flex bg-bg-card p-1 rounded-industrial-sm border border-white/5 shadow-2xl overflow-hidden">
                     {(['inventory', 'labels', 'traceability', 'sales', 'archive'] as RetailView[]).map((tab) => (
                         <button
                             key={tab}
@@ -41,11 +45,11 @@ export default function RetailModuleContainer() {
             </header>
 
             <main className="min-h-[600px]">
-                {activeTab === 'inventory' && <InventoryManager />}
+                {activeTab === 'inventory' && <InventoryManager user={user} />}
                 {activeTab === 'labels' && <LabelGenerator />}
-                {activeTab === 'traceability' && <TraceabilityPreview />}
+                {activeTab === 'traceability' && <TraceabilityPreview user={user} />}
                 {activeTab === 'sales' && <SalesDashboard />}
-                {activeTab === 'archive' && <GlobalHistoryArchive />}
+                {activeTab === 'archive' && <GlobalHistoryArchive user={user} />}
             </main>
         </div>
     );
@@ -53,7 +57,7 @@ export default function RetailModuleContainer() {
 
 // --- Sub-componentes Temporales (Se moverán a archivos propios) ---
 
-function InventoryManager() {
+function InventoryManager({ user }: { user: { companyId: string } | null }) {
     const [inventory, setInventory] = useState<any[]>([]);
     const [roastBatches, setRoastBatches] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -79,14 +83,16 @@ function InventoryManager() {
     }, []);
 
     const loadData = async () => {
+        if (!user?.companyId) return;
         setIsLoading(true);
-        const inv = await getRetailInventory();
+        const inv = await getRetailInventory(user.companyId);
         setInventory(inv);
 
         // Cargar lotes de tueste disponibles para empacar
         const { data: batches } = await supabase
             .from('roast_batches')
             .select('*')
+            .eq('company_id', user.companyId)
             .order('roast_date', { ascending: false })
             .limit(10);
 
@@ -100,6 +106,7 @@ function InventoryManager() {
 
         const payload = {
             ...packData,
+            companyId: user?.companyId || '',
             isExternal: sourceType === 'external',
             externalNotes: packData.externalNotes.split(',').map(n => n.trim())
         };
@@ -115,7 +122,7 @@ function InventoryManager() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-                <div className="bg-bg-card border border-white/10 rounded-[2.5rem] p-10">
+                <div className="bg-bg-card border border-white/10 rounded-industrial p-10">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-sm font-bold uppercase tracking-[0.2em] flex items-center gap-3">
                             <span className="w-2 h-2 rounded-full bg-purple-500"></span>
@@ -130,12 +137,12 @@ function InventoryManager() {
                         {isLoading ? (
                             <div className="py-20 text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">Consultando Inventario Cloud...</div>
                         ) : inventory.length === 0 ? (
-                            <div className="py-20 text-center border border-dashed border-white/10 rounded-3xl">
+                            <div className="py-20 text-center border border-dashed border-white/10 rounded-industrial">
                                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Sin stock registrado.</p>
                             </div>
                         ) : (
                             inventory.map((item) => (
-                                <div key={item.id} className="p-6 bg-bg-main border border-white/5 rounded-2xl flex items-center justify-between group hover:border-purple-500/30 transition-all">
+                                <div key={item.id} className="p-6 bg-bg-main border border-white/5 rounded-industrial-sm flex items-center justify-between group hover:border-purple-500/30 transition-all">
                                     <div className="flex gap-4 items-center">
                                         <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 font-bold text-xs uppercase">
                                             {item.unit_size_grams}g
@@ -161,14 +168,14 @@ function InventoryManager() {
                 </div>
 
                 {showPackager ? (
-                    <form onSubmit={handlePackage} className="bg-gradient-to-br from-purple-900/40 to-bg-card border border-purple-500/30 rounded-[2.5rem] p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
+                    <form onSubmit={handlePackage} className="bg-gradient-to-br from-purple-900/40 to-bg-card border border-purple-500/30 rounded-industrial p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
                         <div className="flex justify-between items-center mb-4">
                             <h4 className="text-xl font-bold uppercase tracking-widest text-white">Ingreso de Producto al Retail</h4>
                             <button type="button" onClick={() => setShowPackager(false)} className="text-gray-500 hover:text-white">✕</button>
                         </div>
 
                         {/* Selector de Origen */}
-                        <div className="flex bg-bg-main p-1 rounded-xl border border-white/10 mb-6">
+                        <div className="flex bg-bg-main p-1 rounded-industrial-sm border border-white/10 mb-6">
                             <button
                                 type="button"
                                 onClick={() => setSourceType('internal')}
@@ -193,11 +200,11 @@ function InventoryManager() {
                                         required
                                         value={packData.roastBatchId}
                                         onChange={(e) => setPackData({ ...packData, roastBatchId: e.target.value })}
-                                        className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 text-sm font-bold"
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 text-sm font-bold"
                                     >
                                         <option value="">Seleccionar lote...</option>
                                         {roastBatches.map(b => (
-                                            <option key={b.batch_id_label} value={b.batch_id_label}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
+                                            <option key={b.id} value={b.id}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
                                         ))}
                                     </select>
                                 </div>
@@ -211,7 +218,7 @@ function InventoryManager() {
                                             placeholder="v.g. Café Pergamino, Amor Perfecto..."
                                             value={packData.externalRoaster}
                                             onChange={(e) => setPackData({ ...packData, externalRoaster: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold"
                                         />
                                     </div>
                                     <div>
@@ -222,7 +229,7 @@ function InventoryManager() {
                                             placeholder="Cauca, Tolima..."
                                             value={packData.externalOrigin}
                                             onChange={(e) => setPackData({ ...packData, externalOrigin: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold"
                                         />
                                     </div>
                                     <div>
@@ -230,7 +237,7 @@ function InventoryManager() {
                                         <select
                                             value={packData.externalProcess}
                                             onChange={(e) => setPackData({ ...packData, externalProcess: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold"
                                         >
                                             <option value="Lavado">Lavado</option>
                                             <option value="Natural">Natural</option>
@@ -245,7 +252,7 @@ function InventoryManager() {
                                             placeholder="Vainilla, Caramelo, Lima..."
                                             value={packData.externalNotes}
                                             onChange={(e) => setPackData({ ...packData, externalNotes: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 font-bold font-mono text-[10px]"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold font-mono text-[10px]"
                                         />
                                     </div>
                                 </>
@@ -258,7 +265,7 @@ function InventoryManager() {
                                     required
                                     value={packData.unitsProduced}
                                     onChange={(e) => setPackData({ ...packData, unitsProduced: parseInt(e.target.value) })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 font-bold"
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 font-bold"
                                 />
                             </div>
                             <div>
@@ -266,7 +273,7 @@ function InventoryManager() {
                                 <select
                                     value={packData.unitSizeGrams}
                                     onChange={(e) => setPackData({ ...packData, unitSizeGrams: parseInt(e.target.value) })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 font-bold"
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 font-bold"
                                 >
                                     <option value="250">250g</option>
                                     <option value="340">340g (12oz)</option>
@@ -279,13 +286,13 @@ function InventoryManager() {
                         <button
                             type="submit"
                             disabled={isPackaging}
-                            className={`w-full py-4 rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-purple-600 hover:bg-purple-500 shadow-purple-900/40' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/40'}`}
+                            className={`w-full py-4 rounded-industrial-sm text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-purple-600 hover:bg-purple-500 shadow-purple-900/40' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/40'}`}
                         >
                             {isPackaging ? 'PROCESANDO REGISTRO...' : `REGISTRAR CAFÉ ${sourceType === 'internal' ? 'PROPIO' : 'ADQUIRIDO'}`}
                         </button>
                     </form>
                 ) : (
-                    <div className="bg-gradient-to-r from-purple-900/20 to-transparent border border-purple-500/20 rounded-3xl p-8">
+                    <div className="bg-gradient-to-r from-purple-900/20 to-transparent border border-purple-500/20 rounded-industrial p-8">
                         <div className="flex justify-between items-center">
                             <div>
                                 <h4 className="text-xl font-bold uppercase tracking-widest text-white">Gestión Multi-Origen</h4>
@@ -302,10 +309,11 @@ function InventoryManager() {
                 )}
             </div>
 
-            <div className="bg-bg-card border border-white/10 rounded-[2.5rem] p-10 space-y-8">
+            {/* HISTORIAL - ALTURA SINCRONIZADA CON SECCIONES DEL FORMULARIO */}
+            <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group h-[780px]">
                 <h3 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-4">Alertas de Frescura AI</h3>
                 <div className="space-y-6">
-                    <div className="p-6 bg-brand-green/5 border border-brand-green/20 rounded-2xl">
+                    <div className="p-6 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm">
                         <p className="text-[10px] text-brand-green uppercase font-bold mb-2">✓ Calidad Óptima</p>
                         <p className="text-xs leading-relaxed text-gray-300">
                             95% de su inventario se encuentra en la ventana de frescura ideal (7-21 días post-tueste).
@@ -334,7 +342,7 @@ function InventoryManager() {
 function LabelGenerator() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="bg-bg-card border border-white/10 rounded-[2.5rem] p-12">
+            <div className="bg-bg-card border border-white/10 rounded-industrial p-12">
                 <h3 className="text-sm font-bold uppercase mb-8">Diseñador de Etiquetas Pro</h3>
                 <form className="space-y-6">
                     <div>
@@ -355,7 +363,7 @@ function LabelGenerator() {
                 </form>
             </div>
 
-            <div className="flex flex-col items-center justify-center bg-white p-12 rounded-[2.5rem] text-black">
+            <div className="flex flex-col items-center justify-center bg-white p-12 rounded-industrial text-black">
                 <div className="w-full aspect-[3/4] border-4 border-black p-8 flex flex-col justify-between relative">
                     <div className="space-y-2">
                         <h4 className="text-4xl font-bold uppercase leading-tight">AxIs<br />CoFfeE</h4>
@@ -399,7 +407,7 @@ function LabelGenerator() {
     );
 }
 
-function TraceabilityPreview() {
+function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
     const [searchBatch, setSearchBatch] = useState('AX-2130');
     const [story, setStory] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -410,7 +418,7 @@ function TraceabilityPreview() {
 
     const handleSearch = async () => {
         setIsLoading(true);
-        const data = await getBatchStory(searchBatch);
+        const data = await getBatchStory(searchBatch, user?.companyId || '');
         if (data) setStory(data);
         setIsLoading(false);
     };
@@ -490,7 +498,7 @@ function TraceabilityPreview() {
                                 <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                             </div>
 
-                            <button className="w-full py-4 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all">Ver Telemetría Roaster</button>
+                            <button className="w-full py-4 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest transition-all">Ver Telemetría Roaster</button>
                         </>
                     )}
                 </div>

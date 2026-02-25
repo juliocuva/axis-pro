@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS physical_analysis (
     density_gl DECIMAL, -- Densidad g/L
     screen_size_distribution JSONB, -- Distribución de mallas
     defects_count JSONB, -- Conteo de defectos
+    grain_color TEXT,
     notes TEXT,
     company_id UUID NOT NULL
 );

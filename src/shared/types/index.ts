@@ -20,6 +20,9 @@ export interface InventoryBatch {
     thrashedWeight?: number; // Kilos after thrashing (Excelso)
     thrashingYield?: number; // % Efficiency (Factor de rendimiento)
     status: 'purchased' | 'thrashed' | 'roasting' | 'completed';
+    destination?: 'internal' | 'export_green' | 'export_roasted';
+    exportCertificate?: string;
+    moisture?: number; // Added for validation needs
 }
 
 export interface RoastBatch {
