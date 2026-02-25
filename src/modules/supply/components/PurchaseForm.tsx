@@ -70,6 +70,12 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 exportCertificate: selectedLot.export_certificate || ''
             });
             setDisplayValue(formatCOP(String(selectedLot.purchase_value || 0)));
+        } else {
+            // Reset to initial state when no lot is selected (e.g., clicking "Crear Nuevo Lote")
+            setFormData(initialFormState);
+            setDisplayValue('');
+            setStatus(null);
+            setShowSuccessModal(false);
         }
     }, [selectedLot]);
 
