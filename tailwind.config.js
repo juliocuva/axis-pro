@@ -10,11 +10,13 @@ module.exports = {
                 mono: ["var(--font-montserrat)", "monospace"],
             },
             letterSpacing: {
-                tighter: "0.0em",
-                tight: "0.0em",
-                wide: "0.0em",
-                widest: "0.0m",
-                "ultra-wide": "0.0em",
+                tighter: "-0.05em",
+                tight: "-0.025em",
+                normal: "0",
+                wide: "0.025em",
+                wider: "0.05em",
+                widest: "0.1em",
+                "ultra-wide": "0.4em",
             },
             colors: {
                 brand: {

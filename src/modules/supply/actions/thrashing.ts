@@ -13,7 +13,9 @@ export async function processThrashingAction(
     excelsoWeight: number,
     pasillaWeight: number,
     ciscoWeight: number,
-    companyId: string
+    companyId: string,
+    processType: string,
+    humidity: number
 ) {
     try {
         // 1. Obtener Peso Pergamino desde la fuente de verdad (DB)
@@ -45,13 +47,15 @@ export async function processThrashingAction(
                 pasilla_weight: pasillaWeight,
                 cisco_weight: ciscoWeight,
                 thrashing_yield: yieldFactor,
-                status: 'thrashed'
+                status: 'thrashed',
+                process: processType, // Corregimos o actualizamos el proceso
+                humidity: humidity
             })
             .eq('id', inventoryId)
             .eq('company_id', companyId);
 
         if (updateError) {
-            // Si el error es PGRST204 (columna no encontrada), reintentamos sin pasilla/cisco
+            // Si el error es PGRST204 (columna no encontrada), reintentamos con campos básicos
             if (updateError.code === 'PGRST204') {
                 const { error: retryError } = await supabase
                     .from('coffee_purchase_inventory')

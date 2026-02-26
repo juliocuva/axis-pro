@@ -166,7 +166,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                         </p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Cali. Final</p>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Calificación Final</p>
                         <p className={`text-6xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-blue-400' : 'text-orange-500'}`}>
                             {totalScore.toFixed(2)}
                         </p>
@@ -255,12 +255,14 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
             </div>
 
             <div className="space-y-6">
-                <div className="bg-bg-card border border-white/5 p-8 rounded-industrial h-full flex flex-col items-center justify-center relative overflow-hidden shadow-2xl min-h-[500px]">
+                <div className="bg-bg-card border border-white/5 p-6 rounded-industrial flex flex-col items-center space-y-4 relative overflow-hidden shadow-2xl">
                     <div className="absolute inset-0 bg-brand-green/5 blur-3xl opacity-50"></div>
-                    <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] mb-8 relative z-10">Huella Organoléptica Industrial</h4>
-                    <div className="w-full h-[300px] min-h-[300px] relative z-10">
+                    <h4 className="text-[14px] font-bold text-gray-300 uppercase tracking-[0.4em] text-center leading-relaxed relative z-10 px-4 pt-2">
+                        Huella Organoléptica<br />Industrial
+                    </h4>
+                    <div className="w-full h-[280px] min-h-[280px] relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
                                 <PolarGrid stroke="#ffffff10" />
                                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
                                 <PolarRadiusAxis angle={30} domain={[6, 10]} axisLine={false} tick={false} />
@@ -269,12 +271,12 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     dataKey="A"
                                     stroke="#00a651"
                                     fill="#00a651"
-                                    fillOpacity={0.4}
+                                    fillOpacity={0.6}
                                 />
                             </RadarChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="mt-8 text-center space-y-3 relative z-10">
+                    <div className="pb-4 text-center space-y-3 relative z-10">
                         <span className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
                             {totalScore >= 85 ? '✓ SPECIALTY COFFEE' : '✓ PREMIUM GRADE'}
                         </span>

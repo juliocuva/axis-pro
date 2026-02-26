@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ProcessType } from '@/shared/types';
 import RoastCurveAnalysis from './RoastCurveAnalysis';
+import { NumericInput } from '@/shared/components/ui/NumericInput';
 
 export default function RoastEntryForm({ user }: { user: { companyId: string } | null }) {
     const [formData, setFormData] = useState({
@@ -159,18 +160,23 @@ export default function RoastEntryForm({ user }: { user: { companyId: string } |
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Tipo de Proceso</label>
-                                <select
-                                    value={formData.process}
-                                    onChange={(e) => setFormData({ ...formData, process: e.target.value as ProcessType })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none transition-all uppercase text-xs font-bold"
-                                    disabled={isSubmitting}
-                                >
-                                    <option value="washed">Lavado</option>
-                                    <option value="honey">Honey</option>
-                                    <option value="natural">Natural</option>
-                                </select>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Tipo de Proceso</label>
+                                <div className="relative group/select">
+                                    <select
+                                        value={formData.process}
+                                        onChange={(e) => setFormData({ ...formData, process: e.target.value as ProcessType })}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none transition-all uppercase text-xs font-bold appearance-none pr-12"
+                                        disabled={isSubmitting}
+                                    >
+                                        <option value="washed">Lavado</option>
+                                        <option value="honey">Honey</option>
+                                        <option value="natural">Natural</option>
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -180,31 +186,29 @@ export default function RoastEntryForm({ user }: { user: { companyId: string } |
                         <h3 className="text-brand-green-bright font-bold mb-6 text-sm uppercase tracking-widest">Control Masivo</h3>
 
                         <div className="space-y-6">
-                            <div className="relative">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Peso Verde (Kg)</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    required
-                                    onChange={(e) => setFormData({ ...formData, greenWeight: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-4 focus:border-brand-green outline-none text-xl font-bold"
-                                    placeholder="0.0"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
+                            <NumericInput
+                                label="Peso Verde (Kg)"
+                                value={formData.greenWeight}
+                                onChange={(val) => setFormData({ ...formData, greenWeight: val })}
+                                step={0.1}
+                                unit="KG"
+                                required
+                                disabled={isSubmitting}
+                                variant="industrial"
+                                inputClassName="text-xl font-bold py-4"
+                            />
 
-                            <div className="relative">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 block">Peso Tostado (Kg)</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    required
-                                    onChange={(e) => setFormData({ ...formData, roastedWeight: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-4 focus:border-brand-green outline-none text-xl font-bold"
-                                    placeholder="0.0"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
+                            <NumericInput
+                                label="Peso Tostado (Kg)"
+                                value={formData.roastedWeight}
+                                onChange={(val) => setFormData({ ...formData, roastedWeight: val })}
+                                step={0.1}
+                                unit="KG"
+                                required
+                                disabled={isSubmitting}
+                                variant="industrial"
+                                inputClassName="text-xl font-bold py-4"
+                            />
 
                             {yieldLoss !== null && (
                                 <div className={`mt-4 p-4 rounded-industrial-sm border flex justify-between items-center ${yieldLoss > 16 ? 'bg-brand-red/10 border-brand-red/30' : 'bg-brand-green/10 border-brand-green/30'}`}>

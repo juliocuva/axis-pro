@@ -24,10 +24,22 @@ const BASE_PRESSURE: Record<'light' | 'medium' | 'dark', number> = {
 };
 
 const DECAY_K: Record<ProcessType, number> = {
+    lavado: 0.15,
+    'Lavado': 0.15,
     washed: 0.15,
     honey: 0.12,
-    natural: 0.10, // Naturals degas slower
-    'semi-washed': 0.14
+    honey_yellow: 0.12,
+    'Yellow Honey': 0.12,
+    honey_red: 0.11,
+    'Red Honey': 0.11,
+    honey_black: 0.10,
+    'Black Honey': 0.10,
+    natural: 0.10,
+    'Natural': 0.10,
+    semi_lavado: 0.14,
+    'semi-washed': 0.14,
+    doble_fermentacion: 0.13,
+    co_fermentacion: 0.13
 };
 
 const TEMP_FACTOR: Record<'arctic' | 'temperate' | 'tropical', number> = {

@@ -53,61 +53,50 @@ export async function createCoffeePurchase(formData: any) {
         }
 
         // 4. Inserción de Datos Atómica
+        const insertData: any = {
+            farmer_name: cleanFarmerName,
+            farm_name: cleanFarmName,
+            lot_number: cleanLotNumber,
+            altitude: formData.altitude,
+            country: formData.country,
+            region: formData.region,
+            variety: formData.variety,
+            process: formData.process,
+            purchase_weight: formData.purchaseWeight,
+            purchase_value: formData.purchaseValue,
+            purchase_date: formData.purchaseDate,
+            destination: formData.destination,
+            export_certificate: formData.exportCertificate,
+            company_id: formData.companyId,
+            status: formData.coffeeType === 'excelso' ? 'thrashed' : 'purchased',
+            coffee_type: formData.coffeeType,
+            thrashed_weight: formData.coffeeType === 'excelso' ? formData.purchaseWeight : null
+        };
+
         let insertResponse = await supabase
             .from('coffee_purchase_inventory')
-            .insert([{
-                farmer_name: cleanFarmerName,
-                farm_name: cleanFarmName,
-                lot_number: cleanLotNumber,
-                altitude: formData.altitude,
-                country: formData.country,
-                region: formData.region,
-                variety: formData.variety,
-                process: formData.process,
-                purchase_weight: formData.purchaseWeight,
-                purchase_value: formData.purchaseValue,
-                purchase_date: formData.purchaseDate,
-                destination: formData.destination,
-                export_certificate: formData.exportCertificate,
-                company_id: formData.companyId,
-                status: 'purchased'
-            }])
+            .insert([insertData])
             .select()
             .single();
 
-        // RETRY LOGIC: Si fallan las columnas de exportación (error PGRST204 o 42703), reintentamos sin ellas
-        const isColumnError = insertResponse.error && (
-            insertResponse.error.code === '42703' ||
-            insertResponse.error.message?.includes('column') ||
-            insertResponse.error.message?.includes('destination')
-        );
+        // RETRY LOGIC: Si fallan columnas específicas, reintentamos sin ellas
+        if (insertResponse.error && (insertResponse.error.code === '42703' || insertResponse.error.message?.includes('column'))) {
+            console.warn("AXIS LOG: Detectada discrepancia de esquema. Reintentando sin columnas extendidas.");
 
-        if (isColumnError) {
-            console.warn("AXIS LOG: Detectada discrepancia de esquema. Reintentando sin columnas de exportación.");
+            const legacyData = { ...insertData };
+            delete legacyData.coffee_type;
+            delete legacyData.destination;
+            delete legacyData.export_certificate;
+
             insertResponse = await supabase
                 .from('coffee_purchase_inventory')
-                .insert([{
-                    farmer_name: cleanFarmerName,
-                    farm_name: cleanFarmName,
-                    lot_number: cleanLotNumber,
-                    altitude: formData.altitude,
-                    country: formData.country,
-                    region: formData.region,
-                    variety: formData.variety,
-                    process: formData.process,
-                    purchase_weight: formData.purchaseWeight,
-                    purchase_value: formData.purchaseValue,
-                    purchase_date: formData.purchaseDate,
-                    company_id: formData.companyId,
-                    status: 'purchased'
-                }])
+                .insert([legacyData])
                 .select()
                 .single();
         }
 
         if (insertResponse.error) {
             console.error("AXIS INSERT ERROR FULL:", insertResponse.error);
-            // Si el error es una violación de llave foránea (e.g. company_id que no existe)
             if (insertResponse.error.code === '23503') {
                 throw new Error(`ERROR INDUSTRIAL: Error de integridad (FK). Verifique la configuración de la empresa. [DB: ${insertResponse.error.message}]`);
             }
@@ -131,6 +120,67 @@ export async function createCoffeePurchase(formData: any) {
         return {
             success: false,
             message: userMessage
+        };
+    }
+}
+
+export async function updateCoffeePurchase(lotId: string, formData: any) {
+    try {
+        const cleanLotNumber = sanitizeString(formData.lotNumber);
+
+        const updateData: any = {
+            farmer_name: sanitizeString(formData.farmerName),
+            farm_name: sanitizeString(formData.farmName),
+            lot_number: cleanLotNumber,
+            altitude: formData.altitude,
+            country: formData.country,
+            region: formData.region,
+            variety: formData.variety,
+            process: formData.process,
+            purchase_weight: formData.purchaseWeight,
+            purchase_value: formData.purchaseValue,
+            purchase_date: formData.purchaseDate,
+            destination: formData.destination,
+            export_certificate: formData.exportCertificate,
+            coffee_type: formData.coffeeType
+        };
+
+        let updateResponse = await supabase
+            .from('coffee_purchase_inventory')
+            .update(updateData)
+            .eq('id', lotId)
+            .select()
+            .single();
+
+        // RETRY LOGIC para update
+        if (updateResponse.error && (updateResponse.error.code === '42703' || updateResponse.error.message?.includes('column'))) {
+            console.warn("AXIS LOG: Detectada discrepancia de esquema en UPDATE. Reintentando sin columnas extendidas.");
+
+            const legacyData = { ...updateData };
+            delete legacyData.coffee_type;
+            delete legacyData.destination;
+            delete legacyData.export_certificate;
+
+            updateResponse = await supabase
+                .from('coffee_purchase_inventory')
+                .update(legacyData)
+                .eq('id', lotId)
+                .select()
+                .single();
+        }
+
+        if (updateResponse.error) throw updateResponse.error;
+
+        return {
+            success: true,
+            data: updateResponse.data,
+            message: `Lote ${cleanLotNumber} actualizado correctamente.`
+        };
+    } catch (error: any) {
+        console.error("UPDATE ERROR:", error);
+        return {
+            success: false,
+            message: `Fallo al actualizar lote: ${error.message}`
         };
     }
 }

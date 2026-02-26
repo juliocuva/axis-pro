@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import CoffeePassport from './CoffeePassport';
+import { NumericInput } from '@/shared/components/ui/NumericInput';
 
 export default function GreenExportForm({ user }: { user: { companyId: string } | null }) {
     const [formData, setFormData] = useState({
@@ -80,28 +81,27 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                         </h3>
 
                         <div className="space-y-4">
-                            <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Humedad (%)</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={formData.moistureContent}
-                                    onChange={(e) => setFormData({ ...formData, moistureContent: parseFloat(e.target.value) })}
-                                    className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all text-sm font-bold"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
+                            <NumericInput
+                                label="Humedad (%)"
+                                value={formData.moistureContent}
+                                onChange={(val) => setFormData({ ...formData, moistureContent: val })}
+                                step={0.1}
+                                unit="%"
+                                disabled={isSubmitting}
+                                variant={formData.moistureContent > 12 ? 'red' : 'industrial'}
+                                inputClassName="text-sm py-3"
+                            />
 
-                            <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Días de Estabilización (Reposo)</label>
-                                <input
-                                    type="number"
-                                    value={formData.stabilizationDays}
-                                    onChange={(e) => setFormData({ ...formData, stabilizationDays: parseInt(e.target.value) })}
-                                    className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all text-sm font-bold"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
+                            <NumericInput
+                                label="Días de Estabilización (Reposo)"
+                                value={formData.stabilizationDays}
+                                onChange={(val) => setFormData({ ...formData, stabilizationDays: val })}
+                                step={1}
+                                unit="D"
+                                disabled={isSubmitting}
+                                variant="industrial"
+                                inputClassName="text-sm py-3"
+                            />
 
                             <div>
                                 <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Fecha de Exportación</label>

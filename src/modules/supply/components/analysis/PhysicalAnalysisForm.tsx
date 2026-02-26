@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import { submitPhysicalAnalysis } from '../../actions/analysis';
+import { NumericInput } from '@/shared/components/ui/NumericInput';
 
 interface PhysicalAnalysisFormProps {
     inventoryId: string;
@@ -20,11 +21,15 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
             size18: 20,
             size17: 45,
             size16: 25,
-            size15: 10
+            size15: 10,
+            size14: 0,
+            size13: 0,
+            size12: 0,
+            under12: 0
         },
         defects: {
-            primary: 0,
-            secondary: 0
+            primary: 0.0,
+            secondary: 0.0
         },
         grainColor: 'VERDE OLIVA'
     });
@@ -60,11 +65,15 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             size18: 0,
                             size17: 0,
                             size16: 0,
-                            size15: 0
+                            size15: 0,
+                            size14: 0,
+                            size13: 0,
+                            size12: 0,
+                            under12: 0
                         },
                         defects: record.defects_count || {
-                            primary: 0,
-                            secondary: 0
+                            primary: 0.0,
+                            secondary: 0.0
                         },
                         grainColor: record.grain_color || 'VERDE OLIVA'
                     });
@@ -127,120 +136,149 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">
-                            Humedad (%) {lotDestination.startsWith('export') && <span className="text-blue-400 font-black ml-1">[NORMA EXPORT]</span>}
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="number" step="0.01" value={formData.moisture}
-                                className={`w-full bg-bg-main border rounded-industrial-sm px-5 py-4 text-2xl font-bold outline-none transition-all pr-20 ${lotDestination.startsWith('export')
-                                    ? (formData.moisture > 12 || formData.moisture < 10 ? 'border-brand-red/50 text-brand-red' : 'border-blue-500/50 text-blue-400 focus:border-blue-400')
-                                    : (formData.moisture > 13 || formData.moisture < 9 ? 'border-brand-red/50 text-brand-red' : 'border-white/10 text-white focus:border-brand-green')
-                                    }`}
-                                onChange={(e) => setFormData({ ...formData, moisture: parseFloat(e.target.value) || 0 })}
-                            />
-                            <span className="absolute right-8 top-5 text-gray-600 font-mono font-bold opacity-60">%</span>
-                        </div>
-                        <p className={`text-[9px] uppercase font-bold transition-colors ${lotDestination.startsWith('export')
-                            ? (formData.moisture > 12 || formData.moisture < 10 ? 'text-brand-red' : 'text-blue-400 opacity-70')
-                            : (formData.moisture > 13 || formData.moisture < 9 ? 'text-brand-red' : 'text-gray-500 opacity-70')
-                            }`}>
-                            {lotDestination.startsWith('export')
-                                ? (formData.moisture > 12 || formData.moisture < 10 ? '⚠️ No cumple estándar exportación (10-12%)' : 'Rango Exportación: 10.0% - 12.0%')
-                                : (formData.moisture > 13 || formData.moisture < 9 ? '⚠️ No apto para proceso industrial' : 'Rango: 9.0% - 13.0%')
+                <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
+                    <div className="md:col-span-2">
+                        <NumericInput
+                            label={`Humedad (%) ${lotDestination.startsWith('export') ? '[NORMA]' : ''}`}
+                            value={formData.moisture}
+                            onChange={(val) => setFormData({ ...formData, moisture: val })}
+                            step={0.01}
+                            variant={lotDestination.startsWith('export')
+                                ? (formData.moisture > 12 || formData.moisture < 10 ? 'red' : 'blue')
+                                : (formData.moisture > 13 || formData.moisture < 9 ? 'red' : 'industrial')
                             }
-                        </p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Actividad de Agua ($a_w$)</label>
-                        <input
-                            type="number" step="0.001" value={formData.waterActivity}
-                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 text-2xl font-bold outline-none focus:border-blue-500"
-                            onChange={(e) => setFormData({ ...formData, waterActivity: parseFloat(e.target.value) || 0 })}
+                            inputClassName="text-xl py-4"
+                            unit="%"
                         />
-                        <p className="text-[9px] text-gray-500 uppercase font-bold opacity-70">Límite seguridad: &lt; 0.60 $a_w$</p>
                     </div>
 
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Densidad (g/L)</label>
-                        <input
-                            type="number" value={formData.density}
-                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 text-2xl font-bold outline-none focus:border-brand-green"
-                            onChange={(e) => setFormData({ ...formData, density: parseFloat(e.target.value) || 0 })}
+                    <div className="md:col-span-2">
+                        <NumericInput
+                            label="Agua ($a_w$)"
+                            value={formData.waterActivity}
+                            onChange={(val) => setFormData({ ...formData, waterActivity: val })}
+                            step={0.001}
+                            variant="blue"
+                            inputClassName="text-xl py-4"
                         />
-                        <p className="text-[9px] text-gray-500 uppercase font-bold opacity-70">Promedio: 680 - 740 g/L</p>
                     </div>
 
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Color del Grano</label>
-                        <select
-                            value={formData.grainColor}
-                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 text-xs font-bold text-white outline-none focus:border-brand-green uppercase"
-                            onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
-                        >
-                            <option value="VERDE OLIVA">Verde Oliva (Estándar)</option>
-                            <option value="VERDE AZULADO">Verde Azulado (Fresco)</option>
-                            <option value="VERDE PALIDO">Verde Pálido / Blanqueado</option>
-                            <option value="AMARILLENTO">Amarillento (Envejecido)</option>
-                            <option value="MARRON">Marrón (Sobresecado / Dañado)</option>
-                        </select>
-                        <p className="text-[9px] text-gray-500 uppercase font-bold opacity-70">Descriptor Visual SCA</p>
+                    <div className="md:col-span-2">
+                        <NumericInput
+                            label="Densidad (g/L)"
+                            value={formData.density}
+                            onChange={(val) => setFormData({ ...formData, density: val })}
+                            step={1}
+                            variant="industrial"
+                            inputClassName="text-xl py-4"
+                            unit="g/L"
+                        />
+                    </div>
+
+                    <div className="md:col-span-4 space-y-2">
+                        <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest block">Color del Grano</label>
+                        <div className="relative group/select">
+                            <select
+                                value={formData.grainColor}
+                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 pr-14 py-4 text-sm font-bold text-white outline-none focus:border-brand-green uppercase appearance-none transition-all"
+                                onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
+                            >
+                                <option value="VERDE OLIVA">Verde Oliva (Estándar)</option>
+                                <option value="VERDE AZULADO">Verde Azulado (Fresco)</option>
+                                <option value="VERDE PALIDO">Verde Pálido / Blanqueado</option>
+                                <option value="AMARILLENTO">Amarillento (Envejecido)</option>
+                                <option value="MARRON">Marrón (Sobresecado / Dañado)</option>
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover:text-brand-green transition-colors">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                            </div>
+                        </div>
+                        <p className="text-[9px] text-gray-500 uppercase font-medium opacity-70">Descriptor Visual SCA</p>
                     </div>
                 </div>
 
-                <section className="bg-bg-main/50 p-6 rounded-industrial space-y-8 border border-white/5">
-                    <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-6">Distribución de Mallas (Screen Analysis)</h4>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[18, 17, 16, 15].map(size => (
-                            <div key={size} className="space-y-2">
-                                <label className="text-[10px] text-gray-600 uppercase font-mono">Malla {size}</label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        value={(formData.screenSize as any)[`size${size}`]}
-                                        className="w-full bg-bg-card border border-white/10 rounded-industrial-sm px-3 py-2 text-sm font-bold outline-none focus:border-brand-green pr-10"
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            screenSize: { ...formData.screenSize, [`size${size}`]: parseFloat(e.target.value) || 0 }
-                                        })}
-                                    />
-                                    <span className="absolute right-4 top-2.5 text-[10px] text-gray-500 opacity-60">%</span>
-                                </div>
-                            </div>
-                        ))}
+                <section className="py-4 px-4 md:px-12 rounded-industrial space-y-4 border-y border-white/5 mt-4">
+                    <h4 className="text-[10px] font-medium text-gray-400 uppercase tracking-[0.2em] mb-4">GRANULOMETRÍA (SIEVE ANALYSIS)</h4>
+                    <div className="space-y-4 md:w-4/5 mx-auto">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            {[18, 17, 16, 15].map(size => (
+                                <NumericInput
+                                    key={size}
+                                    label={`Malla ${size}`}
+                                    value={(formData.screenSize as any)[`size${size}`]}
+                                    onChange={(val) => setFormData({
+                                        ...formData,
+                                        screenSize: { ...formData.screenSize, [`size${size}`]: val }
+                                    })}
+                                    step={0.1}
+                                    variant="default"
+                                    inputClassName="text-base py-2"
+                                    unit="%"
+                                />
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            {[14, 13, 12].map(size => (
+                                <NumericInput
+                                    key={size}
+                                    label={`Malla ${size}`}
+                                    value={(formData.screenSize as any)[`size${size}`]}
+                                    onChange={(val) => setFormData({
+                                        ...formData,
+                                        screenSize: { ...formData.screenSize, [`size${size}`]: val }
+                                    })}
+                                    step={0.1}
+                                    variant="default"
+                                    inputClassName="text-base py-2"
+                                    unit="%"
+                                />
+                            ))}
+                            <NumericInput
+                                label="Fondo (-12)"
+                                value={formData.screenSize.under12}
+                                onChange={(val) => setFormData({
+                                    ...formData,
+                                    screenSize: { ...formData.screenSize, under12: val }
+                                })}
+                                step={0.1}
+                                variant="default"
+                                inputClassName="text-base py-2"
+                                unit="%"
+                            />
+                        </div>
                     </div>
                 </section>
 
                 <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-brand-red/5 p-6 rounded-industrial border border-brand-red/10 space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h4 className="text-[10px] font-bold text-brand-red-bright uppercase tracking-widest">Defectos Primarios</h4>
-                            <span className="text-[8px] bg-brand-red/20 text-brand-red-bright px-2 py-0.5 rounded font-bold">MUESTRA 350G</span>
-                        </div>
-                        <input
-                            type="number"
+                    <div className="space-y-3">
+                        <NumericInput
+                            label="Defectos Primarios (%)"
                             value={formData.defects.primary}
-                            className="w-full bg-bg-main border border-brand-red/20 rounded-industrial-sm px-5 py-4 text-2xl font-bold text-brand-red-bright outline-none"
-                            onChange={(e) => setFormData({ ...formData, defects: { ...formData.defects, primary: parseInt(e.target.value) || 0 } })}
+                            onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, primary: val } })}
+                            step={0.01}
+                            variant="red"
+                            inputClassName="text-3xl font-bold py-4 !text-white"
+                            unit="%"
+                            className="bg-brand-red/5 p-6 rounded-industrial border border-brand-red/10"
                         />
-                        <p className="text-[9px] text-gray-600 uppercase font-bold">Grano Negro, Agrio, Hongo, Materia Extraña.</p>
+                        <p className="text-[9px] text-gray-500 uppercase font-medium leading-relaxed px-2">
+                            Granos negros, agrios, cereza seca, materia extraña (piedras/palos), daños por hongos.
+                        </p>
                     </div>
-
-                    <div className="bg-orange-500/5 p-6 rounded-industrial border border-orange-500/10 space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h4 className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Defectos Secundarios</h4>
-                            <span className="text-[8px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded font-bold">MUESTRA 350G</span>
-                        </div>
-                        <input
-                            type="number"
+                    <div className="space-y-3">
+                        <NumericInput
+                            label="Defectos Secundarios (%)"
                             value={formData.defects.secondary}
-                            className="w-full bg-bg-main border border-orange-500/20 rounded-industrial-sm px-5 py-4 text-2xl font-bold text-orange-400 outline-none"
-                            onChange={(e) => setFormData({ ...formData, defects: { ...formData.defects, secondary: parseInt(e.target.value) || 0 } })}
+                            onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, secondary: val } })}
+                            step={0.01}
+                            variant="orange"
+                            inputClassName="text-3xl font-bold py-4 !text-white"
+                            unit="%"
+                            className="bg-orange-500/5 p-6 rounded-industrial border border-orange-500/10"
                         />
-                        <p className="text-[9px] text-gray-600 uppercase font-bold">Quebrados, Inmaduros, Conchas, Mordidos por broca.</p>
+                        <p className="text-[9px] text-gray-500 uppercase font-medium leading-relaxed px-2">
+                            Granos picados, quebrados, inmaduros, aplastados, conchas, flotadores, pergamino.
+                        </p>
                     </div>
                 </section>
 

@@ -47,8 +47,12 @@ CREATE TABLE coffee_purchase_inventory (
     pasilla_weight DECIMAL DEFAULT 0, -- Pasilla
     cisco_weight DECIMAL DEFAULT 0, -- Cisco
     thrashing_yield DECIMAL, -- Factor
+    humidity DECIMAL, -- Humedad en trilla
     status TEXT CHECK (status IN ('purchased', 'thrashed', 'roasting', 'completed')) DEFAULT 'purchased',
-    company_id UUID NOT NULL
+    company_id UUID NOT NULL,
+    coffee_type TEXT DEFAULT 'pergamino',
+    destination TEXT CHECK (destination IN ('internal', 'export_green', 'export_roasted')) DEFAULT 'internal',
+    export_certificate TEXT
 );
 
 -- 4. PRODUCCIÓN (ROAST INTELLIGENCE)
@@ -90,7 +94,8 @@ CREATE TABLE retail_inventory (
     batch_id UUID REFERENCES roast_batches(id) ON DELETE CASCADE,
     package_size_grams INTEGER NOT NULL DEFAULT 250, -- 250, 500, 1000
     units_produced INTEGER NOT NULL,
-    units_available INTEGER NOT NULL,
+    total_grams_produced DECIMAL NOT NULL, -- CMT: Masa Total Inicial
+    total_grams_available DECIMAL NOT NULL, -- CMT: Masa Total Actual
     sku TEXT UNIQUE, -- Código de barras o SKU interno
     retail_price_cop DECIMAL,
     status TEXT CHECK (status IN ('fresh', 'stale', 'sold_out')) DEFAULT 'fresh',
@@ -102,6 +107,8 @@ CREATE TABLE sales_records (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     inventory_id UUID REFERENCES retail_inventory(id) ON DELETE SET NULL,
     units_sold INTEGER NOT NULL,
+    grams_deducted DECIMAL NOT NULL, -- CMT: Masa real restada
+    delivery_type TEXT CHECK (delivery_type IN ('grano', 'molido')), 
     total_sale_cop DECIMAL NOT NULL,
     sale_channel TEXT NOT NULL, -- Ej: E-commerce, POS Físico
     customer_feedback_score INTEGER CHECK (customer_feedback_score BETWEEN 1 AND 5),

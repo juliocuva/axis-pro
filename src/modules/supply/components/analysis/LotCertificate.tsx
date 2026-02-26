@@ -55,20 +55,19 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             setLotData(lot);
             setPhysicalData(physical);
 
-            // Fallback calculation if total_score column is missing in DB
             if (sca && sca.total_score == null) {
                 sca.total_score = (
-                    Number(sca.fragrance_aroma || 0) +
-                    Number(sca.flavor || 0) +
-                    Number(sca.aftertaste || 0) +
-                    Number(sca.acidity || 0) +
-                    Number(sca.body || 0) +
-                    Number(sca.balance || 0) +
-                    Number(sca.uniformity || 10) +
-                    Number(sca.clean_cup || 10) +
-                    Number(sca.sweetness || 10) +
-                    Number(sca.overall || 0) -
-                    (Number(sca.defects_score || 0) * 2)
+                    (Number(sca.fragrance_aroma || 0) +
+                        Number(sca.flavor || 0) +
+                        Number(sca.aftertaste || 0) +
+                        Number(sca.acidity || 0) +
+                        Number(sca.body || 0) +
+                        Number(sca.balance || 0) +
+                        Number(sca.uniformity || 10) +
+                        Number(sca.clean_cup || 10) +
+                        Number(sca.sweetness || 10) +
+                        Number(sca.overall || 0) -
+                        (Number(sca.defects_score || 0) * 2))
                 );
             }
             setScaData(sca);
@@ -100,335 +99,310 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         { name: 'M17', val: physicalData.screen_size_distribution.size17 },
         { name: 'M16', val: physicalData.screen_size_distribution.size16 },
         { name: 'M15', val: physicalData.screen_size_distribution.size15 },
+        { name: 'M14', val: physicalData.screen_size_distribution.size14 },
+        { name: 'M13', val: physicalData.screen_size_distribution.size13 },
+        { name: 'M12', val: physicalData.screen_size_distribution.size12 },
+        { name: 'Fondo', val: physicalData.screen_size_distribution.under12 },
     ] : [];
 
     return (
-        <div className="flex flex-col items-center w-full">
-            {/* Document "Sheet" - US Letter Proportion (8.5 x 11) */}
-            <div
-                id="lot-certificate-area"
-                className="w-full bg-[#050510] border border-white/10 shadow-[0_0_80px_rgba(0,0,0,1)] relative flex flex-col mx-auto overflow-hidden print:w-[215.9mm] print:min-h-[279.4mm]"
-                style={{
-                    aspectRatio: '8.5 / 11',
-                    minHeight: '1100px',
-                    maxWidth: '850px'
-                }}
-            >
-                {/* PRE-HEADER: Branding Internal Logic */}
-                <div className="bg-black/80 border-b border-white/5 px-8 py-5 flex justify-between items-center relative z-50">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/5 rounded-industrial-sm flex items-center justify-center overflow-hidden border border-white/10 p-1 shadow-inner">
-                            <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain" />
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-black tracking-[0.3em] text-white leading-none">AXIS COFFEE <span className="text-brand-green text-[7px]">PRO</span></p>
-                            <p className="text-[6px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Industrial Traceability Protocol</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-4">
-                        <span className="px-2 py-0.5 bg-brand-green/10 rounded-full text-[7px] font-bold uppercase tracking-[0.2em] text-brand-green border border-brand-green/20">TRL-7 OPERATIONAL</span>
-                        <div className="flex items-center gap-3 text-[7px] font-bold text-gray-600 uppercase tracking-widest">
-                            <span>VER: 2.0.4</span>
-                            <div className="w-px h-2 bg-white/10"></div>
-                            <span>{new Date().toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                </div>
+        <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
+            {/* Contenedor Maestro para Exportación (2 Hojas Carta) */}
+            <div id="lot-certificate-area" className="w-full space-y-4 print:space-y-0">
 
-                {/* Header / Banner - Reimagined for High Impact */}
-                <div className="relative bg-gradient-to-br from-[#0a0a0a] to-[#111] p-6 md:p-10 overflow-hidden border-b border-white/5">
-                    {/* Background Accents */}
-                    <div className="absolute top-0 right-0 w-[300px] h-full bg-brand-green/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/4"></div>
-                    <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-brand-green/2 blur-[80px] rounded-full translate-y-1/2 -translate-x-1/4"></div>
+                {/* HOJA 1: IDENTIDAD, PRODUCCIÓN Y GRANULOMETRÍA */}
+                <div className="w-full bg-[#08080c] border border-white/5 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none"
+                    style={{ minHeight: '1056px', height: '1056px' }}>
 
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-end w-full gap-6">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="px-2 py-0.5 bg-white/10 backdrop-blur-md rounded-industrial-sm text-[7px] font-bold uppercase tracking-[0.2em] text-white">Digital Birth Certificate</span>
-                                <div className="h-px w-8 bg-white/10"></div>
-                                <span className="text-[7px] font-bold uppercase tracking-[0.2em] text-brand-green-bright">Specialty Coffee Archive</span>
-                            </div>
-
-                            <h1 className="text-3xl md:text-5xl font-bold tracking-tighter text-white uppercase leading-none mb-3 group inline-block relative">
-                                {lotData?.farm_name || 'Lote Premium'}
-                                <span className="absolute -bottom-1.5 left-0 w-1/4 h-1 bg-brand-green rounded-full opacity-50"></span>
-                            </h1>
-
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 border-t border-white/5 pt-6">
-                                <div className="space-y-0.5">
-                                    <p className="text-[7px] text-gray-500 font-bold uppercase tracking-widest">Farmer/Producer</p>
-                                    <p className="text-xs font-bold text-white uppercase">{lotData?.farmer_name || 'Independiente'}</p>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <p className="text-[7px] text-gray-500 font-bold uppercase tracking-widest">Lot ID</p>
-                                    <p className="text-xs font-bold text-brand-green-bright font-mono italic">{lotData?.lot_number || 'AX-000'}</p>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <p className="text-[7px] text-gray-500 font-bold uppercase tracking-widest">Variety / Process</p>
-                                    <p className="text-xs font-bold text-white uppercase truncate">{lotData?.variety} • {lotData?.process}</p>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <p className="text-[7px] text-gray-500 font-bold uppercase tracking-widest">Origin Region</p>
-                                    <p className="text-xs font-bold text-white uppercase">{lotData?.region}, {lotData?.country || 'COL'}</p>
-                                </div>
+                    {/* Header Minimalista */}
+                    <div className="bg-black/40 px-10 py-6 flex justify-between items-center border-b border-white/5">
+                        <div className="flex items-center gap-4">
+                            <img src="/logo.png" alt="AXIS" className="w-8 h-8 opacity-80" />
+                            <div>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-white">AXIS COFFEE ANALYTICS</p>
+                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Industrial Quality Protocol | Page 01</p>
                             </div>
                         </div>
+                        <div className="text-right">
+                            <p className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em]">Expedición Digital</p>
+                            <p className="text-[9px] font-mono text-brand-green-bright uppercase">{new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                    </div>
 
-                        <div className="shrink-0">
-                            <div className="bg-white/[0.02] border border-white/10 p-0.5 rounded-industrial overflow-hidden relative group">
-                                <div className="bg-[#050505] p-6 md:p-8 rounded-industrial flex flex-col items-center justify-center relative z-10">
-                                    <p className="text-[8px] text-brand-green font-black uppercase tracking-[0.4em] mb-2">SCA SCORE</p>
-                                    <p className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none flex items-start">
-                                        {scaData?.total_score != null ? Math.floor(scaData.total_score) : '00'}
-                                        <span className="text-xl mt-1.5 text-brand-green-bright">.{scaData?.total_score != null ? String(Number(scaData.total_score).toFixed(2)).split('.')[1] : '00'}</span>
+                    {/* Identidad del Lote */}
+                    <div className="p-12 pb-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-10">
+                            <div className="space-y-4 max-w-xl">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
+                                    <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest ">Identity Verified • Cloud-Stored Profile</span>
+                                </div>
+                                <h1 className="text-6xl font-black text-white tracking-tighter uppercase leading-[0.85]">
+                                    {lotData?.farm_name || 'Lote Premium'}
+                                </h1>
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
+                                    <div>
+                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Productor</p>
+                                        <p className="text-sm font-bold text-gray-200 uppercase leading-none">{lotData?.farmer_name || 'Independiente'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Lote ID</p>
+                                        <p className="text-sm font-bold text-brand-green-bright font-mono leading-none">{lotData?.lot_number || '---'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Variedad</p>
+                                        <p className="text-sm font-bold text-gray-200 uppercase leading-none">{lotData?.variety || 'Caturra'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Región</p>
+                                        <p className="text-sm font-bold text-gray-200 uppercase leading-none">{lotData?.region || 'Huila'}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Score Destacado Sutil */}
+                            <div className="bg-white/[0.03] border border-white/10 p-1.5 rounded-xl shrink-0 self-center">
+                                <div className="bg-black/60 px-8 py-5 rounded-lg flex flex-col items-center border border-white/5 shadow-2xl">
+                                    <p className="text-[9px] font-bold text-brand-green uppercase tracking-[0.3em] mb-1">SCA Score</p>
+                                    <p className="text-5xl font-bold text-white tracking-tighter leading-none">
+                                        {scaData?.total_score != null ? Number(scaData.total_score).toFixed(2) : '00.00'}
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Stats row - Stacked for Vertical balance */}
-                <div className="px-10 py-8 bg-black/30 border-b border-white/5 grid grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-500 border border-white/10">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 8l-2-2H5L3 8v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8zM3 8h18M16 12a4 4 0 0 1-8 0" /></svg>
-                        </div>
-                        <div>
-                            <p className="text-[7px] text-gray-500 font-bold uppercase tracking-[0.3em] mb-0.5">Materia Prima</p>
-                            <p className="text-lg font-bold text-white tracking-tight">{lotData?.purchase_weight} <span className="text-[9px] text-gray-600 font-mono">KG</span></p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-brand-green/10 flex items-center justify-center text-brand-green border border-brand-green/20">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                        </div>
-                        <div>
-                            <p className="text-[7px] text-brand-green font-bold uppercase tracking-[0.3em] mb-0.5">Exportable</p>
-                            <p className="text-lg font-bold text-white tracking-tight">{lotData?.thrashed_weight} <span className="text-[9px] text-gray-600 font-mono">KG</span></p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2z" /></svg>
-                        </div>
-                        <div>
-                            <p className="text-[7px] text-gray-500 font-bold uppercase tracking-[0.3em] mb-0.5">Mermas</p>
-                            <p className="text-lg font-bold text-white tracking-tight">{Number(lotData?.pasilla_weight || 0) + Number(lotData?.cisco_weight || 0)} <span className="text-[9px] text-gray-600 font-mono">KG</span></p>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-end">
-                        <div className="bg-brand-green text-black px-4 py-2 rounded-industrial flex flex-col items-center min-w-[100px] shadow-lg shadow-brand-green/10">
-                            <p className="text-[7px] font-black uppercase tracking-widest">RENDIMIENTO</p>
-                            <p className="text-xl font-black font-mono leading-none">{Number(lotData?.thrashing_yield || 0).toFixed(2)}</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Content Sections: Physical & Defects & Screens */}
-                <div className="px-10 py-10 space-y-12 flex-1">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        <div className="space-y-8">
-                            <div>
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-green flex items-center gap-3 mb-8">
-                                    <div className="w-2 h-2 rounded-full bg-brand-green"></div>
-                                    ANÁLISIS FÍSICO
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className="bg-white/2 p-5 rounded-industrial-sm border border-white/5">
-                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2">Humedad de Grano</p>
-                                        <div className="flex items-end gap-2">
-                                            <span className="text-3xl font-black text-white">{physicalData?.moisture_pct || '--'}</span>
-                                            <span className="text-xs text-brand-green-bright font-black mb-1.5">%</span>
-                                        </div>
-                                        <p className="text-[8px] text-brand-green font-bold uppercase mt-2 tracking-tighter">{physicalData?.grain_color || 'Standard'}</p>
-                                    </div>
-                                    <div className="bg-white/2 p-5 rounded-industrial-sm border border-white/5">
-                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2">Actividad de Agua ($a_w$)</p>
-                                        <div className="flex items-end gap-2">
-                                            <span className="text-3xl font-black text-white">{physicalData?.water_activity || '--'}</span>
-                                            <span className="text-[10px] text-gray-600 font-mono mb-1.5 ml-1">aw</span>
-                                        </div>
-                                    </div>
-                                    <div className="bg-white/2 p-5 rounded-industrial-sm border border-white/10 bg-brand-green/2">
-                                        <p className="text-[8px] text-brand-green font-bold uppercase tracking-widest mb-2">Densidad Industrial</p>
-                                        <p className="text-2xl font-black text-white">{physicalData?.density_gl || '--'} <span className="text-xs text-brand-green-bright font-black">g/L</span></p>
-                                    </div>
+                    {/* Stats de Producción (Fila compacta) */}
+                    <div className="px-12">
+                        <div className="grid grid-cols-4 gap-4 bg-white/[0.015] p-6 rounded-xl border border-white/5">
+                            {[
+                                { label: 'Materia Primera', val: lotData?.purchase_weight, unit: 'Kg', sub: 'Ingreso' },
+                                { label: 'Materia Exportable', val: lotData?.thrashed_weight, unit: 'Kg', sub: 'Excelso' },
+                                { label: 'Rendimiento', val: Number(lotData?.thrashing_yield || 0).toFixed(2), unit: 'Fr', sub: 'Factor' },
+                                { label: 'Beneficio', val: lotData?.process, unit: '', sub: 'Método' }
+                            ].map((stat, i) => (
+                                <div key={i} className="text-center">
+                                    <p className="text-[7px] text-gray-600 font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+                                    <p className="text-lg font-bold text-white tracking-tight leading-none">{stat.val} <span className="text-[9px] text-gray-700 font-mono ml-0.5">{stat.unit}</span></p>
+                                    <p className="text-[6px] text-brand-green font-bold uppercase tracking-[0.2em] mt-1.5 opacity-50">{stat.sub}</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-8">
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-red flex items-center gap-3 mb-8">
-                                <div className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></div>
-                                DEFECTOS (FÍS)
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="bg-brand-red/5 p-5 rounded-industrial-sm border border-brand-red/10 flex justify-between items-center group/defect">
-                                    <div>
-                                        <p className="text-[11px] font-black text-white uppercase">Primarios</p>
-                                        <p className="text-[8px] text-brand-red-bright font-bold uppercase tracking-widest mt-1">Crítico / Taza</p>
-                                    </div>
-                                    <p className="text-4xl font-black text-white leading-none">{physicalData?.defects_count?.primary ?? '0'}</p>
-                                </div>
-                                <div className="bg-orange-500/5 p-5 rounded-industrial-sm border border-orange-500/10 flex justify-between items-center">
-                                    <div>
-                                        <p className="text-[11px] font-black text-white uppercase">Secundarios</p>
-                                        <p className="text-[8px] text-orange-400 font-bold uppercase tracking-widest mt-1">Visible / Valor</p>
-                                    </div>
-                                    <p className="text-4xl font-black text-white leading-none">{physicalData?.defects_count?.secondary ?? '0'}</p>
-                                </div>
-                                <div className="p-4 border border-dashed border-white/5 rounded-industrial text-center">
-                                    <p className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.3em]">Protocolo ISO 4149</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-8">
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-400 flex items-center gap-3 mb-8">
-                                <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                                DIST. MALLAS
-                            </h3>
-                            <div className="bg-white/[0.02] p-6 rounded-industrial border border-white/10 h-[240px] flex items-center justify-center">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={screenData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#777', fontSize: 10, fontWeight: '900' }} />
-                                        <Tooltip
-                                            contentStyle={{ backgroundColor: '#050510', border: '1px solid #ffffff10', borderRadius: '12px', padding: '12px' }}
-                                            itemStyle={{ color: '#00df9a', fontSize: '12px', fontWeight: '900' }}
-                                            cursor={{ fill: '#ffffff05' }}
-                                        />
-                                        <Bar dataKey="val" radius={[6, 6, 0, 0]} barSize={32} isAnimationActive={false}>
-                                            {screenData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={index === 1 ? '#00df9a' : '#ffffff05'} stroke={index === 1 ? '#00df9a' : '#ffffff10'} />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Sensory Section: Wide but Vertical-compatible */}
-                    <div className="bg-gradient-to-br from-white/[0.02] to-transparent rounded- industrial border border-white/10 overflow-hidden relative">
-                        <div className="absolute top-0 right-0 bg-brand-green/10 px-8 py-3 text-[8px] font-black uppercase tracking-[0.5em] rounded-bl-3xl border-l border-b border-brand-green/20 text-brand-green-bright">
-                            SCA QUALITY PROTOCOL
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2">
-                            <div className="p-12 flex flex-col items-center justify-center min-h-[420px] relative border-b md:border-b-0 md:border-r border-white/5">
-                                <h3 className="absolute top-10 left-10 text-[10px] font-black uppercase tracking-[0.5em] text-white flex items-center gap-3">
-                                    <div className="w-4 h-0.5 bg-brand-green"></div>
-                                    SENSORIAL
-                                </h3>
-
-                                <div className="w-full h-full max-w-[340px] mt-8">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <RadarChart cx="50%" cy="50%" outerRadius="75%" data={scaRadarData}>
-                                            <PolarGrid stroke="#ffffff05" />
-                                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: '900' }} />
-                                            <Radar
-                                                name="Perfil"
-                                                dataKey="A"
-                                                stroke="#00df9a"
-                                                strokeWidth={4}
-                                                fill="#00df9a"
-                                                fillOpacity={0.1}
-                                                isAnimationActive={false}
+                    {/* Granulometría (Movida a Hoja 1, diseño más sutil) */}
+                    <div className="mt-8 px-12">
+                        <h3 className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.5em] flex items-center gap-4 mb-6">
+                            <div className="w-6 h-0.5 bg-cyan-400"></div>
+                            Granulometría (Screen Size Distribution)
+                        </h3>
+                        <div className="bg-white/[0.01] border border-white/5 p-6 rounded-2xl h-[240px] relative overflow-hidden">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={screenData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                                    <XAxis
+                                        dataKey="name"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#444', fontSize: 10, fontWeight: '700' }}
+                                    />
+                                    <Bar dataKey="val" radius={[4, 4, 0, 0]} barSize={30}>
+                                        {screenData.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={Number(entry.val) > 10 ? '#00df9a' : '#ffffff05'}
+                                                stroke={Number(entry.val) > 10 ? '#00df9a' : '#ffffff05'}
+                                                fillOpacity={Number(entry.val) > 10 ? 0.6 : 0.3}
                                             />
-                                        </RadarChart>
-                                    </ResponsiveContainer>
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="grid grid-cols-8 gap-1 mt-4 border-t border-white/5 pt-4">
+                            {screenData.map((d, i) => (
+                                <div key={i} className="text-center group">
+                                    <p className="text-[6px] text-gray-600 font-bold uppercase tracking-widest mb-1">{d.name}</p>
+                                    <p className="text-[10px] font-mono font-bold text-gray-400">{Number(d.val).toFixed(1)}%</p>
                                 </div>
-                            </div>
+                            ))}
+                        </div>
+                    </div>
 
-                            <div className="p-12 flex flex-col justify-between space-y-12">
-                                <div className="space-y-10">
-                                    <div className="space-y-4">
-                                        <p className="text-[10px] text-brand-green font-black uppercase tracking-[0.5em]">DESCRIPTOR MAESTRO</p>
-                                        <p className="text-2xl font-black text-white tracking-tight leading-tight italic grayscale hover:grayscale-0 transition-all duration-700">
-                                            "{scaData?.notes || 'Perfil sensorial excepcionalmente equilibrado con estructura definida y potencial industrial verificado.'}"
-                                        </p>
-                                        <div className="h-1.5 w-16 bg-brand-green rounded-full"></div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Q-GRADER ANALYST</p>
-                                        <div className="bg-black/40 p-4 rounded-industrial border border-white/5 flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center font-black text-brand-green border border-brand-green/20">QG</div>
-                                            <div>
-                                                <p className="text-sm font-black text-white uppercase tracking-tight">{scaData?.taster_name || 'Protocolo Axis AI'}</p>
-                                                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Digital Signature: Verified</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                    {/* Calidad Física y Defectos (Compactos en la base de la H1) */}
+                    <div className="mt-10 px-12 grid grid-cols-2 gap-10">
+                        <div className="space-y-4">
+                            <h3 className="text-[10px] font-bold text-brand-green uppercase tracking-[0.5em] flex items-center gap-4">
+                                <div className="w-6 h-0.5 bg-brand-green"></div>
+                                Physical Quality
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-white/[0.02] p-5 rounded-xl border border-white/5">
+                                    <p className="text-[8px] text-gray-600 font-bold uppercase tracking-widest mb-2">Humedad</p>
+                                    <p className="text-3xl font-bold text-white leading-none">{physicalData?.moisture_pct || '--'}<span className="text-xs text-brand-green-bright ml-1.5 opacity-40">%</span></p>
+                                    <p className="text-[8px] text-brand-green font-bold uppercase mt-3 tracking-widest  opacity-60">{physicalData?.grain_color || 'Estándar'}</p>
                                 </div>
-
-                                <div className="pt-10 border-t border-white/5 flex justify-between items-center">
-                                    <div className="bg-brand-green/5 px-5 py-3 rounded-full border border-brand-green/20 flex items-center gap-3">
-                                        <div className="w-6 h-6 rounded-full bg-brand-green flex items-center justify-center shadow-lg shadow-brand-green/20">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4"><path d="M20 6L9 17l-5-5" /></svg>
-                                        </div>
-                                        <span className="text-[9px] font-black text-brand-green-bright uppercase tracking-widest">VERIFICACIÓN AXIS</span>
-                                    </div>
-                                    <img src="/logo.png" alt="Seal" className="w-8 h-8 opacity-20" />
+                                <div className="bg-white/[0.02] p-5 rounded-xl border border-white/5">
+                                    <p className="text-[8px] text-gray-600 font-bold uppercase tracking-widest mb-2">Densidad</p>
+                                    <p className="text-3xl font-bold text-white leading-none">{physicalData?.density_gl || '--'}<span className="text-[10px] text-blue-400 font-mono ml-1.5 opacity-40">g/L</span></p>
+                                    <p className="text-[8px] text-blue-400 font-bold uppercase mt-3 tracking-widest  opacity-60">{physicalData?.water_activity || '--'} aw</p>
                                 </div>
                             </div>
                         </div>
+
+                        <div className="space-y-4">
+                            <h3 className="text-[10px] font-bold text-brand-red uppercase tracking-[0.5em] flex items-center gap-4">
+                                <div className="w-6 h-0.5 bg-brand-red"></div>
+                                Grading Count
+                            </h3>
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="bg-brand-red/[0.02] border border-brand-red/10 px-6 py-4 rounded-xl flex justify-between items-center group">
+                                    <p className="text-[11px] font-bold text-gray-300 uppercase">Primarios <span className="text-[8px] text-brand-red ml-2 font-bold opacity-60">(Type 1)</span></p>
+                                    <p className="text-3xl font-bold text-white leading-none">{physicalData?.defects_count?.primary ?? '0.0'}<span className="text-xs text-brand-red ml-1.5 font-bold">%</span></p>
+                                </div>
+                                <div className="bg-orange-500/[0.02] border border-orange-500/10 px-6 py-4 rounded-xl flex justify-between items-center group">
+                                    <p className="text-[11px] font-bold text-gray-300 uppercase">Secundarios <span className="text-[8px] text-orange-500 ml-2 font-bold opacity-60">(Type 2)</span></p>
+                                    <p className="text-3xl font-bold text-white leading-none">{physicalData?.defects_count?.secondary ?? '0.0'}<span className="text-xs text-orange-500 ml-1.5 font-bold">%</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer Hoja 1 */}
+                    <div className="mt-auto px-12 py-8 flex justify-between items-center opacity-20 border-t border-white/5">
+                        <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.4</p>
+                        <p className="text-[7px] font-mono text-gray-600 uppercase tracking-widest">{inventoryId.substring(0, 8).toUpperCase()}-P1</p>
                     </div>
                 </div>
 
-                {/* Footer / QR / Actions - Final Official Seal */}
-                <div className="bg-[#050505] p-8 md:p-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-green/30 to-transparent"></div>
+                {/* INDICADOR VISUAL DE CORTE (No visible al imprimir) */}
+                <div className="w-full h-8 print:hidden"></div>
 
-                    <div className="flex items-center gap-8 flex-1 w-full md:w-auto">
-                        <div className="bg-white p-2 rounded-xl shadow-lg relative shrink-0">
-                            <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-coffee.pro') + '/verify/lot/' + inventoryId)}`}
-                                alt="QR Trazabilidad"
-                                className="w-20 h-20 grayscale hover:grayscale-0 transition-all cursor-pointer"
-                            />
+                {/* HOJA 2: PERFIL SENSORIAL Y TRAZABILIDAD DIGITAL */}
+                <div className="w-full bg-[#08080c] border border-white/5 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none"
+                    style={{ minHeight: '1056px', height: '1056px' }}>
+
+                    {/* Header P2 */}
+                    <div className="bg-black/40 px-10 py-6 flex justify-between items-center border-b border-white/5">
+                        <div className="flex items-center gap-4">
+                            <img src="/logo.png" alt="AXIS" className="w-8 h-8 opacity-80" />
+                            <div>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-white">AXIS COFFEE ANALYTICS</p>
+                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Industrial Quality Protocol | Page 02</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[9px] font-bold text-brand-green-bright font-mono uppercase ">{lotData?.lot_number || '---'}</p>
+                        </div>
+                    </div>
+
+                    {/* Perfil Sensorial SCA (Elegante y Visual) */}
+                    <div className="flex-1 flex flex-col">
+                        <div className="p-12 pb-6 text-center">
+                            <h2 className="text-[11px] font-bold text-brand-green uppercase tracking-[0.6em] mb-4">Evaluación Sensorial SCA</h2>
+                            <p className="text-[9px] text-gray-500 uppercase tracking-[0.2em] font-medium">Análisis de Perfil Organoléptico de Especialidad</p>
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse"></span>
-                                <p className="text-[9px] text-white font-black uppercase tracking-[0.3em]">PROPIEDAD DIGITAL AXIS</p>
+                        {/* Radar Chart (Mucho más elegante) */}
+                        <div className="flex-1 flex items-center justify-center p-12">
+                            <div className="w-full h-full max-w-[540px] relative">
+                                <div className="absolute inset-0 bg-brand-green/[0.03] rounded-full blur-[100px]"></div>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RadarChart cx="50%" cy="50%" outerRadius="85%" data={scaRadarData}>
+                                        <PolarGrid stroke="#ffffff05" strokeWidth={1} />
+                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#444', fontSize: 11, fontWeight: '700' }} />
+                                        <Radar
+                                            name="Profile"
+                                            dataKey="A"
+                                            stroke="#00df9a"
+                                            strokeWidth={1.5}
+                                            fill="#00df9a"
+                                            fillOpacity={0.08}
+                                            isAnimationActive={false}
+                                        />
+                                    </RadarChart>
+                                </ResponsiveContainer>
+                                {/* Puntos de datos destacados */}
+                                <div className="absolute top-0 right-0 p-6 space-y-2 opacity-40">
+                                    {scaRadarData.map((d, i) => (
+                                        <div key={i} className="flex items-center gap-3 justify-end">
+                                            <span className="text-[8px] font-bold uppercase text-gray-500 tracking-widest">{d.subject}</span>
+                                            <span className="text-[10px] font-mono font-bold text-gray-400">{Number(d.A).toFixed(2)}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <p className="text-[10px] text-gray-500 max-w-sm font-medium leading-tight uppercase opacity-70">
-                                Certificado generado mediante infraestructura de datos distribuida con inmutabilidad industrial.
-                            </p>
-                            <div className="bg-white/5 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/5">
-                                <span className="text-[7px] text-brand-green font-bold uppercase tracking-widest italic">8f2a...1b9c</span>
+                        </div>
+
+                        {/* Descriptor Maestro (Elegancia Tipográfica) */}
+                        <div className="px-16 py-12 bg-white/[0.01] border-y border-white/5 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 px-8 py-3 bg-brand-green/5 text-[9px] font-bold uppercase tracking-widest text-brand-green-bright opacity-40">
+                                Sensory Analysis Summary
+                            </div>
+                            <div className="space-y-6">
+                                <p className="text-3xl font-regular text-gray-200 tracking-tight leading-relaxed  opacity-90 max-w-3xl">
+                                    "{scaData?.notes || 'Un perfil exquisitamente balanceado con acidez brillante y cuerpo sedoso, preservado bajo estándares AXIS.'}"
+                                </p>
+                                <div className="flex items-center gap-6 pt-4 border-t border-white/5">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center bg-black/40 text-[10px] font-bold text-brand-green">QG</div>
+                                        <div>
+                                            <p className="text-sm font-bold text-white uppercase tracking-tight">{scaData?.taster_name || 'Q-Grader Senior'}</p>
+                                            <p className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">Professional Cupper • Digital Signature Verified</p>
+                                        </div>
+                                    </div>
+                                    <div className="ml-auto flex items-center gap-4 opacity-30">
+                                        <img src="/logo.png" alt="Verify" className="w-8 h-8 grayscale" />
+                                        <div className="text-right">
+                                            <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest">Protocol S2.4</p>
+                                            <p className="text-[7px] font-mono text-gray-600">ID SEAL: {inventoryId.substring(0, 6).toUpperCase()}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-4">
-                        <div className="text-right border-r border-white/10 pr-4 hidden md:block">
-                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">ID CONTROL</p>
-                            <p className="text-xs font-black text-white italic">{inventoryId.substring(0, 8).toUpperCase()}</p>
+                    {/* Footer Hoja 2: Seguridad y QR */}
+                    <div className="bg-black p-12 flex justify-between items-center gap-12 relative overflow-hidden mt-auto">
+                        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+
+                        <div className="flex items-center gap-10 max-w-2xl">
+                            <div className="bg-white p-1.5 rounded-xl shrink-0 opacity-90 hover:opacity-100 transition-all shadow-2xl">
+                                <img
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-pro.coffee') + '/verify/lot/' + inventoryId)}`}
+                                    alt="QR Traceability"
+                                    className="w-24 h-24 grayscale contrast-125"
+                                />
+                            </div>
+                            <div className="space-y-3">
+                                <p className="text-[9px] font-bold text-white uppercase tracking-[0.5em]">Trazabilidad Digital Inmutable</p>
+                                <p className="text-[10px] text-gray-600 uppercase font-medium leading-[1.6] tracking-wider opacity-70">
+                                    Certificación técnica de origen y calidad física-sensorial. Los datos han sido encriptados en la red AXIS para garantizar transparencia absoluta en la cadena de suministro industrial de café.
+                                </p>
+                            </div>
                         </div>
-                        <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center border border-white/10 opacity-30">
-                            <img src="/logo.png" alt="Seal" className="w-6 h-6 object-contain" />
+
+                        <div className="text-right space-y-4">
+                            <div className="px-4 py-2 bg-white/5 rounded-lg border border-white/10">
+                                <p className="text-[8px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}</p>
+                            </div>
+                            <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive</span></p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="p-6 bg-bg-card border-t border-white/5 flex justify-end gap-3 no-export w-full max-w-[850px]">
-                <ExportReportButton elementId="lot-certificate-area" fileName={`CERTIFICATE-${inventoryId}`} />
-                <button
-                    className="px-6 py-3 bg-brand-green hover:bg-brand-green-bright text-white rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all shadow-lg flex items-center gap-2"
-                >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v10m0 0l-3-3m3 3l3-3" /></svg>
-                    Compartir
-                </button>
+            {/* Panel de Control Inferior (No exportable) */}
+            <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-bg-card border border-white/5 rounded-2xl shadow-2xl">
+                <ExportReportButton
+                    elementId="lot-certificate-area"
+                    fileName={`REPORT-AXIS-${lotData?.lot_number || 'LOT'}-${lotData?.farm_name || 'COFFEE'}`}
+                />
                 <button
                     onClick={onClose}
-                    className="px-6 py-3 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all border border-white/5"
+                    className="px-10 py-4 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all border border-white/10 active:scale-95 shadow-xl"
                 >
-                    Cerrar
+                    Cerrar Certificado
                 </button>
             </div>
         </div>

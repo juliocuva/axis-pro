@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { registerRetailInventory, getRetailInventory, getBatchStory } from '../actions/retailActions';
+import { registerRetailInventory, getRetailInventory, getBatchStory, processRetailSale } from '../actions/retailActions';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 import { supabase } from '@/shared/lib/supabase';
+import { NumericInput } from '@/shared/components/ui/NumericInput';
 
 type RetailView = 'inventory' | 'labels' | 'traceability' | 'sales' | 'archive';
 
@@ -13,6 +14,20 @@ interface RetailModuleContainerProps {
 
 export default function RetailModuleContainer({ user }: RetailModuleContainerProps) {
     const [activeTab, setActiveTab] = useState<RetailView>('inventory');
+    const [inventory, setInventory] = useState<any[]>([]);
+    const [isLoadingInventory, setIsLoadingInventory] = useState(true);
+
+    const loadInventoryData = async () => {
+        if (!user?.companyId) return;
+        setIsLoadingInventory(true);
+        const inv = await getRetailInventory(user.companyId);
+        setInventory(inv);
+        setIsLoadingInventory(false);
+    };
+
+    useEffect(() => {
+        loadInventoryData();
+    }, [user?.companyId]);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
@@ -45,10 +60,10 @@ export default function RetailModuleContainer({ user }: RetailModuleContainerPro
             </header>
 
             <main className="min-h-[600px]">
-                {activeTab === 'inventory' && <InventoryManager user={user} />}
+                {activeTab === 'inventory' && <InventoryManager user={user} inventory={inventory} isLoading={isLoadingInventory} loadData={loadInventoryData} />}
                 {activeTab === 'labels' && <LabelGenerator />}
                 {activeTab === 'traceability' && <TraceabilityPreview user={user} />}
-                {activeTab === 'sales' && <SalesDashboard />}
+                {activeTab === 'sales' && <SalesDashboard user={user} inventory={inventory} onSaleComplete={loadInventoryData} />}
                 {activeTab === 'archive' && <GlobalHistoryArchive user={user} />}
             </main>
         </div>
@@ -57,10 +72,13 @@ export default function RetailModuleContainer({ user }: RetailModuleContainerPro
 
 // --- Sub-componentes Temporales (Se moverán a archivos propios) ---
 
-function InventoryManager({ user }: { user: { companyId: string } | null }) {
-    const [inventory, setInventory] = useState<any[]>([]);
+function InventoryManager({ user, inventory, isLoading, loadData }: {
+    user: { companyId: string } | null,
+    inventory: any[],
+    isLoading: boolean,
+    loadData: () => Promise<void>
+}) {
     const [roastBatches, setRoastBatches] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [isPackaging, setIsPackaging] = useState(false);
     const [showPackager, setShowPackager] = useState(false);
     const [sourceType, setSourceType] = useState<'internal' | 'external'>('internal');
@@ -79,15 +97,11 @@ function InventoryManager({ user }: { user: { companyId: string } | null }) {
     });
 
     useEffect(() => {
-        loadData();
+        fetchRoastBatches();
     }, []);
 
-    const loadData = async () => {
+    const fetchRoastBatches = async () => {
         if (!user?.companyId) return;
-        setIsLoading(true);
-        const inv = await getRetailInventory(user.companyId);
-        setInventory(inv);
-
         // Cargar lotes de tueste disponibles para empacar
         const { data: batches } = await supabase
             .from('roast_batches')
@@ -97,7 +111,6 @@ function InventoryManager({ user }: { user: { companyId: string } | null }) {
             .limit(10);
 
         if (batches) setRoastBatches(batches);
-        setIsLoading(false);
     };
 
     const handlePackage = async (e: React.FormEvent) => {
@@ -152,14 +165,18 @@ function InventoryManager({ user }: { user: { companyId: string } | null }) {
                                                 <p className="text-xs font-bold uppercase">SKU: {item.sku}</p>
                                                 {item.metadata?.is_external && <span className="text-[7px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
                                             </div>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
-                                                {item.metadata?.is_external ? `Roaster: ${item.metadata.roaster}` : `Batch: ${item.roast_batch_id}`}
+                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2 mt-1">
+                                                {item.roast_batches?.coffee_purchase_inventory?.varietal || 'Variedad'} |
+                                                {item.roast_batches?.coffee_purchase_inventory?.coffee_type || item.metadata?.process || 'Proceso'} |
+                                                Roasted: {item.roast_batches?.roast_date ? new Date(item.roast_batches.roast_date).toLocaleDateString() : 'N/A'}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-3xl font-bold tracking-tighter">{item.units_produced} <span className="text-[10px] text-gray-500 font-bold">UDS</span></p>
-                                        <span className="text-[9px] bg-brand-green/10 text-brand-green-bright px-2 py-0.5 rounded-full uppercase font-bold">Listo para Venta</span>
+                                        <p className="text-3xl font-bold tracking-tighter leading-none">{item.total_grams_available.toLocaleString()} <span className="text-[10px] text-gray-500 font-bold">G</span></p>
+                                        <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                                            {Math.floor(item.total_grams_available / item.unit_size_grams)} Bolsas Est.
+                                        </p>
                                     </div>
                                 </div>
                             ))
@@ -194,19 +211,24 @@ function InventoryManager({ user }: { user: { companyId: string } | null }) {
 
                         <div className="grid grid-cols-2 gap-4">
                             {sourceType === 'internal' ? (
-                                <div className="col-span-2">
-                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Lote de Tueste (Materia Prima)</label>
-                                    <select
-                                        required
-                                        value={packData.roastBatchId}
-                                        onChange={(e) => setPackData({ ...packData, roastBatchId: e.target.value })}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 text-sm font-bold"
-                                    >
-                                        <option value="">Seleccionar lote...</option>
-                                        {roastBatches.map(b => (
-                                            <option key={b.id} value={b.id}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
-                                        ))}
-                                    </select>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Lote de Tueste (Materia Prima)</label>
+                                    <div className="relative group/select">
+                                        <select
+                                            required
+                                            value={packData.roastBatchId}
+                                            onChange={(e) => setPackData({ ...packData, roastBatchId: e.target.value })}
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 text-sm font-bold appearance-none pr-12"
+                                        >
+                                            <option value="">Seleccionar lote...</option>
+                                            {roastBatches.map(b => (
+                                                <option key={b.id} value={b.id}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-purple-500 transition-colors">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
                                 <>
@@ -232,18 +254,23 @@ function InventoryManager({ user }: { user: { companyId: string } | null }) {
                                             className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Proceso de Beneficio</label>
-                                        <select
-                                            value={packData.externalProcess}
-                                            onChange={(e) => setPackData({ ...packData, externalProcess: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold"
-                                        >
-                                            <option value="Lavado">Lavado</option>
-                                            <option value="Natural">Natural</option>
-                                            <option value="Honey">Honey</option>
-                                            <option value="Anaeróbico">Anaeróbico</option>
-                                        </select>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Proceso de Beneficio</label>
+                                        <div className="relative group/select">
+                                            <select
+                                                value={packData.externalProcess}
+                                                onChange={(e) => setPackData({ ...packData, externalProcess: e.target.value })}
+                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold appearance-none pr-12"
+                                            >
+                                                <option value="Lavado">Lavado</option>
+                                                <option value="Natural">Natural</option>
+                                                <option value="Honey">Honey</option>
+                                                <option value="Anaeróbico">Anaeróbico</option>
+                                            </select>
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-blue-500 transition-colors">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="col-span-2">
                                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Notas de Cata (Separadas por coma)</label>
@@ -258,28 +285,45 @@ function InventoryManager({ user }: { user: { companyId: string } | null }) {
                                 </>
                             )}
 
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Unidades (Bolsas)</label>
-                                <input
-                                    type="number"
-                                    required
-                                    value={packData.unitsProduced}
-                                    onChange={(e) => setPackData({ ...packData, unitsProduced: parseInt(e.target.value) })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 font-bold"
-                                />
+                            <NumericInput
+                                label="Unidades (Bolsas)"
+                                value={packData.unitsProduced}
+                                onChange={(val) => setPackData({ ...packData, unitsProduced: Math.round(val) })}
+                                step={1}
+                                min={1}
+                                required
+                                disabled={isPackaging}
+                                variant="industrial"
+                                inputClassName="font-bold"
+                            />
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Tamaño Unitario (g)</label>
+                                <div className="relative group/select">
+                                    <select
+                                        value={packData.unitSizeGrams}
+                                        onChange={(e) => setPackData({ ...packData, unitSizeGrams: parseInt(e.target.value) })}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 font-bold appearance-none pr-12"
+                                    >
+                                        <option value="250">250g</option>
+                                        <option value="340">340g (12oz)</option>
+                                        <option value="500">500g</option>
+                                        <option value="1000">1000g</option>
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-purple-500 transition-colors">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Tamaño Unitario (g)</label>
-                                <select
-                                    value={packData.unitSizeGrams}
-                                    onChange={(e) => setPackData({ ...packData, unitSizeGrams: parseInt(e.target.value) })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 font-bold"
-                                >
-                                    <option value="250">250g</option>
-                                    <option value="340">340g (12oz)</option>
-                                    <option value="500">500g</option>
-                                    <option value="1000">1000g</option>
-                                </select>
+
+                            <div className="col-span-2 p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl flex justify-between items-center">
+                                <div>
+                                    <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Control de Masa Total (CMT)</p>
+                                    <p className="text-[8px] text-gray-500 uppercase mt-1">Masa neta que ingresará al inventario global</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xl font-bold text-white">{(packData.unitsProduced * packData.unitSizeGrams / 1000).toFixed(2)} KG</p>
+                                    <p className="text-[10px] text-gray-500 font-bold">({(packData.unitsProduced * packData.unitSizeGrams).toLocaleString()} G)</p>
+                                </div>
                             </div>
                         </div>
 
@@ -507,40 +551,209 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
     );
 }
 
-function SalesDashboard() {
+function SalesDashboard({ user, inventory, onSaleComplete }: {
+    user: any,
+    inventory: any[],
+    onSaleComplete?: () => void
+}) {
+    const [sales, setSales] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [saleForm, setSaleForm] = useState({
+        inventoryId: '',
+        unitsSold: 1,
+        deliveryType: 'grano' as 'grano' | 'molido',
+        totalSaleCop: 0,
+        saleChannel: 'POS Físico'
+    });
+
+    useEffect(() => {
+        loadSalesData();
+    }, []);
+
+    const loadSalesData = async () => {
+        setIsLoading(true);
+
+        const { data: salesData } = await supabase
+            .from('sales_records')
+            .select('*, retail_inventory(sku, unit_size_grams)')
+            .eq('company_id', user?.companyId)
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        if (salesData) setSales(salesData);
+        setIsLoading(false);
+    };
+
+    const handleSale = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        const result = await processRetailSale({
+            ...saleForm,
+            companyId: user?.companyId || ''
+        });
+
+        if (result.success) {
+            alert(result.message);
+            await loadSalesData();
+            if (onSaleComplete) onSaleComplete();
+        } else {
+            alert("Error: " + result.error);
+        }
+        setIsSubmitting(false);
+    };
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-2">Ingresos Retail (Hoy)</p>
-                <h4 className="text-3xl font-bold tracking-tighter">$2.450.000 <span className="text-[10px] text-brand-green-bright font-bold">COP</span></h4>
-            </div>
-            <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-2">Ticket Promedio</p>
-                <h4 className="text-3xl font-bold tracking-tighter">$45.000</h4>
-            </div>
-            <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                <p className="text-[10px] text-gray-500 uppercase font-mono mb-2">Conversión</p>
-                <h4 className="text-3xl font-bold">12.4%</h4>
-            </div>
-            <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                <p className="text-[10px] text-gray-500 uppercase font-mono mb-2">NPS (Feedback)</p>
-                <h4 className="text-3xl font-bold">4.8 <span className="text-xs text-brand-green-bright">★</span></h4>
+        <div className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Ventas (Total Masa)</p>
+                    <h4 className="text-3xl font-bold tracking-tighter">
+                        {sales.reduce((acc, curr) => acc + (Number(curr.grams_deducted) || 0), 0).toFixed(1)}
+                        <span className="text-xs text-brand-green-bright ml-2 font-mono">G</span>
+                    </h4>
+                </div>
+                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Ingresos Netos</p>
+                    <h4 className="text-3xl font-bold tracking-tighter">
+                        ${sales.reduce((acc, curr) => acc + (Number(curr.total_sale_cop) || 0), 0).toLocaleString()}
+                        <span className="text-xs text-brand-green-bright ml-1">COP</span>
+                    </h4>
+                </div>
+                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Ticket Promedio Masa</p>
+                    <h4 className="text-3xl font-bold tracking-tighter">
+                        {sales.length > 0 ? (sales.reduce((acc, curr) => acc + (Number(curr.grams_deducted) || 0), 0) / sales.length).toFixed(0) : 0}g
+                    </h4>
+                </div>
+                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Merma Molienda</p>
+                    <h4 className="text-3xl font-bold tracking-tighter text-orange-500">
+                        {sales.filter(s => s.delivery_type === 'molido').reduce((acc, curr) => acc + (Number(curr.grams_deducted) * 0.01), 0).toFixed(1)}g
+                    </h4>
+                </div>
             </div>
 
-            <div className="md:col-span-2 lg:col-span-4 bg-bg-card border border-white/10 p-10 rounded-[2.5rem]">
-                <h3 className="text-sm font-bold uppercase mb-8">Últimas Transacciones Omni-Canal</h3>
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center p-4 bg-bg-main rounded-xl border border-white/5">
-                        <div className="flex gap-4">
-                            <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-white">Vendido via E-commerce</p>
-                                <p className="text-[8px] text-gray-500 uppercase">2x Bolsa 250g - Lote AX-2130</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Formulario de Venta Rápida */}
+                <div className="bg-gradient-to-br from-bg-card to-purple-900/10 border border-purple-500/20 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden h-fit">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-3xl rounded-full"></div>
+                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+                        <span className="w-2 h-2 rounded-full bg-brand-green"></span>
+                        Registrar Venta (POS)
+                    </h3>
+
+                    <form onSubmit={handleSale} className="space-y-6 relative z-10">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Seleccionar Producto</label>
+                            <div className="relative group/select">
+                                <select
+                                    required
+                                    value={saleForm.inventoryId}
+                                    onChange={(e) => setSaleForm({ ...saleForm, inventoryId: e.target.value })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 text-xs font-bold outline-none focus:border-purple-500 appearance-none pr-12"
+                                >
+                                    <option value="">Seleccionar SKU...</option>
+                                    {inventory.map(item => (
+                                        <option key={item.id} value={item.id}>
+                                            {item.sku} - {item.unit_size_grams}g ({item.total_grams_available}g disp.)
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-purple-500 transition-colors">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                                </div>
                             </div>
                         </div>
-                        <p className="text-xs font-bold text-brand-green-bright">+$72.000</p>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <NumericInput
+                                label="Unidades"
+                                value={saleForm.unitsSold}
+                                onChange={(val) => setSaleForm({ ...saleForm, unitsSold: Math.round(val) })}
+                                step={1}
+                                min={1}
+                                required
+                                disabled={isSubmitting}
+                                variant="industrial"
+                                inputClassName="text-sm py-4"
+                            />
+                            <NumericInput
+                                label="Valor Venta (COP)"
+                                value={saleForm.totalSaleCop}
+                                onChange={(val) => setSaleForm({ ...saleForm, totalSaleCop: Math.round(val) })}
+                                step={1000}
+                                min={0}
+                                required
+                                disabled={isSubmitting}
+                                variant="industrial"
+                                inputClassName="text-sm py-4"
+                            />
+                        </div>
+
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Estado de Entrega</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setSaleForm({ ...saleForm, deliveryType: 'grano' })}
+                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'grano' ? 'bg-purple-600 border-purple-500 text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
+                                >
+                                    En Grano
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setSaleForm({ ...saleForm, deliveryType: 'molido' })}
+                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'molido' ? 'bg-orange-600 border-orange-500 text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
+                                >
+                                    Molido (+1%)
+                                </button>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isSubmitting || !saleForm.inventoryId}
+                            className="w-full py-6 bg-white hover:bg-brand-green text-black hover:text-white font-bold rounded-xl text-xs uppercase tracking-[0.2em] transition-all shadow-2xl disabled:opacity-30"
+                        >
+                            {isSubmitting ? 'SINCRONIZANDO VENTA...' : 'PROCEDER A DESPACHO'}
+                        </button>
+                    </form>
+                </div>
+
+                {/* Historial de Transacciones */}
+                <div className="lg:col-span-2 bg-bg-card border border-white/10 p-10 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
+                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-8 border-b border-white/5 pb-6">Log de Transacciones Omni-Canal</h3>
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
+                        {isLoading ? (
+                            <div className="py-20 text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">Consultando Registro de Ventas...</div>
+                        ) : sales.length === 0 ? (
+                            <div className="py-20 text-center text-[10px] text-gray-600 font-bold uppercase tracking-widest">Sin transacciones hoy</div>
+                        ) : (
+                            sales.map(sale => (
+                                <div key={sale.id} className="group p-6 bg-bg-main/50 border border-white/5 hover:border-purple-500/20 rounded-2xl flex items-center justify-between transition-all">
+                                    <div className="flex gap-5">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sale.delivery_type === 'molido' ? 'bg-orange-500/10 text-orange-400' : 'bg-brand-green/10 text-brand-green-bright'}`}>
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-white uppercase tracking-tight">SKU: {sale.retail_inventory?.sku}</p>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">
+                                                Canal: {sale.sale_channel} | {sale.delivery_type === 'molido' ? 'Despacho Molido' : 'Grano Entero'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-lg font-bold text-white tracking-tighter leading-none">${Number(sale.total_sale_cop).toLocaleString()}</p>
+                                        <p className="text-[10px] text-brand-red-bright font-bold mt-1 uppercase tracking-tighter">-{Number(sale.grams_deducted).toFixed(1)}g</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

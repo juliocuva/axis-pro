@@ -78,7 +78,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </div>
                         <button
                             onClick={() => setShowLoginModal(true)}
-                            className="bg-brand-green text-black px-5 py-2 rounded-industrial-sm text-[10px] font-black uppercase tracking-widest hover:bg-brand-green-bright transition-all shadow-lg shadow-brand-green/20"
+                            className="bg-brand-green text-black px-5 py-2 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest hover:bg-brand-green-bright transition-all shadow-lg shadow-brand-green/20"
                         >
                             ACCESO OPERADORES
                         </button>
@@ -98,13 +98,13 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     </div>
 
                     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <h1 className="max-w-4xl mx-auto text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.95] selection:bg-brand-green/30">
+                        <h1 className="max-w-4xl mx-auto text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter uppercase leading-[0.95] selection:bg-brand-green/30">
                             Capa de <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-green via-brand-green-bright to-blue-500">Inteligencia Industrial</span> para el Control Total del café
                         </h1>
                         <div className="flex flex-col items-center gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/10"></div>
-                                <p className="text-[11px] md:text-xs text-gray-400 font-black uppercase tracking-[0.5em] leading-relaxed">
+                                <p className="text-[11px] md:text-xs text-gray-400 font-bold uppercase tracking-[0.5em] leading-relaxed">
                                     Trazabilidad de la Cadena de Valor • TRL 7
                                 </p>
                                 <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/10"></div>
@@ -113,10 +113,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-6 pt-10">
-                        <button className="px-10 py-5 bg-white text-black font-black uppercase text-xs tracking-[0.2em] rounded-industrial-sm hover:scale-105 transition-all">
+                        <button className="px-10 py-5 bg-white text-black font-bold uppercase text-xs tracking-[0.2em] rounded-industrial-sm hover:scale-105 transition-all">
                             VER DEMO OPERATIVA
                         </button>
-                        <button className="px-10 py-5 bg-white/5 border border-white/10 text-white font-black uppercase text-xs tracking-[0.2em] rounded-industrial-sm hover:bg-white/10 transition-all">
+                        <button className="px-10 py-5 bg-white/5 border border-white/10 text-white font-bold uppercase text-xs tracking-[0.2em] rounded-industrial-sm hover:bg-white/10 transition-all">
                             CONOCER PLANES
                         </button>
                     </div>
@@ -128,7 +128,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
                         <div className="space-y-4">
-                            <span className="text-[10px] text-brand-green font-black uppercase tracking-[0.5em]">ECOSISTEMA MODULAR</span>
+                            <span className="text-[10px] text-brand-green font-bold uppercase tracking-[0.5em]">ECOSISTEMA MODULAR</span>
                             <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">ARQUITECTURA DE CONTROL</h2>
                         </div>
                         <p className="max-w-md text-xs text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
@@ -164,14 +164,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                         <div key={i} className="flex items-center gap-4 grayscale">
                             <div className="w-8 h-8 bg-white/10 rounded-full"></div>
-                            <span className="text-sm font-black uppercase tracking-tighter">PARTNER COFFEE {i}</span>
+                            <span className="text-sm font-bold uppercase tracking-tighter">PARTNER COFFEE {i}</span>
                         </div>
                     ))}
                     {/* Duplicate for seamless loop */}
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                         <div key={`dup-${i}`} className="flex items-center gap-4 grayscale">
                             <div className="w-8 h-8 bg-white/10 rounded-full"></div>
-                            <span className="text-sm font-black uppercase tracking-tighter">PARTNER COFFEE {i}</span>
+                            <span className="text-sm font-bold uppercase tracking-tighter">PARTNER COFFEE {i}</span>
                         </div>
                     ))}
                 </div>
@@ -192,7 +192,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </p>
                     </div>
                     <div className="space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Legal</h4>
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white">Legal</h4>
                         <nav className="flex flex-col gap-3 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
                             <a href="#" className="hover:text-white transition-colors">Términos</a>
                             <a href="#" className="hover:text-white transition-colors">Privacidad</a>
@@ -200,7 +200,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </nav>
                     </div>
                     <div className="space-y-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Social</h4>
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white">Social</h4>
                         <nav className="flex flex-col gap-3 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
                             <a href="#" className="hover:text-white transition-colors">Instagram</a>
                             <a href="#" className="hover:text-white transition-colors">LinkedIn</a>

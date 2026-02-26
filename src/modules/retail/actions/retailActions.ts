@@ -26,6 +26,8 @@ export async function registerRetailInventory(data: {
             sku: data.sku,
             unit_size_grams: data.unitSizeGrams,
             units_produced: data.unitsProduced,
+            total_grams_produced: data.unitsProduced * data.unitSizeGrams,
+            total_grams_available: data.unitsProduced * data.unitSizeGrams,
             packer_name: data.packerName,
             company_id: data.companyId,
             created_at: new Date().toISOString()
@@ -67,7 +69,16 @@ export async function getRetailInventory(companyId: string) {
     try {
         const { data, error } = await supabase
             .from('retail_inventory')
-            .select('*')
+            .select(`
+                *,
+                roast_batches (
+                    roast_date,
+                    coffee_purchase_inventory (
+                        varietal,
+                        coffee_type
+                    )
+                )
+            `)
             .eq('company_id', companyId)
             .order('created_at', { ascending: false });
 
@@ -134,5 +145,73 @@ export async function getBatchStory(batchIdLabel: string, companyId?: string) {
         };
     } catch (error) {
         return null;
+    }
+}
+
+/**
+ * Procesa una venta aplicando la lógica de CMT (Control de Masa Total).
+ * Si es molido, se aplica un 1% de merma técnica.
+ */
+export async function processRetailSale(data: {
+    inventoryId: string,
+    unitsSold: number,
+    deliveryType: 'grano' | 'molido',
+    totalSaleCop: number,
+    saleChannel: string,
+    companyId: string
+}) {
+    try {
+        // 1. Obtener inventario actual
+        const { data: item, error: fetchError } = await supabase
+            .from('retail_inventory')
+            .select('total_grams_available, unit_size_grams')
+            .eq('id', data.inventoryId)
+            .single();
+
+        if (fetchError || !item) throw new Error("Producto no encontrado");
+
+        // 2. Calcular deducción de masa
+        const nominalWeight = data.unitsSold * item.unit_size_grams;
+        const shrinkageFactor = data.deliveryType === 'molido' ? 1.01 : 1.0;
+        const actualDeduction = nominalWeight * shrinkageFactor;
+
+        if (item.total_grams_available < actualDeduction) {
+            throw new Error(`Stock insuficiente. Disponible: ${item.total_grams_available}g, Requerido: ${actualDeduction}g`);
+        }
+
+        // 3. Actualizar Inventario (Deducción Atómica)
+        const { error: updateError } = await supabase
+            .from('retail_inventory')
+            .update({
+                total_grams_available: item.total_grams_available - actualDeduction
+            })
+            .eq('id', data.inventoryId);
+
+        if (updateError) throw updateError;
+
+        // 4. Registrar la Venta
+        const { error: saleError } = await supabase
+            .from('sales_records')
+            .insert([{
+                inventory_id: data.inventoryId,
+                units_sold: data.unitsSold,
+                grams_deducted: actualDeduction,
+                delivery_type: data.deliveryType,
+                total_sale_cop: data.totalSaleCop,
+                sale_channel: data.saleChannel,
+                company_id: data.companyId
+            }]);
+
+        if (saleError) throw saleError;
+
+        return {
+            success: true,
+            deduction: actualDeduction,
+            message: `Venta registrada. Se descontaron ${actualDeduction.toFixed(1)}g (${data.deliveryType === 'molido' ? 'incluye 1% merma' : 'grano entero'})`
+        };
+
+    } catch (error: any) {
+        console.error("Error in processRetailSale:", error.message);
+        return { success: false, error: error.message };
     }
 }

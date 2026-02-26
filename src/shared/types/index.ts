@@ -1,10 +1,43 @@
-export type ProcessType = 'washed' | 'honey' | 'natural' | 'semi-washed';
+export type ProcessType =
+    | 'lavado'
+    | 'washed'
+    | 'honey'
+    | 'honey_yellow'
+    | 'honey_red'
+    | 'honey_black'
+    | 'natural'
+    | 'semi_lavado'
+    | 'semi-washed'
+    | 'doble_fermentacion'
+    | 'co_fermentacion'
+    | 'Lavado'
+    | 'Yellow Honey'
+    | 'Red Honey'
+    | 'Black Honey'
+    | 'Natural';
 
 export type CoffeeVariety =
-    | '' | 'Castillo' | 'Caturra' | 'Colombia' | 'Tabi' | 'Bourbon'
-    | 'Geisha' | 'Typica' | 'Maragogype' | 'Pacamara' | 'Sidra'
-    | 'Wush Wush' | 'Java' | 'SL28' | 'Pink Bourbon' | 'Laurina'
-    | 'Mundo Novo' | 'Cenicafe 1' | 'Papayo' | 'Chiroso';
+    | ''
+    | 'Bourbon'
+    | 'Bourbon Rosado'
+    | 'Castillo'
+    | 'Caturra'
+    | 'Cenicafe 1'
+    | 'Chiroso'
+    | 'Colombia'
+    | 'Geisha'
+    | 'Java'
+    | 'Laurina'
+    | 'Maragogype'
+    | 'Mundo Novo'
+    | 'Pacamara'
+    | 'Papayo'
+    | 'Sidra'
+    | 'SL28'
+    | 'Tabi'
+    | 'Typica'
+    | 'Wush Wush'
+    | 'Otro';
 
 export interface InventoryBatch {
     id: string;

@@ -6,5 +6,30 @@
 - Environments: .env.local
 
   Creating an optimized production build ...
-Ô£ô Compiled successfully in 6.0s
+Ô£ô Compiled successfully in 6.5s
   Running TypeScript ...
+node.exe : Failed to compile.
+En C:\Program Files\nodejs\npm.ps1: 29 Carácter: 3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Failed to com 
+   pile.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+./scripts/migrate_coffee_type.ts:2:20
+Type error: Cannot find module 'dotenv' or its 
+corresponding type declarations.
+
+[0m [90m 1 |[39m [36mimport[39m { createClient } 
+[36mfrom[39m [32m'@supabase/supabase-js'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m dotenv 
+[36mfrom[39m [32m'dotenv'[39m[33m;[39m
+ [90m   |[39m                    [31m[1m^[22m[39m
+ [90m 3 |[39m dotenv[33m.[39mconfig({ path[33m:[39m 
+[32m'.env.local'[39m })[33m;[39m
+ [90m 4 |[39m
+ [90m 5 |[39m [36mconst[39m supabaseUrl [33m=[39m pro
+cess[33m.[39menv[33m.[39m[33mNEXT_PUBLIC_SUPABASE_URL
+[39m[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
