@@ -398,7 +398,7 @@ export default function Home() {
                                 onClick={() => setView('entry')}
                                 className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'entry' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
-                                Nueva Tostión
+                                Cargar Reporte
                             </button>
                             <button
                                 onClick={() => setView('quality')}
