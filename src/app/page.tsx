@@ -386,31 +386,60 @@ export default function Home() {
 
             {(view === 'production' || view === 'entry' || view === 'quality' || view === 'curves') && (
                 <div className="max-w-7xl mx-auto space-y-8">
-                    <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
-                        <div className="flex bg-bg-card p-1 rounded-industrial-sm border border-white/5 shadow-xl">
+                    <div className="bg-bg-card p-3 rounded-industrial border border-white/5 shadow-2xl w-full">
+                        <div className="flex flex-col md:flex-row gap-2">
                             <button
                                 onClick={() => setView('production')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'production' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'production' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
                             >
-                                Inteligencia en Vivo
+                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
+                                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] ${view === 'production' ? 'bg-brand-green text-black' : 'bg-gray-800 text-gray-400'}`}>1</span>
+                                    Predicción térmica
+                                </span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Inteligencia en Vivo</span>
                             </button>
+
+                            <div className="hidden md:flex items-center justify-center text-gray-700 px-2">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </div>
+
                             <button
                                 onClick={() => setView('entry')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'entry' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'entry' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
                             >
-                                Cargar Reporte
+                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
+                                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] ${view === 'entry' ? 'bg-brand-green text-black' : 'bg-gray-800 text-gray-400'}`}>2</span>
+                                    Importar CSV/Pesos
+                                </span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Cargar Reporte</span>
                             </button>
+
+                            <div className="hidden md:flex items-center justify-center text-gray-700 px-2">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </div>
+
                             <button
                                 onClick={() => setView('quality')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'quality' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'quality' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
                             >
-                                Control Calidad
+                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
+                                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] ${view === 'quality' ? 'bg-brand-green text-black' : 'bg-gray-800 text-gray-400'}`}>3</span>
+                                    Desviación VS Objetivo
+                                </span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Control Calidad</span>
                             </button>
+
+                            <div className="w-px bg-white/10 hidden md:block mx-4 my-2"></div>
+
                             <button
                                 onClick={() => setView('curves')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'curves' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'curves' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-lg shadow-cyan-500/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
                             >
-                                Análisis Curvas
+                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                                    Herramienta
+                                </span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Análisis Curvas</span>
                             </button>
                         </div>
                     </div>
