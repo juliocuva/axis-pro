@@ -39,7 +39,8 @@ const DECAY_K: Record<ProcessType, number> = {
     semi_lavado: 0.14,
     'semi-washed': 0.14,
     doble_fermentacion: 0.13,
-    co_fermentacion: 0.13
+    co_fermentacion: 0.13,
+    anaerobico: 0.11
 };
 
 const TEMP_FACTOR: Record<'arctic' | 'temperate' | 'tropical', number> = {

@@ -152,7 +152,7 @@ export default function Home() {
                             <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain p-1" />
                         </div>
                         <h1 className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-bold">PRO V2.0</span></h1>
-                        {isDemoUnlocked && <span className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-md animate-pulse">DEMO UNLOCKED</span>}
+                        {isDemoUnlocked && <span className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-md animate-pulse">DEMO DESBLOQUEADA</span>}
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
@@ -179,7 +179,7 @@ export default function Home() {
                                 title="Control Maestro"
                             >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                                Master Control
+                                Control Maestro
                             </button>
                         )}
                         <button
@@ -188,7 +188,7 @@ export default function Home() {
                             title="Bóveda de Documentos"
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-                            Cloud Vault
+                            Bóveda en la Nube
                         </button>
                     </div>
 
@@ -229,7 +229,7 @@ export default function Home() {
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <ModuleCard
-                                title="Supply & Quality"
+                                title="Acopio y Calidad"
                                 description="Dominio de Origen: Recepción de pergamino, balance de masa industrial, defectos SCA y catación profesional. Control total de la materia prima."
                                 status="trl7"
                                 color="brand-green"
@@ -237,30 +237,30 @@ export default function Home() {
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
                             />
                             <ModuleCard
-                                title="Roast Intelligence"
+                                title="Inteligencia de Tostión"
                                 description="Ingeniería de Tueste: IA predictiva de curvas, monitoreo de ROR en tiempo real y perfiles de referencia blindados. Solicitud de validación pendiente."
                                 status={activatedModules.has('production') ? "trl7" : "locked"}
                                 color="orange-500"
                                 isOptional={latestLotDestination === 'export_green'}
                                 isRecommended={latestLotDestination === 'export_roasted'}
-                                onClick={() => requestActivation('production', 'Roast Intelligence')}
+                                onClick={() => requestActivation('production', 'Inteligencia de Tostión')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>}
                             />
                             <ModuleCard
-                                title="Global Trade"
+                                title="Comercio Global"
                                 description="Logística Internacional: Pasaporte digital del lote, manifiestos de exportación e inteligencia de mercado global. Módulo en fase beta restringida."
                                 status={activatedModules.has('export') ? "trl7" : "locked"}
                                 color="blue-500"
                                 isRecommended={latestLotDestination?.startsWith('export')}
-                                onClick={() => requestActivation('export', 'Global Trade')}
+                                onClick={() => requestActivation('export', 'Comercio Global')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>}
                             />
                             <ModuleCard
-                                title="Retail Connect"
+                                title="Conexión Minorista"
                                 description="Venta y Fidelización: Gestión de inventario terminado, e-commerce integrado y trazabilidad directo al consumidor. Próxima actualización corporativa."
                                 status={activatedModules.has('retail') ? "active" : "locked"}
                                 color="purple-500"
-                                onClick={() => requestActivation('retail', 'Retail Connect')}
+                                onClick={() => requestActivation('retail', 'Conexión Minorista')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
                             />
                         </div>
@@ -281,43 +281,13 @@ export default function Home() {
                                     <h3 className="text-4xl font-bold uppercase tracking-tighter text-white mb-2">
                                         Activar {pendingActivation.title}
                                     </h3>
-                                    <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.4em] mb-10">Software-as-a-Service Industrial</p>
+                                    <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.4em] mb-10">Software de Gestión Industrial</p>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6 mb-10 relative z-10">
-                                    {/* Plan Standard */}
-                                    <div className="p-8 bg-white/2 border border-white/5 rounded-industrial-sm hover:border-white/10 transition-all cursor-pointer group">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <p className="text-[10px] font-bold text-white uppercase tracking-widest">Plan Base</p>
-                                        </div>
-                                        <p className="text-3xl font-bold text-white">$49<span className="text-xs text-gray-600 font-bold ml-1">/mes</span></p>
-                                        <div className="mt-6 space-y-3">
-                                            <p className="text-[9px] text-gray-500 font-bold uppercase flex items-center gap-2">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
-                                                Acceso 1 Usuario
-                                            </p>
-                                            <p className="text-[9px] text-gray-500 font-bold uppercase flex items-center gap-2">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
-                                                Trazabilidad Manual
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Plan Pro */}
-                                    <div className="p-8 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm hover:border-brand-green/40 transition-all cursor-pointer group relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 bg-brand-green text-black px-3 py-1 text-[8px] font-bold uppercase rounded-bl-xl">Máximo Valor</div>
-                                        <p className="text-[10px] font-bold text-brand-green uppercase tracking-widest mb-4">Enterprise</p>
-                                        <p className="text-3xl font-bold text-white">$129<span className="text-xs text-gray-600 font-bold ml-1">/mes</span></p>
-                                        <div className="mt-6 space-y-3">
-                                            <p className="text-[9px] text-gray-100 font-bold uppercase flex items-center gap-2">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
-                                                Usuarios Ilimitados
-                                            </p>
-                                            <p className="text-[9px] text-gray-100 font-bold uppercase flex items-center gap-2">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
-                                                Sincronización Cloud
-                                            </p>
-                                        </div>
+                                <div className="mb-10 relative z-10 text-center space-y-4">
+                                    <div className="p-8 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm relative overflow-hidden">
+                                        <p className="text-[12px] font-bold text-brand-green-bright uppercase tracking-widest mb-4">Bienvenido al ecosistema</p>
+                                        <p className="text-sm text-gray-300 leading-relaxed font-medium">Estás a punto de ingresar al módulo de <strong className="text-white">{pendingActivation.title}</strong>. <br /><br />Al activar este módulo, podrás expandir el control y la trazabilidad de tus operaciones a un nuevo nivel industrial.</p>
                                     </div>
                                 </div>
 
@@ -326,7 +296,7 @@ export default function Home() {
                                         onClick={confirmActivation}
                                         className="w-full py-5 bg-brand-green text-black font-bold rounded-industrial-sm uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-brand-green/20 hover:bg-brand-green-bright hover:scale-[1.02] transition-all"
                                     >
-                                        SUSCRIBIRSE Y ACTIVAR MÓDULO
+                                        ACTIVAR E INGRESAR AL MÓDULO
                                     </button>
                                     <button
                                         onClick={() => setPendingActivation(null)}
@@ -337,7 +307,7 @@ export default function Home() {
                                 </div>
 
                                 <p className="text-center text-[8px] text-gray-600 font-bold uppercase tracking-[0.3em] mt-10">
-                                    Pagos Procesados por Stripe Secure Gateway
+                                    Válido para la sesión actual
                                 </p>
                             </div>
                         </div>
@@ -366,7 +336,7 @@ export default function Home() {
                                                     <div className="flex items-center gap-2">
                                                         <p className="text-xs font-bold uppercase">Lote: {batch.id}</p>
                                                         {batch.isDemo && (
-                                                            <span className="text-[8px] bg-brand-green/20 text-brand-green-bright px-2 py-0.5 rounded-md font-bold border border-brand-green/30">DEMO INTELLIGENCE</span>
+                                                            <span className="text-[8px] bg-brand-green/20 text-brand-green-bright px-2 py-0.5 rounded-md font-bold border border-brand-green/30">INTELIGENCIA DEMO</span>
                                                         )}
                                                     </div>
                                                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{batch.process} • {batch.roastedWeight}kg</p>
@@ -422,7 +392,7 @@ export default function Home() {
                                 onClick={() => setView('production')}
                                 className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'production' ? 'bg-brand-green text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
-                                Intelligence Vivo
+                                Inteligencia en Vivo
                             </button>
                             <button
                                 onClick={() => setView('entry')}
@@ -508,7 +478,7 @@ export default function Home() {
                                 onClick={() => setView('archive')}
                                 className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'archive' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
-                                Historial Cloud
+                                Historial en la Nube
                             </button>
                             <button
                                 onClick={() => setView('calibration')}
@@ -558,8 +528,8 @@ export default function Home() {
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-4xl font-bold uppercase tracking-tighter">Portal Cloud AXIS</h2>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mt-1">Acceso Centralizado a Assets de Confianza</p>
+                                    <h2 className="text-4xl font-bold uppercase tracking-tighter">Portal en la Nube AXIS</h2>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mt-1">Acceso Centralizado a Archivos de Confianza</p>
                                 </div>
                             </div>
                             <button
@@ -603,20 +573,20 @@ export default function Home() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-brand-green-bright uppercase">Supply & Quality</h4>
+                                    <h4 className="text-sm font-bold text-brand-green-bright uppercase">Acopio y Calidad</h4>
                                     <p className="text-xs leading-relaxed">Control de trilla, factor de rendimiento y protocolos SCA ciegos con firma digital.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-orange-400 uppercase">Roast Intelligence</h4>
-                                    <p className="text-xs leading-relaxed">Monitoreo espectral en vivo, Ghost Profiles y asistente IA para control de variables físicas.</p>
+                                    <h4 className="text-sm font-bold text-orange-400 uppercase">Inteligencia de Tostión</h4>
+                                    <p className="text-xs leading-relaxed">Monitoreo espectral en vivo, Perfiles Espejo y asistente IA para control de variables físicas.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-blue-400 uppercase">Global Trade</h4>
+                                    <h4 className="text-sm font-bold text-blue-400 uppercase">Comercio Global</h4>
                                     <p className="text-xs leading-relaxed">Pasaportes digitales QR y motores dinámicos de desgasificación para logística segura.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-purple-400 uppercase">Retail Connect</h4>
-                                    <p className="text-xs leading-relaxed">Gestión multi-procedencia para retailers y etiquetado inteligente para storytelling B2C.</p>
+                                    <h4 className="text-sm font-bold text-purple-400 uppercase">Conexión Minorista</h4>
+                                    <p className="text-xs leading-relaxed">Gestión multi-procedencia para distribuidores y etiquetado inteligente para storytelling final.</p>
                                 </div>
                             </div>
 

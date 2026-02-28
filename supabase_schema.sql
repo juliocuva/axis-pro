@@ -52,7 +52,10 @@ CREATE TABLE coffee_purchase_inventory (
     company_id UUID NOT NULL,
     coffee_type TEXT DEFAULT 'pergamino',
     destination TEXT CHECK (destination IN ('internal', 'export_green', 'export_roasted')) DEFAULT 'internal',
-    export_certificate TEXT
+    export_certificate TEXT,
+    latitude DECIMAL,
+    longitude DECIMAL,
+    process_data JSONB DEFAULT '{}'::jsonb
 );
 
 -- 4. PRODUCCIÓN (ROAST INTELLIGENCE)
@@ -69,6 +72,9 @@ CREATE TABLE roast_batches (
     profile_id UUID REFERENCES roast_profiles(id) ON DELETE SET NULL,
     machine_id UUID REFERENCES machines(id) ON DELETE SET NULL,
     roaster_name TEXT,
+    selected_weight DECIMAL, -- Peso final tras selección
+    quakers_grams DECIMAL DEFAULT 0, -- Peso de quakers
+    roast_curve_json JSONB, -- Datos de Artisan/Cropster
     consistency_score DECIMAL, -- Puntaje de Calibración Espectral
     sca_score_predicted DECIMAL, -- Basado en la IA del Cierre de Círculo
     company_id UUID NOT NULL

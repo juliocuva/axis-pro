@@ -42,7 +42,9 @@ async function seedMassive() {
                     purchase_weight: 150 + i * 10,
                     purchase_date: new Date().toISOString().split('T')[0],
                     status: status,
-                    company_id: user.id
+                    company_id: user.id,
+                    latitude: (1 + Math.random() * 11).toFixed(6),
+                    longitude: (-79 + Math.random() * 12).toFixed(6)
                 }], { onConflict: 'lot_number' })
                 .select().single();
 
@@ -71,6 +73,15 @@ async function seedMassive() {
                     process: 'washed',
                     green_weight: 12,
                     roasted_weight: 10.2,
+                    selected_weight: 10.1, // Merma de selección (0.1kg)
+                    quakers_grams: 15,     // 15g de quakers
+                    roast_curve_json: [
+                        { time: "0:00", temp: 200, ror: 0 },
+                        { time: "1:00", temp: 95, ror: -15 },
+                        { time: "3:00", temp: 130, ror: 12 },
+                        { time: "6:00", temp: 170, ror: 10 },
+                        { time: "9:00", temp: 204, ror: 8 }
+                    ],
                     company_id: user.id
                 }]);
             }

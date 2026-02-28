@@ -47,6 +47,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
     const [error, setError] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [isAlreadySealed, setIsAlreadySealed] = useState(false);
 
     useEffect(() => {
         const fetchCupping = async () => {
@@ -78,6 +79,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                     });
                     setTasterName(record.taster_name || 'Q-Grader Senior');
                     setNotes(record.notes || '');
+                    setIsAlreadySealed(true);
                 }
             } catch (err) {
                 console.error("AXIS CRITICAL ERROR (Catación):", err);
@@ -189,8 +191,8 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                 </div>
                                 <input
                                     type="range" min="6" max="10" step="0.25" value={scores[cat.id] || 7.5}
-                                    disabled={isSubmitting}
-                                    className="w-full accent-brand-green-bright bg-white/5 h-1.5 rounded-full appearance-none outline-none cursor-pointer"
+                                    disabled={isSubmitting || isAlreadySealed}
+                                    className={`w-full accent-brand-green-bright bg-white/5 h-1.5 rounded-full appearance-none outline-none ${isAlreadySealed ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                     onChange={(e) => setScores({ ...scores, [cat.id]: parseFloat(e.target.value) })}
                                 />
                             </div>
@@ -206,9 +208,10 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     <button
                                         key={num}
                                         type="button"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || isAlreadySealed}
                                         onClick={() => setScores({ ...scores, defects_score: num })}
-                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-white' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'}`}
+                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-white' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'} ${isAlreadySealed && scores.defects_score !== num ? 'opacity-20 cursor-not-allowed hidden' : ''}`}
+                                        style={isAlreadySealed && scores.defects_score !== num ? { display: 'none' } : {}}
                                     >
                                         {num}
                                     </button>
@@ -222,9 +225,9 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                 <input
                                     type="text"
                                     value={tasterName}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || isAlreadySealed}
                                     onChange={(e) => setTasterName(e.target.value)}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none"
+                                    className={`w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none ${isAlreadySealed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -232,24 +235,38 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                 <input
                                     type="text"
                                     value={notes}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || isAlreadySealed}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder="Descriptores, cuerpo, post-gusto..."
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none"
+                                    className={`w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none ${isAlreadySealed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 />
                             </div>
                         </div>
                     </div>
 
                     <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full flex items-center justify-center gap-4 py-6 bg-white text-black hover:bg-brand-green-bright hover:text-white font-bold rounded-industrial-sm transition-all shadow-2xl group uppercase tracking-[0.2em] text-xs"
+                        type={isAlreadySealed ? "button" : "submit"}
+                        disabled={isSubmitting || isAlreadySealed}
+                        className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadySealed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-white hover:bg-brand-green-bright text-black hover:text-white disabled:opacity-30'}`}
                     >
-                        {isSubmitting ? 'SELLANDO PROTOCOLO EN AXIS CLOUD...' : 'SELLAR LOTE Y FIRMAR CERTIFICADO'}
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
-                            <path d="M5 12h14M12 5l7-7 7 7" />
-                        </svg>
+                        {isAlreadySealed ? (
+                            <>
+                                PROTOCOLO SCA SELLADO
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
+                            </>
+                        ) : isSubmitting ? (
+                            'SELLANDO PROTOCOLO EN AXIS CLOUD...'
+                        ) : (
+                            <>
+                                SELLAR LOTE Y FIRMAR CERTIFICADO
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
+                                    <path d="M5 12h14M12 5l7-7 7 7" />
+                                </svg>
+                            </>
+                        )}
                     </button>
                 </form>
             </div>

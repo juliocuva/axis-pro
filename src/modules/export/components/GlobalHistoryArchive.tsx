@@ -89,7 +89,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
             )}
 
             {selectedItem && viewMode === 'certificate' && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-2xl overflow-y-auto">
+                <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 md:py-10 bg-black/95 backdrop-blur-2xl overflow-y-auto">
                     <LotCertificate
                         inventoryId={selectedItem.id}
                         user={user}

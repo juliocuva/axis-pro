@@ -190,6 +190,12 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                                                 <span className="text-[11px] text-blue-400 font-bold uppercase tracking-wider">FLUJO B: EXPORTACIÓN</span>
                                             </div>
                                         )}
+                                        {selectedLot.latitude && selectedLot.longitude && (
+                                            <div className="bg-[#ea580c]/10 border border-[#ea580c]/20 px-3 py-1.5 rounded-industrial-sm flex items-center gap-2">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                                <span className="text-[11px] text-[#ea580c] font-bold font-mono tracking-widest">{parseFloat(selectedLot.latitude).toFixed(4)}, {parseFloat(selectedLot.longitude).toFixed(4)}</span>
+                                            </div>
+                                        )}
                                         {selectedLot.status === 'completed' && (
                                             <button
                                                 onClick={() => setShowCertificate(true)}
@@ -432,5 +438,12 @@ const LotCard = ({ lot, isSelected, onClick }: { lot: any, isSelected: boolean, 
                 })}
             </div>
         </div>
+
+        {lot.latitude && lot.longitude && (
+            <div className="flex items-center gap-2 pt-3 border-t border-white/5 opacity-40 group-hover/item:opacity-80 transition-opacity">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                <span className="text-[9px] font-mono text-gray-500 uppercase">GPS: {parseFloat(lot.latitude).toFixed(4)}, {parseFloat(lot.longitude).toFixed(4)}</span>
+            </div>
+        )}
     </div>
 );

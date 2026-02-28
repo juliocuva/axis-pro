@@ -67,6 +67,9 @@ export async function createCoffeePurchase(formData: any) {
             purchase_date: formData.purchaseDate,
             destination: formData.destination,
             export_certificate: formData.exportCertificate,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+            process_data: formData.processData || {},
             company_id: formData.companyId,
             status: formData.coffeeType === 'excelso' ? 'thrashed' : 'purchased',
             coffee_type: formData.coffeeType,
@@ -87,6 +90,9 @@ export async function createCoffeePurchase(formData: any) {
             delete legacyData.coffee_type;
             delete legacyData.destination;
             delete legacyData.export_certificate;
+            delete legacyData.latitude;
+            delete legacyData.longitude;
+            delete legacyData.process_data;
 
             insertResponse = await supabase
                 .from('coffee_purchase_inventory')
@@ -142,6 +148,9 @@ export async function updateCoffeePurchase(lotId: string, formData: any) {
             purchase_date: formData.purchaseDate,
             destination: formData.destination,
             export_certificate: formData.exportCertificate,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+            process_data: formData.processData || {},
             coffee_type: formData.coffeeType
         };
 
@@ -160,6 +169,9 @@ export async function updateCoffeePurchase(lotId: string, formData: any) {
             delete legacyData.coffee_type;
             delete legacyData.destination;
             delete legacyData.export_certificate;
+            delete legacyData.latitude;
+            delete legacyData.longitude;
+            delete legacyData.process_data;
 
             updateResponse = await supabase
                 .from('coffee_purchase_inventory')

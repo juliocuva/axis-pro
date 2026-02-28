@@ -2,12 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
+import ClientPerformanceReport from './ClientPerformanceReport';
+import ClientLotsArchive from './ClientLotsArchive';
+import ClientRoastsArchive from './ClientRoastsArchive';
 
 export default function MasterControlCenter() {
     const [stats, setStats] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isMigrating, setIsMigrating] = useState(false);
     const [selectedTargetId, setSelectedTargetId] = useState('');
+    const [reportCompany, setReportCompany] = useState<{ id: string, name: string } | null>(null);
+    const [showLotsCompany, setShowLotsCompany] = useState<{ id: string, name: string } | null>(null);
+    const [showRoastsCompany, setShowRoastsCompany] = useState<{ id: string, name: string } | null>(null);
 
     useEffect(() => {
         fetchMasterStats();
@@ -208,9 +214,46 @@ export default function MasterControlCenter() {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <span className="gold-gradient-text font-bold tracking-widest text-2xl">
-                                                {(company.roasts * 10 + company.physical * 5 + company.cupping * 5).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-                                            </span>
+                                            <div className="flex flex-col items-end gap-3">
+                                                <span className="gold-gradient-text font-bold tracking-widest text-2xl">
+                                                    {(company.roasts * 10 + company.physical * 5 + company.cupping * 5).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                                </span>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => setShowLotsCompany({
+                                                            id: company.id,
+                                                            name: company.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA (ADMIN)' :
+                                                                company.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
+                                                                    company.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' : 'CLIENTE CORPORATIVO'
+                                                        })}
+                                                        className="px-4 py-2 bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
+                                                    >
+                                                        Ver Lotes
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setShowRoastsCompany({
+                                                            id: company.id,
+                                                            name: company.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA (ADMIN)' :
+                                                                company.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
+                                                                    company.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' : 'CLIENTE CORPORATIVO'
+                                                        })}
+                                                        className="px-4 py-2 bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
+                                                    >
+                                                        Ver Tuestes
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setReportCompany({
+                                                            id: company.id,
+                                                            name: company.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA (ADMIN)' :
+                                                                company.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
+                                                                    company.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' : 'CLIENTE CORPORATIVO'
+                                                        })}
+                                                        className="px-4 py-2 bg-brand-green/10 text-brand-green border border-brand-green/30 hover:bg-brand-green/20 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
+                                                    >
+                                                        Reporte (AI)
+                                                    </button>
+                                                </div>
+                                            </div>
                                         )}
                                     </td>
                                 </tr>
@@ -239,6 +282,30 @@ export default function MasterControlCenter() {
                     </div>
                 </div>
             </div>
+
+            {reportCompany && (
+                <ClientPerformanceReport
+                    companyId={reportCompany.id}
+                    companyName={reportCompany.name}
+                    onClose={() => setReportCompany(null)}
+                />
+            )}
+
+            {showLotsCompany && (
+                <ClientLotsArchive
+                    companyId={showLotsCompany.id}
+                    companyName={showLotsCompany.name}
+                    onClose={() => setShowLotsCompany(null)}
+                />
+            )}
+
+            {showRoastsCompany && (
+                <ClientRoastsArchive
+                    companyId={showRoastsCompany.id}
+                    companyName={showRoastsCompany.name}
+                    onClose={() => setShowRoastsCompany(null)}
+                />
+            )}
         </div>
     );
 }

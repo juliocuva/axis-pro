@@ -59,19 +59,24 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                     itemsToHide.forEach((el: any) => el.style.display = 'none');
 
                     // Force charts to have non-zero dimensions
+                    // Force charts to have non-zero dimensions
                     const charts = clonedDoc.querySelectorAll('.recharts-responsive-container');
                     charts.forEach((chart: any) => {
-                        chart.style.width = '800px'; // Forced static width for capture
-                        chart.style.height = '400px'; // Forced static height for capture
+                        chart.style.width = '800px';
+                        chart.style.height = '400px';
                         chart.style.visibility = 'visible';
                         chart.style.opacity = '1';
                     });
 
-                    // Avoid 0-size canvases which trigger InvalidStateError in createPattern
-                    const canvases = clonedDoc.querySelectorAll('canvas');
-                    canvases.forEach((canvas: any) => {
-                        if (canvas.width === 0) canvas.width = 1;
-                        if (canvas.height === 0) canvas.height = 1;
+                    // Remove filters and complex SVG patterns that crash html2canvas
+                    const filters = clonedDoc.querySelectorAll('filter, clipPath, mask');
+                    filters.forEach((el: any) => el.parentNode?.removeChild(el));
+
+                    // Hide elements with blur classes which often break canvas
+                    const blurElements = clonedDoc.querySelectorAll('[class*="blur-"]');
+                    blurElements.forEach((el: any) => {
+                        el.style.filter = 'none';
+                        el.style.backdropFilter = 'none';
                     });
                 }
             });
@@ -109,7 +114,7 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
     return (
         <button
             onClick={handleDownload}
-            className="mt-6 w-full bg-white/5 hover:bg-white/10 border border-white/10 text-brand-green-bright font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3 group"
+            className="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-brand-green-bright font-bold rounded-2xl transition-all flex items-center justify-center gap-3 group shadow-xl"
         >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:translate-y-0.5 transition-transform">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />

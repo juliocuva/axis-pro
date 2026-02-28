@@ -11,7 +11,8 @@ import {
     ResponsiveContainer,
     ReferenceLine,
     AreaChart,
-    Area
+    Area,
+    ComposedChart
 } from 'recharts';
 
 // Datos simulados de una curva de tostión profesional (12 minutos)
@@ -37,22 +38,29 @@ import { supabase } from '@/shared/lib/supabase';
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-bg-card border border-white/10 p-4 rounded-industrial-sm shadow-2xl backdrop-blur-md">
-                <p className="text-xs font-mono text-gray-500 mb-2">{`TIEMPO: ${label}`}</p>
-                <div className="space-y-1">
-                    <p className="text-sm font-bold text-brand-green-bright flex justify-between gap-4">
-                        Temp: <span className="text-white">{payload[0].value}°C</span>
-                    </p>
-                    {payload[1] && (
-                        <p className="text-sm font-bold text-orange-400 flex justify-between gap-4">
-                            RoR: <span className="text-white">{payload[1].value} Δ</span>
-                        </p>
-                    )}
-                    {payload[2] && (
-                        <p className="text-sm font-bold text-cyan-400 flex justify-between gap-4">
-                            Aire: <span className="text-white">{payload[2].value}%</span>
-                        </p>
-                    )}
+            <div className="bg-bg-card border border-white/10 p-4 rounded-industrial-sm shadow-2xl backdrop-blur-md min-w-[180px]">
+                <p className="text-xs font-mono text-gray-500 mb-3 flex justify-between">
+                    <span>TIEMPO</span>
+                    <span>{label}</span>
+                </p>
+                <div className="space-y-2">
+                    {payload.map((entry: any, index: number) => {
+                        if (!entry.value) return null;
+                        const labelMap: any = {
+                            temp: { name: 'BT', color: 'text-brand-green-bright', unit: '°C' },
+                            et: { name: 'ET', color: 'text-gray-400', unit: '°C' },
+                            ror: { name: 'RoR', color: 'text-orange-400', unit: 'Δ' },
+                            gas: { name: 'GAS', color: 'text-orange-600', unit: '%' },
+                            pressure: { name: 'PRES', color: 'text-cyan-400', unit: 'WC' }
+                        };
+                        const meta = labelMap[entry.dataKey] || { name: entry.name, color: 'text-white', unit: '' };
+
+                        return (
+                            <p key={index} className={`text-sm font-bold ${meta.color} flex justify-between gap-4`}>
+                                {meta.name}: <span className="text-white font-mono">{entry.value}{meta.unit}</span>
+                            </p>
+                        );
+                    })}
                 </div>
             </div>
         );
@@ -84,18 +92,44 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
         if (data) setPastRoasts(data);
     };
 
+    const padTimeline = (data: any[]) => {
+        if (data.length === 0) return data;
+        const lastPoint = data[data.length - 1];
+        const timeParts = lastPoint.time.split(':').map(Number);
+        const lastSecs = timeParts.length === 3
+            ? timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2]
+            : (timeParts.length === 2 ? timeParts[0] * 60 + timeParts[1] : 0);
+
+        const targetSecs = 12 * 60; // 12 minutos
+        if (lastSecs < targetSecs) {
+            const padded = [...data];
+            // Añadir puntos vacíos cada 30 segundos hasta llegar a 12min
+            for (let t = Math.floor(lastSecs / 30) * 30 + 30; t <= targetSecs; t += 30) {
+                const mm = Math.floor(t / 60).toString().padStart(2, '0');
+                const ss = (t % 60).toString().padStart(2, '0');
+                padded.push({ time: `${mm}:${ss}` });
+            }
+            return padded;
+        }
+        return data;
+    };
+
     const handleBatchSelect = (id: string) => {
         const roast = pastRoasts.find(r => r.batch_id_label === id);
         if (roast) {
             setSelectedRoast(roast);
-            // Simular variación de curva según el lote para realismo visual
-            const seed = parseInt(id.split('-')[1]) || 100;
-            const newCurve = roastData.map(d => ({
-                ...d,
-                temp: d.temp + (Math.sin(seed + (parseInt(d.time.split(':')[0]) || 0)) * 2),
-                ror: d.ror + (Math.cos(seed + (parseInt(d.time.split(':')[0]) || 0)) * 0.5)
-            }));
-            setChartData(newCurve);
+
+            if (roast.roast_curve_json && Array.isArray(roast.roast_curve_json)) {
+                setChartData(padTimeline(roast.roast_curve_json));
+            } else {
+                const seed = parseInt(id.split('-')[1]) || 100;
+                const newCurve = roastData.map(d => ({
+                    ...d,
+                    temp: d.temp + (Math.sin(seed + (parseInt(d.time.split(':')[0]) || 0)) * 2),
+                    ror: d.ror + (Math.cos(seed + (parseInt(d.time.split(':')[0]) || 0)) * 0.5)
+                }));
+                setChartData(padTimeline(newCurve));
+            }
         }
     };
 
@@ -150,14 +184,28 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                         <div className="space-y-1">
                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Tiempo de Tueste</p>
                             <p className="text-4xl font-bold text-white tracking-tighter">
-                                {selectedRoast ? `${Math.floor(selectedRoast.duration_seconds / 60)}:${(selectedRoast.duration_seconds % 60).toString().padStart(2, '0')}` : '09:12'}
+                                {(() => {
+                                    const duration = selectedRoast?.duration_seconds || (chartData.length > 0 ? (() => {
+                                        const parseTime = (t: string) => {
+                                            const p = t.split(':').map(Number);
+                                            if (p.length === 3) return p[0] * 3600 + p[1] * 60 + p[2];
+                                            if (p.length === 2) return p[0] * 60 + p[1];
+                                            return 0;
+                                        };
+                                        const firstSecs = parseTime(chartData[0].time);
+                                        const lastSecs = parseTime(chartData[chartData.length - 1].time);
+                                        const secs = lastSecs - firstSecs;
+                                        return secs > 0 ? secs : 0;
+                                    })() : 552);
+                                    return `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`;
+                                })()}
                                 <span className="text-xs text-gray-500 ml-2">min</span>
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Temp. Final</p>
                             <p className="text-4xl font-bold text-brand-green-bright tracking-tighter">
-                                {selectedRoast ? selectedRoast.final_temp : '202.4'}
+                                {selectedRoast?.final_temp || (chartData.length > 0 ? chartData[chartData.length - 1].temp : '202.4')}
                                 <span className="text-xs text-gray-500 ml-2">°C</span>
                             </p>
                         </div>
@@ -173,7 +221,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
 
                 <div className="h-[450px] w-full relative z-10">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                        <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="spectralGradient" x1="0" y1="0" x2="1" y2="0">
                                     <stop offset="0%" stopColor="#3b82f6" />
@@ -196,7 +244,8 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                                 fontSize={10}
                                 tickLine={false}
                                 axisLine={false}
-                                domain={[80, 240]}
+                                domain={[0, 250]}
+                                allowDataOverflow={true}
                                 tick={{ fill: '#4b5563', fontWeight: 700 }}
                             />
                             <YAxis
@@ -206,24 +255,49 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                                 fontSize={10}
                                 tickLine={false}
                                 axisLine={false}
-                                domain={[-30, 100]}
+                                domain={[-15, 45]}
+                                allowDataOverflow={true}
                                 tick={{ fill: '#4b5563', fontWeight: 700 }}
                             />
+                            <ReferenceLine yAxisId="right" y={0} stroke="#ffffff20" strokeDasharray="3 3" />
                             <Tooltip content={<CustomTooltip />} />
 
-                            {/* Spectral Area Background (simulating thermal energy) */}
-                            <AreaChart data={chartData.slice(0, 10)}>
-                                <Area type="monotone" dataKey="temp" stroke="none" fill="url(#spectralGradient)" fillOpacity={0.05} />
-                            </AreaChart>
+                            {/* Background Heat Signature */}
+                            <Area yAxisId="left" type="monotone" dataKey="temp" stroke="none" fill="url(#spectralGradient)" fillOpacity={0.03} />
+
+                            {/* Secondary Metrics (Industrial Logs) */}
+                            <Line
+                                yAxisId="left"
+                                type="stepAfter"
+                                dataKey="gas"
+                                name="gas"
+                                stroke="#ea580c"
+                                strokeWidth={2}
+                                strokeOpacity={0.3}
+                                dot={false}
+                            />
 
                             <Line
                                 yAxisId="right"
                                 type="monotone"
-                                dataKey="airflow"
+                                dataKey="pressure"
+                                name="pressure"
                                 stroke="#22d3ee"
                                 strokeWidth={2}
                                 strokeOpacity={0.4}
                                 dot={false}
+                            />
+
+                            <Line
+                                yAxisId="left"
+                                type="monotone"
+                                dataKey="et"
+                                name="et"
+                                stroke="#94a3b8"
+                                strokeWidth={2}
+                                strokeDasharray="5 5"
+                                dot={false}
+                                strokeOpacity={0.6}
                             />
 
                             <Line
@@ -260,7 +334,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                                 dot={false}
                                 activeDot={{ r: 8, fill: '#f97316' }}
                             />
-                        </LineChart>
+                        </ComposedChart>
                     </ResponsiveContainer>
                 </div>
 

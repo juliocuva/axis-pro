@@ -3,7 +3,7 @@ import React from 'react';
 interface NumericInputProps {
     label?: string;
     value: number | string;
-    onChange: (val: number) => void;
+    onChange: (val: any) => void;
     min?: number;
     max?: number;
     step?: number;
@@ -36,7 +36,9 @@ export const NumericInput: React.FC<NumericInputProps> = ({
         const currentVal = typeof value === 'string' ? parseFloat(value) || 0 : value;
         const newVal = currentVal + step;
         if (max !== undefined && newVal > max) return;
-        onChange(Number(newVal.toFixed(2)));
+        // Si el valor es pequeño, toFixed(2) podría agregar ceros de más a la vista, usamos Number para quitar trailing zeros, 
+        // pero almacenamos como string para evitar el salto del cursor
+        onChange(String(Number(newVal.toFixed(2))));
     };
 
     const handleDecrement = () => {
@@ -44,7 +46,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
         const currentVal = typeof value === 'string' ? parseFloat(value) || 0 : value;
         const newVal = currentVal - step;
         if (min !== undefined && newVal < min) return;
-        onChange(Number(newVal.toFixed(2)));
+        onChange(String(Number(newVal.toFixed(2))));
     };
 
     const variantStyles = {
@@ -70,20 +72,27 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                     {label}
                 </label>
             )}
-            <div className="relative group">
+            <div className="relative group w-full">
                 <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required={required}
-                    min={min}
-                    max={max}
-                    step={step}
-                    value={value || ''}
+                    value={value !== undefined ? value : ''}
                     placeholder={placeholder}
                     disabled={disabled}
-                    onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-                    className={`w-full bg-bg-main border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-24 ${variantStyles[variant]} ${inputClassName} [appearance:none] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    onChange={(e) => {
+                        // Allow only numbers, dot, and comma
+                        let val = e.target.value.replace(/[^0-9.,]/g, '');
+                        // Convert comma to dot for internal state consistency if desired, or keep as typed
+                        val = val.replace(',', '.');
+                        onChange(val);
+                    }}
+                    className={`block w-full bg-bg-main border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-24 ${variantStyles[variant]} ${inputClassName} placeholder:text-white/60 placeholder:font-normal`}
                 />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+                <div
+                    className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"
+                    style={{ right: '16px' }}
+                >
                     <div className="flex flex-col border-l border-white/10 pl-3">
                         <button
                             type="button"

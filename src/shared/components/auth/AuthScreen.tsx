@@ -66,15 +66,15 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </div>
                         <nav className="hidden md:flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                             <a href="#features" className="hover:text-white transition-colors">Tecnología</a>
-                            <a href="#plans" className="hover:text-white transition-colors">Planes</a>
-                            <a href="#contact" className="hover:text-white transition-colors">Contacto</a>
                         </nav>
                     </div>
                     <div className="flex items-center gap-6">
                         <div className="hidden lg:flex items-center gap-4 text-[9px] font-bold text-gray-500 uppercase tracking-widest border-r border-white/10 pr-6">
-                            <span>Email: support@axiscoffee.pro</span>
+                            <span>Email: juliocuva@gmail.com</span>
                             <div className="w-1 h-1 bg-brand-green rounded-full"></div>
-                            <span>T: +57 321 000 0000</span>
+                            <span>T: +57 301 397 0002</span>
+                            <div className="w-1 h-1 bg-brand-green rounded-full"></div>
+                            <a href="https://www.linkedin.com/in/julio-uva-b7a124163/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors hover:underline">LinkedIn</a>
                         </div>
                         <button
                             onClick={() => setShowLoginModal(true)}
@@ -112,14 +112,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-6 pt-10">
-                        <button className="px-10 py-5 bg-white text-black font-bold uppercase text-xs tracking-[0.2em] rounded-industrial-sm hover:scale-105 transition-all">
-                            VER DEMO OPERATIVA
-                        </button>
-                        <button className="px-10 py-5 bg-white/5 border border-white/10 text-white font-bold uppercase text-xs tracking-[0.2em] rounded-industrial-sm hover:bg-white/10 transition-all">
-                            CONOCER PLANES
-                        </button>
-                    </div>
+
                 </div>
             </main>
 
@@ -138,10 +131,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {[
-                            { title: 'Supply & Quality', desc: 'Factor de rendimiento, laboratorios físicos y catación SCA automatizada.', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
-                            { title: 'Roast Intelligence', desc: 'IA predictiva de curvas, monitoreo ROR y perfiles de referencia blindados.', icon: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z' },
-                            { title: 'Global Trade', desc: 'Pasaportes digitales QR y motores predictivos de desgasificación logística.', icon: 'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z' },
-                            { title: 'Retail Connect', desc: 'Trazabilidad B2C directa con historias de origen generadas por datos.', icon: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' }
+                            { title: 'Acopio y Calidad', desc: 'Factor de rendimiento, laboratorios físicos y catación SCA automatizada.', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+                            { title: 'Inteligencia de Tostión', desc: 'IA predictiva de curvas, monitoreo ROR y perfiles de referencia blindados.', icon: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z' },
+                            { title: 'Comercio Global', desc: 'Pasaportes digitales QR y motores predictivos de desgasificación logística.', icon: 'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z' },
+                            { title: 'Conexión Minorista', desc: 'Trazabilidad B2C directa con historias de origen generadas por datos.', icon: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' }
                         ].map((item, idx) => (
                             <div key={idx} className="bg-bg-card p-10 rounded-industrial border border-white/5 hover:border-brand-green/30 transition-all group">
                                 <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center text-brand-green mb-8 group-hover:bg-brand-green group-hover:text-black transition-all">
@@ -177,45 +170,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 </div>
             </section>
 
-            {/* 4. FOOTER */}
-            <footer className="py-20 bg-black">
-                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-white/5 pb-20">
-                    <div className="md:col-span-2 space-y-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-white/5 rounded-md flex items-center justify-center border border-white/10">
-                                <img src="/logo.png" alt="AXIS" className="w-full h-full object-contain" />
-                            </div>
-                            <span className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green">PRO</span></span>
-                        </div>
-                        <p className="max-w-md text-xs text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
-                            Infraestructura digital masiva para la industria cafetera. 100% cloud, 100% trazable, 100% industrial.
-                        </p>
-                    </div>
-                    <div className="space-y-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white">Legal</h4>
-                        <nav className="flex flex-col gap-3 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
-                            <a href="#" className="hover:text-white transition-colors">Términos</a>
-                            <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-                            <a href="#" className="hover:text-white transition-colors">SLA</a>
-                        </nav>
-                    </div>
-                    <div className="space-y-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white">Social</h4>
-                        <nav className="flex flex-col gap-3 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
-                            <a href="#" className="hover:text-white transition-colors">Instagram</a>
-                            <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
-                            <a href="#" className="hover:text-white transition-colors">Twitter</a>
-                        </nav>
-                    </div>
-                </div>
-                <div className="max-w-7xl mx-auto px-6 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-[9px] text-gray-700 font-bold uppercase tracking-[0.2em]">© 2026 AXIS COFFEE ROASTERS • TODOS LOS DERECHOS RESERVADOS</p>
-                    <div className="flex gap-8 text-[9px] text-gray-700 font-bold uppercase tracking-[0.2em]">
-                        <span>Versión 2.0.4 PRO</span>
-                        <span>Hosting en Bóveda Global</span>
-                    </div>
-                </div>
-            </footer>
+
 
             {/* 5. LOGIN MODAL OVERLAY */}
             {showLoginModal && (

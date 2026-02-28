@@ -14,7 +14,8 @@ export type ProcessType =
     | 'Yellow Honey'
     | 'Red Honey'
     | 'Black Honey'
-    | 'Natural';
+    | 'Natural'
+    | 'anaerobico';
 
 export type CoffeeVariety =
     | ''
@@ -60,17 +61,22 @@ export interface InventoryBatch {
 
 export interface RoastBatch {
     id: string;
+    batchIdLabel?: string;
     roastDate: string; // ISO format
     process: ProcessType;
-    variety: CoffeeVariety;
+    variety: CoffeeVariety | string;
     profileId: string;
     greenWeight: number;
     roastedWeight: number;
-    chargeTemp: number;
-    dropTime: string; // MM:SS
-    developmentPct: number;
+    selectedWeight?: number; // Weight after selection (defect removal)
+    quakersGrams?: number;   // Weight of quakers in grams
+    chargeTemp?: number;
+    dropTime?: string; // MM:SS
+    developmentPct?: number;
     machineId?: string;
     roasterName?: string;
+    roastCurve?: any[]; // Points for chart {time, temp, ror, airflow, event}
+    scaScore?: number;
 }
 
 export interface DegassingResult {

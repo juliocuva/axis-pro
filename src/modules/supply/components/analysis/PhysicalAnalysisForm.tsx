@@ -38,6 +38,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
     const [error, setError] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
+    const [isAlreadyAnalyzed, setIsAlreadyAnalyzed] = useState(false);
 
     useEffect(() => {
         const fetchAnalysis = async () => {
@@ -77,6 +78,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                         },
                         grainColor: record.grain_color || 'VERDE OLIVA'
                     });
+                    setIsAlreadyAnalyzed(true);
                 }
             } catch (err) {
                 console.error("AXIS CRITICAL ERROR (Physical):", err);
@@ -143,6 +145,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.moisture}
                             onChange={(val) => setFormData({ ...formData, moisture: val })}
                             step={0.01}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
                             variant={lotDestination.startsWith('export')
                                 ? (formData.moisture > 12 || formData.moisture < 10 ? 'red' : 'blue')
                                 : (formData.moisture > 13 || formData.moisture < 9 ? 'red' : 'industrial')
@@ -158,6 +161,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.waterActivity}
                             onChange={(val) => setFormData({ ...formData, waterActivity: val })}
                             step={0.001}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
                             variant="blue"
                             inputClassName="text-xl py-4"
                         />
@@ -169,6 +173,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.density}
                             onChange={(val) => setFormData({ ...formData, density: val })}
                             step={1}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
                             variant="industrial"
                             inputClassName="text-xl py-4"
                             unit="g/L"
@@ -180,7 +185,8 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                         <div className="relative group/select">
                             <select
                                 value={formData.grainColor}
-                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 pr-14 py-4 text-sm font-bold text-white outline-none focus:border-brand-green uppercase appearance-none transition-all"
+                                disabled={isSubmitting || isAlreadyAnalyzed}
+                                className={`w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 pr-14 py-4 text-sm font-bold text-white outline-none focus:border-brand-green uppercase appearance-none transition-all ${isAlreadyAnalyzed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
                             >
                                 <option value="VERDE OLIVA">Verde Oliva (Estándar)</option>
@@ -211,6 +217,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                         screenSize: { ...formData.screenSize, [`size${size}`]: val }
                                     })}
                                     step={0.1}
+                                    disabled={isSubmitting || isAlreadyAnalyzed}
                                     variant="default"
                                     inputClassName="text-base py-2"
                                     unit="%"
@@ -228,6 +235,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                         screenSize: { ...formData.screenSize, [`size${size}`]: val }
                                     })}
                                     step={0.1}
+                                    disabled={isSubmitting || isAlreadyAnalyzed}
                                     variant="default"
                                     inputClassName="text-base py-2"
                                     unit="%"
@@ -241,6 +249,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                     screenSize: { ...formData.screenSize, under12: val }
                                 })}
                                 step={0.1}
+                                disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="default"
                                 inputClassName="text-base py-2"
                                 unit="%"
@@ -256,6 +265,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.defects.primary}
                             onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, primary: val } })}
                             step={0.01}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
                             variant="red"
                             inputClassName="text-3xl font-bold py-4 !text-white"
                             unit="%"
@@ -271,6 +281,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.defects.secondary}
                             onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, secondary: val } })}
                             step={0.01}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
                             variant="orange"
                             inputClassName="text-3xl font-bold py-4 !text-white"
                             unit="%"
@@ -283,11 +294,28 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                 </section>
 
                 <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold rounded-industrial-sm transition-all shadow-xl shadow-blue-900/20 uppercase tracking-widest text-xs"
+                    type={isAlreadyAnalyzed ? "button" : "submit"}
+                    disabled={isSubmitting || isAlreadyAnalyzed}
+                    className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyAnalyzed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white disabled:opacity-30'}`}
                 >
-                    {isSubmitting ? 'SINCRONIZANDO LABORATORIO...' : 'GUARDAR ANÁLISIS FÍSICO Y CONTINUAR A CATACIÓN'}
+                    {isAlreadyAnalyzed ? (
+                        <>
+                            CERTIFICADO FÍSICO SELLADO
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                        </>
+                    ) : isSubmitting ? (
+                        'SINCRONIZANDO LABORATORIO...'
+                    ) : (
+                        <>
+                            GUARDAR ANÁLISIS FÍSICO Y CONTINUAR A CATACIÓN
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
+                                <path d="M5 12h14M12 5l7 7-7-7" />
+                            </svg>
+                        </>
+                    )}
                 </button>
             </form>
         </div>

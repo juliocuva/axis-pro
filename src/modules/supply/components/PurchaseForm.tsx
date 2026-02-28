@@ -12,7 +12,7 @@ const COFFEE_VARIETIES_BASE: string[] = [
 ];
 
 const PROCESS_TYPES: ProcessType[] = [
-    'lavado', 'honey', 'honey_yellow', 'honey_red', 'honey_black', 'natural', 'semi_lavado', 'doble_fermentacion', 'co_fermentacion'
+    'lavado', 'honey', 'honey_yellow', 'honey_red', 'honey_black', 'natural', 'anaerobico', 'semi_lavado', 'doble_fermentacion', 'co_fermentacion'
 ];
 
 const COLOMBIAN_REGIONS = [
@@ -49,7 +49,19 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
         destination: 'internal' as 'internal' | 'export_green' | 'export_roasted',
         exportCertificate: '',
-        coffeeType: 'pergamino' as 'pergamino' | 'excelso'
+        coffeeType: 'pergamino' as 'pergamino' | 'excelso',
+        latitude: 0,
+        longitude: 0,
+        processData: {
+            ph_inicial: '4.5',
+            ph_final: '3.8',
+            brix_inicial: '18.5',
+            temperatura_masa_max: '35',
+            duracion_fermentacion_horas: '72',
+            actividad_agua_aw: '',
+            recipiente_fermentacion: '',
+            tipo_secado: ''
+        } as any
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -58,6 +70,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [expectedYield, setExpectedYield] = useState<number>(0);
+    const [smartLinkText, setSmartLinkText] = useState('');
+    const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+
+    const nextStep = () => setCurrentStep(p => (Math.min(p + 1, 3) as 1 | 2 | 3));
+    const prevStep = () => setCurrentStep(p => (Math.max(p - 1, 1) as 1 | 2 | 3));
 
     // Cargar variedades dinámicas desde la DB
     useEffect(() => {
@@ -98,7 +115,38 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 lotNumber: selectedLot.lot_number || `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
                 destination: (selectedLot.destination as 'internal' | 'export_green' | 'export_roasted') || 'internal',
                 exportCertificate: selectedLot.export_certificate || '',
-                coffeeType: (selectedLot.coffee_type as 'pergamino' | 'excelso') || 'pergamino'
+                coffeeType: (selectedLot.coffee_type as 'pergamino' | 'excelso') || 'pergamino',
+                latitude: selectedLot.latitude || 0,
+                longitude: selectedLot.longitude || 0,
+                processData: (() => {
+                    const pd = selectedLot.process_data;
+                    const isSpecialty = ['anaerobico', 'doble_fermentacion', 'co_fermentacion'].includes((selectedLot.process as ProcessType) || 'lavado');
+                    const hasData = pd && Object.keys(pd).length > 0;
+                    const hasValues = hasData && Object.values(pd).some(v => v !== null && v !== '');
+
+                    if (isSpecialty && hasData && !hasValues) {
+                        return {
+                            ph_inicial: '4.5',
+                            ph_final: '3.8',
+                            brix_inicial: '18.5',
+                            temperatura_masa_max: '35',
+                            duracion_fermentacion_horas: '72',
+                            actividad_agua_aw: '',
+                            recipiente_fermentacion: '',
+                            tipo_secado: ''
+                        };
+                    }
+                    return hasData ? pd : {
+                        ph_inicial: '4.5',
+                        ph_final: '3.8',
+                        brix_inicial: '18.5',
+                        temperatura_masa_max: '35',
+                        duracion_fermentacion_horas: '72',
+                        actividad_agua_aw: '',
+                        recipiente_fermentacion: '',
+                        tipo_secado: ''
+                    };
+                })()
             });
             if (!isBase) setCustomVariety(selectedLot.variety);
             setDisplayValue(formatCOP(String(selectedLot.purchase_value || 0)));
@@ -106,8 +154,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             setFormData(initialFormState);
             setCustomVariety('');
             setDisplayValue('');
+            setSmartLinkText('');
             setStatus(null);
             setShowSuccessModal(false);
+            setCurrentStep(1);
         }
     }, [selectedLot]);
 
@@ -156,7 +206,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 setStatus({ type: 'success', message: result.message });
                 setShowSuccessModal(true);
 
-                // Actualizar lista de variedades para que la nueva aparezca de inmediato sin recargar
+                // Actualizar lista de variedades
                 if (formData.variety === 'Otro' && !dynamicVarieties.includes(customVariety)) {
                     setDynamicVarieties(prev => [...prev, customVariety].sort((a, b) => a.localeCompare(b)));
                 }
@@ -184,6 +234,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         });
         setDisplayValue('');
         setStatus(null);
+        setCurrentStep(1);
     };
 
     // AI Pattern Box Component
@@ -217,9 +268,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         );
     };
 
+    const isAlreadyRegistered = !!selectedLot;
+
     return (
         <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
-
             {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -250,66 +302,88 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h3 className="text-brand-green-bright font-bold flex items-center gap-2">
-                            <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
-                            Datos del Productor
-                        </h3>
-                    </div>
+            {/* Stepper Wizard Header */}
+            <div className="flex justify-between items-center mb-8 relative px-4">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] h-0.5 bg-white/5 z-0 mx-4">
+                    <div className="h-full bg-brand-green/50 transition-all duration-500" style={{ width: `${(currentStep - 1) * 50}%` }}></div>
+                </div>
 
-                    <div className="flex flex-col items-center justify-center p-8 bg-bg-main border border-white/5 rounded-industrial-sm group relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-brand-green/20"></div>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /></svg>
-                            Identificador de Lote (Manual / Auto)
-                        </p>
-                        <div className="flex items-center gap-6">
-                            <input
-                                type="text"
-                                placeholder="AX-0000"
-                                value={formData.lotNumber}
-                                onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
-                                className="bg-transparent text-5xl font-bold tracking-tighter text-white hover:text-brand-green-bright transition-colors uppercase outline-none text-center border-b border-white/10 focus:border-brand-green w-64"
-                                disabled={isSubmitting}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}` })}
-                                className="p-4 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 text-brand-green transition-all"
-                                title="Generar ID Aleatorio"
-                            >
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
-                            </button>
+                <button type="button" onClick={() => setCurrentStep(1)} className="relative z-10 flex flex-col items-center gap-2 group">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-bg-main border-2 transition-all duration-500 ${currentStep >= 1 ? 'border-brand-green shadow-[0_0_20px_rgba(0,255,136,0.5)] text-brand-green' : 'border-white/20 text-gray-600'}`}>1</div>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-bg-main px-3 transition-colors ${currentStep === 1 ? 'text-brand-green-bright' : (currentStep > 1 ? 'text-brand-green/70' : 'text-gray-500')}`}>Origen y Productor</span>
+                </button>
+                <button type="button" onClick={() => setCurrentStep(2)} className="relative z-10 flex flex-col items-center gap-2 group">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-bg-main border-2 transition-all duration-500 ${currentStep >= 2 ? 'border-brand-green shadow-[0_0_20px_rgba(0,255,136,0.5)] text-brand-green' : 'border-white/20 text-gray-600'}`}>2</div>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-bg-main px-3 transition-colors ${currentStep === 2 ? 'text-brand-green-bright' : (currentStep > 2 ? 'text-brand-green/70' : 'text-gray-500')}`}>Comercialización</span>
+                </button>
+                <button type="button" onClick={() => setCurrentStep(3)} className="relative z-10 flex flex-col items-center gap-2 group">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-bg-main border-2 transition-all duration-500 ${currentStep >= 3 ? 'border-brand-green shadow-[0_0_20px_rgba(0,255,136,0.5)] text-brand-green' : 'border-white/20 text-gray-600'}`}>3</div>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-bg-main px-3 transition-colors ${currentStep === 3 ? 'text-brand-green-bright' : 'text-gray-500'}`}>Proceso Químico</span>
+                </button>
+            </div>
+
+            <fieldset disabled={isSubmitting || isAlreadyRegistered} className={`border-none p-0 m-0 min-h-[450px] relative transition-all ${isAlreadyRegistered ? 'opacity-80 pointer-events-none' : ''}`}>
+                {currentStep === 1 && (
+                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
+                        <h3 className="text-brand-green-bright font-bold flex items-center gap-2 mb-6">
+                            <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
+                            Datos Principales de Origen
+                        </h3>
+
+                        <div className="flex flex-col items-center justify-center p-8 bg-bg-main border border-white/5 rounded-industrial-sm group relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-brand-green/20"></div>
+                            <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /></svg>
+                                Identificador de Lote (Manual / Auto)
+                            </p>
+                            <div className="flex items-center gap-6">
+                                <input
+                                    type="text"
+                                    placeholder="AX-0000"
+                                    value={formData.lotNumber}
+                                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
+                                    className="bg-transparent text-5xl font-bold tracking-tighter text-white hover:text-brand-green-bright transition-colors uppercase outline-none text-center border-b border-white/10 focus:border-brand-green w-64"
+                                    disabled={isSubmitting}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}` })}
+                                    className="p-4 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 text-brand-green transition-all"
+                                    title="Generar ID Aleatorio"
+                                >
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nombre del Caficultor</label>
-                            <input
-                                type="text"
-                                placeholder="Ej. Alejandra Pérez"
-                                required
-                                value={formData.farmerName}
-                                onChange={(e) => setFormData({ ...formData, farmerName: e.target.value })}
-                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
-                                disabled={isSubmitting}
-                            />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nombre del Caficultor</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. Alejandra Pérez"
+                                    required
+                                    value={formData.farmerName}
+                                    onChange={(e) => setFormData({ ...formData, farmerName: e.target.value })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nombre de la Finca</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. Alejandría"
+                                    required
+                                    value={formData.farmName}
+                                    onChange={(e) => setFormData({ ...formData, farmName: e.target.value })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nombre de la Finca</label>
-                            <input
-                                type="text"
-                                placeholder="Ej. Alejandría"
-                                required
-                                value={formData.farmName}
-                                onChange={(e) => setFormData({ ...formData, farmName: e.target.value })}
-                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
-                                disabled={isSubmitting}
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <NumericInput
                                     label="Altura (msnm)"
@@ -322,7 +396,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     inputClassName="font-bold"
                                     unit="M"
                                 />
-                                <p className="text-[10px] mt-[-10px] text-gray-500 uppercase">Rango: 800 - 2500 msnm</p>
+                                <p className="text-[10px] mt-2 text-gray-500 uppercase">Rango: 800 - 2500 msnm</p>
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Fecha de Compra</label>
@@ -333,7 +407,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                         value={formData.purchaseDate}
                                         onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
                                         className={`w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-brand-green-bright font-bold scheme-dark pr-12 cursor-pointer
-                                                [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                                            [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                                         disabled={isSubmitting}
                                     />
                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-green-bright group-focus-within/date:opacity-100 opacity-60 transition-opacity">
@@ -347,110 +421,228 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 </div>
                             </div>
                         </div>
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Región / Departamento</label>
-                            <select
-                                required
-                                value={formData.region}
-                                onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
-                                disabled={isSubmitting}
-                            >
-                                <option value="">Seleccionar</option>
-                                {COLOMBIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">País</label>
-                            <select
-                                required
-                                value={formData.country}
-                                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
-                                disabled={isSubmitting}
-                            >
-                                <option value="">Seleccionar</option>
-                                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                        </div>
-                    </div>
-                </section>
 
-                <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6">
-                    <h3 className="text-brand-green-bright font-bold flex items-center gap-2">
-                        <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
-                        Flujo de Destino y Especificaciones
-                    </h3>
+                        <div className="space-y-4">
+                            <div className="bg-[#ea580c]/5 border border-[#ea580c]/20 p-4 rounded-industrial-sm">
+                                <label className="text-[10px] font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2 mb-2">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+                                    Vínculo de Ubicación Smart (WhatsApp / Maps)
+                                </label>
+                                <div className="flex gap-2 w-full">
+                                    <input
+                                        type="text"
+                                        placeholder="Pegue aquí el enlace..."
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-[#ea580c] outline-none text-xs text-gray-300 italic"
+                                        value={smartLinkText}
+                                        onChange={(e) => setSmartLinkText(e.target.value)}
+                                        disabled={isSubmitting}
+                                    />
+                                    <button
+                                        type="button"
+                                        disabled={!smartLinkText || isSubmitting}
+                                        onClick={() => {
+                                            let decodedText = smartLinkText;
+                                            try { decodedText = decodeURIComponent(smartLinkText).replace(/\+/g, ' '); } catch (e) { }
+                                            const queryRegex = /q=([-+]?\d*\.\d+)[,\s]([-+]?\d*\.\d+)/;
+                                            const placeRegex = /@([-+]?\d*\.\d+)[,\s]([-+]?\d*\.\d+)/;
+                                            const rawCoordsRegex = /([-+]?\d{1,2}\.\d+)[,\s]+([-+]?\d{1,3}\.\d+)/;
 
-                    <div className="grid grid-cols-1 gap-6">
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Estado del Café al Ingreso</label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, coffeeType: 'pergamino' })}
-                                    className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green/10 border-brand-green text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/10'}`}
-                                >
-                                    <span className="text-[11px] font-bold uppercase tracking-widest">CAFÉ PERGAMINO</span>
-                                    <span className="text-[8px] opacity-60 font-bold uppercase">(Requiere Trilla)</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, coffeeType: 'excelso' })}
-                                    className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-blue-600/10 border-blue-500 text-blue-400 shadow-lg shadow-blue-500/5' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/10'}`}
-                                >
-                                    <span className="text-xs font-bold uppercase tracking-widest">CAFÉ VERDE / ORO</span>
-                                    <span className="text-[10px] opacity-60 font-bold uppercase">(Salto a Calidad)</span>
-                                </button>
+                                            let extracted = false;
+                                            [queryRegex, placeRegex, rawCoordsRegex].forEach(r => {
+                                                if (extracted) return;
+                                                const match = decodedText.match(r);
+                                                if (match) {
+                                                    setFormData(prev => ({ ...prev, latitude: parseFloat(match[1]), longitude: parseFloat(match[2]) }));
+                                                    setStatus({ type: 'success', message: '¡Coordenadas extraídas exitosamente del vínculo!' });
+                                                    extracted = true;
+                                                }
+                                            });
+                                            if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
+                                        }}
+                                        className="bg-[#ea580c]/20 hover:bg-[#ea580c] text-[#ea580c] hover:text-white border border-[#ea580c]/50 transition-colors px-4 py-3 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Extraer GPS
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-4">
-                        <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Destino Final del Lote</label>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-1">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, destination: 'internal' })}
-                                    className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'internal' ? 'bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
-                                >
-                                    <span>CONSUMO</span>
-                                    <span>INTERNO</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, destination: 'export_roasted' })}
-                                    className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'export_roasted' ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
-                                >
-                                    <span>EXPORTAR</span>
-                                    <span>TOSTADO</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, destination: 'export_green' })}
-                                    className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'export_green' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
-                                >
-                                    <span>EXPORTAR</span>
-                                    <span>VERDE</span>
-                                </button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
+                                        Latitud
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="Ej. 4.570868"
+                                        value={formData.latitude || ''}
+                                        onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-[#ea580c] outline-none font-mono text-sm"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
+                                        Longitud
+                                    </label>
+                                    <input
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="Ej. -74.297333"
+                                        value={formData.longitude || ''}
+                                        onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-[#ea580c] outline-none font-mono text-sm"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        {formData.destination.startsWith('export') && (
-                            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                                <label className="text-xs font-bold text-blue-400 uppercase tracking-widest">Certificado / Lote de Exportación Internacional</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Región / Departamento</label>
+                                <select
+                                    required
+                                    value={formData.region}
+                                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                                    disabled={isSubmitting}
+                                >
+                                    <option value="">Seleccionar</option>
+                                    {COLOMBIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">País</label>
+                                <select
+                                    required
+                                    value={formData.country}
+                                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                                    disabled={isSubmitting}
+                                >
+                                    <option value="">Seleccionar</option>
+                                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                {currentStep === 2 && (
+                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
+                        <h3 className="text-brand-green-bright font-bold flex items-center gap-2 mb-6">
+                            <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
+                            Negocio, Destino y Tipo de Grano
+                        </h3>
+
+                        <div className="grid grid-cols-1 gap-6">
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Estado del Café al Ingreso</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, coffeeType: 'pergamino' })}
+                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green/10 border-brand-green text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/10'}`}
+                                    >
+                                        <span className="text-[11px] font-bold uppercase tracking-widest">CAFÉ PERGAMINO</span>
+                                        <span className="text-[8px] opacity-60 font-bold uppercase">(Requiere Trilla)</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, coffeeType: 'excelso' })}
+                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-blue-600/10 border-blue-500 text-blue-400 shadow-lg shadow-blue-500/5' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/10'}`}
+                                    >
+                                        <span className="text-xs font-bold uppercase tracking-widest">CAFÉ VERDE / ORO</span>
+                                        <span className="text-[10px] opacity-60 font-bold uppercase">(Salto a Calidad)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Destino Final del Lote</label>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, destination: 'internal' })}
+                                        className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'internal' ? 'bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
+                                    >
+                                        <span>CONSUMO</span>
+                                        <span>INTERNO</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, destination: 'export_roasted' })}
+                                        className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'export_roasted' ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
+                                    >
+                                        <span>EXPORTAR</span>
+                                        <span>TOSTADO</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, destination: 'export_green' })}
+                                        className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'export_green' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
+                                    >
+                                        <span>EXPORTAR</span>
+                                        <span>VERDE</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {formData.destination.startsWith('export') && (
+                                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                                    <label className="text-xs font-bold text-blue-400 uppercase tracking-widest">Certificado / Lote de Exportación Internacional</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        placeholder="Ej. SNT-2026-X001"
+                                        value={formData.exportCertificate}
+                                        onChange={(e) => setFormData({ ...formData, exportCertificate: e.target.value })}
+                                        className="w-full bg-bg-main border border-blue-500/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-blue-400 outline-none text-white font-mono shadow-inner shadow-blue-500/5 placeholder:text-gray-700"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        <NumericInput
+                            label="Cantidad Pack de Compra"
+                            value={formData.purchaseWeight}
+                            onChange={(val) => setFormData({ ...formData, purchaseWeight: val })}
+                            min={1}
+                            step={0.1}
+                            unit="KG"
+                            required
+                            disabled={isSubmitting}
+                            variant={formData.purchaseWeight <= 0 ? 'red' : 'industrial'}
+                            inputClassName="text-2xl py-4"
+                        />
+
+                        <div className="space-y-4">
+                            <label className="text-xs font-bold text-white uppercase tracking-widest block border-l-2 border-brand-green pl-3">Valor Total de Compra</label>
+                            <div className="relative">
                                 <input
                                     type="text"
-                                    required
-                                    placeholder="Ej. SNT-2026-X001"
-                                    value={formData.exportCertificate}
-                                    onChange={(e) => setFormData({ ...formData, exportCertificate: e.target.value })}
-                                    className="w-full bg-bg-main border border-blue-500/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-blue-400 outline-none text-white font-mono shadow-inner shadow-blue-500/5 placeholder:text-gray-700"
+                                    value={displayValue}
+                                    onChange={handleValueChange}
+                                    className={`w-full bg-bg-main border rounded-industrial-sm px-6 py-5 text-4xl font-bold tracking-tighter outline-none transition-all pr-32 ${formData.purchaseValue <= 0 ? 'border-brand-red/50 text-brand-red' : 'border-white/10 text-brand-green-bright focus:border-brand-green'}`}
+                                    placeholder="0"
                                     disabled={isSubmitting}
                                 />
+                                <span className="absolute right-12 top-6 text-xs text-gray-400 font-bold tracking-widest opacity-60">COP</span>
                             </div>
-                        )}
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-1 uppercase">Manejando Pesos Colombianos (COP)</p>
+                    </section>
+                )}
+
+                {currentStep === 3 && (
+                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
+                        <h3 className="text-brand-green-bright font-bold flex items-center gap-2 mb-6">
+                            <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
+                            Perfiles Biológicos y Procesamiento
+                        </h3>
+
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-4">
                                 <div>
@@ -482,11 +674,32 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     </div>
                                 )}
                             </div>
-                            <div>
+                            <div className="flex flex-col gap-4 w-full">
                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Proceso</label>
                                 <select
                                     value={formData.process}
-                                    onChange={(e) => setFormData({ ...formData, process: e.target.value as ProcessType })}
+                                    onChange={(e) => {
+                                        const newProcess = e.target.value as ProcessType;
+                                        const isSpecialty = ['anaerobico', 'doble_fermentacion', 'co_fermentacion'].includes(newProcess);
+                                        setFormData(prev => {
+                                            const currentPd = prev.processData || {};
+                                            const hasValues = Object.values(currentPd).some(v => v !== null && v !== '');
+                                            return {
+                                                ...prev,
+                                                process: newProcess,
+                                                processData: isSpecialty && !hasValues ? {
+                                                    ph_inicial: '4.5',
+                                                    ph_final: '3.8',
+                                                    brix_inicial: '18.5',
+                                                    temperatura_masa_max: '35',
+                                                    duracion_fermentacion_horas: '72',
+                                                    actividad_agua_aw: '',
+                                                    recipiente_fermentacion: '',
+                                                    tipo_secado: ''
+                                                } : currentPd
+                                            };
+                                        });
+                                    }}
                                     className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none uppercase appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
                                     disabled={isSubmitting}
                                 >
@@ -499,63 +712,151 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
                         </div>
 
-                        <NumericInput
-                            label="Cantidad Pack de Compra (Kg Pergamino)"
-                            value={formData.purchaseWeight}
-                            onChange={(val) => setFormData({ ...formData, purchaseWeight: val })}
-                            min={1}
-                            step={0.1}
-                            unit="KG"
-                            required
-                            disabled={isSubmitting}
-                            variant={formData.purchaseWeight <= 0 ? 'red' : 'industrial'}
-                            inputClassName="text-2xl py-4"
-                        />
+                        {/* Variables Técnicas (Procesos Especiales) */}
+                        {['anaerobico', 'doble_fermentacion', 'co_fermentacion'].includes(formData.process) && (
+                            <div className="mt-6 p-6 border border-brand-green/30 bg-brand-green/5 rounded-industrial-sm animate-in zoom-in-95 duration-300">
+                                <h4 className="text-[11px] font-bold text-brand-green tracking-widest uppercase mb-6 flex items-center justify-between">
+                                    <span className="flex items-center gap-2">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                                        Variables Fisicoquímicas
+                                    </span>
+                                    <span className="px-2 py-0.5 bg-black/50 text-[8px] rounded font-mono border border-brand-green/20">Privado/Encriptado</span>
+                                </h4>
 
-                        <div className="space-y-4">
-                            <label className="text-xs font-bold text-white uppercase tracking-widest block border-l-2 border-brand-green pl-3">Valor Total de Compra</label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={displayValue}
-                                    onChange={handleValueChange}
-                                    className={`w-full bg-bg-main border rounded-industrial-sm px-6 py-5 text-4xl font-bold tracking-tighter outline-none transition-all pr-32 ${formData.purchaseValue <= 0 ? 'border-brand-red/50 text-brand-red' : 'border-white/10 text-brand-green-bright focus:border-brand-green'}`}
-                                    placeholder="0"
-                                    disabled={isSubmitting}
-                                />
-                                <span className="absolute right-12 top-6 text-xs text-gray-400 font-bold tracking-widest opacity-60">COP</span>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <NumericInput
+                                        label="pH Inicial"
+                                        placeholder="4.5"
+                                        step={0.01}
+                                        value={formData.processData.ph_inicial || ''}
+                                        onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, ph_inicial: val } }))}
+                                        inputClassName="text-xs py-2 pr-12"
+                                    />
+                                    <NumericInput
+                                        label="pH Final *"
+                                        required
+                                        placeholder="3.8"
+                                        step={0.01}
+                                        value={formData.processData.ph_final || ''}
+                                        onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, ph_final: val } }))}
+                                        inputClassName="text-xs py-2 pr-12"
+                                    />
+                                    <NumericInput
+                                        label="Brix Inicial"
+                                        placeholder="18.5"
+                                        step={0.1}
+                                        value={formData.processData.brix_inicial || ''}
+                                        onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, brix_inicial: val } }))}
+                                        inputClassName="text-xs py-2 pr-12"
+                                    />
+                                    <NumericInput
+                                        label="Temp. Max Masa (°C)"
+                                        placeholder="35"
+                                        step={0.1}
+                                        value={formData.processData.temperatura_masa_max || ''}
+                                        onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, temperatura_masa_max: val } }))}
+                                        inputClassName="text-xs py-2 pr-12"
+                                    />
+                                    <NumericInput
+                                        label="Duración (Horas)"
+                                        placeholder="72"
+                                        step={1}
+                                        value={formData.processData.duracion_fermentacion_horas || ''}
+                                        onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, duracion_fermentacion_horas: val } }))}
+                                        inputClassName="text-xs py-2 pr-12"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Recipiente de Fermentación</label>
+                                        <select
+                                            value={formData.processData.recipiente_fermentacion || ''}
+                                            onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, recipiente_fermentacion: e.target.value } }))}
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 focus:border-brand-green outline-none text-[12px] font-bold text-white appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                                            disabled={isSubmitting}
+                                        >
+                                            <option value="" className="text-gray-400 font-normal">Seleccionar</option>
+                                            <option value="Bioreactor Inoxidable">Bioreactor Inoxidable</option>
+                                            <option value="Tanque Plástico">Tanque Plástico (Caneca)</option>
+                                            <option value="Bolsa GrainPro">Bolsa GrainPro / Emulsión</option>
+                                            <option value="Tanque Cemento">Tanque Cemento</option>
+                                            <option value="Otro">Otro Tipo</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Método de Secado</label>
+                                        <select
+                                            value={formData.processData.tipo_secado || ''}
+                                            onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, tipo_secado: e.target.value } }))}
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 focus:border-brand-green outline-none text-[12px] font-bold text-white appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                                            disabled={isSubmitting}
+                                        >
+                                            <option value="" className="text-gray-400 font-normal">Seleccionar</option>
+                                            <option value="Camas Africanas">Camas Africanas</option>
+                                            <option value="Marquesina Parabólica">Marquesina / Parabólica</option>
+                                            <option value="Silo Mecánico">Secadora Mecánica (Silo)</option>
+                                            <option value="Patio al Sol">Patio de Cemento al Sol</option>
+                                            <option value="Secado Mixto">Mixto (Sol y Máquina)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p className="text-[9px] text-brand-green/70 mt-3 font-mono">Los datos marcados con * serán visibles en el perfil de calidad de exportación.</p>
                             </div>
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-1 uppercase">Manejando Pesos Colombianos (COP)</p>
-                    </div>
+                        )}
 
-                    <AIPatternBox />
-                </section>
-            </div>
-
-            <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full ${selectedLot ? 'bg-blue-600 hover:bg-blue-500' : 'bg-brand-green hover:bg-brand-green-bright'} text-white font-bold py-6 rounded-industrial-sm transition-all shadow-xl flex items-center justify-center gap-4 group disabled:opacity-50 text-sm uppercase tracking-widest relative overflow-hidden`}
-            >
-                {isSubmitting ? (
-                    <>
-                        <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            SINCRONIZANDO CON LA NUBE...
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        {selectedLot ? 'ACTUALIZAR DATOS DE TRAZABILIDAD' : 'REGISTRAR INGRESO Y PREPARAR PARA TRILLA'}
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:rotate-12 transition-transform">
-                            <path d="M4 12V4a2 2 0 0 1 2-2h10l4 4v5" />
-                            <path d="M10 12l2 2 4-4" />
-                            <path d="M4 18h16" />
-                        </svg>
-                    </>
+                        <AIPatternBox />
+                    </section>
                 )}
-            </button>
+            </fieldset>
+
+            {/* Navigational Buttons */}
+            <div className="flex justify-between items-center mt-6 pt-6 border-t border-white/5 relative z-20">
+                {currentStep > 1 ? (
+                    <button type="button" onClick={prevStep} disabled={isAlreadyRegistered} className="px-6 py-3 border border-white/10 text-white rounded-industrial-sm font-bold uppercase tracking-widest text-[10px] hover:bg-white/5 transition-colors disabled:opacity-50">
+                        &larr; Volver Atrás
+                    </button>
+                ) : <div></div>}
+
+                {currentStep < 3 ? (
+                    <button type="button" onClick={nextStep} className="px-10 py-4 bg-brand-green/10 text-brand-green-bright border border-brand-green/30 rounded-industrial-sm font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-brand-green hover:text-black transition-colors shadow-[0_0_15px_rgba(0,255,136,0.1)]">
+                        Siguiente Paso &rarr;
+                    </button>
+                ) : (
+                    <div className="flex-1 ml-4 animate-in fade-in zoom-in-95 duration-500">
+                        <button
+                            type={isAlreadyRegistered ? "button" : "submit"}
+                            disabled={isSubmitting || isAlreadyRegistered}
+                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyRegistered ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-brand-green hover:bg-brand-green-bright text-white disabled:opacity-30'}`}
+                        >
+                            {isAlreadyRegistered ? (
+                                <>
+                                    RECIBO DE INGRESO SELLADO
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                </>
+                            ) : isSubmitting ? (
+                                <>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        SINCRONIZANDO CON LA NUBE...
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    REGISTRAR INGRESO Y PREPARAR PARA TRILLA
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:rotate-12 transition-transform">
+                                        <path d="M4 12V4a2 2 0 0 1 2-2h10l4 4v5" />
+                                        <path d="M10 12l2 2 4-4" />
+                                        <path d="M4 18h16" />
+                                    </svg>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+            </div>
 
             <style jsx>{`
                 @keyframes loading-bar {

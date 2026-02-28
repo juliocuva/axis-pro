@@ -15,10 +15,15 @@ interface ThrashingFormProps {
 export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashingComplete, user }: ThrashingFormProps) {
     const PROCESS_PARAMS: Record<string, { shrinkageMin: number; shrinkageMax: number; conversion: number; frMin: number; frMax: number }> = {
         'Lavado': { shrinkageMin: 18.0, shrinkageMax: 20.0, conversion: 0.81, frMin: 88, frMax: 94 },
+        'Semi Lavado': { shrinkageMin: 19.0, shrinkageMax: 21.0, conversion: 0.80, frMin: 90, frMax: 96 },
+        'Honey': { shrinkageMin: 22.0, shrinkageMax: 24.0, conversion: 0.78, frMin: 95, frMax: 102 },
         'Yellow Honey': { shrinkageMin: 20.0, shrinkageMax: 22.0, conversion: 0.80, frMin: 92, frMax: 98 },
         'Red Honey': { shrinkageMin: 22.0, shrinkageMax: 24.0, conversion: 0.78, frMin: 95, frMax: 102 },
         'Black Honey': { shrinkageMin: 24.0, shrinkageMax: 26.0, conversion: 0.75, frMin: 100, frMax: 108 },
-        'Natural': { shrinkageMin: 28.0, shrinkageMax: 32.0, conversion: 0.70, frMin: 115, frMax: 130 }
+        'Natural': { shrinkageMin: 28.0, shrinkageMax: 32.0, conversion: 0.70, frMin: 115, frMax: 130 },
+        'Anaerobico': { shrinkageMin: 21.0, shrinkageMax: 23.0, conversion: 0.79, frMin: 93, frMax: 100 },
+        'Doble Fermentacion': { shrinkageMin: 20.0, shrinkageMax: 22.0, conversion: 0.80, frMin: 92, frMax: 98 },
+        'Co Fermentacion': { shrinkageMin: 22.0, shrinkageMax: 25.0, conversion: 0.77, frMin: 96, frMax: 104 }
     };
 
     const [formData, setFormData] = useState({
@@ -31,6 +36,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
     const [yieldFactor, setYieldFactor] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isAlreadyThrashed, setIsAlreadyThrashed] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [warning, setWarning] = useState<{ message: string; type: 'low' | 'high' } | null>(null);
 
@@ -55,17 +61,29 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     // Map process from DB to our internal types
                     let processType = 'Lavado';
                     const dbProcess = (data.process || '').toUpperCase();
-                    if (dbProcess.includes('HONEY')) processType = 'Honey';
+                    if (dbProcess.includes('HONEY YELLOW')) processType = 'Yellow Honey';
+                    else if (dbProcess.includes('HONEY RED')) processType = 'Red Honey';
+                    else if (dbProcess.includes('HONEY BLACK')) processType = 'Black Honey';
+                    else if (dbProcess.includes('HONEY')) processType = 'Honey';
                     else if (dbProcess.includes('NATURAL')) processType = 'Natural';
+                    else if (dbProcess.includes('SEMI LAVADO')) processType = 'Semi Lavado';
+                    else if (dbProcess.includes('ANAEROBICO')) processType = 'Anaerobico';
+                    else if (dbProcess.includes('DOBLE FERMENTACION')) processType = 'Doble Fermentacion';
+                    else if (dbProcess.includes('CO FERMENTACION')) processType = 'Co Fermentacion';
 
+                    const thrashedW = Number(data.thrashed_weight) || 0;
                     setFormData(prev => ({
                         ...prev,
-                        excelsoWeight: Number(data.thrashed_weight) || 0,
+                        excelsoWeight: thrashedW,
                         pasillaWeight: Number(data.pasilla_weight) || 0,
                         ciscoWeight: Number(data.cisco_weight) || 0,
                         processType: processType,
                         humidity: Number(data.humidity) || 11.0
                     }));
+
+                    if (thrashedW > 0) {
+                        setIsAlreadyThrashed(true);
+                    }
                 }
             } catch (err) {
                 console.error("AXIS CRITICAL ERROR (Trilla):", err);
@@ -189,13 +207,19 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <select
                             value={formData.processType}
                             onChange={(e) => setFormData({ ...formData, processType: e.target.value })}
-                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none font-bold text-white transition-all appearance-none pr-12"
+                            disabled={isSubmitting || isAlreadyThrashed}
+                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none font-bold text-white transition-all appearance-none pr-12 disabled:opacity-50"
                         >
                             <option value="Lavado">LAVADO (Shrink: 18-20%)</option>
+                            <option value="Semi Lavado">SEMI LAVADO (Shrink: 19-21%)</option>
+                            <option value="Honey">HONEY (Shrink: 22-24%)</option>
                             <option value="Yellow Honey">YELLOW HONEY (Shrink: 20-22%)</option>
                             <option value="Red Honey">RED HONEY (Shrink: 22-24%)</option>
                             <option value="Black Honey">BLACK HONEY (Shrink: 24-26%)</option>
                             <option value="Natural">NATURAL (Shrink: 28-32%)</option>
+                            <option value="Anaerobico">ANAERÓBICO (Shrink: 21-23%)</option>
+                            <option value="Doble Fermentacion">DOBLE FERMENTACIÓN (Shrink: 20-22%)</option>
+                            <option value="Co Fermentacion">CO FERMENTACIÓN (Shrink: 22-25%)</option>
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-[calc(50%-2px)] pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
@@ -214,6 +238,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     value={formData.humidity}
                     onChange={(val) => setFormData({ ...formData, humidity: val })}
                     step={0.1}
+                    disabled={isSubmitting || isAlreadyThrashed}
                     variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'orange'}
                     inputClassName="text-base"
                 />
@@ -251,7 +276,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         step={0.1}
                         unit="KG"
                         required
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isAlreadyThrashed}
                         variant="industrial"
                         inputClassName="text-2xl py-4"
                     />
@@ -261,7 +286,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         onChange={(val) => setFormData({ ...formData, pasillaWeight: val })}
                         step={0.1}
                         unit="KG"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isAlreadyThrashed}
                         variant="default"
                         inputClassName="text-2xl py-4"
                     />
@@ -271,7 +296,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         onChange={(val) => setFormData({ ...formData, ciscoWeight: val })}
                         step={0.1}
                         unit="KG"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isAlreadyThrashed}
                         variant="default"
                         inputClassName="text-2xl py-4 opacity-60"
                     />
@@ -279,16 +304,16 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
                 {stats.yieldFactor > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green/10 border-brand-green/30 shadow-[0_0_30px_rgba(0,223,154,0.05)]' : 'bg-orange-500/10 border-orange-500/30'}`}>
+                        <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green/10 border-brand-green shadow-[0_0_30px_rgba(0,223,154,0.15)]' : 'bg-orange-500/10 border-orange-500'}`}>
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">Factor de Rendimiento ($FR$)</span>
+                                <span className={`text-[10px] font-bold uppercase tracking-[0.4em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green/70' : 'text-orange-500/70'}`}>Factor de Rendimiento ($FR$)</span>
                             </div>
                             <span className={`text-7xl font-bold font-mono tracking-tighter ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green-bright' : 'text-orange-500'}`}>
                                 {stats.yieldFactor.toFixed(2)}
                             </span>
                             <div className="mt-4 flex items-center gap-3">
                                 <div className={`w-2.5 h-2.5 rounded-full ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green-bright animate-pulse' : 'bg-orange-500'}`}></div>
-                                <p className="text-[11px] uppercase font-bold tracking-[0.2em] text-white">
+                                <p className={`text-[11px] uppercase font-bold tracking-[0.2em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-white' : 'text-orange-200'}`}>
                                     Meta {formData.processType}: {PROCESS_PARAMS[formData.processType]?.frMin}-{PROCESS_PARAMS[formData.processType]?.frMax}
                                 </p>
                             </div>
@@ -344,13 +369,21 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
                 <button
                     type="submit"
-                    disabled={isSubmitting || !formData.excelsoWeight}
-                    className="w-full bg-white hover:bg-brand-green-bright text-black hover:text-white font-bold py-6 rounded-industrial-sm transition-all disabled:opacity-30 flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl"
+                    disabled={isSubmitting || !formData.excelsoWeight || isAlreadyThrashed}
+                    className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyThrashed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-white hover:bg-brand-green-bright text-black hover:text-white disabled:opacity-30'}`}
                 >
-                    {isSubmitting ? 'SINCRONIZANDO CON SERVIDOR AXIS...' : 'SELLAR Y EMITIR REPORTE DE TRILLA'}
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
-                        <path d="M5 12h14M12 5l7 7-7-7" />
-                    </svg>
+                    {isSubmitting ? 'SINCRONIZANDO CON SERVIDOR AXIS...' : isAlreadyThrashed ? 'CERTIFICADO DE TRILLA SELLADO' : 'SELLAR Y EMITIR REPORTE DE TRILLA'}
+                    {!isAlreadyThrashed && (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
+                            <path d="M5 12h14M12 5l7 7-7-7" />
+                        </svg>
+                    )}
+                    {isAlreadyThrashed && (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    )}
                 </button>
             </form>
         </div>
