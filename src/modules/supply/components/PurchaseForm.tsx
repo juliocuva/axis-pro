@@ -591,10 +591,12 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
 
                             {formData.destination.startsWith('export') && (
                                 <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                                    <label className="text-xs font-bold text-blue-400 uppercase tracking-widest">Certificado / Lote de Exportación Internacional</label>
+                                    <label className="text-xs font-bold text-blue-400 uppercase tracking-widest flex justify-between">
+                                        Certificado / Lote de Exportación Internacional
+                                        <span className="text-gray-500 font-normal">(Opcional)</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        required
                                         placeholder="Ej. SNT-2026-X001"
                                         value={formData.exportCertificate}
                                         onChange={(e) => setFormData({ ...formData, exportCertificate: e.target.value })}
