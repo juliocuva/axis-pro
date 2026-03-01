@@ -102,6 +102,46 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
         }
     };
 
+    // DYNAMIC ROAST PREDICTION ENGINE (TRL-7)
+    let dynamicChargeTemp = 195;
+    let dynamicDryTime = "5:30";
+    let dynamicRorRange = "12-14";
+    let dynamicDropTemp = 204;
+    let dynamicDevPct = 16;
+    let dynamicTargetMerma = "14.5% - 15.5%";
+    let dynamicRestDays = 7;
+
+    if (selectedLot) {
+        const d = Number(selectedLot.physical_analysis?.[0]?.density_gl) || 710;
+        const m = Number(selectedLot.physical_analysis?.[0]?.moisture_pct) || 11.2;
+        const s = Number(selectedLot.sca_cupping?.[0]?.total_score) || 86.5;
+        const p = (selectedLot.process || 'washed').toLowerCase();
+
+        // 1. Charge Temp & Dry Time (based on density & moisture)
+        if (d >= 750) { dynamicChargeTemp = 202; dynamicDryTime = "6:00"; dynamicTargetMerma = "15.0% - 16.0%"; }
+        else if (d <= 680) { dynamicChargeTemp = 188; dynamicDryTime = "4:45"; dynamicTargetMerma = "13.5% - 14.5%"; }
+
+        if (m > 11.5) dynamicDryTime = (d >= 750) ? "6:30" : "5:45";
+
+        // 2. RoR Range (based on process)
+        if (p.includes('natural') || p.includes('honey') || p.includes('anaerobico')) {
+            dynamicRorRange = "10-12";
+        } else if (d >= 750) {
+            dynamicRorRange = "14-16";
+        }
+
+        // 3. Final Drop Temp & Dev % (based on SCA score)
+        if (s >= 87) {
+            dynamicDropTemp = 201;
+            dynamicDevPct = 14;
+            dynamicRestDays = 12;
+        } else if (s < 83) {
+            dynamicDropTemp = 208;
+            dynamicDevPct = 20;
+            dynamicRestDays = 4;
+        }
+    }
+
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
             {view !== 'entry' && (
@@ -272,7 +312,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center text-[11px]">
                                             <span className="text-gray-400">Objetivo Merma Tostión:</span>
-                                            <span className="font-bold text-white">14.5% - 15.5%</span>
+                                            <span className="font-bold text-white">{dynamicTargetMerma}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-500 leading-relaxed font-medium">
                                             Basado en la densidad de <span className="text-white font-bold">{selectedLot.physical_analysis?.[0]?.density_gl || '710'} g/L</span>, el grano tiene una estructura celular densa que requiere una transferencia de energía conductiva moderada al inicio.
@@ -301,12 +341,12 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         <div className="p-8 bg-blue-500/5 border border-blue-500/10 rounded-industrial space-y-4">
                                             <p className="text-[9px] text-blue-400 font-bold uppercase tracking-widest">Fase 1: Secado (Dry)</p>
                                             <p className="text-xl font-bold text-white">Carga Moderada</p>
-                                            <p className="text-[10px] text-gray-500 leading-relaxed">Inicia a <span className="text-blue-400 font-bold">195°C</span>. Extender fase de secado a 5:30 min para estabilizar humedad interna del {selectedLot.physical_analysis?.[0]?.moisture_pct || '11.2'}%.</p>
+                                            <p className="text-[10px] text-gray-500 leading-relaxed">Inicia a <span className="text-blue-400 font-bold">{dynamicChargeTemp}°C</span>. Extender fase de secado a {dynamicDryTime} min para estabilizar humedad interna del {selectedLot.physical_analysis?.[0]?.moisture_pct || '11.2'}%.</p>
                                         </div>
                                         <div className="p-8 bg-orange-500/5 border border-orange-500/10 rounded-industrial space-y-4">
                                             <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest">Fase 2: Maillard</p>
                                             <p className="text-xl font-bold text-white">Desarrollo Dulzor</p>
-                                            <p className="text-[10px] text-gray-500 leading-relaxed">Mantener RoR constante entre <span className="text-orange-400 font-bold">12-14°C/min</span>. Crucial para potenciar notas de {(() => {
+                                            <p className="text-[10px] text-gray-500 leading-relaxed">Mantener RoR constante entre <span className="text-orange-400 font-bold">{dynamicRorRange}°C/min</span>. Crucial para potenciar notas de {(() => {
                                                 const rawNotes = selectedLot.sca_cupping?.[0]?.notes;
                                                 if (Array.isArray(rawNotes)) return rawNotes[0] || 'Caramelo';
                                                 if (typeof rawNotes === 'string') return rawNotes.split(',')[0].trim() || 'Caramelo';
@@ -316,7 +356,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         <div className="p-8 bg-brand-red/5 border border-brand-red/10 rounded-industrial space-y-4">
                                             <p className="text-[9px] text-brand-red font-bold uppercase tracking-widest">Fase 3: Finalización</p>
                                             <p className="text-xl font-bold text-white">Acento de Acidez</p>
-                                            <p className="text-[10px] text-gray-500 leading-relaxed">Finalizar a <span className="text-brand-red font-bold">204°C</span> con un desarrollo del 16%. Evitar Segundo Crack para no perder notas florales.</p>
+                                            <p className="text-[10px] text-gray-500 leading-relaxed">Finalizar a <span className="text-brand-red font-bold">{dynamicDropTemp}°C</span> con un desarrollo del {dynamicDevPct}%. Evitar Segundo Crack para no perder notas florales.</p>
                                         </div>
                                     </div>
 
@@ -327,7 +367,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         <div>
                                             <p className="text-[11px] font-bold text-brand-green-bright uppercase tracking-[0.2em] mb-2">Objetivo de Desgasificación</p>
                                             <p className="text-sm text-gray-400 leading-relaxed max-w-xl">
-                                                Dada la estrategia de tueste medio-claro, el pico de sabor se alcanzará a los <span className="text-white font-bold">7 días</span>. Tiempo de reposo mínimo recomendado: 48 horas tras tueste.
+                                                Dada la estrategia de tueste medio-claro, el pico de sabor se alcanzará a los <span className="text-white font-bold">{dynamicRestDays} días</span>. Tiempo de reposo mínimo recomendado: 48 horas tras tueste.
                                             </p>
                                         </div>
                                     </div>
