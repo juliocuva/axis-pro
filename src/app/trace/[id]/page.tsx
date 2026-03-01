@@ -69,7 +69,7 @@ export default function TraceabilityStoryPage() {
                         </div>
                         <div className="text-center border-x border-white/10">
                             <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Puntaje</p>
-                            <p className="text-xs font-bold text-brand-green-bright">{story?.sensoryScore || 87.5} SCA</p>
+                            <p className="text-xs font-bold text-brand-green-bright">{story?.sensoryScore || 87.5} pts (Basado en estándares SCA)</p>
                         </div>
                         <div className="text-center">
                             <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Tueste</p>

@@ -14,7 +14,7 @@ export default function ComparisonCalibrationDashboard() {
         <div className="space-y-12 animate-in fade-in duration-700">
             <header>
                 <h2 className="text-2xl font-bold uppercase tracking-tight">Dashboard de Calibración Espectral</h2>
-                <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em] uppercase mt-2 opacity-70">Análisis de Correlación: Roasting vs Cupping SCA</p>
+                <p className="text-[10px] text-gray-500 font-bold tracking-[0.3em] uppercase mt-2 opacity-70">Análisis de Correlación: Roasting vs Cupping (Estándares SCA)</p>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -37,7 +37,7 @@ export default function ComparisonCalibrationDashboard() {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-3xl font-bold tracking-tighter text-brand-green-bright">{lot.sca_score}</p>
-                                        <p className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">Puntaje SCA</p>
+                                        <p className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">Puntaje basado en estándares de la SCA</p>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -79,7 +79,7 @@ export default function ComparisonCalibrationDashboard() {
                             <div className="p-6 bg-brand-green/5 border border-brand-green/10 rounded-2xl">
                                 <p className="text-[9px] text-brand-green font-medium uppercase mb-2">Análisis de Repetibilidad</p>
                                 <p className="text-xs text-gray-400 leading-relaxed font-bold uppercase text-[9px] opacity-70">
-                                    "El DTR del 18.2% sugiere una caramelización óptima de los azúcares complejos, correlacionando positivamente con el puntaje SCA proyectado."
+                                    "El DTR del 18.2% sugiere una caramelización óptima de los azúcares complejos, correlacionando positivamente con el puntaje basado en estándares de la SCA proyectado."
                                 </p>
                             </div>
 

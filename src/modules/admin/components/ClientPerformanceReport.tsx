@@ -134,7 +134,7 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                     {/* Gráficas */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="bg-black/30 border border-white/5 p-6 rounded-industrial lg:col-span-2">
-                            <h4 className="text-[12px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">Producción vs SCA Score</h4>
+                            <h4 className="text-[12px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">Producción vs Puntaje basado en estándares de la SCA</h4>
                             <div className="h-72 w-full min-h-[288px] min-w-[300px]" style={{ position: 'relative' }}>
                                 <ResponsiveContainer width="100%" height="100%" minHeight={280} minWidth={300}>
                                     <AreaChart data={productionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

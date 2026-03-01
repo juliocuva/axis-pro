@@ -214,7 +214,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             {/* Score Destacado Sutil */}
                             <div className="bg-gray-50 border border-gray-200 p-1.5 rounded-xl shrink-0 self-center">
                                 <div className="bg-white px-8 py-5 rounded-lg flex flex-col items-center border border-gray-200 shadow-2xl">
-                                    <p className="text-[9px] font-bold text-brand-green uppercase tracking-[0.3em] mb-1">SCA Score</p>
+                                    <p className="text-[9px] font-bold text-brand-green uppercase tracking-[0.3em] mb-1">Puntaje basado en estándares SCA</p>
                                     <p className="text-5xl font-bold text-black tracking-tighter leading-none">
                                         {scaData?.total_score != null ? Number(scaData.total_score).toFixed(2) : '00.00'}
                                     </p>
@@ -406,14 +406,14 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         </div>
                     </div>
 
-                    {/* Perfil Sensorial SCA (Elegante y Visual) */}
+                    {/* Perfil Sensorial basado en estándares SCA (Elegante y Visual) */}
                     <div className="flex flex-col w-full h-[885px] justify-between">
 
                         {/* Radar Chart (Mucho más elegante) */}
                         <div className="w-full relative flex flex-col pt-12 items-center">
                             {/* Title (Normal Flow) */}
                             <div className="flex flex-col items-center mb-6">
-                                <h2 className="text-sm font-bold text-brand-green uppercase tracking-[0.6em] mb-4">Evaluación Sensorial SCA</h2>
+                                <h2 className="text-sm font-bold text-brand-green uppercase tracking-[0.6em] mb-4">Evaluación Sensorial basada en estándares de la SCA</h2>
                                 <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium">Análisis de Perfil Organoléptico de Especialidad</p>
                             </div>
 

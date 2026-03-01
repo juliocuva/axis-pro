@@ -199,7 +199,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                             </div>
                         </div>
-                        <p className="text-[9px] text-gray-500 uppercase font-medium opacity-70">Descriptor Visual SCA</p>
+                        <p className="text-[9px] text-gray-500 uppercase font-medium opacity-70">Descriptor Visual basado en estándares SCA</p>
                     </div>
                 </div>
 

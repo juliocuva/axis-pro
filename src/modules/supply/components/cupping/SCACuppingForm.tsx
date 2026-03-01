@@ -160,7 +160,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                     <div>
                         <h3 className="text-xl font-bold flex items-center gap-3">
                             <span className="w-1.5 h-6 bg-brand-green-bright rounded-full"></span>
-                            Protocolo SCA V2.0
+                            Protocolo basado en estándares de la SCA V2.0
                         </h3>
                         <p className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest flex items-center gap-2">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
@@ -251,7 +251,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                     >
                         {isAlreadySealed ? (
                             <>
-                                PROTOCOLO SCA SELLADO
+                                PROTOCOLO BASADO EN ESTÁNDARES DE LA SCA SELLADO
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                     <polyline points="22 4 12 14.01 9 11.01" />

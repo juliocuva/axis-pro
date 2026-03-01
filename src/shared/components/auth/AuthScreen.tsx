@@ -131,7 +131,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                         {[
-                            { title: 'Acopio y Calidad', desc: 'Factor de rendimiento, laboratorios físicos y catación SCA automatizada.', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+                            { title: 'Acopio y Calidad', desc: 'Factor de rendimiento, laboratorios físicos y catación basada en estándares de la SCA automatizada.', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
                             { title: 'Inteligencia de Tostión', desc: 'IA predictiva de curvas, monitoreo ROR y perfiles de referencia blindados.', icon: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z' },
                             { title: 'Comercio Global', desc: 'Pasaportes digitales QR y motores predictivos de desgasificación logística.', icon: 'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z' },
                             { title: 'Conexión Minorista', desc: 'Trazabilidad B2C directa con historias de origen generadas por datos.', icon: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' }

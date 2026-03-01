@@ -199,7 +199,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                             <div className="space-y-4">
                                 <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.4em]">Analytics Export</h4>
                                 <p className="text-xl font-bold text-white tracking-tight">Reporte Consolidado Mensual</p>
-                                <p className="text-xs text-gray-500 leading-relaxed uppercase font-bold tracking-wider">Genera un PDF con todos los movimientos del mes, puntajes SCA promedio y yield de trilla acumulado.</p>
+                                <p className="text-xs text-gray-500 leading-relaxed uppercase font-bold tracking-wider">Genera un PDF con todos los movimientos del mes, puntajes basados en estándares de la SCA promedio y yield de trilla acumulado.</p>
                             </div>
                             <button className="mt-8 w-full py-4 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all">Sincronizar Reporte Completo</button>
                         </div>

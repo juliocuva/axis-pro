@@ -230,7 +230,7 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <ModuleCard
                                 title="Acopio y Calidad"
-                                description="Dominio de Origen: Recepción de pergamino, balance de masa industrial, defectos SCA y catación profesional. Control total de la materia prima."
+                                description="Dominio de Origen: Recepción de pergamino, balance de masa industrial, defectos basados en estándares de la SCA y catación profesional. Control total de la materia prima."
                                 status="trl7"
                                 color="brand-green"
                                 onClick={() => setView('supply')}
@@ -603,7 +603,7 @@ export default function Home() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
                                     <h4 className="text-sm font-bold text-brand-green-bright uppercase">Acopio y Calidad</h4>
-                                    <p className="text-xs leading-relaxed">Control de trilla, factor de rendimiento y protocolos SCA ciegos con firma digital.</p>
+                                    <p className="text-xs leading-relaxed">Control de trilla, factor de rendimiento y protocolos basados en estándares de la SCA ciegos con firma digital.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
                                     <h4 className="text-sm font-bold text-orange-400 uppercase">Inteligencia de Tostión</h4>

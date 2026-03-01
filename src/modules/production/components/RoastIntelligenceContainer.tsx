@@ -130,7 +130,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
             dynamicRorRange = "14-16";
         }
 
-        // 3. Final Drop Temp & Dev % (based on SCA score)
+        // 3. Final Drop Temp & Dev % (based on SCA standards score)
         if (s >= 87) {
             dynamicDropTemp = 201;
             dynamicDevPct = 14;
@@ -232,7 +232,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                             </div>
                                             <div className="flex items-center gap-8">
                                                 <div className="text-right">
-                                                    <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">SCA Score</p>
+                                                    <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Puntaje basado en estándares SCA</p>
                                                     <p className="text-lg font-bold text-brand-green-bright">{roast.sca_score || '86.5'}</p>
                                                 </div>
                                                 <button
@@ -269,7 +269,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                                 <p className="font-bold text-lg text-white uppercase tracking-tight">{selectedLot.variety || 'Caturra'}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Puntaje SCA</p>
+                                                <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Puntaje basado en estándares SCA</p>
                                                 <p className="text-2xl font-black text-brand-green-bright">{(selectedLot.sca_cupping?.[0]?.total_score || 86.5).toFixed(1)}</p>
                                             </div>
                                         </div>

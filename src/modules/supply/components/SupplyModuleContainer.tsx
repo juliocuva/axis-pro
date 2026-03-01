@@ -124,7 +124,7 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                             {activeTab === 'purchase' ? 'Fase 01: Ingreso de Café Pergamino' :
                                 activeTab === 'thrashing' ? 'Fase 02: Proceso de Trillado Industrial' :
                                     activeTab === 'analysis' ? 'Fase 03: Control de Calidad Física' :
-                                        activeTab === 'cupping' ? 'Fase 04: Evaluación Sensorial SCA' : 'Historial Maestro de Trazabilidad'}
+                                        activeTab === 'cupping' ? 'Fase 04: Evaluación Sensorial basada en estándares de la SCA' : 'Historial Maestro de Trazabilidad'}
                         </p>
                     </div>
                 </header>

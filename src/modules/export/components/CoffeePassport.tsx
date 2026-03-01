@@ -77,7 +77,7 @@ export default function CoffeePassport({ lotData, scaData, roastData, degassingD
                             <div className="space-y-6">
                                 <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-3">
                                     <span className="w-2 h-2 rounded-full bg-brand-green"></span>
-                                    Análisis Sensorial SCA
+                                    Análisis Sensorial basado en estándares de la SCA
                                 </h3>
                                 <div className="h-64 bg-bg-main/50 rounded-3xl border border-white/5 p-4">
                                     <ResponsiveContainer width="100%" height="100%">
