@@ -172,7 +172,7 @@ export default function Home() {
                     )}
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden">
-                        {(user?.email === 'juliocuva@gmail.com' || process.env.NODE_ENV === 'development') && (
+                        {(user?.email === 'juliocuva@gmail.com' || user?.email?.startsWith('admin')) && (
                             <button
                                 onClick={() => setView(view === 'master-control' ? 'launcher' : 'master-control')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master-control' ? 'bg-brand-red/10 text-brand-red border border-brand-red/20' : 'hover:bg-brand-green/10 text-brand-green-bright'}`}
