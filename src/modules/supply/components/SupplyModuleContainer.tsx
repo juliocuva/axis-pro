@@ -107,7 +107,14 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
     return (
         <>
             {showCertificate && selectedLot && (
-                <div className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/80 backdrop-blur-xl">
+                <div
+                    className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/80 backdrop-blur-xl"
+                    onClick={(e) => {
+                        const selection = window.getSelection();
+                        if (selection && selection.toString().length > 0) return;
+                        if (e.target === e.currentTarget) setShowCertificate(false);
+                    }}
+                >
                     <div className="w-full py-10 pb-[150px]">
                         <LotCertificate
                             inventoryId={selectedLot.id}

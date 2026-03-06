@@ -79,7 +79,10 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
     ];
 
     return (
-        <div className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/80 backdrop-blur-xl">
+        <div
+            className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/80 backdrop-blur-xl"
+            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        >
             <div className="w-full py-10 pb-[150px]">
 
                 {/* Controles de exportación */}
