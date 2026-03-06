@@ -6,24 +6,17 @@ import ModuleCard from '@/shared/components/layout/ModuleCard';
 
 // Componentes de Módulos (Carga perezosa o condicional)
 import SupplyModuleContainer from '@/modules/supply/components/SupplyModuleContainer';
-import RoastIntelligenceContainer from '@/modules/production/components/RoastIntelligenceContainer';
-import RoastEntryForm from '@/modules/production/components/RoastEntryForm';
-import QualityDashboard from '@/modules/production/components/QualityDashboard';
-import RoastCurveAnalysis from '@/modules/production/components/RoastCurveAnalysis';
-import GreenExportForm from '@/modules/export/components/GreenExportForm';
-import ComparisonCalibrationDashboard from '@/modules/export/components/ComparisonCalibrationDashboard';
-import DegassingPredictor from '@/modules/export/components/DegassingPredictor';
-import RetailModuleContainer from '@/modules/retail/components/RetailModuleContainer';
+import TrillaModuleContainer from '@/modules/supply/components/TrillaModuleContainer';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
-import MasterControlCenter from '@/modules/admin/components/MasterControlCenter';
+import GreenExportForm from '@/modules/export/components/GreenExportForm';
 
 import { supabase } from '@/shared/lib/supabase';
-import { calculateAdvancedDegassing } from '@/shared/lib/engine/degassing';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
+import AxisNexusWidget from '@/shared/components/ai/AxisNexusWidget';
 
 export default function Home() {
     const [user, setUser] = useState<{ name: string, email: string, companyId: string } | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'production' | 'export' | 'retail' | 'quality' | 'curves' | 'entry' | 'calibration' | 'degassing' | 'archive' | 'master-control'>('launcher');
+    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive'>('launcher');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -46,11 +39,6 @@ export default function Home() {
         }
     }, []);
 
-    // Estado para activación in-situ de módulos finales
-    const [activatedModules, setActivatedModules] = useState<Set<string>>(new Set());
-    const [pendingActivation, setPendingActivation] = useState<{ id: string, title: string } | null>(null);
-
-    // Estado para el Portal Global de Documentos
     const [showCloudVault, setShowCloudVault] = useState(false);
     const [showFunctionalDocs, setShowFunctionalDocs] = useState(false);
     const [showUpdates, setShowUpdates] = useState(false);
@@ -61,22 +49,6 @@ export default function Home() {
         if (newCount === 5) {
             setIsDemoUnlocked(true);
             setClickCount(0);
-        }
-    };
-
-    const requestActivation = (id: string, title: string) => {
-        if (activatedModules.has(id)) {
-            setView(id as any);
-            return;
-        }
-        setPendingActivation({ id, title });
-    };
-
-    const confirmActivation = () => {
-        if (pendingActivation) {
-            setActivatedModules(prev => new Set(prev).add(pendingActivation.id));
-            setView(pendingActivation.id as any);
-            setPendingActivation(null);
         }
     };
 
@@ -106,27 +78,27 @@ export default function Home() {
             }
 
             const { data } = await supabase
-                .from('roast_batches')
+                .from('coffee_purchase_inventory')
                 .select('*')
                 .eq('company_id', user?.companyId)
-                .order('roast_date', { ascending: false })
+                .order('purchase_date', { ascending: false })
                 .limit(3);
 
             if (data && data.length > 0) {
                 const transformed = data.map(b => ({
-                    id: b.batch_id_label,
-                    roastDate: b.roast_date,
-                    process: b.process,
-                    greenWeight: b.green_weight,
-                    roastedWeight: b.roasted_weight,
+                    id: b.batch_id,
+                    date: b.purchase_date,
+                    process: b.process_type || 'Export Standard',
+                    greenWeight: b.net_purchased_weight,
                     isDemo: false
                 }));
                 setBatches(transformed);
             } else {
-                // MOCK DATA PARA MOSTRAR ALCANCE (Nuevos Usuarios)
+                // MOCK DATA PARA MOSTRAR ALCANCE (Exportadores Verdes)
                 const demoBatches = [
-                    { id: 'DEMO-001', roastDate: new Date().toISOString(), process: 'Washed / Colombia', greenWeight: 35.0, roastedWeight: 29.8, isDemo: true },
-                    { id: 'DEMO-002', roastDate: new Date(Date.now() - 86400000).toISOString(), process: 'Natural / Ethiopia', greenWeight: 24.0, roastedWeight: 21.0, isDemo: true }
+                    { id: 'AX-GRN-001', date: new Date().toISOString(), process: 'Washed / Colombia', greenWeight: 2450.0, isDemo: true },
+                    { id: 'AX-GRN-002', date: new Date(Date.now() - 86400000).toISOString(), process: 'Natural / Brazil', greenWeight: 1800.0, isDemo: true },
+                    { id: 'AX-GRN-003', date: new Date(Date.now() - 172800000).toISOString(), process: 'Honey / Costa Rica', greenWeight: 900.0, isDemo: true }
                 ];
                 setBatches(demoBatches);
             }
@@ -172,16 +144,7 @@ export default function Home() {
                     )}
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden">
-                        {(user?.email === 'juliocuva@gmail.com' || user?.email?.startsWith('admin')) && (
-                            <button
-                                onClick={() => setView(view === 'master-control' ? 'launcher' : 'master-control')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master-control' ? 'bg-brand-red/10 text-brand-red border border-brand-red/20' : 'hover:bg-brand-green/10 text-brand-green-bright'}`}
-                                title="Control Maestro"
-                            >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                                Control Maestro
-                            </button>
-                        )}
+                        {/* Removed admin controls to keep it focused */}
                         <button
                             onClick={() => setShowCloudVault(true)}
                             className="flex items-center gap-2 px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
@@ -222,131 +185,70 @@ export default function Home() {
             {view === 'launcher' && (
                 <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
                     <section>
-                        <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
+                        <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
                             <span className="w-8 h-px bg-white/10"></span>
-                            Arquitectura Modular de Control
+                            Emisión de Certificados de Calidad de Exportación
                             <span className="w-full h-px bg-white/10"></span>
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <ModuleCard
-                                title="Acopio y Calidad"
-                                description="Dominio de Origen: Recepción de pergamino, balance de masa industrial, defectos basados en estándares de la SCA y catación profesional. Control total de la materia prima."
-                                status="trl7"
+                                title="Origen Inmutable"
+                                description="Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas."
+                                status="active"
                                 color="brand-green"
                                 onClick={() => setView('supply')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
                             />
                             <ModuleCard
-                                title="Inteligencia de Tostión"
-                                description="Ingeniería de Tueste: IA predictiva de curvas, monitoreo de ROR en tiempo real y perfiles de referencia blindados. Solicitud de validación pendiente."
-                                status={activatedModules.has('production') ? "trl7" : "locked"}
-                                color="orange-500"
-                                isOptional={latestLotDestination === 'export_green'}
-                                isRecommended={latestLotDestination === 'export_roasted'}
-                                onClick={() => requestActivation('production', 'Inteligencia de Tostión')}
-                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" /></svg>}
-                            />
-                            <ModuleCard
-                                title="Comercio Global"
-                                description="Logística Internacional: Pasaporte digital del lote, manifiestos de exportación e inteligencia de mercado global. Módulo en fase beta restringida."
-                                status={activatedModules.has('export') ? "trl7" : "locked"}
-                                color="blue-500"
-                                isRecommended={latestLotDestination?.startsWith('export')}
-                                onClick={() => requestActivation('export', 'Comercio Global')}
-                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>}
-                            />
-                            <ModuleCard
-                                title="Conexión Minorista"
-                                description="Venta y Fidelización: Gestión de inventario terminado, e-commerce integrado y trazabilidad directo al consumidor. Próxima actualización corporativa."
-                                status={activatedModules.has('retail') ? "active" : "locked"}
+                                title="Estándar Verde (Trilla)"
+                                description="Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales."
+                                status="active"
                                 color="purple-500"
-                                onClick={() => requestActivation('retail', 'Conexión Minorista')}
+                                onClick={() => setView('trilla')}
                                 icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
+                            />
+                            <ModuleCard
+                                title="Pasaporte Aduanero"
+                                description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
+                                status="active"
+                                color="blue-500"
+                                onClick={() => setView('export')}
+                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
                             />
                         </div>
                     </section>
-
-                    {/* Ventana de Activación Pop-up con Precios */}
-                    {pendingActivation && (
-                        <div className="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[200] flex items-center justify-center p-6 sm:p-12 animate-in fade-in duration-500">
-                            <div className="bg-bg-card border border-white/10 w-full max-w-xl rounded-industrial p-12 shadow-3xl relative overflow-hidden">
-                                {/* Decoración de fondo */}
-                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-green/10 blur-[100px] rounded-full"></div>
-
-                                <div className="w-20 h-20 bg-white/5 rounded-industrial-sm flex items-center justify-center mx-auto mb-8 border border-white/10 ring-4 ring-white/5 relative z-10">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green-bright"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
-                                </div>
-
-                                <div className="text-center relative z-10">
-                                    <h3 className="text-4xl font-bold uppercase tracking-tighter text-white mb-2">
-                                        Activar {pendingActivation.title}
-                                    </h3>
-                                    <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.4em] mb-10">Software de Gestión Industrial</p>
-                                </div>
-
-                                <div className="mb-10 relative z-10 text-center space-y-4">
-                                    <div className="p-8 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm relative overflow-hidden">
-                                        <p className="text-[12px] font-bold text-brand-green-bright uppercase tracking-widest mb-4">Bienvenido al ecosistema</p>
-                                        <p className="text-sm text-gray-300 leading-relaxed font-medium">Estás a punto de ingresar al módulo de <strong className="text-white">{pendingActivation.title}</strong>. <br /><br />Al activar este módulo, podrás expandir el control y la trazabilidad de tus operaciones a un nuevo nivel industrial.</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col gap-4 relative z-10">
-                                    <button
-                                        onClick={confirmActivation}
-                                        className="w-full py-5 bg-brand-green text-black font-bold rounded-industrial-sm uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-brand-green/20 hover:bg-brand-green-bright hover:scale-[1.02] transition-all"
-                                    >
-                                        ACTIVAR E INGRESAR AL MÓDULO
-                                    </button>
-                                    <button
-                                        onClick={() => setPendingActivation(null)}
-                                        className="w-full py-4 text-gray-500 font-bold uppercase tracking-widest text-[9px] hover:text-white transition-all"
-                                    >
-                                        REGRESAR AL DASHBOARD
-                                    </button>
-                                </div>
-
-                                <p className="text-center text-[8px] text-gray-600 font-bold uppercase tracking-[0.3em] mt-10">
-                                    Válido para la sesión actual
-                                </p>
-                            </div>
-                        </div>
-                    )}
 
                     <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 bg-bg-card border border-white/5 rounded-industrial p-8">
                             <h3 className="text-sm font-bold uppercase tracking-widest mb-8 flex items-center gap-3">
                                 <span className="w-2 h-2 rounded-full bg-brand-green-bright"></span>
-                                Monitor Industrial de Reposo
+                                Monitor Comercial Lotes Verdes
                             </h3>
                             <div className="space-y-4">
-                                {batches.map((batch) => {
-                                    const analysis = calculateAdvancedDegassing(
-                                        { id: batch.id, roastDate: batch.roastDate },
-                                        { process: batch.process, roastDevelopment: 'medium', packagingType: 'valve', routeTemperature: 'temperate' }
-                                    );
-                                    const isBlocked = analysis.pressureCurve[0].pressure > 0.8; // Simplified for dashboard
+                                {batches.map((batch, index) => {
                                     return (
-                                        <div key={batch.id} className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-white/5 group hover:border-brand-green/30 transition-all">
+                                        <div key={`${batch.id}-${index}`} className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-white/5 group hover:border-brand-green/30 transition-all">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-industrial-sm bg-white/5 flex items-center justify-center font-bold text-[10px] uppercase tracking-tighter">
                                                     {batch.process.substring(0, 3)}
                                                 </div>
                                                 <div>
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-xs font-bold uppercase">Lote: {batch.id}</p>
+                                                        <p className="text-xs font-bold uppercase text-white tracking-widest">Lote: {batch.id}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{batch.process} • {batch.greenWeight}kg</p>
                                                         {batch.isDemo && (
-                                                            <span className="text-[8px] bg-brand-green/20 text-brand-green-bright px-2 py-0.5 rounded-md font-bold border border-brand-green/30">INTELIGENCIA DEMO</span>
+                                                            <span className="text-[8px] bg-brand-green/20 text-brand-green-bright px-2 py-0.5 rounded-md font-bold border border-brand-green/30 uppercase tracking-widest">Demo WGS84</span>
                                                         )}
                                                     </div>
-                                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{batch.process} • {batch.roastedWeight}kg</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className={`text-[10px] font-bold uppercase tracking-widest ${isBlocked ? 'text-orange-500' : 'text-brand-green-bright'}`}>
-                                                    {isBlocked ? 'ESTABILIZANDO' : 'LISTO'}
+                                                <p className={`text-[10px] font-bold uppercase tracking-widest text-brand-green-bright`}>
+                                                    LISTO PARA EXPORTAR
                                                 </p>
-                                                <p className="text-[9px] text-gray-600 font-bold uppercase mt-1">Envío: {analysis.recommendedShipDate}</p>
+                                                <p className="text-[8px] text-blue-400 font-bold uppercase mt-1 tracking-widest">SICA / EUDR Asignado</p>
                                             </div>
                                         </div>
                                     );
@@ -360,17 +262,17 @@ export default function Home() {
                             <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-8 border-b border-white/5 pb-4">Estado del Sistema</h3>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-xs">
-                                    <span className="text-gray-400">Conectividad Cloud</span>
+                                    <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Sincronización Aduanera</span>
                                     <span className="text-brand-green-bright font-bold">OPERATIVO</span>
                                 </div>
                                 <div className="flex justify-between items-center text-xs">
-                                    <span className="text-gray-400">Motor Predictivo</span>
-                                    <span className="text-orange-500 font-bold">ACTIVO</span>
+                                    <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Scanner WGS84 / GIS</span>
+                                    <span className="text-blue-500 font-bold">ACTIVO</span>
                                 </div>
                                 <div className="h-px bg-white/5 my-4"></div>
                                 <div className="text-center p-6 bg-white/2 border border-white/5 rounded-industrial-sm">
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Total Procesado (Mes)</p>
-                                    <p className="text-4xl font-bold text-white tracking-tighter">4,821 <span className="text-[10px] text-brand-green-bright font-bold">KG</span></p>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Total Auditado (Mes)</p>
+                                    <p className="text-4xl font-bold text-white tracking-tighter">18,450 <span className="text-[10px] text-brand-green-bright font-bold">KG</span></p>
                                 </div>
                             </div>
                         </div>
@@ -384,74 +286,13 @@ export default function Home() {
                 </div>
             )}
 
-            {(view === 'production' || view === 'entry' || view === 'quality' || view === 'curves') && (
-                <div className="max-w-7xl mx-auto space-y-8">
-                    <div className="bg-bg-card p-3 rounded-industrial border border-white/5 shadow-2xl w-full">
-                        <div className="flex flex-col md:flex-row gap-2">
-                            <button
-                                onClick={() => setView('production')}
-                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'production' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
-                            >
-                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
-                                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] ${view === 'production' ? 'bg-brand-green text-black' : 'bg-gray-800 text-gray-400'}`}>1</span>
-                                    Predicción térmica
-                                </span>
-                                <span className="text-xs font-bold uppercase tracking-widest">Inteligencia en Vivo</span>
-                            </button>
-
-                            <div className="hidden md:flex items-center justify-center text-gray-700 px-2">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            </div>
-
-                            <button
-                                onClick={() => setView('entry')}
-                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'entry' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
-                            >
-                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
-                                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] ${view === 'entry' ? 'bg-brand-green text-black' : 'bg-gray-800 text-gray-400'}`}>2</span>
-                                    Importar CSV/Pesos
-                                </span>
-                                <span className="text-xs font-bold uppercase tracking-widest">Cargar Reporte</span>
-                            </button>
-
-                            <div className="hidden md:flex items-center justify-center text-gray-700 px-2">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                            </div>
-
-                            <button
-                                onClick={() => setView('quality')}
-                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'quality' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
-                            >
-                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
-                                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] ${view === 'quality' ? 'bg-brand-green text-black' : 'bg-gray-800 text-gray-400'}`}>3</span>
-                                    Desviación VS Objetivo
-                                </span>
-                                <span className="text-xs font-bold uppercase tracking-widest">Control Calidad</span>
-                            </button>
-
-                            <div className="w-px bg-white/10 hidden md:block mx-4 my-2"></div>
-
-                            <button
-                                onClick={() => setView('curves')}
-                                className={`flex-1 flex flex-col items-start px-5 py-4 rounded-industrial-sm transition-all border ${view === 'curves' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 shadow-lg shadow-cyan-500/5' : 'bg-transparent border-transparent text-gray-500 hover:bg-white/5 hover:border-white/10'}`}
-                            >
-                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] opacity-70 mb-1.5 flex items-center gap-2">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-                                    Herramienta
-                                </span>
-                                <span className="text-xs font-bold uppercase tracking-widest">Análisis Curvas</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {view === 'production' && <RoastIntelligenceContainer user={user} />}
-                        {view === 'entry' && <RoastEntryForm user={user} />}
-                        {view === 'quality' && <QualityDashboard />}
-                        {view === 'curves' && <RoastCurveAnalysis />}
-                    </div>
+            {view === 'trilla' && (
+                <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <TrillaModuleContainer user={user} />
                 </div>
             )}
+
+            {/* Removed Production View */}
 
             {/* BIENVENIDA ELIMINADA - SE ENVIARÁ POR CORREO ELECTRÓNICO */}
 
@@ -493,7 +334,7 @@ export default function Home() {
                 </div>
             )}
 
-            {(view === 'export' || view === 'calibration' || view === 'degassing' || view === 'archive') && (
+            {(view === 'export' || view === 'archive') && (
                 <div className="max-w-7xl mx-auto space-y-8">
                     <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
                         <div className="flex bg-bg-card p-1 rounded-industrial-sm border border-white/5 shadow-xl">
@@ -501,49 +342,25 @@ export default function Home() {
                                 onClick={() => setView('export')}
                                 className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'export' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
-                                Manifiestos
+                                Emisión de Pasaportes
                             </button>
                             <button
                                 onClick={() => setView('archive')}
                                 className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'archive' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
-                                Historial en la Nube
-                            </button>
-                            <button
-                                onClick={() => setView('calibration')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'calibration' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                            >
-                                Calibración Espectral
-                            </button>
-                            <button
-                                onClick={() => setView('degassing')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'degassing' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
-                            >
-                                Predictor CO₂
+                                Archivo Confidencial Nube
                             </button>
                         </div>
                     </div>
 
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {view === 'calibration' && <ComparisonCalibrationDashboard />}
                         {view === 'export' && <GreenExportForm user={user} />}
-                        {view === 'degassing' && <DegassingPredictor />}
                         {view === 'archive' && <GlobalHistoryArchive user={user} />}
                     </div>
                 </div>
             )}
 
-            {view === 'retail' && (
-                <div className="max-w-7xl mx-auto space-y-8">
-                    <RetailModuleContainer user={user} />
-                </div>
-            )}
-
-            {view === 'master-control' && (
-                <div className="max-w-7xl mx-auto space-y-8">
-                    <MasterControlCenter />
-                </div>
-            )}
+            {/* Removed Retail and Master Control View */}
 
             {/* --- PORTAL GLOBAL DE DOCUMENTOS (MODALES) --- */}
 
@@ -575,7 +392,7 @@ export default function Home() {
                 </div>
             )}
 
-            {/* 2. Guía TRL 7: Documentación Funcional del Sistema */}
+            {/* 2. Guía Sistema: Documentación Funcional del Sistema */}
             {showFunctionalDocs && (
                 <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[300] p-12 overflow-y-auto">
                     <div className="max-w-4xl mx-auto space-y-12">
@@ -596,7 +413,7 @@ export default function Home() {
 
                         <div className="bg-white/2 border border-white/5 rounded-industrial p-16 space-y-12 shadow-inner text-gray-300">
                             <section className="space-y-4">
-                                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Estatus Tecnológico: TRL 7</h3>
+                                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Estatus Tecnológico: Sistema Operativo</h3>
                                 <p className="text-sm leading-relaxed">AXIS COFFEE PRO es una solución industrial operativa demostrada en entornos reales. El sistema centraliza la trazabilidad desde la recepción en finca hasta el retail transfronterizo.</p>
                             </section>
 
@@ -614,19 +431,22 @@ export default function Home() {
                                     <p className="text-xs leading-relaxed">Pasaportes digitales QR y motores dinámicos de desgasificación para logística segura.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-purple-400 uppercase">Conexión Minorista</h4>
-                                    <p className="text-xs leading-relaxed">Gestión multi-procedencia para distribuidores y etiquetado inteligente para storytelling final.</p>
+                                    <h4 className="text-sm font-bold text-purple-400 uppercase">Sello Inmutable</h4>
+                                    <p className="text-xs leading-relaxed">Generación de Hashes y QR dinámicos que prueban criptográficamente la autenticidad del café ante cualquier puerto.</p>
                                 </div>
                             </div>
 
-                            <div className="p-10 bg-brand-green/10 border border-brand-green/20 rounded-industrial-sm">
-                                <h4 className="text-brand-green text-xs font-bold uppercase mb-2">Propuesta de Valor</h4>
-                                <p className="text-sm text-gray-100 leading-relaxed font-medium">"Transformamos la opacidad del agro en transparencia industrial, eliminando riesgos de calidad y maximizando el valor percibido del grano colombiano en el mundo."</p>
+                            <div className="p-10 bg-brand-green/10 border border-brand-green/20 rounded-industrial-sm shadow-[0_0_30px_rgba(0,255,136,0.1)]">
+                                <h4 className="text-brand-green-bright text-[10px] font-bold uppercase tracking-widest mb-3">La Llave Maestra (Propuesta de Valor)</h4>
+                                <p className="text-sm text-white leading-relaxed font-bold">"AXIS es el emisor de Certificados Digitales de Autenticidad para café verde de exportación. Garantizamos que el contenedor que subes al barco cumple instantáneamente con las normativas EUDR, FDA y auditorías globales de calidad. Lo que dices que va en el saco, está matemáticamente probado para cruzar fronteras sin fricción."</p>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* AI BI AGENT */}
+            <AxisNexusWidget />
         </div>
     );
 }

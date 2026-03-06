@@ -23,10 +23,10 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             // 1. Desactivar transiciones para evitar frames intermedios
             element.style.transition = 'none';
 
-            // 2. Forzar ancho industrial (proporción A4 ideal)
-            element.style.width = '1200px';
+            // 2. Forzar ancho industrial (proporción A4/Carta ideal)
+            element.style.width = '816px';
             element.style.maxWidth = 'none';
-            element.style.minWidth = '1200px';
+            element.style.minWidth = '816px';
             element.style.position = 'relative';
             element.style.left = '0';
             element.style.top = '0';
@@ -44,12 +44,12 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             await new Promise(r => setTimeout(r, 500));
 
             const canvas = await html2canvas(element, {
-                scale: 2,
-                backgroundColor: '#050706',
+                scale: 1.5,
+                backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
-                windowWidth: 1200,
+                windowWidth: 816,
                 x: 0,
                 y: 0,
                 scrollX: 0,
@@ -85,23 +85,34 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             element.style.cssText = originalStyle;
             if (parent) parent.style.cssText = originalParentStyle;
 
-            const imgData = canvas.toDataURL('image/png', 1.0);
+            const imgData = canvas.toDataURL('image/jpeg', 0.75);
 
-            const pdf = new jsPDF({
+            let tempPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const imgProps = tempPdf.getImageProperties(imgData);
+            const pdfWidth = 210; // A4 width in mm
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            const pageHeight = 297; // A4 height in mm
+            let heightLeft = pdfHeight;
+            let position = 0;
+
+            const pdfCustom = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
                 format: 'a4'
             });
 
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdfCustom.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pageHeight;
 
-            // Centrar si es más corto que la página, o empezar en 0 si es más largo
-            const yOffset = pdfHeight < pdf.internal.pageSize.getHeight() ? 5 : 0;
+            while (heightLeft > 0) {
+                position = heightLeft - pdfHeight; // Negative offset to shift image up
+                pdfCustom.addPage();
+                pdfCustom.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pageHeight;
+            }
 
-            pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, pdfHeight);
-            pdf.save(`${fileName}.pdf`);
+            pdfCustom.save(`${fileName}.pdf`);
 
             if (btn) btn.innerText = 'PDF GENERADO ✓';
             setTimeout(() => { if (btn) btn.innerText = 'DESCARGAR REPORTE INDUSTRIAL'; }, 2000);

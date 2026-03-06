@@ -38,10 +38,13 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
 
     useEffect(() => {
         if (demoMode) {
-            setAvailableLots([
+            const demoLots = [
                 { id: '1', farmer_name: 'Juan Valdez', variety: 'Geisha', status: 'completed', physical_analysis: [{ moisture_pct: 11.5 }], sca_cupping: [{ total_score: 87.5 }], thrashing_yield: 89.2 },
                 { id: '2', farmer_name: 'Maria Lopez', variety: 'Castillo', status: 'thrashed', physical_analysis: [{ moisture_pct: 12.1 }], sca_cupping: [{ total_score: 84.0 }], thrashing_yield: 92.5 }
-            ]);
+            ];
+            setAvailableLots(demoLots);
+            if (!selectedLot && demoLots.length > 0) setSelectedLot(demoLots[0]);
+
             setPastRoasts([
                 { id: '101', batch_id_label: 'AX-7721', roast_date: '2026-02-21', process: 'washed', sensor_notes: ['Chocolate', 'Frutos Rojos'], sca_score: 87.2 },
                 { id: '102', batch_id_label: 'AX-8843', roast_date: '2026-02-20', process: 'natural', sensor_notes: ['Caramelo', 'Miel'], sca_score: 85.8 }
@@ -81,7 +84,10 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                 .in('status', ['completed', 'thrashed', 'purchased'])
                 .order('created_at', { ascending: false });
 
-            if (data) setAvailableLots(data);
+            if (data) {
+                setAvailableLots(data);
+                if (!selectedLot && data.length > 0) setSelectedLot(data[0]);
+            }
         } catch (err) {
             console.error("AXIS Error:", err);
         } finally {
@@ -114,7 +120,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     if (selectedLot) {
         const d = Number(selectedLot.physical_analysis?.[0]?.density_gl) || 710;
         const m = Number(selectedLot.physical_analysis?.[0]?.moisture_pct) || 11.2;
-        const s = Number(selectedLot.sca_cupping?.[0]?.total_score) || 86.5;
+        const s = Number(selectedLot.sca_cupping?.[0]?.total_score) || 0;
         const p = (selectedLot.process || 'washed').toLowerCase();
 
         // 1. Charge Temp & Dry Time (based on density & moisture)
@@ -142,65 +148,67 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
         }
     }
 
+    // -- HELPERS --
+    const getScaScore = (lot: any) => {
+        if (!lot?.sca_cupping?.length) return '--';
+        const s = lot.sca_cupping[0];
+        if (s.total_score) return s.total_score.toFixed(2);
+
+        const sum =
+            (Number(s.fragrance_aroma) || 0) + (Number(s.flavor) || 0) + (Number(s.aftertaste) || 0) +
+            (Number(s.acidity) || 0) + (Number(s.body) || 0) + (Number(s.balance) || 0) +
+            (Number(s.uniformity) || 0) + (Number(s.clean_cup) || 0) + (Number(s.sweetness) || 0) +
+            (Number(s.overall) || 0) - ((Number(s.defects_score) || 0) * 2);
+
+        return sum > 0 ? sum.toFixed(2) : '--';
+    };
+
+    const getMeshDistribution = (lot: any) => {
+        if (!lot?.physical_analysis?.length) return { under14: 0, m15_16: 0, m17_18: 0, m19: 0 };
+        const mesh = lot.physical_analysis[0].screen_size_distribution;
+        if (!mesh) return { under14: 15, m15_16: 45, m17_18: 30, m19: 10 }; // Fallback
+
+        const under14 = (Number(mesh.size14) || 0) + (Number(mesh.size13) || 0) + (Number(mesh.size12) || 0) + (Number(mesh.under12) || 0);
+        const m15_16 = (Number(mesh.size15) || 0) + (Number(mesh.size16) || 0);
+        const m17_18 = (Number(mesh.size17) || 0) + (Number(mesh.size18) || 0);
+        const m19 = 0; // The form top size is 18, so we leave 19+ at 0 or infer if it had size19. 
+
+        // Normalize for visual percentage heights (min 10%, max 100%)
+        const max = Math.max(under14, m15_16, m17_18, m19, 1);
+        return {
+            under14: Math.max((under14 / max) * 100, 10),
+            m15_16: Math.max((m15_16 / max) * 100, 10),
+            m17_18: Math.max((m17_18 / max) * 100, 10),
+            m19: Math.max((m19 / max) * 100, 10),
+        };
+    };
+
+    const meshViz = getMeshDistribution(selectedLot);
+
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
-            {view !== 'entry' && (
-                <header className="flex justify-between items-center bg-bg-card p-6 rounded-industrial border border-white/5 shadow-xl">
-                    <div>
-                        <h2 className="text-2xl font-bold uppercase tracking-tighter text-white">AXIS Roast Intelligence</h2>
-                        <p className="text-[10px] text-gray-500 font-mono uppercase tracking-[0.2em] mt-1">Control de Consistencia Industrial TRL 7</p>
-                    </div>
-
-                    <div className="flex gap-4">
-                        <div className="flex bg-white/5 p-1 rounded-industrial-sm border border-white/5 mr-2">
-                            <button
-                                onClick={() => setView('live')}
-                                className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all ${view === 'live' ? 'bg-orange-500 text-white' : 'text-gray-500'}`}
-                            >
-                                Inteligencia Vivo
-                            </button>
-                            <button
-                                onClick={() => setView('archive')}
-                                className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase transition-all flex items-center gap-2 ${view === 'archive' ? 'bg-blue-600 text-white' : 'text-gray-500'}`}
-                            >
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-                                Archivo Cloud
-                            </button>
-                        </div>
-
-                        <button
-                            onClick={() => setDemoMode(!demoMode)}
-                            className={`px-4 py-2 rounded-industrial-sm text-[10px] font-bold uppercase transition-all border ${demoMode ? 'bg-orange-500/20 border-orange-500/50 text-orange-500' : 'bg-white/5 border-white/10 text-gray-400'}`}
-                        >
-                            {demoMode ? '✨ DEMO ON' : 'MODO REAL'}
-                        </button>
-
-                        {view === 'live' && (
-                            <select
-                                className="bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-2 text-xs font-bold text-gray-300 outline-none focus:border-brand-green min-w-[200px] appearance-none"
-                                onChange={(e) => {
-                                    const lot = availableLots.find(l => l.id === e.target.value);
-                                    setSelectedLot(lot);
-                                }}
-                            >
-                                <option value="">{isLoading ? 'CARGANDO...' : 'SELECCIONAR LOTE'}</option>
-                                {availableLots.map(lot => (
-                                    <option key={lot.id} value={lot.id}>{lot.farmer_name} - {lot.variety}</option>
-                                ))}
-                            </select>
-                        )}
-
-                        {view === 'live' && (
-                            <button
-                                onClick={() => setShowHistoryModal(true)}
-                                className="bg-white/5 hover:bg-white/10 text-white px-6 py-2 rounded-industrial-sm text-xs font-bold transition-all border border-white/5 flex items-center gap-2 uppercase"
-                            >
-                                Cargar Histórico
-                            </button>
-                        )}
-                    </div>
-                </header>
-            )}
+            {/* STEPPER DE NAVEGACIÓN (STYLE PRIMER MÓDULO) */}
+            <nav className="flex bg-transparent p-1.5 gap-2 w-full max-w-7xl mx-auto">
+                <button
+                    onClick={() => setView('live')}
+                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase tracking-widest ${view === 'live' ? 'bg-brand-green text-black shadow-lg' : 'bg-bg-card text-gray-400 hover:text-white'}`}
+                >
+                    01. Predicción Térmica
+                </button>
+                <button
+                    onClick={() => setView('entry')}
+                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase tracking-widest ${view === 'entry' ? 'bg-brand-green text-black shadow-lg' : 'bg-bg-card text-gray-400 hover:text-white'}`}
+                >
+                    02. Registro Tueste
+                </button>
+                <button
+                    onClick={() => setView('archive')}
+                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${view === 'archive' ? 'bg-blue-600 text-white shadow-lg' : 'bg-bg-card text-gray-400 hover:text-white'}`}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+                    03. Archivo
+                </button>
+            </nav>
 
             {view === 'live' ? (
                 <>
@@ -252,176 +260,240 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                     )}
 
                     {selectedLot ? (
-                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                            {/* PANEL IZQUIERDO: AUDITORÍA DE LOTE */}
-                            <aside className="xl:col-span-4 space-y-6">
-                                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl pointer-events-none group-hover:bg-brand-green/10 transition-colors"></div>
-                                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.4em] mb-8 flex items-center gap-2">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        DNA de Lote Físico
-                                    </h4>
+                        <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
+                            {/* ENCABEZADO: IDENTIFICACIÓN DEL LOTE Y PUNTAJE */}
+                            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-end gap-6 pb-4 border-b border-white/10 mb-2">
+                                <div>
+                                    <p className="text-[10px] text-brand-green uppercase font-bold tracking-[0.3em] mb-1 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse"></span>
+                                        Panel de Control Térmico
+                                    </p>
+                                    <h3 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">
+                                        {selectedLot.batch_id_label || 'Lote en Tránsito'}
+                                    </h3>
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase mt-1 tracking-widest">
+                                        Productor: <span className="text-white">{selectedLot.farmer_name || 'Sin Asignar'}</span>
+                                    </p>
+                                </div>
 
-                                    <div className="space-y-8">
+                                {/* SELECTOR FÁCIL EN EL MEDIO */}
+                                <div className="flex-1 w-full max-w-sm mx-auto">
+                                    <label className="text-[9px] text-gray-500 uppercase font-bold mb-1.5 block tracking-widest">Cambiar Lote a Procesar</label>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedLot?.id || ''}
+                                            onChange={(e) => {
+                                                const lot = availableLots.find(l => l.id === e.target.value);
+                                                if (lot) setSelectedLot(lot);
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 text-white text-xs py-3.5 px-4 rounded-industrial appearance-none focus:outline-none focus:border-brand-green/50 cursor-pointer font-bold uppercase tracking-wider transition-all hover:bg-white/10"
+                                        >
+                                            <option value="" disabled className="bg-bg-card">Seleccionar Lote...</option>
+                                            {availableLots.map(lot => (
+                                                <option key={lot.id} value={lot.id} className="bg-bg-card text-white">
+                                                    {lot.batch_id_label || lot.variety} - {lot.farmer_name || 'Productor'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-white transition-colors">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="text-right">
+                                    <p className="text-[9px] text-gray-500 uppercase font-bold mb-1 tracking-widest">Puntaje SCA (Crudo)</p>
+                                    <p className="text-4xl font-black text-brand-green-bright">
+                                        {getScaScore(selectedLot)}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* 1. INDICADORES CRÍTICOS (DATOS QUE DICTAN TERMODINÁMICA) */}
+                                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial relative overflow-hidden flex flex-col justify-between group">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl pointer-events-none group-hover:bg-orange-500/10 transition-colors"></div>
+                                    <div className="mb-6 relative z-10">
+                                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">1. Indicadores Críticos</h4>
+                                        <p className="text-[10px] text-gray-600 font-medium">Dictan la Temperatura de Carga</p>
+                                    </div>
+
+                                    <div className="space-y-6 relative z-10">
+                                        {/* Densidad es el más grande */}
                                         <div className="flex justify-between items-end border-b border-white/5 pb-4">
-                                            <div>
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Origen / Variedad</p>
-                                                <p className="font-bold text-lg text-white uppercase tracking-tight">{selectedLot.variety || 'Caturra'}</p>
-                                            </div>
+                                            <p className="text-xs text-gray-400 uppercase font-bold">Densidad</p>
                                             <div className="text-right">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Puntaje basado en estándares SCA</p>
-                                                <p className="text-2xl font-black text-brand-green-bright">{(selectedLot.sca_cupping?.[0]?.total_score || 86.5).toFixed(1)}</p>
+                                                <p className="text-5xl font-black text-white tracking-tighter">
+                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0)
+                                                        ? selectedLot.physical_analysis[0].density_gl
+                                                        : '--'}
+                                                </p>
+                                                <p className="text-[10px] text-gray-500 font-bold uppercase">g/L</p>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="p-4 bg-white/2 rounded-xl border border-white/5">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold mb-1 italic">Humedad</p>
-                                                <p className="text-xl font-bold text-white tracking-tighter">{selectedLot.physical_analysis?.[0]?.moisture_pct || '11.2'}%</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                                                <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Humedad</p>
+                                                <p className="text-2xl font-bold text-white tracking-tight">
+                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0)
+                                                        ? `${selectedLot.physical_analysis[0].moisture_pct}%`
+                                                        : '--'}
+                                                </p>
                                             </div>
-                                            <div className="p-4 bg-white/2 rounded-xl border border-white/5">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold mb-1 italic">Densidad</p>
-                                                <p className="text-xl font-bold text-white tracking-tighter">{selectedLot.physical_analysis?.[0]?.density_gl || '710'} <span className="text-[10px] text-gray-500">g/L</span></p>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <p className="text-[9px] text-gray-500 uppercase font-bold italic">Notas de Catación Destacadas</p>
-                                            <div className="flex flex-wrap gap-2">
-                                                {(() => {
-                                                    const rawNotes = selectedLot.sca_cupping?.[0]?.notes;
-                                                    const notesArray = Array.isArray(rawNotes)
-                                                        ? rawNotes
-                                                        : (typeof rawNotes === 'string' ? rawNotes.split(',').map(n => n.trim()) : ['Chocolate', 'Caramelo', 'Cuerpo Medio']);
-
-                                                    return notesArray.map((note: string, i: number) => (
-                                                        <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold text-gray-300 uppercase">{note}</span>
-                                                    ));
-                                                })()}
+                                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                                                <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Actividad Agua (aW)</p>
+                                                <p className="text-2xl font-bold text-white tracking-tight">
+                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0 && selectedLot.physical_analysis[0].aw) || '0.58'}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-orange-500/5 border border-orange-500/10 p-8 rounded-industrial relative overflow-hidden group">
-                                    <div className="absolute -top-10 -left-10 w-24 h-24 bg-orange-500/10 blur-2xl rounded-full"></div>
-                                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                                        Protocolo de Rendimiento
-                                    </p>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center text-[11px]">
-                                            <span className="text-gray-400">Objetivo Merma Tostión:</span>
-                                            <span className="font-bold text-white">{dynamicTargetMerma}</span>
+                                {/* 2. ESPECIFICACIONES DEL LOTE */}
+                                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial relative overflow-hidden flex flex-col justify-between group">
+                                    <div className="mb-6 relative z-10">
+                                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">2. Especificaciones</h4>
+                                        <p className="text-[10px] text-gray-600 font-medium">Determinan la Estrategia de Perfil</p>
+                                    </div>
+
+                                    <div className="space-y-4 relative z-10 flex-1 flex flex-col justify-center">
+                                        <div className="flex justify-between items-center bg-white/5 p-4 rounded border border-white/5">
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase">Varietal</span>
+                                            <span className="text-sm font-bold text-white uppercase tracking-wider">{selectedLot.variety || 'Caturra'}</span>
                                         </div>
-                                        <p className="text-[10px] text-gray-500 leading-relaxed font-medium">
-                                            Basado en la densidad de <span className="text-white font-bold">{selectedLot.physical_analysis?.[0]?.density_gl || '710'} g/L</span>, el grano tiene una estructura celular densa que requiere una transferencia de energía conductiva moderada al inicio.
+                                        <div className="flex justify-between items-center bg-white/5 p-4 rounded border border-white/5">
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase">Proceso</span>
+                                            <span className="text-sm font-bold text-brand-green-bright uppercase tracking-wider">{selectedLot.process || 'Lavado'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center bg-white/5 p-4 rounded border border-white/5">
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase">Altura</span>
+                                            <span className="text-sm font-bold text-white tracking-wider">{selectedLot.altitude || '1,750'} <span className="text-[9px] text-gray-500">msnm</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 3. CALIDAD DE MATERIA PRIMA */}
+                                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial relative overflow-hidden flex flex-col justify-between">
+                                    <div className="mb-6">
+                                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">3. Calidad Materia Prima</h4>
+                                        <p className="text-[10px] text-gray-600 font-medium">Previsión de Limpieza y Uniformidad</p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                                            <div className="flex justify-between items-end mb-3">
+                                                <p className="text-[9px] text-gray-400 uppercase font-bold">Defectos Físicos Totales</p>
+                                                <p className="text-lg font-bold text-white">
+                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0)
+                                                        ? `${selectedLot.physical_analysis[0].total_defects_grams || 0}g`
+                                                        : '0g'}
+                                                </p>
+                                            </div>
+                                            {/* Progress bar mock */}
+                                            <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                                <div className="bg-brand-green h-full w-[5%]" />
+                                            </div>
+                                            <p className="text-[8px] text-gray-500 uppercase mt-2 text-right">Lote Limpio (Grado Especialidad)</p>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-[9px] text-gray-400 uppercase font-bold mb-3">Distribución de Malla (Homogeneidad)</p>
+                                            <div className="flex items-end gap-2 h-16 border-b border-white/10 pb-1">
+                                                {/* Bar Chart Mock for mesh distribution */}
+                                                <div className="w-1/4 bg-white/10 hover:bg-white/30 transition-all rounded-t-sm group relative" style={{ height: `${meshViz.under14}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-gray-600 font-bold">&lt;14</span></div>
+                                                <div className="w-1/4 bg-blue-500/50 hover:bg-blue-500 transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m15_16}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-gray-500 font-bold">15-16</span></div>
+                                                <div className="w-1/4 bg-brand-green/70 hover:bg-brand-green transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m17_18}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-brand-green font-bold">17-18</span></div>
+                                                <div className="w-1/4 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m19}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-gray-500 font-bold">19+</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 4. OBJETIVO DE TUESTE (FOOTER) */}
+                            <div className="bg-gradient-to-r from-bg-card to-white/5 border border-white/10 p-8 rounded-industrial flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
+                                <div className="flex items-center gap-6">
+                                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-1">4. Objetivo de Tueste</h4>
+                                        <p className="text-sm font-bold text-white mb-2">Perfil Base: {masterProfile?.label || 'Curva Inteligente AXIS (TRL-7)'}</p>
+                                        <p className="text-[10px] text-gray-400 leading-relaxed max-w-lg">
+                                            {masterProfile ? 'Curva de Campeón Global Ghost sincronizada.' : `Estrategia: Carga a ${dynamicChargeTemp}°C, Desarrollo Corto (${dynamicDevPct}%) para resaltar acidez floral debido al proceso ${selectedLot.process || 'Lavado'} y su alta puntuación.`}
                                         </p>
                                     </div>
                                 </div>
-                            </aside>
-
-                            {/* PANEL CENTRAL: PROPUESTA ESTRATÉGICA */}
-                            <main className="xl:col-span-8 space-y-8">
-                                <section className="bg-bg-card border border-white/10 p-10 rounded-industrial relative overflow-hidden min-h-[400px]">
-                                    <header className="flex justify-between items-start mb-12">
-                                        <div>
-                                            <h3 className="text-3xl font-bold uppercase tracking-tighter text-white mb-1">Estrategia de Tostión AXIS</h3>
-                                            <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.4em]">Propuesta Algorítmica de Perfil Térmico</p>
-                                        </div>
-                                        <button
-                                            onClick={() => setView('entry')}
-                                            className="bg-white text-black px-10 py-5 rounded-industrial-sm text-[11px] font-bold uppercase tracking-widest shadow-2xl hover:bg-brand-green-bright hover:text-white transition-all transform hover:-translate-y-1"
-                                        >
-                                            Iniciar Registro de Tostión
-                                        </button>
-                                    </header>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                                        <div className="p-8 bg-blue-500/5 border border-blue-500/10 rounded-industrial space-y-4">
-                                            <p className="text-[9px] text-blue-400 font-bold uppercase tracking-widest">Fase 1: Secado (Dry)</p>
-                                            <p className="text-xl font-bold text-white">Carga Moderada</p>
-                                            <p className="text-[10px] text-gray-500 leading-relaxed">Inicia a <span className="text-blue-400 font-bold">{dynamicChargeTemp}°C</span>. Extender fase de secado a {dynamicDryTime} min para estabilizar humedad interna del {selectedLot.physical_analysis?.[0]?.moisture_pct || '11.2'}%.</p>
-                                        </div>
-                                        <div className="p-8 bg-orange-500/5 border border-orange-500/10 rounded-industrial space-y-4">
-                                            <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest">Fase 2: Maillard</p>
-                                            <p className="text-xl font-bold text-white">Desarrollo Dulzor</p>
-                                            <p className="text-[10px] text-gray-500 leading-relaxed">Mantener RoR constante entre <span className="text-orange-400 font-bold">{dynamicRorRange}°C/min</span>. Crucial para potenciar notas de {(() => {
-                                                const rawNotes = selectedLot.sca_cupping?.[0]?.notes;
-                                                if (Array.isArray(rawNotes)) return rawNotes[0] || 'Caramelo';
-                                                if (typeof rawNotes === 'string') return rawNotes.split(',')[0].trim() || 'Caramelo';
-                                                return 'Caramelo';
-                                            })()}.</p>
-                                        </div>
-                                        <div className="p-8 bg-brand-red/5 border border-brand-red/10 rounded-industrial space-y-4">
-                                            <p className="text-[9px] text-brand-red font-bold uppercase tracking-widest">Fase 3: Finalización</p>
-                                            <p className="text-xl font-bold text-white">Acento de Acidez</p>
-                                            <p className="text-[10px] text-gray-500 leading-relaxed">Finalizar a <span className="text-brand-red font-bold">{dynamicDropTemp}°C</span> con un desarrollo del {dynamicDevPct}%. Evitar Segundo Crack para no perder notas florales.</p>
-                                        </div>
+                                <div className="flex items-center gap-6">
+                                    <div className="text-right border-r border-white/10 pr-6">
+                                        <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Peso de Carga Óptimo</p>
+                                        <p className="text-2xl font-bold text-white tracking-tighter">15.0 <span className="text-xs text-gray-500">kg</span></p>
                                     </div>
-
-                                    <div className="p-8 bg-white/2 border border-white/5 rounded-industrial-sm flex items-center gap-8 group hover:border-brand-green/30 transition-all">
-                                        <div className="w-20 h-20 bg-brand-green/10 rounded-full flex items-center justify-center border border-brand-green/20 group-hover:scale-110 transition-transform">
-                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-[11px] font-bold text-brand-green-bright uppercase tracking-[0.2em] mb-2">Objetivo de Desgasificación</p>
-                                            <p className="text-sm text-gray-400 leading-relaxed max-w-xl">
-                                                Dada la estrategia de tueste medio-claro, el pico de sabor se alcanzará a los <span className="text-white font-bold">{dynamicRestDays} días</span>. Tiempo de reposo mínimo recomendado: 48 horas tras tueste.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                {/* GHOST PROFILE PREVIEW (Si hay histórico cargado) */}
-                                {masterProfile && (
-                                    <div className="border border-blue-500/20 bg-blue-500/5 p-10 rounded-industrial animate-in slide-in-from-bottom-8 duration-700">
-                                        <div className="flex justify-between items-center mb-10">
-                                            <div>
-                                                <h4 className="text-xl font-bold text-white uppercase tracking-tighter italic">Referencia de Perfil Ghost</h4>
-                                                <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Sincronizado con Lote {masterProfile.label}</p>
-                                            </div>
-                                            <div className="px-6 py-2 bg-blue-500/20 rounded-full border border-blue-500/40">
-                                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Consistencia Objetivo: 98%</span>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                            <div className="space-y-1">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold italic">Tiempo de Tueste</p>
-                                                <p className="text-2xl font-bold text-white">09:12 <span className="text-xs text-gray-500">min</span></p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold italic">Temperatura Carga</p>
-                                                <p className="text-2xl font-bold text-white">202 <span className="text-xs text-gray-500">°C</span></p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold italic">Punto de Giro</p>
-                                                <p className="text-2xl font-bold text-white">01:05 <span className="text-xs text-gray-500">min</span></p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-[9px] text-gray-500 uppercase font-bold italic">Desarrollo Final</p>
-                                                <p className="text-2xl font-bold text-white">18.2 <span className="text-xs text-gray-500">%</span></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </main>
+                                    <button
+                                        onClick={() => setView('entry')}
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-5 rounded-industrial-sm text-[11px] font-bold uppercase tracking-widest shadow-2xl transition-all transform hover:-translate-y-1"
+                                    >
+                                        Iniciar Registro Tueste
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     ) : (
-                        <div className="min-h-[600px] border border-dashed border-white/5 rounded-industrial flex flex-col items-center justify-center text-center p-20 bg-white/[0.01]">
-                            <div className="w-40 h-40 bg-white/5 rounded-full flex items-center justify-center mb-8 border border-white/5 animate-pulse relative">
-                                <div className="absolute inset-0 bg-brand-green/20 blur-3xl opacity-30"></div>
-                                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-brand-green"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                        <div className="min-h-[600px] border border-white/5 rounded-industrial p-12 bg-bg-card relative overflow-hidden flex flex-col items-center justify-center">
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-brand-green/5 blur-[100px] pointer-events-none rounded-full"></div>
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500/5 blur-[80px] pointer-events-none rounded-full"></div>
+
+                            <div className="text-center mb-16 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                                <div className="w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-brand-green/20 relative">
+                                    <div className="absolute inset-0 bg-brand-green/10 blur-xl rounded-full"></div>
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-brand-green"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                </div>
+                                <h3 className="text-4xl lg:text-5xl font-bold uppercase tracking-tighter text-white mb-4">Centro de Tostión</h3>
+                                <p className="text-gray-400 max-w-2xl mx-auto font-medium uppercase text-[10px] tracking-[0.3em] leading-relaxed">
+                                    Software predictivo para maximizar el desarrollo de sabor y minimizar la merma industrial.
+                                </p>
                             </div>
-                            <h3 className="text-3xl font-bold uppercase tracking-tighter text-white">Generador de Estrategia de Tostión</h3>
-                            <p className="text-gray-500 mt-4 max-w-lg font-medium uppercase text-[10px] tracking-[0.4em] leading-relaxed">
-                                Selecciona un lote con análisis físico y sensorial completo para proyectar parámetros térmicos y curvas de desgasificación inteligentes.
-                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto relative z-10">
+                                {/* Option 1 */}
+                                <div className="bg-bg-main border border-white/5 hover:border-brand-green/30 p-8 rounded-industrial-sm flex flex-col group transition-all duration-500 hover:shadow-[0_10px_40px_rgba(0,223,154,0.1)]">
+                                    <div className="w-12 h-12 bg-brand-green/10 rounded-lg flex items-center justify-center text-brand-green mb-6 border border-brand-green/20 group-hover:scale-110 transition-transform">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                                    </div>
+                                    <h4 className="text-white font-bold uppercase tracking-tight text-lg mb-3">1. Tostión Predictiva (IA)</h4>
+                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed mb-8 flex-1">
+                                        Sistema de predicción basado en los datos físico-químicos cargados en el primer módulo. Te genera una estrategia algorítmica sugerida para el tostador aprendiz.
+                                    </p>
+                                    <div className="bg-white/5 border border-white/10 p-3 rounded flex items-center gap-2 text-[10px] text-brand-green-bright font-bold uppercase tracking-widest">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                        Seleccione un lote arriba
+                                    </div>
+                                </div>
+
+                                {/* Option 2 */}
+                                <div className="bg-bg-main border border-white/5 hover:border-orange-500/30 p-8 rounded-industrial-sm flex flex-col group transition-all duration-500 hover:shadow-[0_10px_40px_rgba(249,115,22,0.1)]">
+                                    <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500 mb-6 border border-orange-500/20 group-hover:scale-110 transition-transform">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                    </div>
+                                    <h4 className="text-white font-bold uppercase tracking-tight text-lg mb-3">2. Tueste Manual (Vieja Guardia)</h4>
+                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed mb-8 flex-1">
+                                        Formulario de ingreso directo para el tostador profesional. Registra los parámetros bajo tu propia experiencia para calcular en segundos el rendimiento y la merma de tu lote.
+                                    </p>
+                                    <button
+                                        onClick={() => setView('entry')}
+                                        className="w-full bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/50 p-3 rounded transition-colors text-[10px] font-bold uppercase tracking-widest text-center"
+                                    >
+                                        Registrar Tueste
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </>
             ) : view === 'entry' ? (
-                <RoastEntryForm user={user} />
+                <RoastEntryForm user={user} lotData={selectedLot} />
             ) : (
                 <GlobalHistoryArchive user={user} />
             )}

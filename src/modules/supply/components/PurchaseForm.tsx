@@ -3,6 +3,8 @@ import { CoffeeVariety, ProcessType } from '@/shared/types';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
 import { createCoffeePurchase, updateCoffeePurchase } from '../actions/purchase';
 import { supabase } from '@/shared/lib/supabase';
+import EUDRGeoreference from './EUDRGeoreference';
+
 
 const COFFEE_VARIETIES_BASE: string[] = [
     'Bourbon', 'Bourbon Rosado', 'Castillo', 'Caturra', 'Cenicafe 1',
@@ -36,8 +38,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
     const [customVariety, setCustomVariety] = useState('');
 
     const initialFormState = {
+        sicaId: '',
         farmerName: '',
         farmName: '',
+        farmSizeHectares: undefined as number | undefined,
         altitude: 1600,
         country: 'Colombia',
         region: '',
@@ -47,8 +51,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         purchaseValue: 0,
         purchaseDate: new Date().toISOString().split('T')[0],
         lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
-        destination: 'internal' as 'internal' | 'export_green' | 'export_roasted',
+        destination: 'export_green' as 'export_green',
         exportCertificate: '',
+        isEuropeDestination: false as boolean,
         coffeeType: 'pergamino' as 'pergamino' | 'excelso',
         latitude: 0,
         longitude: 0,
@@ -60,7 +65,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             duracion_fermentacion_horas: '72',
             actividad_agua_aw: '',
             recipiente_fermentacion: '',
-            tipo_secado: ''
+            tipo_secado: '',
+            agente_infusion: ''
         } as any
     };
 
@@ -102,8 +108,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         if (selectedLot) {
             const isBase = COFFEE_VARIETIES_BASE.includes(selectedLot.variety);
             setFormData({
+                sicaId: selectedLot.process_data?.sica_id || '',
                 farmerName: selectedLot.farmer_name || '',
                 farmName: selectedLot.farm_name || '',
+                farmSizeHectares: selectedLot.farm_size_hectares || undefined,
                 altitude: selectedLot.altitude || 1600,
                 country: selectedLot.country || 'Colombia',
                 region: selectedLot.region || '',
@@ -113,8 +121,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 purchaseValue: Number(selectedLot.purchase_value) || 0,
                 purchaseDate: selectedLot.purchase_date || new Date().toISOString().split('T')[0],
                 lotNumber: selectedLot.lot_number || `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
-                destination: (selectedLot.destination as 'internal' | 'export_green' | 'export_roasted') || 'internal',
+                destination: 'export_green',
                 exportCertificate: selectedLot.export_certificate || '',
+                isEuropeDestination: selectedLot.is_europe_destination || false,
                 coffeeType: (selectedLot.coffee_type as 'pergamino' | 'excelso') || 'pergamino',
                 latitude: selectedLot.latitude || 0,
                 longitude: selectedLot.longitude || 0,
@@ -133,7 +142,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             duracion_fermentacion_horas: '72',
                             actividad_agua_aw: '',
                             recipiente_fermentacion: '',
-                            tipo_secado: ''
+                            tipo_secado: '',
+                            agente_infusion: ''
                         };
                     }
                     return hasData ? pd : {
@@ -144,7 +154,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                         duracion_fermentacion_horas: '72',
                         actividad_agua_aw: '',
                         recipiente_fermentacion: '',
-                        tipo_secado: ''
+                        tipo_secado: '',
+                        agente_infusion: ''
                     };
                 })()
             });
@@ -178,6 +189,44 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         setFormData({ ...formData, purchaseValue: parseInt(rawValue) || 0 });
     };
 
+    const [isSearchingSica, setIsSearchingSica] = useState(false);
+
+    const handleSicaSearch = async () => {
+        if (!formData.sicaId) return;
+        setIsSearchingSica(true);
+        setStatus(null);
+        try {
+            const res = await fetch('/sica_mock_db.json');
+            if (res.ok) {
+                const data = await res.json();
+                // Buscar por codigo_sica (cédula simulada)
+                const found = data.productores.find((p: any) => p.codigo_sica === formData.sicaId || p.cedula === formData.sicaId);
+
+                if (found) {
+                    setFormData(prev => ({
+                        ...prev,
+                        farmerName: found.nombre_caficultor || prev.farmerName,
+                        farmName: found.nombre_finca || prev.farmName,
+                        farmSizeHectares: found.area_total_hectareas || prev.farmSizeHectares,
+                        altitude: found.altitud_promedio_msnm || prev.altitude,
+                        country: 'Colombia', // Por defecto para FNC/SICA
+                        region: found.departamento ? `${found.departamento}, ${found.municipio}` : prev.region,
+                        processData: { ...prev.processData, eudr_polygon: found.poligono_geojson || '' }
+                    }));
+                    setStatus({ type: 'success', message: 'Datos de la finca precargados exitosamente desde SICA.' });
+                    setTimeout(() => setStatus(null), 4000);
+                } else {
+                    setStatus({ type: 'error', message: 'Cédula / SICA no encontrado en base de datos FNC.' });
+                    setTimeout(() => setStatus(null), 4000);
+                }
+            }
+        } catch (error) {
+            console.error("Error buscando SICA:", error);
+        } finally {
+            setIsSearchingSica(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -187,15 +236,28 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             const finalVariety = formData.variety === 'Otro' ? customVariety : formData.variety;
             if (!finalVariety) throw new Error("Debe especificar una variedad.");
 
+            // VALIDACIÓN ESTRICTA EUDR
+            const isEudrRequired = (formData.farmSizeHectares ?? 0) >= 4;
+            if (isEudrRequired && formData.isEuropeDestination && !formData.processData?.eudr_polygon) {
+                setCurrentStep(1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                throw new Error("ALERTA REGULATORIA EUDR: Ha declarado envío a Europa desde una finca de 4 Hectáreas o más. Es obligatorio anexar el polígono de georreferenciación antes de continuar.");
+            }
+
             let result;
             if (selectedLot?.id) {
                 // Modo Edición
-                result = await updateCoffeePurchase(selectedLot.id, { ...formData, variety: finalVariety });
+                result = await updateCoffeePurchase(selectedLot.id, {
+                    ...formData,
+                    variety: finalVariety,
+                    processData: { ...formData.processData, sica_id: formData.sicaId }
+                });
             } else {
                 // Modo Creación
                 result = await createCoffeePurchase({
                     ...formData,
                     variety: finalVariety,
+                    processData: { ...formData.processData, sica_id: formData.sicaId },
                     companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
                 });
             }
@@ -219,7 +281,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             console.error("DEBUG SUBMISSION:", err);
             setStatus({
                 type: 'error',
-                message: 'Error de Sincronización Industrial: Fallo crítico en el procesamiento.'
+                message: err.message || 'Error de Sincronización Industrial: Fallo crítico en el procesamiento.'
             });
         } finally {
             setIsSubmitting(false);
@@ -322,7 +384,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 </button>
             </div>
 
-            <fieldset disabled={isSubmitting || isAlreadyRegistered} className={`border-none p-0 m-0 min-h-[450px] relative transition-all ${isAlreadyRegistered ? 'opacity-80 pointer-events-none' : ''}`}>
+            <fieldset disabled={isSubmitting} className="border-none p-0 m-0 min-h-[450px] relative transition-all">
                 {currentStep === 1 && (
                     <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
                         <h3 className="text-brand-green-bright font-bold flex items-center gap-2 mb-6">
@@ -356,9 +418,45 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nombre del Caficultor</label>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><path d="M8 14h.01 M12 14h.01 M16 14h.01 M8 18h.01 M12 18h.01 M16 18h.01" /></svg>
+                                    ID SICA (FNC)
+                                </label>
+                                <div className="flex items-stretch gap-2 mt-1">
+                                    <input
+                                        type="text"
+                                        placeholder="Ej. Cédula Cafetera / SICA"
+                                        required
+                                        value={formData.sicaId}
+                                        onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleSicaSearch();
+                                            }
+                                        }}
+                                        className="w-full bg-bg-main border border-brand-green/30 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none font-mono text-brand-green-bright"
+                                        disabled={isSubmitting}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleSicaSearch}
+                                        disabled={isSearchingSica || !formData.sicaId}
+                                        className="bg-brand-green hover:bg-brand-green-bright text-black font-bold px-4 rounded-industrial-sm transition-colors flex items-center justify-center disabled:opacity-50"
+                                        title="Autocompletar desde SICA"
+                                    >
+                                        {isSearchingSica ? (
+                                            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                        ) : (
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Caficultor</label>
                                 <input
                                     type="text"
                                     placeholder="Ej. Alejandra Pérez"
@@ -422,13 +520,27 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="bg-[#ea580c]/5 border border-[#ea580c]/20 p-4 rounded-industrial-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                            <div className="bg-bg-main/50 border border-white/5 rounded-industrial-sm p-4 h-full flex flex-col justify-center">
+                                <label className="text-xs font-bold text-brand-green uppercase tracking-widest block mb-2">Tamaño de la Finca (Hectáreas) *</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    placeholder="Ej. 4.5"
+                                    value={formData.farmSizeHectares || ''}
+                                    onChange={(e) => setFormData({ ...formData, farmSizeHectares: parseFloat(e.target.value) || undefined })}
+                                    className="w-full bg-bg-main border border-brand-green/30 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none text-brand-green-bright font-bold text-lg"
+                                    disabled={isSubmitting}
+                                />
+                                <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-tight">Utilizado para requerimiento EUDR (≥ 4 He).</p>
+                            </div>
+
+                            <div className="bg-[#ea580c]/5 border border-[#ea580c]/20 p-4 rounded-industrial-sm h-full flex flex-col justify-center">
                                 <label className="text-[10px] font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2 mb-2">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
-                                    Vínculo de Ubicación Smart (WhatsApp / Maps)
+                                    Vínculo de Ubicación Smart (Maps)
                                 </label>
-                                <div className="flex gap-2 w-full">
+                                <div className="flex gap-2 w-full mt-1">
                                     <input
                                         type="text"
                                         placeholder="Pegue aquí el enlace..."
@@ -453,48 +565,101 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                                 const match = decodedText.match(r);
                                                 if (match) {
                                                     setFormData(prev => ({ ...prev, latitude: parseFloat(match[1]), longitude: parseFloat(match[2]) }));
-                                                    setStatus({ type: 'success', message: '¡Coordenadas extraídas exitosamente del vínculo!' });
+                                                    setStatus({ type: 'success', message: '¡Coordenadas extraídas!' });
                                                     extracted = true;
                                                 }
                                             });
                                             if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
                                         }}
                                         className="bg-[#ea580c]/20 hover:bg-[#ea580c] text-[#ea580c] hover:text-white border border-[#ea580c]/50 transition-colors px-4 py-3 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Extraer GPS"
                                     >
                                         Extraer GPS
                                     </button>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
-                                        Latitud
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="0.000001"
-                                        placeholder="Ej. 4.570868"
-                                        value={formData.latitude || ''}
-                                        onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-[#ea580c] outline-none font-mono text-sm"
-                                        disabled={isSubmitting}
-                                    />
+                        <div className="bg-bg-card/50 border border-white/5 rounded-industrial-sm p-4 mt-2 mb-4">
+                            <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.isEuropeDestination}
+                                    onChange={(e) => setFormData({ ...formData, isEuropeDestination: e.target.checked })}
+                                    className="w-5 h-5 accent-brand-green bg-bg-main border-white/20 rounded cursor-pointer"
+                                />
+                                <span className="text-xs font-bold text-gray-300 uppercase tracking-widest block">¿Este lote será exportado a la Unión Europea? (Requisito EUDR)</span>
+                            </label>
+                            {formData.isEuropeDestination && (
+                                <p className="text-[10px] text-brand-green-bright mt-2 uppercase tracking-tight ml-8 animate-in fade-in">Se activará la Validación EUDR si la finca es ≥ 4 Hectáreas.</p>
+                            )}
+                        </div>
+
+                        {/* EUDR Conditional Module */}
+                        {(formData.farmSizeHectares ?? 0) >= 4 ? (
+                            <div className="bg-brand-green/5 border border-brand-green/30 rounded-industrial-sm p-4 animate-in slide-in-from-top-4 duration-500 shadow-inner mb-4">
+                                <div className="flex items-start justify-between gap-4 mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                                        <h4 className="text-sm font-bold text-brand-green-bright uppercase tracking-tight">Georreferenciación EUDR Requerida</h4>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] rounded uppercase font-bold">Europa</span>
+                                        <span className="px-2 py-0.5 bg-brand-green/20 text-brand-green text-[10px] rounded uppercase font-bold">&ge; 4 Hectáreas</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="text-xs font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
-                                        Longitud
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="0.000001"
-                                        placeholder="Ej. -74.297333"
-                                        value={formData.longitude || ''}
-                                        onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-[#ea580c] outline-none font-mono text-sm"
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
+                                <p className="text-xs text-brand-green/80 mb-6 leading-relaxed">
+                                    La finca excede el área mínima (≥ 4 He) y su destino es Europa. Para cumplir con la normativa de la UE, ¿tiene los datos en un archivo digital (SICA) para cargarlo y que el sistema monte las coordenadas, o prefiere realizar la captura de puntos en campo ahora mismo?
+                                </p>
+
+                                <EUDRGeoreference
+                                    onPolygonChange={(geoJson) => {
+                                        console.log("Polygon Updated for EUDR:", geoJson);
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            processData: {
+                                                ...prev.processData,
+                                                eudr_polygon: geoJson
+                                            }
+                                        }));
+                                    }}
+                                />
+                            </div>
+                        ) : ((formData.farmSizeHectares ?? 0) > 0) ? (
+                            <div className="bg-white/5 border border-white/10 rounded-sm p-4 flex items-center gap-3 mb-4 animate-in fade-in">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Finca exenta de georreferenciación en polígono (&lt; 4 He).</p>
+                            </div>
+                        ) : null}
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
+                                    Latitud
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.000001"
+                                    placeholder="Ej. 4.570868"
+                                    value={formData.latitude || ''}
+                                    onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-[#ea580c] outline-none font-mono text-sm"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
+                                    Longitud
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.000001"
+                                    placeholder="Ej. -74.297333"
+                                    value={formData.longitude || ''}
+                                    onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-[#ea580c] outline-none font-mono text-sm"
+                                    disabled={isSubmitting}
+                                />
                             </div>
                         </div>
 
@@ -560,51 +725,30 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Destino Final del Lote</label>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, destination: 'internal' })}
-                                        className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'internal' ? 'bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
-                                    >
-                                        <span>CONSUMO</span>
-                                        <span>INTERNO</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, destination: 'export_roasted' })}
-                                        className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'export_roasted' ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
-                                    >
-                                        <span>EXPORTAR</span>
-                                        <span>TOSTADO</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, destination: 'export_green' })}
-                                        className={`py-3 px-4 rounded-industrial-sm text-[9px] font-bold uppercase tracking-tight transition-all border leading-tight flex flex-col items-center justify-center ${formData.destination === 'export_green' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-600/20' : 'bg-bg-main text-gray-400 border-white/5 hover:border-white/20'}`}
-                                    >
-                                        <span>EXPORTAR</span>
-                                        <span>VERDE</span>
-                                    </button>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Destino Exclusivo del Lote</label>
+                                <div className="w-full py-4 px-4 rounded-industrial-sm flex items-center justify-between border bg-indigo-600/10 border-indigo-500/30 text-indigo-400 shadow-inner">
+                                    <span className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                                        EXPORTACIÓN VERDE
+                                    </span>
+                                    <span className="text-[10px] text-indigo-400/60 uppercase font-bold">(Ruta Única)</span>
                                 </div>
                             </div>
 
-                            {formData.destination.startsWith('export') && (
-                                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                                    <label className="text-xs font-bold text-blue-400 uppercase tracking-widest flex justify-between">
-                                        Certificado / Lote de Exportación Internacional
-                                        <span className="text-gray-500 font-normal">(Opcional)</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ej. SNT-2026-X001"
-                                        value={formData.exportCertificate}
-                                        onChange={(e) => setFormData({ ...formData, exportCertificate: e.target.value })}
-                                        className="w-full bg-bg-main border border-blue-500/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-blue-400 outline-none text-white font-mono shadow-inner shadow-blue-500/5 placeholder:text-gray-700"
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                            )}
+                            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                                <label className="text-xs font-bold text-blue-400 uppercase tracking-widest flex justify-between">
+                                    Certificado / Lote de Exportación Internacional
+                                    <span className="text-gray-500 font-normal">(Opcional)</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. SNT-2026-X001"
+                                    value={formData.exportCertificate}
+                                    onChange={(e) => setFormData({ ...formData, exportCertificate: e.target.value })}
+                                    className="w-full bg-bg-main border border-blue-500/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-blue-400 outline-none text-white font-mono shadow-inner shadow-blue-500/5 placeholder:text-gray-700"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
                         </div>
 
                         <NumericInput
@@ -620,8 +764,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             inputClassName="text-2xl py-4"
                         />
 
-                        <div className="space-y-4">
-                            <label className="text-xs font-bold text-white uppercase tracking-widest block border-l-2 border-brand-green pl-3">Valor Total de Compra</label>
+                        <div className="space-y-4 pt-4 border-t border-white/5">
+                            <div className="flex justify-between items-end">
+                                <label className="text-xs font-bold text-white uppercase tracking-widest block border-l-2 border-brand-green pl-3">Valor Total Pagado al Productor</label>
+                                <span className="text-[10px] bg-[#ea580c]/20 text-[#ea580c] px-2 py-1 rounded font-bold uppercase tracking-widest border border-[#ea580c]/30">Auditoría Fair Trade</span>
+                            </div>
                             <div className="relative">
                                 <input
                                     type="text"
@@ -697,7 +844,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                                     duracion_fermentacion_horas: '72',
                                                     actividad_agua_aw: '',
                                                     recipiente_fermentacion: '',
-                                                    tipo_secado: ''
+                                                    tipo_secado: '',
+                                                    agente_infusion: ''
                                                 } : currentPd
                                             };
                                         });
@@ -714,30 +862,60 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
                         </div>
 
+                        {/* Alerta Tapasco para Infusionados */}
+                        {formData.process === 'co_fermentacion' && (
+                            <div className="mt-4 p-6 bg-[#ea580c]/10 border border-[#ea580c]/40 rounded-industrial-sm shadow-inner animate-in slide-in-from-top-4 duration-300">
+                                <h4 className="text-[11px] font-bold text-[#ea580c] tracking-widest uppercase mb-3 flex items-center gap-2">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                                    Protocolo de Pureza / Alerta Cero Adulteración
+                                </h4>
+                                <p className="text-[10px] text-gray-300 leading-relaxed font-medium uppercase tracking-widest mb-4">
+                                    Los lotes catalogados como Co-Fermentados (<strong className="text-white">Infusionados</strong>) alteran los perfiles intrínsecos de la variedad. La declaración del agente biológico es <strong className="text-[#ea580c]">OBLIGATORIA</strong> para evitar multas por fraude en aduanas bajo estándares SCA/EU.
+                                </p>
+                                <div>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Agente Saborizante / Aditivo Infusionado *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej. Pulpa de Fresa, Canela, Mosto de Uva o Levaduras Aromatizadas..."
+                                        required
+                                        value={formData.processData.agente_infusion || ''}
+                                        onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, agente_infusion: e.target.value } }))}
+                                        className="w-full bg-black/50 border border-[#ea580c]/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-[#ea580c] outline-none text-[#ea580c] placeholder:text-[#ea580c]/30 font-bold"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         {/* Variables Técnicas (Procesos Especiales) */}
                         {['anaerobico', 'doble_fermentacion', 'co_fermentacion'].includes(formData.process) && (
                             <div className="mt-6 p-6 border border-brand-green/30 bg-brand-green/5 rounded-industrial-sm animate-in zoom-in-95 duration-300">
-                                <h4 className="text-[11px] font-bold text-brand-green tracking-widest uppercase mb-6 flex items-center justify-between">
+                                <h4 className="text-[11px] font-bold text-brand-green tracking-widest uppercase mb-4 flex items-center justify-between">
                                     <span className="flex items-center gap-2">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
                                         Variables Fisicoquímicas
                                     </span>
-                                    <span className="px-2 py-0.5 bg-black/50 text-[8px] rounded font-mono border border-brand-green/20">Privado/Encriptado</span>
+                                    <span className="px-2 py-0.5 bg-black/50 text-[8px] rounded font-mono border border-brand-green/20">Módulo Opcional de Acopio</span>
                                 </h4>
+
+                                <div className="mb-6 p-4 bg-black/40 border-l-2 border-orange-500 rounded-r-md">
+                                    <p className="text-[10px] text-gray-300 leading-relaxed font-medium uppercase tracking-widest">
+                                        <strong className="text-orange-500 font-bold">Riesgo Biológico (Aduanas):</strong> La captura de estas variables fermentativas es <strong className="text-brand-green-bright">estrictamente necesaria</strong> para justificar los perfiles enzimáticos ante la <strong className="text-white">FDA o Autoridad Sanitaria Portuaria</strong>. Lotes con procesos prolongados asumen un mayor escrutinio por riesgo de patógenos o moho durante tránsito marítimo.
+                                    </p>
+                                </div>
 
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     <NumericInput
                                         label="pH Inicial"
-                                        placeholder="4.5"
+                                        placeholder="Opcional"
                                         step={0.01}
                                         value={formData.processData.ph_inicial || ''}
                                         onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, ph_inicial: val } }))}
                                         inputClassName="text-xs py-2 pr-12"
                                     />
                                     <NumericInput
-                                        label="pH Final *"
-                                        required
-                                        placeholder="3.8"
+                                        label="pH Final (Motor IA)"
+                                        placeholder="Ej. 3.8"
                                         step={0.01}
                                         value={formData.processData.ph_final || ''}
                                         onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, ph_final: val } }))}
@@ -814,7 +992,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             {/* Navigational Buttons */}
             <div className="flex justify-between items-center mt-6 pt-6 border-t border-white/5 relative z-20">
                 {currentStep > 1 ? (
-                    <button type="button" onClick={prevStep} disabled={isAlreadyRegistered} className="px-6 py-3 border border-white/10 text-white rounded-industrial-sm font-bold uppercase tracking-widest text-[10px] hover:bg-white/5 transition-colors disabled:opacity-50">
+                    <button type="button" onClick={prevStep} disabled={isSubmitting} className="px-6 py-3 border border-white/10 text-white rounded-industrial-sm font-bold uppercase tracking-widest text-[10px] hover:bg-white/5 transition-colors disabled:opacity-50">
                         &larr; Volver Atrás
                     </button>
                 ) : <div></div>}
@@ -826,24 +1004,24 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 ) : (
                     <div className="flex-1 ml-4 animate-in fade-in zoom-in-95 duration-500">
                         <button
-                            type={isAlreadyRegistered ? "button" : "submit"}
-                            disabled={isSubmitting || isAlreadyRegistered}
-                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyRegistered ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-brand-green hover:bg-brand-green-bright text-white disabled:opacity-30'}`}
+                            type="submit"
+                            disabled={isSubmitting}
+                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyRegistered ? 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/30' : 'bg-brand-green hover:bg-brand-green-bright text-black disabled:opacity-30'}`}
                         >
-                            {isAlreadyRegistered ? (
-                                <>
-                                    RECIBO DE INGRESO SELLADO
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                </>
-                            ) : isSubmitting ? (
+                            {isSubmitting ? (
                                 <>
                                     <div className="flex items-center gap-3">
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                         SINCRONIZANDO CON LA NUBE...
                                     </div>
+                                </>
+                            ) : isAlreadyRegistered ? (
+                                <>
+                                    ACTUALIZAR DATOS DEL LOTE
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:rotate-12 transition-transform">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
                                 </>
                             ) : (
                                 <>
@@ -869,6 +1047,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                     animation: loading-bar 2s infinite linear;
                 }
             `}</style>
-        </form>
+        </form >
     );
 }

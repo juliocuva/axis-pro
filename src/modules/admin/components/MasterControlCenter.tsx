@@ -23,12 +23,21 @@ export default function MasterControlCenter() {
         setIsLoading(true);
         try {
             // 1. Obtener todos los lotes
-            const { data: lots } = await supabase.from('coffee_purchase_inventory').select('id, company_id, status');
+            const { data: lots } = await supabase.from('coffee_purchase_inventory').select('id, company_id, status, farm_name, farmer_name');
             // 2. Obtener todos los tuestes
             const { data: roasts } = await supabase.from('roast_batches').select('id, company_id');
             // 3. Obtener análisis
             const { data: physical } = await supabase.from('physical_analysis').select('id, company_id');
             const { data: cupping } = await supabase.from('sca_cupping').select('id, company_id');
+
+            const getSpecialName = (id: string) => {
+                if (id === '33333333-3333-3333-3333-000023000009') return 'JULIO UVA (ADMIN)';
+                if (id === '33333333-3333-3333-3333-000025000009') return 'CATALINA PEREZ';
+                if (id === '99999999-9999-9999-9999-999999999999') return 'AXIS MASTER';
+                if (id === '11111111-1111-1111-1111-111111111111') return 'SAGRADO CORAZÓN';
+                if (id === 'unassigned') return 'DATOS HUERFANOS';
+                return null;
+            };
 
             // Agrupar por empresa
             const companyGroups: Record<string, any> = {};
@@ -38,6 +47,7 @@ export default function MasterControlCenter() {
                 if (!companyGroups[cid]) {
                     companyGroups[cid] = {
                         id: cid,
+                        name: getSpecialName(cid),
                         lots: 0,
                         purchased: 0,
                         thrashed: 0,
@@ -48,6 +58,10 @@ export default function MasterControlCenter() {
                     };
                 }
                 if (type === 'lot') {
+                    if (!companyGroups[cid].name && (record.farmer_name || record.farm_name)) {
+                        companyGroups[cid].name = (record.farmer_name || record.farm_name).toUpperCase();
+                    }
+
                     companyGroups[cid].lots++;
                     if (record.status === 'purchased') companyGroups[cid].purchased++;
                     if (record.status === 'thrashed') companyGroups[cid].thrashed++;
@@ -61,6 +75,10 @@ export default function MasterControlCenter() {
             roasts?.forEach(r => processRecord(r, 'roasts'));
             physical?.forEach(p => processRecord(p, 'physical'));
             cupping?.forEach(c => processRecord(c, 'cupping'));
+
+            Object.values(companyGroups).forEach(group => {
+                if (!group.name) group.name = 'CLIENTE CORPORATIVO';
+            });
 
             setStats(Object.values(companyGroups));
         } catch (err) {
@@ -149,11 +167,7 @@ export default function MasterControlCenter() {
                                             <div className={`w-2 h-2 rounded-full ${company.id === 'unassigned' ? 'bg-brand-red animate-pulse shadow-[0_0_12px_rgba(237,28,36,0.6)]' : 'bg-brand-green shadow-[0_0_8px_rgba(0,166,81,0.4)]'}`}></div>
                                             <div className="flex flex-col">
                                                 <span className="text-[11px] font-bold text-white uppercase tracking-tight">
-                                                    {company.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA (ADMIN)' :
-                                                        company.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
-                                                            company.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' :
-                                                                company.id === 'unassigned' ? 'DATOS HUERFANOS' :
-                                                                    'CLIENTE CORPORATIVO'}
+                                                    {company.name}
                                                 </span>
                                                 <span className="text-[9px] font-mono text-gray-500 uppercase tracking-tighter mt-0.5">
                                                     {company.id === 'unassigned' ? 'ASIGNACIÓN PENDIENTE' : company.id}
@@ -222,9 +236,7 @@ export default function MasterControlCenter() {
                                                     <button
                                                         onClick={() => setShowLotsCompany({
                                                             id: company.id,
-                                                            name: company.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA (ADMIN)' :
-                                                                company.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
-                                                                    company.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' : 'CLIENTE CORPORATIVO'
+                                                            name: company.name
                                                         })}
                                                         className="px-4 py-2 bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
                                                     >
@@ -233,9 +245,7 @@ export default function MasterControlCenter() {
                                                     <button
                                                         onClick={() => setShowRoastsCompany({
                                                             id: company.id,
-                                                            name: company.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA (ADMIN)' :
-                                                                company.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
-                                                                    company.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' : 'CLIENTE CORPORATIVO'
+                                                            name: company.name
                                                         })}
                                                         className="px-4 py-2 bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
                                                     >
@@ -244,9 +254,7 @@ export default function MasterControlCenter() {
                                                     <button
                                                         onClick={() => setReportCompany({
                                                             id: company.id,
-                                                            name: company.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA (ADMIN)' :
-                                                                company.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
-                                                                    company.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' : 'CLIENTE CORPORATIVO'
+                                                            name: company.name
                                                         })}
                                                         className="px-4 py-2 bg-brand-green/10 text-brand-green border border-brand-green/30 hover:bg-brand-green/20 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
                                                     >

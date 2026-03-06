@@ -38,7 +38,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAlreadyThrashed, setIsAlreadyThrashed] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [warning, setWarning] = useState<{ message: string; type: 'low' | 'high' } | null>(null);
+    const [warning, setWarning] = useState<{ message: string; type: 'low' | 'high' | 'optimal' } | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
 
@@ -130,20 +130,23 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             theoreticalLossPct
         });
 
-        // Alerta de Desviación
-        if (almondWeight > 0) {
+        // Alerta de Desviación (solo mostrar si han ingresado pesajes para evitar alertas prematuras)
+        if (almondWeight > 10) {
             if (lossPct < params.shrinkageMin) {
                 setWarning({
-                    message: `ALERTA: Merma (${lossPct.toFixed(1)}%) menor al rango esperado. Posible error en pesaje de ingreso o humedad alta.`,
+                    message: `ANÁLISIS DE MERMA: Rendimiento Atípico (${lossPct.toFixed(1)}%). Menor al rango histórico esperado. (Posible alta humedad o error de báscula).`,
                     type: 'low'
                 });
             } else if (lossPct > params.shrinkageMax) {
                 setWarning({
-                    message: `ALERTA: Merma (${lossPct.toFixed(1)}%) mayor al rango esperado. Posible pérdida de grano en cascarilla o exceso de pasilla/broca.`,
+                    message: `ALERTA DE PÉRDIDA: Merma (${lossPct.toFixed(1)}%) superior al rango teórico de control. Verificar pérdida por cascarilla.`,
                     type: 'high'
                 });
             } else {
-                setWarning(null);
+                setWarning({
+                    message: `VALIDACIÓN DE CONTROL: Merma (${lossPct.toFixed(1)}%) dentro de los parámetros de estándar ideal para proceso ${formData.processType}.`,
+                    type: 'optimal' // changed from high to positive type visually later if we want
+                });
             }
         } else {
             setWarning(null);
@@ -263,8 +266,11 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 )}
 
                 {warning && (
-                    <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl text-orange-500 text-[10px] font-bold uppercase animate-bounce-subtle">
-                        ⚠️ {warning.message}
+                    <div className={`p-4 border rounded-xl text-[10px] font-bold uppercase animate-bounce-subtle ${warning.type === 'optimal'
+                        ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright'
+                        : 'bg-orange-500/10 border-orange-500/30 text-orange-500'
+                        }`}>
+                        {warning.type !== 'optimal' ? '⚠️' : '✅'} {warning.message}
                     </div>
                 )}
 

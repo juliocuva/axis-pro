@@ -6,7 +6,7 @@ interface ModuleCardProps {
     title: string;
     description: string;
     icon: React.ReactNode;
-    status: 'active' | 'locked' | 'trl7';
+    status: 'active' | 'locked';
     onClick?: () => void;
     color: string;
     isOptional?: boolean;
@@ -53,7 +53,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
     return (
         <div
             onClick={onClick}
-            className={`relative group bg-bg-card border border-border-main rounded-industrial p-8 transition-all duration-500 cursor-pointer ${currentStyle.border} hover:shadow-2xl ${currentStyle.shadow} hover:-translate-y-1 ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}`}
+            className={`h-full relative group bg-bg-card border border-border-main rounded-industrial p-8 transition-all duration-500 cursor-pointer ${currentStyle.border} hover:shadow-2xl ${currentStyle.shadow} hover:-translate-y-1 ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}`}
         >
             {/* Decorative Hover Line */}
             <div className={`absolute top-0 left-0 w-full h-[2px] rounded-full transition-all duration-500 opacity-0 group-hover:opacity-100 ${currentStyle.glow} z-20`} />
@@ -68,13 +68,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
                 </div>
             )}
 
-            {status === 'trl7' && !isOptional && !isRecommended && (
-                <div className="absolute top-6 right-6">
-                    <span className="bg-brand-green/20 text-brand-green-bright text-[10px] px-2 py-1 rounded-full font-mono font-bold tracking-widest uppercase">
-                        TRL 7
-                    </span>
-                </div>
-            )}
+
 
             {isOptional && (
                 <div className="absolute top-6 right-6">
@@ -97,14 +91,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
             </div>
 
             <h3 className="text-xl font-bold mb-3">{title}</h3>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6">{description}</p>
-
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-500 group-hover:translate-x-2">
-                <span className={currentStyle.text}>{isLocked ? 'Desbloquear con Activación' : 'Acceder al Módulo'}</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={currentStyle.text}>
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-            </div>
+            <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
         </div>
     );
 }

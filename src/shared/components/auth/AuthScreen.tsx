@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ModuleCard from '@/shared/components/layout/ModuleCard';
 
 interface AuthScreenProps {
     onLogin: (userData: { email: string, name: string, companyId: string }) => void;
@@ -53,9 +54,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
     };
 
     return (
-        <div className="min-h-screen bg-[#03000d] text-white selection:bg-brand-green selection:text-black">
+        <div
+            className="min-h-screen bg-[#03000d] text-white selection:bg-brand-green selection:text-black cursor-pointer"
+            onClick={() => {
+                if (!showLoginModal) setShowLoginModal(true);
+            }}
+        >
             {/* 1. TOP UTILITY HEADER */}
-            <header className="fixed top-0 left-0 w-full z-50 bg-[#03000d]/80 backdrop-blur-md border-b border-white/5">
+            <header className="fixed top-0 left-0 w-full z-50 bg-[#03000d]/80 backdrop-blur-md border-b border-white/5" onClick={(e) => e.stopPropagation()}>
                 <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-2">
@@ -87,25 +93,29 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             </header>
 
             {/* 2. HERO SECTION */}
-            <main className="pt-32 pb-20 px-6 relative overflow-hidden">
-                {/* Background FX */}
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-green/5 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/4"></div>
+            <main className="min-h-screen pt-32 pb-20 px-6 relative flex items-center justify-center overflow-hidden border-b border-white/5">
+                {/* Background Image & FX */}
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute inset-0 bg-[url('/hero_bg.png')] bg-cover bg-center opacity-40 mix-blend-luminosity"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#03000d] via-[#03000d]/50 to-[#03000d]"></div>
+                </div>
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-green/10 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2 z-0 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/4 z-0 pointer-events-none"></div>
 
-                <div className="max-w-5xl mx-auto text-center relative z-10 space-y-12">
-                    <div className="mx-auto w-48 h-48 bg-white/5 rounded-industrial flex items-center justify-center p-6 shadow-3xl border border-white/10 animate-in fade-in zoom-in duration-1000">
-                        <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain" />
+                <div className="w-full max-w-5xl mx-auto text-center relative z-10 space-y-12">
+                    <div className="mx-auto w-40 h-40 bg-white/5 rounded-industrial flex items-center justify-center p-6 shadow-3xl border border-white/10 animate-in fade-in zoom-in duration-1000 backdrop-blur-md">
+                        <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(0,255,136,0.3)]" />
                     </div>
 
                     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <h1 className="max-w-4xl mx-auto text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter uppercase leading-[0.95] selection:bg-brand-green/30">
-                            Capa de <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-green via-brand-green-bright to-blue-500">Inteligencia Industrial</span> para el Control Total del café
+                        <h1 className="max-w-4xl mx-auto text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter uppercase leading-[1.1] selection:bg-brand-green/30 drop-shadow-2xl">
+                            Software para <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-green via-brand-green-bright to-blue-500">Certificación</span> de Producción y Exportación de Café
                         </h1>
                         <div className="flex flex-col items-center gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/10"></div>
                                 <p className="text-[11px] md:text-xs text-gray-400 font-bold uppercase tracking-[0.5em] leading-relaxed">
-                                    Trazabilidad de la Cadena de Valor • TRL 7
+                                    Trazabilidad de la Cadena de Valor • Sistema Operativo
                                 </p>
                                 <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/10"></div>
                             </div>
@@ -117,56 +127,47 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             </main>
 
             {/* 3. MODULE ARCHITECTURE (Marketing Features) */}
-            <section id="features" className="py-24 bg-black/40 border-y border-white/5">
-                <div className="max-w-7xl mx-auto px-6">
+            <section id="features" className="min-h-screen py-24 bg-black/40 border-y border-white/5 flex items-center justify-center">
+                <div className="w-full max-w-7xl mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
                         <div className="space-y-4">
                             <span className="text-[10px] text-brand-green font-bold uppercase tracking-[0.5em]">ECOSISTEMA MODULAR</span>
                             <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">ARQUITECTURA DE CONTROL</h2>
                         </div>
                         <p className="max-w-md text-xs text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
-                            Diseñado bajo estándares TRL-7 para integrarse en operaciones que exigen precisión milimétrica y trazabilidad inmutable.
+                            Diseñado bajo estándares rigurosos para integrarse en operaciones que exigen precisión milimétrica y trazabilidad inmutable.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                         {[
-                            { title: 'Acopio y Calidad', desc: 'Factor de rendimiento, laboratorios físicos y catación basada en estándares de la SCA automatizada.', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
-                            { title: 'Inteligencia de Tostión', desc: 'IA predictiva de curvas, monitoreo ROR y perfiles de referencia blindados.', icon: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z' },
-                            { title: 'Comercio Global', desc: 'Pasaportes digitales QR y motores predictivos de desgasificación logística.', icon: 'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z' },
-                            { title: 'Conexión Minorista', desc: 'Trazabilidad B2C directa con historias de origen generadas por datos.', icon: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' }
+                            { title: 'Origen Inmutable', desc: 'Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas.', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', color: 'brand-green' },
+                            { title: 'Estándar Verde (Trilla)', desc: 'Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales.', icon: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0', color: 'purple-500' },
+                            { title: 'Pasaporte Aduanero', desc: 'Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA.', icon: 'M22 12h-4l-3 9L9 3l-3 9H2', color: 'blue-500' }
                         ].map((item, idx) => (
-                            <div key={idx} className="bg-bg-card p-10 rounded-industrial border border-white/5 hover:border-brand-green/30 transition-all group">
-                                <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center text-brand-green mb-8 group-hover:bg-brand-green group-hover:text-black transition-all">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d={item.icon} /></svg>
-                                </div>
-                                <h3 className="text-lg font-bold uppercase mb-4">{item.title}</h3>
-                                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">{item.desc}</p>
+                            <div key={idx} className="h-full flex flex-col">
+                                <ModuleCard
+                                    title={item.title}
+                                    description={item.desc}
+                                    status="active"
+                                    color={item.color}
+                                    onClick={() => setShowLoginModal(true)}
+                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d={item.icon} /></svg>}
+                                />
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* 3.5 CLIENT CAROUSEL (Social Proof) */}
+            {/* 3.5 CLIENT LOGOS (Social Proof) */}
             <section className="py-20 bg-black/20 border-b border-white/5 overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 mb-10">
-                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.5em] text-center">Con la confianza de tostadores líderes</p>
+                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.5em] text-center">Con la confianza de</p>
                 </div>
-                <div className="flex gap-20 animate-marquee whitespace-nowrap opacity-40 hover:opacity-100 transition-opacity">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                        <div key={i} className="flex items-center gap-4 grayscale">
-                            <div className="w-8 h-8 bg-white/10 rounded-full"></div>
-                            <span className="text-sm font-bold uppercase tracking-tighter">PARTNER COFFEE {i}</span>
-                        </div>
-                    ))}
-                    {/* Duplicate for seamless loop */}
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                        <div key={`dup-${i}`} className="flex items-center gap-4 grayscale">
-                            <div className="w-8 h-8 bg-white/10 rounded-full"></div>
-                            <span className="text-sm font-bold uppercase tracking-tighter">PARTNER COFFEE {i}</span>
-                        </div>
-                    ))}
+                <div className="flex justify-center items-center opacity-80 hover:opacity-100 transition-opacity duration-500 flex-wrap mx-auto px-6" style={{ gap: '15vw' }}>
+                    <img src="/logo-sc-claro-cafe.png" alt="Sagrado Corazón" className="h-10 md:h-16 object-contain" />
+                    <img src="/mouselab.png" alt="Mouselab" className="h-10 md:h-16 object-contain filter grayscale invert opacity-80" />
                 </div>
             </section>
 
@@ -174,8 +175,16 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
             {/* 5. LOGIN MODAL OVERLAY */}
             {showLoginModal && (
-                <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in duration-500">
-                    <div className="w-full max-w-md relative">
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-500 cursor-default"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="absolute inset-0 z-0">
+                        <div className="absolute inset-0 bg-[url('/hero_bg.png')] bg-cover bg-center opacity-40 mix-blend-luminosity"></div>
+                        <div className="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
+                    </div>
+
+                    <div className="w-full max-w-md relative z-10">
                         <button
                             onClick={() => setShowLoginModal(false)}
                             className="absolute -top-12 right-0 text-white/50 hover:text-white transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest"
@@ -187,7 +196,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         <div className="bg-bg-card border border-white/10 p-10 rounded-industrial shadow-3xl relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full"></div>
 
-                            <div className="mb-8 text-center relative z-10">
+                            <div className="mb-8 text-center relative z-10 flex flex-col items-center">
+                                <div className="mx-auto w-16 h-16 bg-white/5 rounded-lg flex items-center justify-center p-2 shadow-lg border border-white/10 mb-6 animate-in fade-in zoom-in duration-500">
+                                    <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain" />
+                                </div>
                                 <h2 className="text-3xl font-bold text-white tracking-tighter uppercase mb-2">
                                     {isSignUp ? 'Crear Registro' : 'Acceso Industrial'}
                                 </h2>

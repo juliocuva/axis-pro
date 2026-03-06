@@ -38,9 +38,9 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
             }
 
             // También traemos los certificados de materia prima y su progreso
-            const { data: lots } = await supabase
+            const { data: lots, error: lotsError } = await supabase
                 .from('coffee_purchase_inventory')
-                .select('*, physical_analysis(id), sca_cupping(id)')
+                .select('*')
                 .eq('company_id', user?.companyId)
                 .order('created_at', { ascending: false });
 
@@ -49,8 +49,8 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     // Calcular en qué punto de los 4 procesos está
                     let step = 1; // Ingreso (siempre 1)
                     if (lot.status === 'thrashed' || lot.status === 'completed' || lot.thrashed_weight > 0) step = 2;
-                    if (lot.physical_analysis && lot.physical_analysis.length > 0) step = 3;
-                    if (lot.status === 'completed' || (lot.sca_cupping && lot.sca_cupping.length > 0)) step = 4;
+                    if (lot.status === 'completed' || lot.status === 'physical_analyzed') step = 3;
+                    if (lot.status === 'completed') step = 4;
 
                     return {
                         id: lot.id,
@@ -89,12 +89,14 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
             )}
 
             {selectedItem && viewMode === 'certificate' && (
-                <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 md:py-10 bg-black/95 backdrop-blur-2xl overflow-y-auto">
-                    <LotCertificate
-                        inventoryId={selectedItem.id}
-                        user={user}
-                        onClose={() => { setSelectedItem(null); setViewMode(null); }}
-                    />
+                <div className="fixed inset-0 z-[9999] w-full h-screen overflow-y-auto bg-black/95 backdrop-blur-2xl">
+                    <div className="w-full py-10 pb-[150px]">
+                        <LotCertificate
+                            inventoryId={selectedItem.id}
+                            user={user}
+                            onClose={() => { setSelectedItem(null); setViewMode(null); }}
+                        />
+                    </div>
                 </div>
             )}
 

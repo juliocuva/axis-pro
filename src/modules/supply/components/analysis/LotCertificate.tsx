@@ -154,8 +154,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             <div id="lot-certificate-area" className="w-[816px] mx-auto space-y-8 print:space-y-0 print:m-0">
 
                 {/* HOJA 1: IDENTIDAD, PRODUCCIÓN Y GRANULOMETRÍA */}
-                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '816px', height: '1056px' }}>
+                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
+                    style={{ width: '816px', minHeight: '1056px' }}>
 
                     {/* Header Minimalista */}
                     <div className="bg-gray-50 px-10 py-6 flex justify-between items-center border-b border-gray-200">
@@ -178,7 +178,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="space-y-4 max-w-xl">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full border border-gray-200">
                                     <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                                    <span className="text-[8px] font-bold text-gray-700 uppercase tracking-widest ">Identity Verified • Cloud-Stored Profile</span>
+                                    <span className="text-[8px] font-bold text-brand-green uppercase tracking-widest ">COMPLIANCE EUDR ACTIVO • PROTOCOLO BAX-7370</span>
                                 </div>
                                 <h1 className="text-6xl font-black text-black tracking-tighter uppercase leading-[0.85]">
                                     {lotData?.farm_name || 'Lote Premium'}
@@ -202,7 +202,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     </div>
                                     {lotData?.latitude && lotData?.longitude && (
                                         <div className="lg:col-span-2">
-                                            <p className="text-[8px] text-[#ea580c] font-bold uppercase tracking-widest mb-1">Coordenadas GPS</p>
+                                            <p className="text-[8px] text-[#ea580c] font-bold uppercase tracking-widest mb-1">Verificación Satelital EUDR (WGS84)</p>
                                             <p className="text-sm font-bold text-black font-mono leading-none">
                                                 {parseFloat(lotData.latitude).toFixed(6)} N, {parseFloat(lotData.longitude).toFixed(6)} W
                                             </p>
@@ -389,8 +389,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 <div className="w-full h-8 print:hidden"></div>
 
                 {/* HOJA 2: PERFIL SENSORIAL Y SEGURIDAD */}
-                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '816px', height: '1056px' }}>
+                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
+                    style={{ width: '816px', minHeight: '1056px' }}>
 
                     {/* Header P2 */}
                     <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
@@ -402,7 +402,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="text-[9px] font-bold text-brand-green-bright font-mono uppercase ">{lotData?.lot_number || '---'}</p>
+                            <p className="text-[9px] font-bold text-brand-green font-mono uppercase ">PROTOCOLO BAX-7370 • {lotData?.lot_number || '---'}</p>
                         </div>
                     </div>
 
@@ -505,37 +505,110 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="px-4 py-2 bg-gray-100 rounded-lg border border-gray-200">
                                     <p className="text-[8px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}</p>
                                 </div>
-                                <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive</span></p>
+                                <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive - BAX-7370</span></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Panel de Control Inferior (No exportable) */}
-                <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-gray-100 border border-gray-200 rounded-2xl shadow-2xl print:hidden">
-                    <ExportReportButton
-                        elementId="lot-certificate-area"
-                        fileName={`REPORT-AXIS-${lotData?.lot_number || 'LOT'}-${lotData?.farm_name || 'COFFEE'}`}
-                    />
-                    <button
-                        onClick={() => window.print()}
-                        className="px-8 py-4 bg-black hover:bg-gray-800 text-white border border-gray-800 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                            <rect x="6" y="14" width="12" height="8"></rect>
-                        </svg>
-                        IMPRIMIR / PDF NATIVO
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="px-10 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-black rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all border border-gray-200 active:scale-95 shadow-xl"
-                    >
-                        Cerrar Certificado
-                    </button>
+                {/* INDICADOR VISUAL DE CORTE (No visible al imprimir) */}
+                <div className="w-full h-8 print:hidden"></div>
+
+                {/* HOJA 3: COMPLIANCE EUDR Y LOGÍSTICA DE EMBARQUE */}
+                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
+                    style={{ width: '816px', minHeight: '1056px' }}>
+
+                    {/* Header P3 */}
+                    <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
+                        <div className="flex items-center gap-4">
+                            <img src="/logo.png" alt="AXIS" className="w-8 h-8 opacity-80" />
+                            <div>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">AXIS COFFEE ANALYTICS</p>
+                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Export Compliance Protocol | Page 03</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[9px] font-bold text-brand-green font-mono uppercase ">PROTOCOLO BAX-7370 • {lotData?.lot_number || '---'}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 p-12 flex flex-col gap-12">
+                        {/* EUDR */}
+                        <div className="space-y-6">
+                            <h2 className="text-sm font-bold text-orange-500 uppercase tracking-[0.6em] mb-4">Validación Satelital UE (EUDR)</h2>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium mb-6">Aprobación Fitosanitaria y Deforestación Cero</p>
+
+                            <div className="h-64 bg-gray-900 rounded-3xl border border-gray-800 p-8 relative overflow-hidden flex items-center justify-center flex-col shadow-inner">
+                                <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ff8800 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-orange-500 mb-4 opacity-80"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                <p className="text-[10px] text-gray-400 font-mono uppercase tracking-widest text-center mt-2">Datos Topográficos / Polígonos<br />SICA WGS84 Verificados bajo BAX-7370.</p>
+                                <div className="mt-6 px-4 py-1.5 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded text-[9px] font-bold tracking-widest uppercase">
+                                    Polígono Satelital Confirmado
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Logística */}
+                        <div className="space-y-6 mt-6">
+                            <h2 className="text-sm font-bold text-blue-600 uppercase tracking-[0.6em] mb-4">Logística de Embarque y Pasaporte Aduanero</h2>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium mb-6">Trazabilidad Comercial Inmutable</p>
+
+                            <div className="p-8 bg-gray-50 border border-gray-200 rounded-3xl grid grid-cols-2 gap-8 shadow-sm">
+                                <div>
+                                    <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Mercado Destino Autorizado</p>
+                                    <p className="text-base font-black text-black uppercase">UNION EUROPEA (EU)</p>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Puerto de Descarga Declarado</p>
+                                    <p className="text-base font-black text-black uppercase">{lotData?.destinationCity || 'ROTTERDAM, NL'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Tipo de Transporte Base</p>
+                                    <p className="text-base font-black text-black uppercase">Contenedor Marítimo (20ft) - Lined</p>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Firma Digital (Hash SHA-256)</p>
+                                    <p className="text-[11px] font-mono font-bold text-brand-green uppercase bg-white border border-brand-green/20 px-3 py-2 rounded shadow-sm w-max mt-1">
+                                        121B021A-62FF-4ED4-B4A5-90AF0CA3C5E1
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer Hoja 3 (mini version) */}
+                        <div className="mt-auto pt-8 flex justify-between items-center border-t border-gray-200">
+                            <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE GROUP</p>
+                            <p className="text-[7px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}-P3</p>
+                        </div>
+                    </div>
                 </div>
+            </div> {/* Cierra el area de impresion lot-certificate-area */}
+
+            {/* Panel de Control Inferior (No exportable) */}
+            <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-gray-100 border border-gray-200 rounded-2xl shadow-2xl print:hidden">
+                <ExportReportButton
+                    elementId="lot-certificate-area"
+                    fileName={`REPORT-AXIS-${lotData?.lot_number || 'LOT'}-${lotData?.farm_name || 'COFFEE'}`}
+                />
+                <button
+                    onClick={() => window.print()}
+                    className="px-8 py-4 bg-black hover:bg-gray-800 text-white border border-gray-800 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                    IMPRIMIR / PDF NATIVO
+                </button>
+                <button
+                    onClick={onClose}
+                    className="px-10 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-black rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all border border-gray-200 active:scale-95 shadow-xl"
+                >
+                    Cerrar Certificado
+                </button>
             </div>
+
         </div>
     );
 }

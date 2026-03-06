@@ -40,7 +40,14 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
             .order('created_at', { ascending: false })
             .limit(10);
 
-        if (recent) setRecentLots(recent);
+        if (recent) {
+            setRecentLots(recent);
+            // Si el usuario acaba de entrar al módulo y no hay un lote seleccionado, seleccionamos el más reciente.
+            if (!selectedLot && recent.length > 0) {
+                // Selecciona el más reciente para que no se vea el formulario vacío. No navegamos de tab aquí para dejarlo en Ingreso.
+                setSelectedLot(recent[0]);
+            }
+        }
 
         // Traemos más para el archivo (Demo: últimos 100)
         const { data: all } = await supabase
@@ -100,8 +107,8 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
     return (
         <>
             {showCertificate && selectedLot && (
-                <div className="fixed inset-0 z-[100] flex items-start justify-center p-10 bg-black/80 backdrop-blur-xl overflow-y-auto">
-                    <div className="py-10 w-full flex justify-center">
+                <div className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/80 backdrop-blur-xl">
+                    <div className="w-full py-10 pb-[150px]">
                         <LotCertificate
                             inventoryId={selectedLot.id}
                             user={user}
