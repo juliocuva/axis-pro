@@ -49,12 +49,10 @@ export async function POST(req: Request) {
 
         // NOTA PARA EL USUARIO:
         // Añade tu propia clave mediante Variables de Entorno (.env.local)
-        const openAIApiKey = process.env.OPENAI_API_KEY;
         const geminiApiKey = process.env.GEMINI_API_KEY;
-        const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 
-        if (!openAIApiKey && !geminiApiKey && !anthropicApiKey) {
-            console.warn("ADVERTENCIA: No se detectó ninguna API_KEY. Usando simulación local de ANEXO.");
+        if (!geminiApiKey) {
+            console.warn("ADVERTENCIA: No se detectó GEMINI_API_KEY. Usando simulación local de ANEXO.");
             // SIMULACIÓN LOCAL RAG (En caso de no haber API)
             const lastMessage = apiMessages[apiMessages.length - 1].content.toLowerCase();
             let simulatedResponse = "Verificando base de datos inmutable de AXIS...";
@@ -73,72 +71,26 @@ export async function POST(req: Request) {
 
         let answer = "";
 
-        if (anthropicApiKey) {
-            // ================== CLAUDE (ANTHROPIC) ==================
-            const claudeMessages = messages.map((m: any) => ({
-                role: m.sender === 'user' ? 'user' : 'assistant',
-                content: m.text
-            }));
+        // ================== GEMINI (GOOGLE) ==================
+        // Format for Gemini API
+        const geminiContents = messages.map((m: any) => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }]
+        }));
 
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'x-api-key': anthropicApiKey,
-                    'anthropic-version': '2023-06-01',
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'claude-3-haiku-20240307',
-                    system: SYSTEM_PROMPT,
-                    messages: claudeMessages,
-                    temperature: 0.3,
-                    max_tokens: 400
-                })
-            });
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-            answer = data.content[0].text;
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                contents: geminiContents,
+                generationConfig: { temperature: 0.3, maxOutputTokens: 400 }
+            })
+        });
 
-        } else if (geminiApiKey) {
-            // ================== GEMINI (GOOGLE) ==================
-            // Format for Gemini API
-            const geminiContents = messages.map((m: any) => ({
-                role: m.sender === 'user' ? 'user' : 'model',
-                parts: [{ text: m.text }]
-            }));
-
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                    contents: geminiContents,
-                    generationConfig: { temperature: 0.3, maxOutputTokens: 400 }
-                })
-            });
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-            answer = data.candidates[0].content.parts[0].text;
-
-        } else if (openAIApiKey) {
-            // ================== CHATGPT (OPENAI) ==================
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${openAIApiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    messages: apiMessages,
-                    temperature: 0.3,
-                    max_tokens: 400
-                })
-            });
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-            answer = data.choices[0].message.content;
-        }
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+        answer = data.candidates[0].content.parts[0].text;
 
         return NextResponse.json({ answer });
 

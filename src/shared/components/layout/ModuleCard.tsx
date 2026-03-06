@@ -22,29 +22,29 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
             border: 'hover:border-brand-green/30',
             bg: 'group-hover:bg-brand-green/10',
             text: 'text-brand-green-bright',
-            shadow: 'hover:shadow-brand-green/10',
-            glow: 'bg-brand-green-bright shadow-[0_0_15px_rgba(0,255,136,0.5)]'
+            shadow: 'hover:shadow-brand-green/20',
+            glow: 'bg-brand-green-bright shadow-[0_0_25px_rgba(0,255,136,0.6)]'
         },
         'orange-500': {
             border: 'hover:border-orange-500/30',
             bg: 'group-hover:bg-orange-500/10',
             text: 'text-orange-400',
-            shadow: 'hover:shadow-orange-500/10',
-            glow: 'bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.5)]'
+            shadow: 'hover:shadow-orange-500/20',
+            glow: 'bg-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.6)]'
         },
         'blue-500': {
             border: 'hover:border-blue-500/30',
             bg: 'group-hover:bg-blue-500/10',
             text: 'text-blue-400',
-            shadow: 'hover:shadow-blue-500/10',
-            glow: 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+            shadow: 'hover:shadow-blue-500/20',
+            glow: 'bg-blue-500 shadow-[0_0_25px_rgba(59,130,246,0.6)]'
         },
         'purple-500': {
             border: 'hover:border-purple-500/30',
             bg: 'group-hover:bg-purple-500/10',
             text: 'text-purple-400',
-            shadow: 'hover:shadow-purple-500/10',
-            glow: 'bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+            shadow: 'hover:shadow-purple-500/20',
+            glow: 'bg-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.6)]'
         }
     };
 
@@ -53,10 +53,10 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
     return (
         <div
             onClick={onClick}
-            className={`h-full relative group bg-bg-card border border-border-main rounded-industrial p-8 transition-all duration-500 cursor-pointer ${currentStyle.border} hover:shadow-2xl ${currentStyle.shadow} hover:-translate-y-1 ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}`}
+            className={`h-full relative group bg-bg-card border border-border-main rounded-industrial p-8 transition-all duration-500 cursor-pointer ${currentStyle.border} hover:shadow-[0_0_40px_rgba(0,0,0,0.5)] ${currentStyle.shadow} hover:-translate-y-1 ${isLocked ? 'opacity-70 grayscale-[0.5]' : ''}`}
         >
             {/* Decorative Hover Line */}
-            <div className={`absolute top-0 left-0 w-full h-[2px] rounded-full transition-all duration-500 opacity-0 group-hover:opacity-100 ${currentStyle.glow} z-20`} />
+            <div className={`absolute top-0 left-0 w-full h-[2px] rounded-full transition-all duration-700 opacity-0 group-hover:opacity-100 ${currentStyle.glow} z-20`} />
 
             {isLocked && (
                 <div className="absolute top-6 right-6 flex items-center gap-2">
