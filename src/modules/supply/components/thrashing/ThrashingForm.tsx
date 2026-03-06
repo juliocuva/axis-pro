@@ -242,7 +242,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     onChange={(val) => setFormData({ ...formData, humidity: val })}
                     step={0.1}
                     disabled={isSubmitting || isAlreadyThrashed}
-                    variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'orange'}
+                    variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'default'}
                     inputClassName="text-base"
                 />
             </div>
@@ -268,9 +268,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 {warning && (
                     <div className={`p-4 border rounded-xl text-[10px] font-bold uppercase animate-bounce-subtle ${warning.type === 'optimal'
                         ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright'
-                        : 'bg-orange-500/10 border-orange-500/30 text-orange-500'
+                        : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
                         }`}>
-                        {warning.type !== 'optimal' ? '⚠️' : '✅'} {warning.message}
+                        {warning.type !== 'optimal' ? 'ℹ️' : '✅'} {warning.message}
                     </div>
                 )}
 
@@ -310,16 +310,16 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
                 {stats.yieldFactor > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green/10 border-brand-green shadow-[0_0_30px_rgba(0,223,154,0.15)]' : 'bg-orange-500/10 border-orange-500'}`}>
+                        <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green/10 border-brand-green shadow-[0_0_30px_rgba(0,223,154,0.15)]' : 'bg-white/5 border-white/10'}`}>
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`text-[10px] font-bold uppercase tracking-[0.4em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green/70' : 'text-orange-500/70'}`}>Factor de Rendimiento ($FR$)</span>
+                                <span className={`text-[10px] font-bold uppercase tracking-[0.4em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green/70' : 'text-gray-400'}`}>Factor de Rendimiento ($FR$)</span>
                             </div>
-                            <span className={`text-7xl font-bold font-mono tracking-tighter ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green-bright' : 'text-orange-500'}`}>
+                            <span className={`text-7xl font-bold font-mono tracking-tighter ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green-bright' : 'text-blue-400'}`}>
                                 {stats.yieldFactor.toFixed(2)}
                             </span>
                             <div className="mt-4 flex items-center gap-3">
-                                <div className={`w-2.5 h-2.5 rounded-full ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green-bright animate-pulse' : 'bg-orange-500'}`}></div>
-                                <p className={`text-[11px] uppercase font-bold tracking-[0.2em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-white' : 'text-orange-200'}`}>
+                                <div className={`w-2.5 h-2.5 rounded-full ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green-bright animate-pulse' : 'bg-blue-400'}`}></div>
+                                <p className={`text-[11px] uppercase font-bold tracking-[0.2em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-white' : 'text-gray-400'}`}>
                                     Meta {formData.processType}: {PROCESS_PARAMS[formData.processType]?.frMin}-{PROCESS_PARAMS[formData.processType]?.frMax}
                                 </p>
                             </div>
@@ -338,13 +338,13 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                                 </div>
                                 <div className="flex justify-between items-center text-[10px] uppercase">
                                     <span className="text-gray-400">Masa Obtenida (Verde):</span>
-                                    <span className={`font-mono font-bold ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-brand-green-bright' : 'text-orange-500'}`}>
+                                    <span className={`font-mono font-bold ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-brand-green-bright' : 'text-blue-400'}`}>
                                         {stats.almondWeight.toFixed(1)} KG
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center text-[10px] uppercase border-t border-white/5 pt-2">
                                     <span className="text-gray-400">Merma Real:</span>
-                                    <span className={`font-mono font-bold ${warning ? 'text-orange-500' : 'text-white'}`}>
+                                    <span className={`font-mono font-bold ${warning ? 'text-blue-400' : 'text-white'}`}>
                                         {stats.lossPct.toFixed(1)}%
                                     </span>
                                 </div>
@@ -358,7 +358,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                                 <div className="pt-2">
                                     <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-1000 ${warning ? 'bg-orange-500' : 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]'}`}
+                                            className={`h-full rounded-full transition-all duration-1000 ${warning ? 'bg-blue-400' : 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]'}`}
                                             style={{ width: `${Math.min(100, (stats.lossPct / stats.theoreticalLossPct) * 100)}%` }}
                                         ></div>
                                     </div>
