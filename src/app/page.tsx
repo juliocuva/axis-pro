@@ -12,7 +12,6 @@ import GreenExportForm from '@/modules/export/components/GreenExportForm';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
-import AxisNexusWidget from '@/shared/components/ai/AxisNexusWidget';
 
 export default function Home() {
     const [user, setUser] = useState<{ name: string, email: string, companyId: string } | null>(null);
@@ -444,9 +443,6 @@ export default function Home() {
                     </div>
                 </div>
             )}
-
-            {/* AI BI AGENT */}
-            <AxisNexusWidget />
         </div>
     );
 }

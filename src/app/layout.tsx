@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import AxisNexusWidget from '@/shared/components/ai/AxisNexusWidget';
 
 const montserrat = Montserrat({
     subsets: ["latin"],
@@ -22,7 +23,10 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="es" className={montserrat.variable}>
-            <body className={montserrat.className}>{children}</body>
+            <body className={montserrat.className}>
+                {children}
+                <AxisNexusWidget />
+            </body>
         </html>
     );
 }
