@@ -1,5 +1,23 @@
 [
     {
+        "codigo_sica": "7355514232",
+        "cedula_productor": "1109417355",
+        "nombre_productor": "YISELA VARGAS GONZALEZ",
+        "departamento": "TOLIMA",
+        "municipio": "PLANADAS",
+        "vereda": "LA LOMA",
+        "nombre_finca": "LA FORTALEZA",
+        "area_total_ha": 3.00,
+        "area_cafe_ha": 1.32,
+        "latitud_central": 3.161041,
+        "longitud_central": -75.642735,
+        "poligono_geojson": "POINT(-75.642735 3.161041)",
+        "altitud_promedio_msnm": 1383,
+        "variedades_sembradas": "CASTILLO",
+        "fecha_ultima_actualizacion": "2024-04-18",
+        "sello_verificacion_fnc": "ACTIVO"
+    },
+    {
         "codigo_sica": "05-400-1124",
         "cedula_productor": "43928172",
         "nombre_productor": "MARIA ALEJANDRA PEREZ OCAMPO",

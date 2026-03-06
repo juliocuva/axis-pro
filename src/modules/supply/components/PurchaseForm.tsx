@@ -199,21 +199,21 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             const res = await fetch('/sica_mock_db.json');
             if (res.ok) {
                 const data = await res.json();
-                // Buscar por codigo_sica (cédula simulada)
-                const found = data.productores.find((p: any) => p.codigo_sica === formData.sicaId || p.cedula === formData.sicaId);
+                // Buscar por codigo_sica o cedula_productor
+                const found = data.find((p: any) => p.codigo_sica === formData.sicaId || p.cedula_productor === formData.sicaId);
 
                 if (found) {
                     setFormData(prev => ({
                         ...prev,
-                        farmerName: found.nombre_caficultor || prev.farmerName,
+                        farmerName: found.nombre_productor || prev.farmerName,
                         farmName: found.nombre_finca || prev.farmName,
-                        farmSizeHectares: found.area_total_hectareas || prev.farmSizeHectares,
+                        farmSizeHectares: found.area_total_ha || prev.farmSizeHectares,
                         altitude: found.altitud_promedio_msnm || prev.altitude,
                         country: 'Colombia', // Por defecto para FNC/SICA
                         region: found.departamento ? `${found.departamento}, ${found.municipio}` : prev.region,
                         processData: { ...prev.processData, eudr_polygon: found.poligono_geojson || '' }
                     }));
-                    setStatus({ type: 'success', message: 'Datos de la finca precargados exitosamente desde SICA.' });
+                    setStatus({ type: 'success', message: `Anexus: Datos de finca "${found.nombre_finca}" extraídos mágicamente.` });
                     setTimeout(() => setStatus(null), 4000);
                 } else {
                     setStatus({ type: 'error', message: 'Cédula / SICA no encontrado en base de datos FNC.' });
@@ -419,16 +419,16 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><path d="M8 14h.01 M12 14h.01 M16 14h.01 M8 18h.01 M12 18h.01 M16 18h.01" /></svg>
-                                    ID SICA (FNC)
+                            <div className="md:col-span-3 bg-brand-green/5 border border-brand-green/20 p-6 rounded-industrial relative overflow-hidden group mb-6">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/10 rounded-full blur-3xl group-hover:bg-brand-green/20 transition-all pointer-events-none"></div>
+                                <label className="text-xs font-bold text-brand-green uppercase tracking-widest flex items-center gap-2 mb-3">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></svg>
+                                    Asistente Anexus: Auto-Completar SICA / Cédula
                                 </label>
-                                <div className="flex items-stretch gap-2 mt-1">
+                                <div className="flex flex-col sm:flex-row items-stretch gap-3">
                                     <input
                                         type="text"
-                                        placeholder="Ej. Cédula Cafetera / SICA"
-                                        required
+                                        placeholder="Ej. Cédula Cafetera (1109417355) o Scanner OCR"
                                         value={formData.sicaId}
                                         onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
                                         onKeyDown={(e) => {
@@ -437,23 +437,38 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                                 handleSicaSearch();
                                             }
                                         }}
-                                        className="w-full bg-bg-main border border-brand-green/30 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none font-mono text-brand-green-bright"
+                                        className="flex-1 bg-bg-main border border-brand-green/30 rounded-full px-6 py-4 focus:border-brand-green outline-none font-mono text-brand-green-bright text-lg shadow-inner"
                                         disabled={isSubmitting}
                                     />
                                     <button
                                         type="button"
                                         onClick={handleSicaSearch}
                                         disabled={isSearchingSica || !formData.sicaId}
-                                        className="bg-brand-green hover:bg-brand-green-bright text-black font-bold px-4 rounded-industrial-sm transition-colors flex items-center justify-center disabled:opacity-50"
-                                        title="Autocompletar desde SICA"
+                                        className="bg-brand-green hover:bg-brand-green-bright disabled:opacity-50 text-bg-main px-8 py-4 rounded-full font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,223,154,0.3)] hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
+                                        title="Autocompletar"
                                     >
                                         {isSearchingSica ? (
-                                            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                            <span className="flex items-center gap-2">
+                                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"></path></svg>
+                                                Extrayendo...
+                                            </span>
                                         ) : (
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                            <span className="flex items-center gap-2">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover/btn:scale-110 transition-transform"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                                Magia Anexus
+                                            </span>
                                         )}
                                     </button>
                                 </div>
+                                <p className="text-[10px] text-brand-green/60 uppercase tracking-widest mt-4 font-mono">
+                                    Demo: Digita "1109417355" (Yisela Vargas) para ver extracción simulada de hectáreas y polígonos EUDR.
+                                </p>
+                            </div>
+
+                            <div className="md:col-span-3 my-2 border-t border-white/5 relative">
+                                <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-bg-card px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                    Datos Variables / Manuales
+                                </span>
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Caficultor</label>
