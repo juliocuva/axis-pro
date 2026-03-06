@@ -333,7 +333,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
     const isAlreadyRegistered = !!selectedLot;
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+        <form autoComplete="off" onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
             {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-300">

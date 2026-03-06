@@ -411,7 +411,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                 <div className="flex items-center gap-6 max-w-2xl">
                                     <div className="p-1 rounded-xl bg-white shadow-lg border border-gray-100 hover:scale-105 transition-transform duration-300">
                                         <img
-                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://axis-pro.coffee/verify/passport/' + passportId)}`}
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-pro.coffee') + '/verify/passport/' + passportId)}`}
                                             alt="QR Traceability"
                                             className="w-16 h-16 grayscale opacity-80"
                                         />
