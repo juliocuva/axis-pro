@@ -1,53 +1,58 @@
-# AXIS COFFEE PRO V2.0 - Documentación Funcional (TRL 7)
+# AXIS COFFEE PRO V2.1 - Documentación de Ingeniería (TRL 7)
 
 **AXIS COFFEE PRO** es una solución de software industrial de alta fidelidad diseñada para el control integral de la cadena de valor del café de especialidad. La plataforma ha alcanzado un nivel de madurez tecnológica **TRL 7 (Sistema operativo demostrado en entorno real)**.
 
 ---
 
-## 1. Módulos y Funcionalidades Principales
+## 1. Módulos y Flujos de Operación Industrial
 
-### I. Supply & Quality (Gestión de Suministros y Protocolos SCA)
-*   **Trilla Automatizada:** Cálculo automático del rendimiento de trilla, factor de rendimiento y mermas.
-*   **Formularios SCA Blindados:** Protocolos de catación (Cupping) con métricas estandarizadas (Fragancia, Cuerpo, Acidez, Balance).
-*   **Control de Lotes Verdes:** Gestión de inventario de café en pergamino y café verde con trazabilidad de origen (finca, altura, variedad).
-*   **Gestión de Inventario Dinámica:** Visualización en tiempo real del stock disponible para transformación.
+### I. Supply Intelligence & Traceability (Protocolo 3+1)
+El sistema utiliza un flujo de trabajo optimizado para separar los datos de campo de la analítica técnica de laboratorio, garantizando integridad en la trazabilidad.
 
-### II. Roast Intelligence (Inteligencia de Tostión y Análisis Espectral)
+#### A. Módulo de Ingreso de Lote (PurchaseForm - 3 Pasos)
+Diseñado para operadores de báscula y acopiadores.
+1.  **Origen y Productor:** Identificación SICA/Cédula, georreferenciación satelital y validación automática de cumplimiento **EUDR** (para fincas ≥ 4 Hectáreas).
+2.  **Comercialización:** Registro de pesos, precios (COP) y destino del lote (Exportación/Internal).
+3.  **Beneficio (Datos de Campo):** Información básica del proceso según el productor:
+    *   **Variedad:** Selección dinámica desde catálogo industrial.
+    *   **Tipo de Proceso:** Lavado, Honey, Natural, Anaeróbicos, Co-fermentados.
+    *   **Método de Secado:** Marquesina, Camas Africanas, Silo Mecánico, Patio.
+    *   **Tiempo de Secado:** Registro de duración para control de humedad inicial.
+
+#### B. Módulo de Laboratorio Integral (PhysicalAnalysisForm)
+Ubicado en la pestaña de **Lab Físico**, centraliza la analítica técnica avanzada:
+*   **Análisis Físico:** Humedad (rango 9-13%), Densidad (g/L), Actividad de Agua (aw), Granulometría (Mallas 12 a 18) y Conteo de Defectos (Primarios/Secundarios).
+*   **Análisis Fisicoquímico:** Registro de pH (Inicial/Final), Grados Brix (°Bx), Temperatura Máxima de Masa y Tiempos de Fermentación Controlada.
+*   **Certificación Industrial:** El sistema sella el lote como "Validado Técnicamente" tras el ingreso de estos parámetros, habilitando el paso a Catación SCA.
+
+### II. Calidad y Protocolos SCA (Cupping)
+*   **Formularios SCA Blindados:** Registro de perfiles sensoriales con métricas estandarizadas (Fragancia, Sabor, Acidez, Cuerpo).
+*   **Certificado de Lote Automático:** Generación de Pasaporte Digital con visualización de Radar Chart y desglose de mallas.
+*   **Control de Privacidad:** El certificado permite alternar entre vista de "Productor" (Full Know-how técnico) y "Comprador" (Export Report).
+
+### III. Roast Intelligence (Inteligencia de Tostión)
 *   **Monitoreo Espectral en Vivo:** Interfaz HUD inspirada en termografía infrarroja para seguir la curva de tueste en tiempo real.
-*   **Ghost Profile (Perfil Espejo):** Capacidad de cargar perfiles maestros para comparar la tuesta actual contra la ideal, garantizando consistencia.
-*   **AI Roast Copilot:** Asistente integrado que sugiere ajustes en Gas, Aire y Velocidad de Tambor basado en la telemetría del PLC.
-*   **Análisis Post-Proceso:** Gráficos avanzados de Rate of Rise (RoR), temperaturas críticas (TP, Drying, FC, Drop) y desarrollo porcentual.
-
-### III. Global Trade (Comercio y Logística Internacional)
-*   **Pasaporte Digital del Café:** Generación de un certificado de exportación único vía QR que contiene toda la vida del grano (siembra, tueste, puntaje SCA).
-*   **Motor de Desgasificación Dinámica:** Algoritmo predictivo que calcula la curva de presión interna del empaque y recomienda la fecha óptima de despacho para evitar explosiones de válvulas.
-*   **Historial Cloud de Manifiestos:** Archivo histórico blindado en la nube para auditoría de exportaciones y certificados sanitarios.
-*   **Dashboard de Calibración:** Correlación entre telemetría industrial y puntajes sensoriales.
-
-### IV. Retail Connect (Gestión Comercial y Multi-Origen)
-*   **Gestión Multi-Roaster:** Único módulo diseñado para retailers que venden café de su propia tostadora y también de tostadores aliados externos.
-*   **Conversión Kilo-Bolsa:** Registro de empaque que descuenta automáticamente del stock a granel y crea unidades de retail (250g, 340g, 500g).
-*   **Diseñador de Etiquetas QR:** Generación de etiquetas térmicas con códigos QR vinculados a la historia de trazabilidad para el consumidor final.
-*   **Venta Omni-Canal:** Registro de transacciones tanto en tienda física como vía e-commerce con centralización de stock.
+*   **Ghost Profile (Perfil Espejo):** Comparativa contra perfiles maestros para garantizar consistencia.
+*   **AI Roast Copilot:** Sugerencias tácticas de Gas y Aire basadas en la telemetría del PLC.
 
 ---
 
 ## 2. Características de Seguridad e Infraestructura
 
-*   **Activación In-Situ:** Los módulos críticos (Roast, Trade, Retail) requieren una confirmación de desbloqueo manual por sesión, garantizando que el operador esté consciente del inicio de procesos industriales.
-*   **Arquitectura Serverless:** Desarrollada con **Next.js 14** y **Supabase**, asegurando una respuesta ultra-rápida (menos de 200ms) y escalabilidad global.
-*   **Diseño Industrial Premium:** UI diseñada para entornos de alto estrés operativo, con tipografía de alto peso (Bold 700), modos oscuros para evitar fatiga visual y micro-animaciones HUD.
-*   **Persistencia de Datos:** Sincronización automática con bases de datos PostgreSQL para garantizar que nunca se pierda un registro de tueste.
+*   **Validación EUDR In-Situ:** Bloqueo de registro para exportaciones a Europa si la finca excede el área mínima y no posee polígono de georreferenciación.
+*   **Arquitectura Serverless:** Desarrollada con **Next.js 14** y **Supabase**, asegurando latencias inferiores a 200ms en el Core de datos.
+*   **UI Industrial Low-Fatigue:** Diseño premium en modo oscuro con tipografía *Outfit* de alta legibilidad, optimizado para laboratorios y plantas de proceso.
+*   **Persistencia Atómica:** Actualización de estados del lote (Ingresado, Trillado, Analizado, Catado) garantizando trazabilidad inmutable.
 
 ---
 
 ## 3. Propuesta de Valor para el Usuario
 
-1.  **Eliminación de Mermas:** El control exacto de pesos en cada etapa reduce el desperdicio hasta en un 15%.
-2.  **Consistencia de Sabor:** La tecnología de perfiles espejo permite que cualquier operador replique el tueste de un maestro tostador.
-3.  **Transparencia Radical:** El Pasaporte Digital permite cobrar un **Premium de Calidad** al demostrar con datos irrefutables la excelencia del producto.
-4.  **Omnipresencia:** Controla tu planta de proceso en Colombia desde una oficina en Dubai o Nueva York mediante la nube de AXIS.
+1.  **Cero Mermas Administrativas:** Control exacto de pesos y rendimientos desde el ingreso en pergamino hasta el excelso.
+2.  **Diferenciación de Especialidad:** Capacidad de demostrar científicamente (pH/Brix) por qué un proceso fermentativo es superior.
+3.  **Transparencia de Exportación:** Cumplimiento total con normativas internacionales mediante el Pasaporte Digital del Café.
 
 ---
 **AXIS COFFEE PRO**
 *Transformando la tradición en precisión digital.*
+V2.1 - Rev: 2026.03.27

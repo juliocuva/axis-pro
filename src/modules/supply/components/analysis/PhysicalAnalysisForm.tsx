@@ -34,6 +34,17 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
         grainColor: 'VERDE OLIVA'
     });
 
+    const [physicochemicalData, setPhysicochemicalData] = useState({
+        ph_inicial: '4.5',
+        ph_final: '3.8',
+        brix_inicial: '18.5',
+        temperatura_masa_max: '35',
+        duracion_fermentacion_horas: '72',
+        actividad_agua_aw: '',
+        recipiente_fermentacion: '',
+        agente_infusion: ''
+    });
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +56,8 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
             if (!inventoryId) return;
             setIsLoading(true);
             try {
-                const { data, error } = await supabase
+                // Fetch physical analysis
+                const { data: physicalData, error: physicalError } = await supabase
                     .from('physical_analysis')
                     .select('*')
                     .eq('inventory_id', inventoryId.trim())
@@ -53,11 +65,18 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     .order('created_at', { ascending: false })
                     .limit(1);
 
-                if (error) {
-                    console.error("AXIS DB ERROR (Physical):", error);
-                    setError("Error al cargar datos de laboratorio.");
-                } else if (data && data.length > 0) {
-                    const record = data[0];
+                // Fetch lot process_data for physicochemical analysis
+                const { data: lotData, error: lotError } = await supabase
+                    .from('coffee_purchase_inventory')
+                    .select('process_data')
+                    .eq('id', inventoryId.trim())
+                    .single();
+
+                if (physicalError) {
+                    console.error("AXIS DB ERROR (Physical):", physicalError);
+                    setError("Error al cargar datos de laboratorio físico.");
+                } else if (physicalData && physicalData.length > 0) {
+                    const record = physicalData[0];
                     setFormData({
                         moisture: Number(record.moisture_pct) || 0,
                         waterActivity: Number(record.water_activity) || 0,
@@ -80,6 +99,20 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     });
                     setIsAlreadyAnalyzed(true);
                 }
+
+                if (!lotError && lotData?.process_data) {
+                    const pd = lotData.process_data;
+                    setPhysicochemicalData({
+                        ph_inicial: pd.ph_inicial || '4.5',
+                        ph_final: pd.ph_final || '3.8',
+                        brix_inicial: pd.brix_inicial || '18.5',
+                        temperatura_masa_max: pd.temperatura_masa_max || '35',
+                        duracion_fermentacion_horas: pd.duracion_fermentacion_horas || '72',
+                        actividad_agua_aw: pd.actividad_agua_aw || '',
+                        recipiente_fermentacion: pd.recipiente_fermentacion || '',
+                        agente_infusion: pd.agente_infusion || ''
+                    });
+                }
             } catch (err) {
                 console.error("AXIS CRITICAL ERROR (Physical):", err);
             } finally {
@@ -96,7 +129,12 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
         setError(null);
 
         try {
-            const result = await submitPhysicalAnalysis(inventoryId, formData, user?.companyId || '');
+            const result = await submitPhysicalAnalysis(
+                inventoryId, 
+                formData, 
+                user?.companyId || '',
+                physicochemicalData
+            );
 
             if (!result.success) {
                 throw new Error(result.message);
@@ -104,7 +142,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
 
             onAnalysisComplete();
         } catch (err: any) {
-            console.error("Error en análisis físico:", err);
+            console.error("Error en análisis de laboratorio:", err);
             setError(err.message || "Fallo en la conexión con AXIS Cloud.");
         } finally {
             setIsSubmitting(false);
@@ -293,6 +331,86 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     </div>
                 </section>
 
+                <section className="bg-blue-500/5 border border-blue-500/10 p-8 rounded-industrial space-y-6 mt-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em]">ANÁLISIS FISICOQUÍMICO (LABORATORIO)</h4>
+                        <span className="text-[9px] text-gray-500 font-mono uppercase">Control de Fermentación</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        <NumericInput
+                            label="pH Inicial"
+                            value={physicochemicalData.ph_inicial}
+                            onChange={(val) => setPhysicochemicalData({ ...physicochemicalData, ph_inicial: val })}
+                            step={0.01}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            variant="blue"
+                            inputClassName="text-sm py-3"
+                        />
+                        <NumericInput
+                            label="pH Final"
+                            value={physicochemicalData.ph_final}
+                            onChange={(val) => setPhysicochemicalData({ ...physicochemicalData, ph_final: val })}
+                            step={0.01}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            variant="blue"
+                            inputClassName="text-sm py-3"
+                        />
+                        <NumericInput
+                            label="Grados Brix"
+                            value={physicochemicalData.brix_inicial}
+                            onChange={(val) => setPhysicochemicalData({ ...physicochemicalData, brix_inicial: val })}
+                            step={0.1}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            variant="blue"
+                            inputClassName="text-sm py-3"
+                            unit="°Bx"
+                        />
+                        <NumericInput
+                            label="Temp. Máxima Masa"
+                            value={physicochemicalData.temperatura_masa_max}
+                            onChange={(val) => setPhysicochemicalData({ ...physicochemicalData, temperatura_masa_max: val })}
+                            step={0.1}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            variant="industrial"
+                            inputClassName="text-sm py-3"
+                            unit="°C"
+                        />
+                        <NumericInput
+                            label="Duración Fermentación"
+                            value={physicochemicalData.duracion_fermentacion_horas}
+                            onChange={(val) => setPhysicochemicalData({ ...physicochemicalData, duracion_fermentacion_horas: val })}
+                            step={1}
+                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            variant="industrial"
+                            inputClassName="text-sm py-3"
+                            unit="Hrs"
+                        />
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest block">Envase de Fermentación</label>
+                            <select
+                                value={physicochemicalData.recipiente_fermentacion}
+                                disabled={isSubmitting || isAlreadyAnalyzed}
+                                className={`w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-500 uppercase appearance-none transition-all ${isAlreadyAnalyzed ? 'opacity-50' : ''}`}
+                                onChange={(e) => setPhysicochemicalData({ ...physicochemicalData, recipiente_fermentacion: e.target.value })}
+                            >
+                                <option value="">Seleccionar</option>
+                                <option value="Bioreactor Inoxidable">Bioreactor Inoxidable</option>
+                                <option value="Tanque Plástico">Tanque Plástico (Caneca)</option>
+                                <option value="Bolsa GrainPro">Bolsa GrainPro / Emulsión</option>
+                                <option value="Tanque Cemento">Tanque Cemento</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {physicochemicalData.agente_infusion && (
+                        <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-industrial-sm">
+                            <label className="text-[9px] font-bold text-orange-400 uppercase tracking-widest block mb-2">Saborizante / Co-Fermento</label>
+                            <p className="text-sm font-bold text-white uppercase">{physicochemicalData.agente_infusion}</p>
+                        </div>
+                    )}
+                </section>
+
                 <button
                     type={isAlreadyAnalyzed ? "button" : "submit"}
                     disabled={isSubmitting || isAlreadyAnalyzed}
@@ -300,7 +418,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                 >
                     {isAlreadyAnalyzed ? (
                         <>
-                            CERTIFICADO FÍSICO SELLADO
+                            TECNOLOGÍA DE LABORATORIO VALIDADA
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                 <polyline points="22 4 12 14.01 9 11.01" />
@@ -310,7 +428,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                         'SINCRONIZANDO LABORATORIO...'
                     ) : (
                         <>
-                            GUARDAR ANÁLISIS FÍSICO Y CONTINUAR A CATACIÓN
+                            GUARDAR ANÁLISIS INTEGRAL Y CONTINUAR
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-1 transition-transform">
                                 <path d="M5 12h14M12 5l7 7-7-7" />
                             </svg>

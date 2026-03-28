@@ -240,42 +240,63 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             ))}
                         </div>
 
-                        {/* Selective Visibility: Parámetros Técnicos */}
-                        {(pData.ph_inicial || pData.ph_final) && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="bg-brand-green/[0.02] border border-brand-green/10 p-4 rounded-xl flex justify-between items-center group relative overflow-hidden">
-                                    {viewMode === 'comprador' && <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                                        <p className="text-[9px] text-brand-green font-mono uppercase tracking-widest flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> Dato Privado</p>
-                                    </div>}
-                                    <div>
-                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Evolución pH Acidez</p>
-                                        <p className="text-xs text-black uppercase"><span className="text-gray-500 px-1">IN:</span> {pData.ph_inicial || '-'} <span className="text-brand-green px-1">➤</span> <span className="text-gray-500 px-1">OUT:</span> {pData.ph_final || '-'}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Duración Fermentación</p>
-                                        <p className="text-xs text-black uppercase">{pData.duracion_fermentacion_horas || '-'} HORAS</p>
-                                    </div>
+                        {/* Beneficio Extended */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl">
+                                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Detalles de Beneficio</p>
+                                <div className="flex justify-between items-center text-[11px]">
+                                    <p className="text-black"><span className="text-gray-500 uppercase mr-1">Secado:</span> {pData.tipo_secado || 'No registrado'}</p>
+                                    <p className="text-black"><span className="text-gray-500 uppercase mr-1">Tiempo:</span> {pData.duracion_secado || '-'}</p>
                                 </div>
-                                <div className="bg-blue-500/[0.02] border border-blue-500/10 p-4 rounded-xl flex justify-between items-center group relative overflow-hidden">
-                                    {viewMode === 'comprador' && <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                                        <p className="text-[9px] text-blue-400 font-mono uppercase tracking-widest flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> Dato Privado</p>
-                                    </div>}
-                                    <div>
-                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Brix Inicial</p>
-                                        <p className="text-xs text-black uppercase">{pData.brix_inicial || '-'} °Bx</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Temp. Masa Max</p>
-                                        <p className="text-xs text-brand-red uppercase">{pData.temperatura_masa_max || '-'} °C</p>
-                                    </div>
-                                </div>
+                            </div>
+                            <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl">
+                                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Variedad Confirmada</p>
+                                <p className="text-sm font-bold text-black uppercase">{lotData?.variety || 'Caturra'}</p>
+                            </div>
+                        </div>
 
-                                {viewMode === 'comprador' && (
-                                    <div className="md:col-span-2 bg-white/[0.02] border border-gray-200 p-3 rounded-lg flex items-center gap-4 animate-in fade-in">
-                                        <span className="text-brand-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg></span>
-                                        <p className="text-[9px] text-gray-600 uppercase tracking-widest flex-1">Los parámetros exactos de curva térmica, inoculación y tiempos de fermentación son propiedad del productor. <br /><span className="text-black">Este lote asegura un pH final de <b>{pData.ph_final || 'óptimo'}</b> validando inocuidad técnica y estabilidad.</span></p>
+                        {/* Selective Visibility: Parámetros Técnicos (LABORATORIO) */}
+                        {(pData.ph_inicial || pData.ph_final || pData.brix_inicial) && (
+                            <div className="space-y-3">
+                                <h4 className="text-[9px] font-bold text-blue-500 uppercase tracking-[0.3em] flex items-center gap-2">
+                                    <div className="w-4 h-[1px] bg-blue-500"></div>
+                                    Análisis de Laboratorio
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-brand-green/[0.02] border border-brand-green/10 p-4 rounded-xl flex justify-between items-center group relative overflow-hidden">
+                                        {viewMode === 'comprador' && <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                                            <p className="text-[9px] text-brand-green font-mono uppercase tracking-widest flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> Dato Privado</p>
+                                        </div>}
+                                        <div>
+                                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Evolución pH Acidez</p>
+                                            <p className="text-xs text-black uppercase"><span className="text-gray-500 px-1">IN:</span> {pData.ph_inicial || '-'} <span className="text-brand-green px-1">➤</span> <span className="text-gray-500 px-1">OUT:</span> {pData.ph_final || '-'}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Fermentación</p>
+                                            <p className="text-xs text-black uppercase">{pData.duracion_fermentacion_horas || '-'} HRS</p>
+                                        </div>
                                     </div>
-                                )}
+                                    <div className="bg-blue-500/[0.02] border border-blue-500/10 p-4 rounded-xl flex justify-between items-center group relative overflow-hidden">
+                                        {viewMode === 'comprador' && <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                                            <p className="text-[9px] text-blue-400 font-mono uppercase tracking-widest flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg> Dato Privado</p>
+                                        </div>}
+                                        <div>
+                                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Brix Inicial</p>
+                                            <p className="text-xs text-black uppercase">{pData.brix_inicial || '-'} °Bx</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Temp. Masa Max</p>
+                                            <p className="text-xs text-brand-red uppercase">{pData.temperatura_masa_max || '-'} °C</p>
+                                        </div>
+                                    </div>
+
+                                    {viewMode === 'comprador' && (
+                                        <div className="md:col-span-2 bg-white/[0.02] border border-gray-200 p-3 rounded-lg flex items-center gap-4 animate-in fade-in">
+                                            <span className="text-brand-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg></span>
+                                            <p className="text-[9px] text-gray-600 uppercase tracking-widest flex-1">Los parámetros exactos de curva térmica, inoculación y tiempos de fermentación son propiedad del productor. <br /><span className="text-black">Este lote asegura un pH final de <b>{pData.ph_final || 'óptimo'}</b> validando inocuidad técnica y estabilidad.</span></p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>

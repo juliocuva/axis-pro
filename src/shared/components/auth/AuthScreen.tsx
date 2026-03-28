@@ -108,8 +108,8 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     </div>
 
                     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <h1 className="max-w-4xl mx-auto text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter uppercase leading-[1.1] selection:bg-brand-green/30 drop-shadow-2xl">
-                            Software para <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-green via-brand-green-bright to-blue-500">Certificación</span> de Producción y Exportación de Café
+                        <h1 className="max-w-4xl mx-auto text-3xl md:text-5xl lg:text-5xl font-bold tracking-tighter uppercase leading-[1.1] selection:bg-brand-green/30 drop-shadow-2xl">
+                            Axis Coffee Pro opera en la intersección entre la <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-green via-brand-green-bright to-blue-500">cuarta y quinta ola</span> del café: ciencia de procesos y trazabilidad para cumplimiento internacional.
                         </h1>
                         <div className="flex flex-col items-center gap-4">
                             <div className="flex items-center gap-4">

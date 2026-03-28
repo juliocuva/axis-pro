@@ -37,9 +37,10 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
 
             const { supabase } = await import('@/shared/lib/supabase');
 
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(batchId);
             const { data: lotDataDB } = await supabase.from('coffee_purchase_inventory')
                 .select('*')
-                .or(`lot_number.eq.${batchId},id.eq.${batchId}`)
+                .eq(isUUID ? 'id' : 'lot_number', batchId)
                 .maybeSingle();
 
             if (lotDataDB) {
@@ -55,6 +56,10 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
 
                 const { data: phys } = await supabase.from('physical_analysis').select('*').eq('inventory_id', inventoryId).maybeSingle();
                 if (phys) setFetchedPhysicalData(phys);
+                const { data: exportData } = await supabase.from('green_exports').select('*').eq('lot_id', batchId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+                if (exportData) {
+                    setFetchedLotData((prev: any) => ({ ...prev, export_data: exportData }));
+                }
             }
         };
 
@@ -222,7 +227,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                         <div className="p-4 bg-white border-2 border-brand-green/20 rounded-2xl shadow-sm col-span-2 text-center bg-gradient-to-br from-white to-brand-green/[0.02] flex flex-col justify-center items-center">
                                             <p className="text-[9px] text-gray-500 uppercase mb-2">Firma Digital (Hash SHA-256)</p>
                                             <p className="text-[11px] font-mono font-bold text-brand-green uppercase tracking-widest block bg-white px-3 py-1.5 rounded-lg border border-brand-green/20 shadow-sm w-max">
-                                                121B021A-62FF-4ED4-B4A
+                                                {fetchedLotData?.export_data?.final_hash || '121B021A-62FF-4ED4-B4A'}
                                             </p>
                                         </div>
                                     </div>
@@ -429,13 +434,159 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
 
                                 <div className="text-right space-y-3">
                                     <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 inline-block shadow-sm">
-                                        <p className="text-[9px] font-mono text-gray-600 tracking-tighter">HASH: 121B021A-62FF</p>
+                                        <p className="text-[9px] font-mono text-gray-600 tracking-tighter">HASH: {fetchedLotData?.export_data?.final_hash?.substring(0, 15) || '121B021A-62FF'}</p>
                                     </div>
                                     <p className="text-[7px] text-gray-400 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE<br /><span className="mt-1 block">Protocol BAX-7370</span></p>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {fetchedLotData?.export_data?.status === 'FINALIZADA' && (
+                        <>
+                            {/* INDICADOR VISUAL DE CORTE (No visible al imprimir ni exportar a PDF) */}
+                            <div className="w-full h-8 flex-none bg-black/5 no-export print:hidden flex items-center justify-center">
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">--- Page Break ---</span>
+                            </div>
+
+                            {/* HOJA 3: CERTIFICADO INMUTABLE DE EXPORTACIÓN */}
+                            <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none print:break-after-page"
+                                style={{ width: '816px', height: '1056px' }}>
+
+                                {/* Header P3 */}
+                                <div className="bg-brand-green/10 px-12 py-6 flex justify-between items-center border-b border-brand-green/20">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-8 h-8 bg-brand-green border border-brand-green-bright rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.3)]">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold tracking-[0.4em] text-brand-green-dark">IMMUTABLE LEDGER</p>
+                                            <p className="text-[7px] font-bold text-gray-600 uppercase tracking-widest leading-none mt-1">Export Validation Sealing | Page 03</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[9px] font-bold text-brand-green font-mono uppercase bg-white px-2 py-1 rounded shadow-sm border border-brand-green/20">SEALED</p>
+                                    </div>
+                                </div>
+
+                                {/* Body P3 */}
+                                <div className="flex-1 flex flex-col p-12">
+                                    {/* Título y Hash Principal */}
+                                    <div className="text-center mb-12">
+                                        <h3 className="text-xl font-black text-black uppercase tracking-tight mb-4">Certificado de Exportación Definitivo</h3>
+                                        <div className="p-6 bg-gray-50 border border-brand-green/30 rounded-2xl inline-block w-full max-w-2xl">
+                                            <p className="text-[9px] text-gray-500 uppercase tracking-[0.2em] font-bold mb-2">Firma Digital de Contenedor (Final Hash)</p>
+                                            <p className="text-xl font-mono text-brand-green font-black tracking-widest break-all">
+                                                {fetchedLotData?.export_data?.final_hash}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Grilla de Datos Inmutables */}
+                                    <div className="grid grid-cols-2 gap-8 mb-auto">
+                                        {/* Columna Izquierda: Origen y Seguridad */}
+                                        <div className="space-y-6">
+                                            <div>
+                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
+                                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Ingreso Portuario
+                                                </h4>
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Timestamp</p>
+                                                        <p className="text-sm font-bold text-black font-mono">{fetchedLotData?.export_data?.port_checkin_timestamp}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Coordenadas Verificadas</p>
+                                                        <p className="text-sm font-bold text-black font-mono">{fetchedLotData?.export_data?.port_checkin_location}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Validador Autorizado</p>
+                                                        <p className="text-sm font-bold text-black uppercase">{fetchedLotData?.export_data?.port_validator_id}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
+                                                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span> Seguridad y Precintado
+                                                </h4>
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest mb-1">Contenedor</p>
+                                                        <p className="text-xs font-bold text-black uppercase">{fetchedLotData?.export_data?.container_number}</p>
+                                                    </div>
+                                                    <div className="p-3 bg-orange-50 rounded-xl border border-orange-200">
+                                                        <p className="text-[8px] text-orange-600 uppercase tracking-widest mb-1">Precinto Oficial</p>
+                                                        <p className="text-xs font-bold text-orange-700 uppercase font-mono">{fetchedLotData?.export_data?.seal_number}</p>
+                                                    </div>
+                                                    <div className="p-3 bg-blue-50 rounded-xl border border-blue-200">
+                                                        <p className="text-[8px] text-blue-600 uppercase tracking-widest mb-1">Total Sacos</p>
+                                                        <p className="text-xs font-bold text-blue-700 uppercase font-mono">{fetchedLotData?.export_data?.sacks_count || '280'} BULTOS</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Columna Derecha: Transporte Marítimo/Aéreo */}
+                                        <div className="space-y-6">
+                                            <div>
+                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
+                                                    <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> Transporte Internacional
+                                                </h4>
+                                                <div className="space-y-4">
+                                                    <div className="p-4 bg-gray-900 border border-black rounded-2xl text-white">
+                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest mb-1">Vessel / Buque / Vuelo</p>
+                                                        <p className="text-lg font-black uppercase tracking-wider">{fetchedLotData?.export_data?.vessel_name}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Bill of Lading (BL) / Guía</p>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="px-2 py-0.5 bg-gray-100 border border-gray-200 text-[9px] font-bold text-gray-500 uppercase rounded">{fetchedLotData?.export_data?.bl_type || 'Master BL'}</span>
+                                                            <p className="text-base font-bold text-black font-mono">{fetchedLotData?.export_data?.bol_number}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Consignee (Título de Propiedad)</p>
+                                                        <p className="text-sm font-bold text-black uppercase">{fetchedLotData?.export_data?.consignee || 'NO ESPECIFICADO'}</p>
+                                                    </div>
+                                                    <div className="flex gap-8">
+                                                        <div>
+                                                            <p className="text-[8px] text-gray-400 uppercase tracking-widest">ETA</p>
+                                                            <p className="text-sm font-bold text-black">{fetchedLotData?.export_data?.eta}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[8px] text-gray-400 uppercase tracking-widest">Destino Final</p>
+                                                            <p className="text-sm font-bold text-black uppercase">{fetchedLotData?.export_data?.destination}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-8 p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-8 h-8 rounded-full bg-brand-green/20 flex items-center justify-center flex-shrink-0">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[9px] font-bold text-black uppercase tracking-widest mb-1">Consistencia Verificada</p>
+                                                        <p className="text-[8px] text-gray-500 leading-relaxed uppercase">
+                                                            Los datos físicos en puerto validan origen. El contenedor está sellado y listo para despacho internacional mitigando riesgos FSMA/EUDR.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer Hoja 3 */}
+                                    <div className="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center opacity-70">
+                                        <p className="text-[7px] text-gray-400 uppercase font-bold tracking-[0.2em] leading-relaxed">Automated Output<br/>Blockchain Ledger Validation</p>
+                                        <p className="text-[7px] text-brand-green uppercase font-bold tracking-[0.2em]">{passportId} • HOJA 03 FINAL</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
 

@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import CoffeePassport from './CoffeePassport';
 import LotCertificate from '@/modules/supply/components/analysis/LotCertificate';
+import ShipmentSealer from './ShipmentSealer';
 
 export default function GlobalHistoryArchive({ user }: { user: { companyId: string } | null }) {
     const [history, setHistory] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
     const [viewMode, setViewMode] = useState<'passport' | 'certificate' | null>(null);
+    const [sealerItem, setSealerItem] = useState<any | null>(null);
 
     useEffect(() => {
         fetchGlobalHistory();
@@ -31,7 +33,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     type: 'EXPORT',
                     label: exp.lot_id,
                     date: exp.export_date,
-                    status: 'Exportado',
+                    status: exp.status === 'FINALIZADA' ? 'Finalizada' : 'Borrador',
                     raw: exp
                 }));
                 allHistory = [...allHistory, ...formatted];
@@ -83,7 +85,10 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
         <>
             {selectedItem && viewMode === 'passport' && (
                 <CoffeePassport
-                    lotData={{ batch_id: selectedItem.label }}
+                    lotData={{ 
+                        batch_id: selectedItem.label, 
+                        export_data: selectedItem.type === 'EXPORT' ? selectedItem.raw : undefined 
+                    }}
                     onClose={() => { setSelectedItem(null); setViewMode(null); }}
                 />
             )}
@@ -98,6 +103,19 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         />
                     </div>
                 </div>
+            )}
+
+            {sealerItem && (
+                <ShipmentSealer
+                    exportId={sealerItem.id}
+                    lotId={sealerItem.label}
+                    baseHash={sealerItem.raw.lot_id}
+                    onClose={() => setSealerItem(null)}
+                    onSuccess={() => {
+                        setSealerItem(null);
+                        fetchGlobalHistory();
+                    }}
+                />
             )}
 
             <div className="space-y-8 animate-in fade-in duration-700">
@@ -177,15 +195,30 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                         </td>
                                         <td className="px-8 py-6">
                                             <span className="text-xs font-bold text-gray-500">{item.date}</span>
+                                            {item.type === 'EXPORT' && (
+                                              <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-brand-green/20 text-brand-green border border-brand-green/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                                                  {item.raw.status === 'FINALIZADA' ? 'Inmutable' : 'Borrador'}
+                                              </span>
+                                            )}
                                         </td>
                                         <td className="px-8 py-6 text-right">
-                                            <button
-                                                onClick={() => openReport(item)}
-                                                className="px-6 py-2 bg-white/5 hover:bg-brand-green hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/5 transition-all disabled:opacity-30"
-                                                disabled={item.step < 4 && item.type !== 'EXPORT'}
-                                            >
-                                                {item.type === 'EXPORT' || item.step === 4 ? 'Visualizar' : 'En Proceso'}
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                {item.type === 'EXPORT' && item.raw.status !== 'FINALIZADA' ? (
+                                                    <button
+                                                        onClick={() => setSealerItem(item)}
+                                                        className="px-6 py-2 bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest border border-orange-500/20 transition-all"
+                                                    >
+                                                        Sellar Embarque
+                                                    </button>
+                                                ) : null}
+                                                <button
+                                                    onClick={() => openReport(item)}
+                                                    className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all disabled:opacity-30 ${item.type === 'EXPORT' && item.raw.status === 'FINALIZADA' ? 'bg-brand-green text-black hover:bg-brand-green-bright border-brand-green' : 'bg-white/5 hover:bg-brand-green hover:text-white border-white/5'}`}
+                                                    disabled={item.step < 4 && item.type !== 'EXPORT'}
+                                                >
+                                                    {item.type === 'EXPORT' || item.step === 4 ? 'Visualizar' : 'En Proceso'}
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
