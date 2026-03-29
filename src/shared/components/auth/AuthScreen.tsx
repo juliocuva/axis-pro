@@ -107,15 +107,18 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(0,255,136,0.3)]" />
                     </div>
 
-                    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <h1 className="max-w-4xl mx-auto text-3xl md:text-5xl lg:text-5xl font-bold tracking-tighter uppercase leading-[1.1] selection:bg-brand-green/30 drop-shadow-2xl">
-                            Axis Coffee Pro opera en la intersección entre la <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-green via-brand-green-bright to-blue-500">cuarta y quinta ola</span> del café: ciencia de procesos y trazabilidad para cumplimiento internacional.
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                        <h1 className="max-w-4xl mx-auto text-3xl md:text-5xl lg:text-7xl font-black tracking-tighter uppercase leading-[1.0] selection:bg-brand-green/30 drop-shadow-2xl">
+                            Axis Coffee Pro opera en la intersección entre la <span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-green via-brand-green-bright to-blue-500">cuarta y quinta ola</span> del café
                         </h1>
-                        <div className="flex flex-col items-center gap-4">
+                        <p className="max-w-2xl mx-auto text-sm md:text-lg text-gray-400 font-normal uppercase tracking-[0.2em] leading-relaxed opacity-80">
+                            Ciencia de datos de trazabilidad y certificación para cumplimiento internacional.
+                        </p>
+                        <div className="flex flex-col items-center gap-4 pt-6">
                             <div className="flex items-center gap-4">
                                 <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/10"></div>
-                                <p className="text-[11px] md:text-xs text-gray-400 font-bold uppercase tracking-[0.5em] leading-relaxed">
-                                    Trazabilidad de la Cadena de Valor • Sistema Operativo
+                                <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.5em] leading-none">
+                                    Protocolo Industrial • BAX-7370
                                 </p>
                                 <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/10"></div>
                             </div>
