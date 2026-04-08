@@ -123,8 +123,15 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
         fetchAnalysis();
     }, [inventoryId]);
 
+    const screenSum = Object.values(formData.screenSize).reduce((a, b) => Number(a) + Number(b), 0);
+    const isScreenValid = Math.abs(screenSum - 100) < 0.1;
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isScreenValid) {
+            setError("La suma de granulometría debe ser exactamente 100%.");
+            return;
+        }
         setIsSubmitting(true);
         setError(null);
 
@@ -242,7 +249,12 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                 </div>
 
                 <section className="py-4 px-4 md:px-12 rounded-industrial space-y-4 border-y border-white/5 mt-4">
-                    <h4 className="text-[10px] font-medium text-gray-400 uppercase tracking-[0.2em] mb-4">GRANULOMETRÍA (SIEVE ANALYSIS)</h4>
+                    <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-[10px] font-medium text-gray-400 uppercase tracking-[0.2em]">GRANULOMETRÍA (SIEVE ANALYSIS)</h4>
+                        <div className={`px-3 py-1 rounded-full text-[9px] font-bold tracking-widest ${isScreenValid ? 'bg-brand-green/20 text-brand-green-bright border border-brand-green/30' : 'bg-brand-red/20 text-brand-red-bright border border-brand-red/30 animate-pulse'}`}>
+                            {isScreenValid ? '✓ SUMA 100%' : `⚠ DESCUADRE: ${screenSum.toFixed(1)}%`}
+                        </div>
+                    </div>
                     <div className="space-y-4 md:w-4/5 mx-auto">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             {[18, 17, 16, 15].map(size => (
@@ -413,8 +425,8 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
 
                 <button
                     type={isAlreadyAnalyzed ? "button" : "submit"}
-                    disabled={isSubmitting || isAlreadyAnalyzed}
-                    className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyAnalyzed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white disabled:opacity-30'}`}
+                    disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid}
+                    className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyAnalyzed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : isScreenValid ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
                 >
                     {isAlreadyAnalyzed ? (
                         <>

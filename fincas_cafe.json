@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Finca El Recuerdo",
+        "area_ha": 1.2,
+        "crop": "Cafe"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-75.6155, 4.7500],
+            [-75.6145, 4.7510],
+            [-75.6135, 4.7505],
+            [-75.6142, 4.7492],
+            [-75.6155, 4.7500]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Finca La Esperanza",
+        "area_ha": 2.0,
+        "crop": "Cafe"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-75.6200, 4.7520],
+            [-75.6190, 4.7530],
+            [-75.6178, 4.7525],
+            [-75.6185, 4.7513],
+            [-75.6200, 4.7520]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Finca Santa Marta",
+        "area_ha": 0.8,
+        "crop": "Cafe"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-75.6105, 4.7485],
+            [-75.6095, 4.7495],
+            [-75.6085, 4.7490],
+            [-75.6090, 4.7478],
+            [-75.6105, 4.7485]
+          ]
+        ]
+      }
+    }
+  ]
+}

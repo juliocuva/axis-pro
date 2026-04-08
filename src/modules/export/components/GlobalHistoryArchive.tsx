@@ -86,8 +86,9 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
             {selectedItem && viewMode === 'passport' && (
                 <CoffeePassport
                     lotData={{ 
-                        batch_id: selectedItem.label, 
-                        export_data: selectedItem.type === 'EXPORT' ? selectedItem.raw : undefined 
+                        ...selectedItem.raw,
+                        batch_id: selectedItem.raw?.lot_number || selectedItem.raw?.id || selectedItem.label,
+                        export_data: selectedItem.type === 'EXPORT' ? selectedItem.raw : selectedItem.raw?.export_data
                     }}
                     onClose={() => { setSelectedItem(null); setViewMode(null); }}
                 />

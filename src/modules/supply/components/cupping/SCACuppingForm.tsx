@@ -36,7 +36,8 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
         clean_cup: 10,
         sweetness: 10,
         overall: 7.5,
-        defects_score: 0
+        defects_score: 0,
+        defects_intensity: 2 // 2 for Taint, 4 for Fault
     });
 
     const [tasterName, setTasterName] = useState('Q-Grader Senior');
@@ -75,7 +76,8 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                         clean_cup: Number(record.clean_cup) || 0.001,
                         sweetness: Number(record.sweetness) || 0.001,
                         overall: Number(record.overall) || 0.001,
-                        defects_score: Number(record.defects_score) || 0
+                        defects_score: Number(record.defects_score) || 0,
+                        defects_intensity: Number(record.defects_intensity) || 2
                     });
                     setTasterName(record.taster_name || 'Q-Grader Senior');
                     setNotes(record.notes || '');
@@ -96,7 +98,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
             (Number(scores.fragrance_aroma) || 0) + (Number(scores.flavor) || 0) + (Number(scores.aftertaste) || 0) +
             (Number(scores.acidity) || 0) + (Number(scores.body) || 0) + (Number(scores.balance) || 0) +
             (Number(scores.uniformity) || 0) + (Number(scores.clean_cup) || 0) + (Number(scores.sweetness) || 0) +
-            (Number(scores.overall) || 0) - ((Number(scores.defects_score) || 0) * 2);
+            (Number(scores.overall) || 0) - ((Number(scores.defects_score) || 0) * (Number(scores.defects_intensity) || 2));
         setTotalScore(sum);
 
         const chartDataArray = CATEGORIES.map(cat => ({
@@ -210,12 +212,29 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                         type="button"
                                         disabled={isSubmitting || isAlreadySealed}
                                         onClick={() => setScores({ ...scores, defects_score: num })}
-                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-white' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'} ${isAlreadySealed && scores.defects_score !== num ? 'opacity-20 cursor-not-allowed hidden' : ''}`}
-                                        style={isAlreadySealed && scores.defects_score !== num ? { display: 'none' } : {}}
+                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-white' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'}`}
                                     >
                                         {num}
                                     </button>
                                 ))}
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                                <button
+                                    type="button"
+                                    disabled={isSubmitting || isAlreadySealed}
+                                    onClick={() => setScores({ ...scores, defects_intensity: 2 })}
+                                    className={`flex-1 py-1 px-2 rounded text-[8px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-orange-500 border-orange-500 text-white' : 'border-white/10 text-gray-500'}`}
+                                >
+                                    TAINT (MANCHA -2)
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={isSubmitting || isAlreadySealed}
+                                    onClick={() => setScores({ ...scores, defects_intensity: 4 })}
+                                    className={`flex-1 py-1 px-2 rounded text-[8px] font-bold transition-all border ${scores.defects_intensity === 4 ? 'bg-brand-red border-brand-red text-white' : 'border-white/10 text-gray-500'}`}
+                                >
+                                    FAULT (DEFECTO -4)
+                                </button>
                             </div>
                         </div>
 

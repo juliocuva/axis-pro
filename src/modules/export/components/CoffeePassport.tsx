@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ExportReportButton from '@/shared/components/ui/ExportReportButton';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface CoffeePassportProps {
     lotData: any;
@@ -12,597 +13,495 @@ interface CoffeePassportProps {
     onClose: () => void;
 }
 
+const GREEN = '#00df9a';
+const RED = '#ef4444';
+const ORANGE = '#f97316';
+
 export default function CoffeePassport({ lotData: initialLotData, scaData: initialScaData, roastData, degassingData, onClose }: CoffeePassportProps) {
-    const [fetchedLotData, setFetchedLotData] = React.useState<any>(initialLotData);
-    const [fetchedScaData, setFetchedScaData] = React.useState<any>(initialScaData);
-    const [fetchedPhysicalData, setFetchedPhysicalData] = React.useState<any>(null);
+    const [lot, setLot] = useState<any>(initialLotData);
+    const [sca, setSca] = useState<any>(initialScaData);
+    const [phys, setPhys] = useState<any>(null);
 
-    // Habilitar cierre con la tecla Escape
+    const batchId = initialLotData?.id || initialLotData?.lot_number || initialLotData?.batch_id;
+    const passportId = `AX-${initialLotData?.lot_number || '9822'}-${new Date().getFullYear()}`;
+
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && onClose) {
-                onClose();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
     }, [onClose]);
 
-    // Self-fetcher for missing data when rendering public links or when partial data is passed
     useEffect(() => {
-        const fetchFullData = async () => {
-            if (!initialLotData?.batch_id && !initialLotData?.id) return;
-            const batchId = initialLotData.batch_id || initialLotData.id;
+        const load = async () => {
+            // El id del lote ya viene en initialLotData gracias al fix de GlobalHistoryArchive
+            const invId = initialLotData?.id;
+            if (!invId) return;
+            try {
+                const { supabase } = await import('@/shared/lib/supabase');
 
-            const { supabase } = await import('@/shared/lib/supabase');
-
-            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(batchId);
-            const { data: lotDataDB } = await supabase.from('coffee_purchase_inventory')
-                .select('*')
-                .eq(isUUID ? 'id' : 'lot_number', batchId)
-                .maybeSingle();
-
-            if (lotDataDB) {
-                // Merge initial data (targetMarket, destinationCity) with real DB data
-                setFetchedLotData({ ...lotDataDB, ...initialLotData });
-
-                const inventoryId = lotDataDB.id;
-
-                if (!initialScaData) {
-                    const { data: sca } = await supabase.from('sca_cupping').select('*').eq('inventory_id', inventoryId).maybeSingle();
-                    if (sca) setFetchedScaData(sca);
+                // SCA — copiado exacto de LotCertificate.tsx
+                const { data: scaDB } = await supabase
+                    .from('sca_cupping')
+                    .select('*')
+                    .eq('inventory_id', invId)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                if (scaDB) {
+                    if (scaDB.total_score == null) {
+                        scaDB.total_score = (
+                            Number(scaDB.fragrance_aroma || 0) + Number(scaDB.flavor || 0) +
+                            Number(scaDB.aftertaste || 0) + Number(scaDB.acidity || 0) +
+                            Number(scaDB.body || 0) + Number(scaDB.balance || 0) +
+                            Number(scaDB.uniformity || 10) + Number(scaDB.clean_cup || 10) +
+                            Number(scaDB.sweetness || 10) + Number(scaDB.overall || 0) -
+                            (Number(scaDB.defects_score || 0) * 2)
+                        );
+                    }
+                    setSca(scaDB);
                 }
 
-                const { data: phys } = await supabase.from('physical_analysis').select('*').eq('inventory_id', inventoryId).maybeSingle();
-                if (phys) setFetchedPhysicalData(phys);
-                const { data: exportData } = await supabase.from('green_exports').select('*').eq('lot_id', batchId).order('created_at', { ascending: false }).limit(1).maybeSingle();
-                if (exportData) {
-                    setFetchedLotData((prev: any) => ({ ...prev, export_data: exportData }));
-                }
-            }
+                // Physical Analysis — copiado exacto de LotCertificate.tsx
+                const { data: physDB } = await supabase
+                    .from('physical_analysis')
+                    .select('*')
+                    .eq('inventory_id', invId)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                if (physDB) setPhys(physDB);
+
+            } catch (e) { console.error('PASSPORT_ERROR:', e); }
         };
+        load();
+    }, [initialLotData?.id]);
 
-        fetchFullData();
-    }, [initialLotData, initialScaData]);
 
-    const lotData = fetchedLotData;
-    const scaData = fetchedScaData;
+    // Los datos del lote vienen completos en initialLotData (gracias al fix de GlobalHistoryArchive)
+    // Igual que LotCertificate usa lotData directamente
+    const physData = phys;
 
-    const targetMarket = lotData?.targetMarket || 'otros';
+    const farmName   = initialLotData?.farm_name || '---';
+    const producerName = initialLotData?.farmer_name || '---';
+    const lotNum     = initialLotData?.lot_number || '---';
+    const variety    = initialLotData?.variety || '---';
+    const region     = initialLotData?.region || '---';
+    const process    = initialLotData?.process || '---';
 
-    const passportId = `AX-${lotData.batch_id || '9822'}-${new Date().getFullYear()}`;
+    // Campos de producción — exactos de LotCertificate línea 231-234
+    const purchaseWeight   = initialLotData?.purchase_weight || '--';
+    const thrashedWeight   = initialLotData?.thrashed_weight || '--';
+    const thrashedYield    = initialLotData?.thrashing_yield ? Number(initialLotData.thrashing_yield).toFixed(2) : '--';
 
-    const scaRadarData = [
-        { subject: 'Fragancia', A: scaData?.fragrance_aroma ?? 7.75 },
-        { subject: 'Sabor', A: scaData?.flavor ?? 7.75 },
-        { subject: 'Post-gusto', A: scaData?.aftertaste ?? 7.75 },
-        { subject: 'Acidez', A: scaData?.acidity ?? 7.75 },
-        { subject: 'Cuerpo', A: scaData?.body ?? 7.75 },
-        { subject: 'Balance', A: scaData?.balance ?? 7.75 },
-        { subject: 'Global', A: scaData?.overall ?? 7.50 },
-    ];
+    // SCA score — igual que LotCertificate línea 220
+    const scaScore = sca?.total_score;
+
+    // Radar chart — igual que LotCertificate líneas 101-109
+    const radarData = sca ? [
+        { subject: 'Fragancia',  A: sca.fragrance_aroma },
+        { subject: 'Sabor',      A: sca.flavor },
+        { subject: 'Post-gusto', A: sca.aftertaste },
+        { subject: 'Acidez',     A: sca.acidity },
+        { subject: 'Cuerpo',     A: sca.body },
+        { subject: 'Balance',    A: sca.balance },
+        { subject: 'Global',     A: sca.overall },
+    ] : [];
+
+    // Granulometría — igual que LotCertificate líneas 111-120
+    const screenData = physData?.screen_size_distribution ? [
+        { m: 'M18',   v: physData.screen_size_distribution.size18,  big: true  },
+        { m: 'M17',   v: physData.screen_size_distribution.size17,  big: true  },
+        { m: 'M16',   v: physData.screen_size_distribution.size16,  big: true  },
+        { m: 'M15',   v: physData.screen_size_distribution.size15,  big: true  },
+        { m: 'M14',   v: physData.screen_size_distribution.size14,  big: false },
+        { m: 'M13',   v: physData.screen_size_distribution.size13,  big: false },
+        { m: 'M12',   v: physData.screen_size_distribution.size12,  big: false },
+        { m: 'Fondo', v: physData.screen_size_distribution.under12, big: false },
+    ] : [];
+    const maxV = Math.max(...screenData.map(s => Number(s.v || 0)), 1);
+
+    const today = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+
 
     return (
-        <div
-            className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/80 backdrop-blur-xl"
-            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-        >
-            <div className="w-full py-10 pb-[150px]">
+        <>
+            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet" />
+            <style jsx global>{`
+                @media print {
+                    @page { size: A4; margin: 0 !important; }
+                    body { margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    .no-print { display: none !important; }
+                }
+                .pp { font-family: 'Montserrat', sans-serif; }
+            `}</style>
 
-                {/* Controles de exportación */}
-                <div className="w-[816px] mx-auto flex justify-between items-center bg-gray-100 border border-gray-200 p-4 rounded-xl print:hidden no-export mb-8">
-                    <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Digital Passport Control</span>
+            <div className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/90 pp"
+                onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+
+                {/* Control bar */}
+                <div className="no-print w-[794px] mx-auto flex justify-between items-center bg-white border border-gray-200 p-3 rounded-xl mb-6 mt-8 shadow-2xl">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full" style={{ background: GREEN }}></span>
+                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Axis Coffee Passport — Vista Previa</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => window.print()}
-                            className="px-6 py-2.5 bg-black hover:bg-gray-800 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all shadow-xl"
-                        >
-                            Imprimir Pasaporte
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="px-6 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-black rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
-                        >
-                            Cerrar
-                        </button>
+                    <div className="flex items-center gap-2">
+                        <button onClick={onClose} className="px-4 py-1.5 border border-gray-200 rounded-lg text-[10px] font-bold uppercase text-gray-600 hover:bg-gray-50">Cerrar</button>
+                        <ExportReportButton elementId="passport-pages" fileName={`PASSPORT-${lotNum}`} />
+                        <button onClick={() => window.print()} className="px-4 py-1.5 bg-black text-white rounded-lg text-[10px] font-bold uppercase hover:bg-gray-800">Imprimir</button>
                     </div>
                 </div>
 
-                {/* AREA DE CAPTURA PDF - 2 HOJAS CARTA */}
-                <div id="passport-document-area" className="mx-auto flex flex-col print:m-0"
-                    style={{ width: '816px' }}>
+                <div id="passport-pages" className="mx-auto flex flex-col gap-8 pb-32" style={{ width: '794px' }}>
 
-                    {/* HOJA 1: IDENTIDAD Y RENDIMIENTO */}
-                    <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none print:break-after-page"
-                        style={{ width: '816px', height: '1056px' }}>
+                    {/* ══════════════ PÁGINA 1 ══════════════ */}
+                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
 
-                        {/* Header Institucional */}
-                        <div className="bg-gray-50 px-12 py-6 flex justify-between items-start border-b border-gray-200">
-                            <div className="flex items-center gap-6">
-                                <div className="w-16 h-16 bg-brand-green/10 border border-brand-green/20 rounded-2xl flex items-center justify-center">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                        {/* Header */}
+                        <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-4xl font-black text-black tracking-tighter uppercase leading-none">Export<br />Manifest</h2>
-                                    <p className="text-[9px] text-brand-green font-bold uppercase tracking-[0.4em] mt-2">BAX-7370 Protocol Verification | Page 01</p>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Axis Coffee Analytics</p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 01</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-1">Passport ID</p>
-                                <p className="text-xl font-mono text-black font-bold bg-gray-100 px-3 py-1 rounded-md border border-gray-200">{passportId}</p>
-                                {lotData?.destinationCity && (
-                                    <p className="text-[10px] text-black font-bold uppercase tracking-widest mt-2">DESTINO: {lotData.destinationCity}</p>
-                                )}
+                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Expedición Digital</p>
+                                <p className="text-[11px] font-bold uppercase leading-none mt-0.5" style={{ color: GREEN }}>{today}</p>
                             </div>
                         </div>
 
-                        {/* Body Principal */}
-                        <div className="flex-1 px-12 py-6 flex flex-col gap-6">
-                            {/* ESTRUCTURA MATRIZ HOJA 1 */}
-
-                            {/* SECCIÓN SUPERIOR: Logo y Destino */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
-                                {/* Sección 1 (Top-Left): Certificado Dinámico Frontal */}
-                                <div className="space-y-6">
-                                    <h3 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest flex items-center gap-3 w-full mb-2">
-                                        <span className={`w-2 h-2 rounded-full animate-pulse ${targetMarket === 'europa' ? 'bg-orange-500' : targetMarket === 'usa' ? 'bg-blue-500' : 'bg-brand-green'}`}></span>
-                                        1. Verificación Continente
-                                    </h3>
-
-                                    {targetMarket === 'europa' ? (
-                                        <div className="h-[280px] bg-black/40 rounded-3xl border border-white/5 p-4 relative overflow-hidden flex items-center justify-center flex-col">
-                                            <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ff8800 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-orange-500 mb-4 opacity-70"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                                            <h4 className="text-lg font-black text-white uppercase tracking-widest mb-2 z-10">Sello EUDR</h4>
-                                            {lotData?.process_data?.eudr_polygon ? (
-                                                <p className="text-[10px] text-gray-400 font-mono text-center max-w-[200px] z-10">Datos Topográficos Verificados.<br />Polígonos SICA WGS84 Integrados.</p>
-                                            ) : (
-                                                <p className="text-[10px] text-gray-400 font-mono text-center max-w-[200px] z-10">Datos Topográficos Verificados.<br />{Number(lotData?.farm_size_hectares) < 4 ? 'Exento de Polígono (< 4 He).' : 'Datos Geográficos Pendientes / Modo Compra Activo.'}</p>
-                                            )}
-                                            <div className="absolute bottom-4 right-4 text-[7px] text-orange-500/50 uppercase font-bold tracking-widest">Protocol BAX-7370</div>
+                        <div className="px-10 py-7 flex flex-col gap-6">
+                            {/* Identity block */}
+                            <div className="flex justify-between items-start gap-6">
+                                <div className="flex-1">
+                                    <div className="mb-3">
+                                        <span className="text-[8px] font-bold uppercase tracking-widest px-2.5 py-1 rounded border border-gray-200 text-gray-500">
+                                            ● Identity Verified · Cloud-Stored Profile
+                                        </span>
+                                    </div>
+                                    <h1 className="text-[52px] font-black text-black uppercase leading-none tracking-tighter mb-5">{farmName}</h1>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        <div>
+                                            <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Productor</p>
+                                            <p className="text-[12px] font-bold text-black uppercase leading-tight">{producerName}</p>
                                         </div>
-                                    ) : targetMarket === 'usa' ? (
-                                        <div className="h-[280px] bg-black/40 rounded-3xl border border-white/5 p-6 flex flex-col justify-center space-y-4">
-                                            <h4 className="text-lg font-black text-blue-500 uppercase tracking-widest mb-2 border-b border-white/10 pb-2">FSMA Custody</h4>
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                                                <div className="flex-1 border-b border-dashed border-white/20 pb-2">
-                                                    <p className="text-xs font-bold text-white uppercase">Recepción Finca</p>
-                                                    <p className="text-[9px] text-gray-500 font-mono mt-1">AX-A001</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                                                <div className="flex-1 border-b border-dashed border-white/20 pb-2">
-                                                    <p className="text-xs font-bold text-white uppercase">Procesamiento</p>
-                                                    <p className="text-[9px] text-gray-500 font-mono mt-1">{lotData?.moisture || '11.5'}% - Trilladora</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-2 h-2 rounded-full bg-brand-green-bright shadow-[0_0_10px_#00df9a]"></div>
-                                                <div className="flex-1">
-                                                    <p className="text-xs font-bold text-brand-green-bright uppercase">Aduana Salida</p>
-                                                    <p className="text-[9px] text-gray-500 font-mono mt-1">Exportador Base</p>
-                                                </div>
-                                            </div>
-                                            <div className="absolute bottom-4 right-4 text-[7px] text-blue-500/50 uppercase font-bold tracking-widest">Protocol BAX-7370</div>
+                                        <div>
+                                            <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Lote ID</p>
+                                            <p className="text-[12px] font-bold uppercase leading-tight" style={{ color: GREEN }}>{lotNum}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Variedad</p>
+                                            <p className="text-[12px] font-bold text-black uppercase leading-tight">{variety}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Región</p>
+                                            <p className="text-[12px] font-bold text-black uppercase leading-tight">{region}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* SCA Score box */}
+                                <div className="border border-gray-200 rounded-xl p-5 text-center min-w-[160px] bg-white shadow-sm">
+                                    <p className="text-[8px] font-bold uppercase tracking-widest mb-2 leading-tight" style={{ color: GREEN }}>Puntaje basado en estándares SCA</p>
+                                    <p className="text-[44px] font-black text-black leading-none tracking-tighter">
+                                        {scaScore != null ? Number(scaScore).toFixed(2) : '00.00'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Weights row */}
+                            <div className="grid grid-cols-4 gap-4 p-5 rounded-xl bg-gray-50 border border-gray-100">
+                                <div className="text-center">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Materia Prima</p>
+                                    <p className="text-[20px] font-black text-black leading-none">{purchaseWeight} <span className="text-[12px] font-bold text-gray-400">Kg</span></p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase mt-1">Ingreso</p>
+                                </div>
+                                <div className="text-center border-l border-gray-200">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Materia Exportable</p>
+                                    <p className="text-[20px] font-black text-black leading-none">{thrashedWeight} <span className="text-[12px] font-bold text-gray-400">Kg</span></p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase mt-1">Excelso</p>
+                                </div>
+                                <div className="text-center border-l border-gray-200">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Factor Rendimiento</p>
+                                    <p className="text-[20px] font-black text-black leading-none">{thrashedYield} <span className="text-[12px] font-bold text-gray-400">Fr</span></p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase mt-1">Estimado</p>
+                                </div>
+                                <div className="text-center border-l border-gray-200">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Beneficio</p>
+                                    <p className="text-[16px] font-black text-black leading-none uppercase">{process}</p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase mt-1">Método</p>
+                                </div>
+                            </div>
+
+                            {/* Section headers */}
+                            <div className="flex gap-8 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-6 h-0.5 rounded" style={{ background: GREEN }}></span>
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-black">Physical Quality</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-6 h-0.5 rounded" style={{ background: RED }}></span>
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-black">Grading Count</p>
+                                </div>
+                            </div>
+
+                            {/* Quality cards */}
+                            <div className="grid grid-cols-4 gap-4">
+                                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Humedad</p>
+                                    <div>
+                                        <p className="text-[36px] font-black text-black leading-none">{physData?.moisture_pct ?? '0.0'}<span className="text-[16px]" style={{ color: GREEN }}>%</span></p>
+                                        <p className="text-[8px] font-bold uppercase mt-2" style={{ color: GREEN }}>{physData?.grain_color || 'Verde Oliva'}</p>
+                                    </div>
+                                </div>
+                                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Densidad</p>
+                                    <div>
+                                        <p className="text-[36px] font-black text-black leading-none">{physData?.density_gl ?? '0'}<span className="text-[14px] text-blue-500 ml-1">g/L</span></p>
+                                        <p className="text-[8px] font-bold text-blue-400 uppercase mt-2">{physData?.water_activity ? `${physData.water_activity} AW` : '--- AW'}</p>
+                                    </div>
+                                </div>
+                                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
+                                    <div>
+                                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Primarios</p>
+                                        <p className="text-[8px] font-bold uppercase mt-0.5" style={{ color: RED }}>(Type 1)</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[36px] font-black text-black leading-none">{physData?.defects_count?.primary ?? '0'}<span className="text-[16px]" style={{ color: RED }}>%</span></p>
+                                        <p className="text-[8px] font-bold uppercase mt-2" style={{ color: RED }}>Defectos Críticos</p>
+                                    </div>
+                                </div>
+                                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
+                                    <div>
+                                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Secundarios</p>
+                                        <p className="text-[8px] font-bold uppercase mt-0.5" style={{ color: ORANGE }}>(Type 2)</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[36px] font-black text-black leading-none">{physData?.defects_count?.secondary ?? '0'}<span className="text-[16px]" style={{ color: ORANGE }}>%</span></p>
+                                        <p className="text-[8px] font-bold uppercase mt-2" style={{ color: ORANGE }}>Defectos Menores</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Granulometry */}
+                            <div className="mt-2">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <span className="w-6 h-0.5 rounded" style={{ background: GREEN }}></span>
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-black">Granulometría (Screen Size Distribution)</p>
+                                </div>
+                                <div className="p-6 rounded-xl bg-gray-50 border border-gray-100">
+                                    {!physData ? (
+                                        <div className="h-[180px] flex items-center justify-center">
+                                            <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">Sin análisis físico registrado para este lote</p>
                                         </div>
                                     ) : (
-                                        <div className="h-[280px] bg-gray-50 rounded-3xl border border-gray-200 p-6 flex flex-col items-center justify-center text-center gap-4 shadow-sm relative overflow-hidden">
-                                            <div className="absolute inset-0 bg-brand-green/[0.02] transform -rotate-12 scale-150 rounded-full blur-3xl"></div>
-                                            <div className="w-20 h-20 rounded-full bg-brand-green/10 flex items-center justify-center border border-brand-green/20 shadow-md mb-2 relative z-10">
-                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
-                                            </div>
-                                            <p className="text-base font-black text-black uppercase tracking-widest relative z-10">Global Verifed</p>
-                                            <p className="text-[10px] text-gray-500 uppercase font-bold max-w-[200px] leading-relaxed relative z-10">Certificamos origen, calidad y trazabilidad comercial inmutable.</p>
-                                            <div className="absolute bottom-4 right-4 text-[7px] text-brand-green/50 uppercase font-bold tracking-widest">Protocol BAX-7370</div>
+                                        <div className="flex items-end gap-3 h-[160px]">
+                                            {screenData.map((item, i) => (
+                                                <div key={i} className="flex flex-col items-center flex-1">
+                                                    <div className="w-full rounded-t-sm transition-all"
+                                                        style={{
+                                                            height: `${(Number(item.v || 0) / maxV) * 120}px`,
+                                                            minHeight: Number(item.v || 0) > 0 ? '4px' : '2px',
+                                                            backgroundColor: Number(item.v || 0) > 0 ? (item.big ? GREEN : '#64748b') : '#e2e8f0'
+                                                        }}></div>
+                                                    <p className="text-[8px] font-bold text-gray-500 uppercase mt-2 leading-none">{item.m}</p>
+                                                    <p className="text-[10px] font-bold text-black mt-1 leading-none">{Number(item.v || 0).toFixed(1)}%</p>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Sección 2 (Top-Right): Logística y Pasaporte Aduanero */}
-                                <div className="space-y-6">
-                                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-3">
-                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                                        2. Logística y Destino
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-4 h-[280px]">
-                                        <div className="p-4 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm col-span-2">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-1">Mercado Destino Verificado</p>
-                                            <p className="text-xl font-bold text-black uppercase">{targetMarket === 'europa' ? 'UNION EUROPEA (EU)' : targetMarket === 'usa' ? 'ESTADOS UNIDOS (USA)' : targetMarket}</p>
-                                        </div>
-                                        <div className="p-4 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm col-span-2 flex justify-between items-center">
-                                            <div>
-                                                <p className="text-[9px] text-gray-500 uppercase mb-1">Puerto Declarado</p>
-                                                <p className="text-sm font-bold text-black uppercase">{lotData?.destinationCity || 'ROTTERDAM, NL'}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-[9px] text-gray-500 uppercase mb-1">Transporte Base</p>
-                                                <p className="text-sm font-bold text-black uppercase">Contenedor - Lined</p>
-                                            </div>
-                                        </div>
-                                        <div className="p-4 bg-white border-2 border-brand-green/20 rounded-2xl shadow-sm col-span-2 text-center bg-gradient-to-br from-white to-brand-green/[0.02] flex flex-col justify-center items-center">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-2">Firma Digital (Hash SHA-256)</p>
-                                            <p className="text-[11px] font-mono font-bold text-brand-green uppercase tracking-widest block bg-white px-3 py-1.5 rounded-lg border border-brand-green/20 shadow-sm w-max">
-                                                {fetchedLotData?.export_data?.final_hash || '121B021A-62FF-4ED4-B4A'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
+                        </div>
 
-                            {/* SECCIÓN INFERIOR: Origen y Física/Mermas */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-gray-200">
-
-                                {/* Sección 3 (Bottom-Left): Origen */}
-                                <div className="space-y-6">
-                                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-3">
-                                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                                        3. Datos de Productor y Finca
-                                    </h3>
-
-                                    <div className="grid grid-cols-1 gap-4">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-                                                <p className="text-[9px] text-gray-500 uppercase mb-1">Variedad</p>
-                                                <p className="text-sm font-bold text-black uppercase">{lotData?.variety || 'Bourbon Rosado'}</p>
-                                            </div>
-                                            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-                                                <p className="text-[9px] text-gray-500 uppercase mb-1">Proceso</p>
-                                                <p className="text-sm font-bold text-black uppercase">{lotData?.process || 'Anaeróbico'}</p>
-                                            </div>
-                                        </div>
-                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-1">Humedad de Exportación</p>
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-xl font-bold text-black">{lotData?.moisture || fetchedPhysicalData?.moisture_pct || '11.5'}%</p>
-                                                <span className={`text-[8px] px-2 py-0.5 rounded font-bold uppercase ${(lotData?.moisture || fetchedPhysicalData?.moisture_pct || 11.5) > 12.5 ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-brand-green/10 text-brand-green border border-brand-green/20'}`}>{(lotData?.moisture || fetchedPhysicalData?.moisture_pct || 11.5) > 12.5 ? 'Riesgo' : 'Óptimo'}</span>
-                                            </div>
-                                        </div>
-                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-1 flex items-center gap-1">
-                                                Origen y SICA (Fair Trade)
-                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                                            </p>
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-sm font-bold text-black uppercase">{lotData?.farm_name || 'Palermo (Julio Uva)'}</p>
-                                                <span className="text-[10px] bg-brand-green/10 text-brand-green px-2 py-0.5 rounded font-bold uppercase border border-brand-green/20">SICA Anclado</span>
-                                            </div>
-                                        </div>
-                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-1 border-b border-gray-300 pb-1">Geolocalización GPS (Polígono EUDR)</p>
-                                            <div className="flex items-center justify-between pt-2">
-                                                <p className="text-[10px] font-mono text-gray-600">Lat: {lotData?.latitude || '4.570868'} Long: {lotData?.longitude || '-74.297333'}</p>
-                                                <span className="text-[10px] text-blue-600 font-bold opacity-80 uppercase tracking-widest">Inmutable</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Sección 4 (Bottom-Right): Física y Mermas */}
-                                <div className="space-y-6">
-                                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-3">
-                                        <span className="w-2 h-2 rounded-full bg-brand-green"></span>
-                                        4. Transformación Física y Mermas
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm col-span-2 flex justify-between items-center">
-                                            <div>
-                                                <p className="text-[9px] text-gray-500 uppercase mb-1">Materia Prima Ingreso</p>
-                                                <p className="text-xl font-bold text-black uppercase">400.00 <span className="text-[10px] text-gray-500">kg</span></p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-[9px] text-gray-500 uppercase mb-1">Materia Exportable</p>
-                                                <p className="text-xl font-bold text-brand-green uppercase">400.00 <span className="text-[10px] text-gray-500">kg</span></p>
-                                            </div>
-                                        </div>
-                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm text-center">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-1 border-b border-gray-200 pb-1">Densidad</p>
-                                            <p className="text-2xl font-black text-black tracking-tighter mt-2">{fetchedPhysicalData?.density_gl || '720'} <span className="text-[10px] font-bold text-blue-500">g/L</span></p>
-                                        </div>
-                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm text-center">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-1 border-b border-gray-200 pb-1">Actividad de Agua (aw)</p>
-                                            <p className="text-2xl font-black text-black tracking-tighter mt-2">{fetchedPhysicalData?.water_activity || '0.55'} <span className="text-[10px] font-bold text-gray-500">aw</span></p>
-                                        </div>
-                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm col-span-2">
-                                            <p className="text-[9px] text-gray-500 uppercase mb-2 border-b border-gray-200 pb-1">Granulometría Aprobada</p>
-                                            <div className="flex justify-between items-center px-2">
-                                                <div className="text-center"><p className="text-[8px] text-gray-500 font-bold mb-1">M18</p><p className="text-xs font-bold text-black">20%</p></div>
-                                                <div className="text-center"><p className="text-[8px] text-brand-green font-bold mb-1 border-b border-brand-green">M17</p><p className="text-xs font-bold text-black">45%</p></div>
-                                                <div className="text-center"><p className="text-[8px] text-gray-500 font-bold mb-1">M16</p><p className="text-xs font-bold text-black">25%</p></div>
-                                                <div className="text-center"><p className="text-[8px] text-gray-500 font-bold mb-1">M15</p><p className="text-xs font-bold text-black">10%</p></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        {/* Footer P1 */}
+                        <div className="px-10 py-4 border-t border-gray-100 flex justify-between items-center mt-auto">
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">{passportId}</p>
                         </div>
                     </div>
 
-                    {/* INDICADOR VISUAL DE CORTE (No visible al imprimir ni exportar a PDF) */}
-                    <div className="w-full h-8 flex-none bg-black/5 no-export print:hidden flex items-center justify-center">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">--- Page Break ---</span>
-                    </div>
+                    {/* ══════════════ PÁGINA 2 ══════════════ */}
+                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
 
-                    {/* HOJA 2: HUELLA ORGANOLÉPTICA (RADAR WOW) */}
-                    <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none print:break-after-page"
-                        style={{ width: '816px', height: '1056px' }}>
-
-                        {/* Header P2 */}
-                        <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
-                            <div className="flex items-center gap-4">
-                                <div className="w-8 h-8 bg-brand-green/10 border border-brand-green/20 rounded-lg flex items-center justify-center">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                        {/* Header */}
+                        <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold tracking-[0.4em] text-black">EXPORT MANIFEST</p>
-                                    <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">BAX-7370 Protocol Verification | Page 02</p>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Axis Coffee Analytics</p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 02</p>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-[9px] font-bold text-brand-green-bright font-mono uppercase ">{passportId}</p>
-                            </div>
+                            <p className="text-[12px] font-bold uppercase" style={{ color: GREEN }}>{lotNum}</p>
                         </div>
 
-                        {/* Perfil Sensorial */}
-                        <div className="flex-1 flex flex-col pt-12">
-                            <div className="px-12 mb-8">
-                                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-3 justify-center">
-                                    <span className="w-2 h-2 rounded-full bg-[#ea580c]"></span>
-                                    4. Identidad Sensorial e Inocuidad (SCA)
-                                </h3>
-                                <p className="text-center text-[10px] text-gray-400 uppercase tracking-[0.2em] font-medium mt-3">Huella Organoléptica de Especialidad</p>
+                        <div className="px-10 py-7 flex flex-col gap-6">
+                            <div>
+                                <h2 className="text-[22px] font-black text-black uppercase leading-tight tracking-tight mb-1">Evaluación Sensorial Basada en Estándares de la SCA</h2>
+                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.3em]">Análisis de Perfil Organoléptico de Especialidad</p>
                             </div>
 
-                            {/* Score Principal flotando */}
-                            <div className="flex items-start justify-center gap-16 mb-4">
-                                <div className="text-center">
-                                    <p className="text-[9px] text-gray-500 uppercase tracking-[0.2em] font-bold mb-1">Score Final SCA</p>
-                                    <p className="text-6xl font-black text-black tracking-tighter">{scaData?.total_score || '84.00'}</p>
+                            <div className="flex gap-8 items-center">
+                                {/* Radar Chart */}
+                                <div className="flex-1 h-[400px] flex items-center justify-center">
+                                    <RadarChart width={420} height={400} cx="50%" cy="50%" outerRadius="72%" data={radarData}>
+                                        <PolarGrid stroke="#e2e8f0" strokeWidth={1} />
+                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#374151', fontSize: 11, fontWeight: '600' }} />
+                                        <Radar name="SCA" dataKey="A" stroke={GREEN} strokeWidth={2.5} fill={GREEN} fillOpacity={0.12} isAnimationActive={false} />
+                                    </RadarChart>
                                 </div>
-                            </div>
-
-                            {/* Radar Chart Espectacular (Reducido ~30%) */}
-                            <div className="w-full h-[320px] relative flex justify-center items-center mt-6">
-                                <div className="absolute inset-0 bg-brand-green/[0.03] rounded-full blur-[70px] max-w-[350px] h-[350px] mx-auto top-1/2 -translate-y-1/2"></div>
-
-                                <RadarChart width={350} height={315} cx="50%" cy="50%" outerRadius="70%" data={scaRadarData} className="relative z-10">
-                                    <PolarGrid stroke="#e5e7eb" strokeWidth={1} />
-                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#444', fontSize: 10, fontWeight: '700' }} />
-                                    <Radar
-                                        name="Profile"
-                                        dataKey="A"
-                                        stroke="#00df9a"
-                                        strokeWidth={2}
-                                        fill="#00df9a"
-                                        fillOpacity={0.15}
-                                        isAnimationActive={false}
-                                    />
-                                </RadarChart>
-
-                                {/* Puntos de datos destacados */}
-                                <div className="absolute top-4 right-16 space-y-2 opacity-60 z-20 w-40 text-right">
-                                    {scaRadarData.map((d, i) => (
-                                        <div key={i} className="flex items-center gap-3 justify-end hover:opacity-100 transition-opacity">
-                                            <span className="text-[9px] font-bold uppercase text-gray-500 tracking-widest">{d.subject}</span>
-                                            <span className="text-[11px] font-mono font-bold text-gray-800 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">{Number(d.A).toFixed(2)}</span>
+                                {/* Score table */}
+                                <div className="w-[180px] flex flex-col gap-0">
+                                    {radarData.map((item, i) => (
+                                        <div key={i} className="flex justify-between items-center border-b border-gray-100 py-2.5">
+                                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{item.subject}</span>
+                                            <span className="text-[14px] font-bold text-black">{Number(item.A).toFixed(2)}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Notas y Footer de Catador */}
-                            <div className="px-12 mt-4 pb-8 border-b border-gray-50">
-                                <div className="flex items-center justify-center py-6 border-t border-b border-gray-100 mb-6 w-full max-w-2xl mx-auto">
-                                    <p className="text-lg font-medium italic text-gray-800 text-center leading-relaxed">
-                                        "{scaData?.notes || 'bacancito, chocolate y frutos rojos'}"
-                                    </p>
+                            {/* Sensory summary */}
+                            <div className="border-t border-gray-100 pt-6">
+                                <p className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3">Sensory Analysis Summary</p>
+                                <p className="text-[22px] font-bold text-black text-center py-4" style={{ fontStyle: 'normal' }}>
+                                    "{sca?.notes || 'bacancito, chocolate y frutos rojos'}"
+                                </p>
+                            </div>
+
+                            {/* Q-Grader */}
+                            <div className="flex items-center gap-6 py-4 border-t border-b border-gray-100">
+                                <div className="w-14 h-14 rounded-full bg-gray-800 text-white flex items-center justify-center text-sm font-black shrink-0">QG</div>
+                                <div className="flex-1">
+                                    <p className="text-[16px] font-black text-black uppercase leading-none">{sca?.taster_name?.toUpperCase() || 'Q-Grader Senior'}</p>
+                                    <p className="text-[8px] font-bold uppercase mt-1 tracking-widest" style={{ color: GREEN }}>Professional Cupper · Digital Signature Verified</p>
                                 </div>
-                                <div className="flex items-center justify-center gap-6">
-                                    <div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center bg-gray-900 text-[10px] font-bold text-white shadow-sm">QG</div>
-                                    <div className="text-left">
-                                        <div className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md text-[8px] font-bold uppercase tracking-widest inline-block mb-1 border border-gray-200">Axis Q-Grade Network</div>
-                                        <p className="text-xs font-bold text-black uppercase">{scaData?.taster_name || 'Julio Uva (Senior)'}</p>
-                                        <p className="text-[8px] text-brand-green-bright font-bold uppercase tracking-widest mt-1">Professional Cupper • Digital Signature</p>
+                                <div className="text-right">
+                                    <div className="flex items-center gap-2 justify-end mb-1">
+                                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                        <span className="text-[8px] font-bold uppercase text-gray-400 tracking-widest">AXIS</span>
                                     </div>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase">Protocol 52.4</p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase">ID Seal: 121802</p>
                                 </div>
                             </div>
 
-                            {/* Footer Hoja 2: Seguridad, QR y Verificación */}
-                            <div className="bg-white px-12 py-8 flex justify-between items-center gap-8 relative overflow-hidden mt-auto">
-                                <div className="flex items-center gap-6 max-w-2xl">
-                                    <div className="p-1 rounded-xl bg-white shadow-lg border border-gray-100 hover:scale-105 transition-transform duration-300">
-                                        <img
-                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-pro.coffee') + '/verify/passport/' + passportId)}`}
-                                            alt="QR Traceability"
-                                            className="w-16 h-16 grayscale opacity-80"
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <p className="text-[10px] font-bold text-black uppercase tracking-[0.4em] flex items-center gap-2">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                                            Trazabilidad Inmutable
-                                        </p>
-                                        <p className="text-[8px] text-gray-500 uppercase font-medium leading-[1.6] tracking-wider max-w-[300px]">
-                                            Certificación de origen y calidad física-sensorial encriptada en la red AXIS para garantizar transparencia de suministro industrial.
-                                        </p>
-                                    </div>
+                            {/* Trazabilidad digital */}
+                            <div className="flex items-start gap-6 p-5 rounded-xl bg-gray-50 border border-gray-100">
+                                <div className="bg-white p-2 border border-gray-200 rounded-lg shrink-0 shadow-sm">
+                                    <QRCodeSVG value={`${window.location.origin}/verify/lot/${batchId}`} size={72} level="H" />
                                 </div>
-
-                                <div className="text-right space-y-3">
-                                    <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-200 inline-block shadow-sm">
-                                        <p className="text-[9px] font-mono text-gray-600 tracking-tighter">HASH: {fetchedLotData?.export_data?.final_hash?.substring(0, 15) || '121B021A-62FF'}</p>
-                                    </div>
-                                    <p className="text-[7px] text-gray-400 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE<br /><span className="mt-1 block">Protocol BAX-7370</span></p>
+                                <div className="flex-1">
+                                    <p className="text-[10px] font-bold text-black uppercase tracking-widest mb-2">Trazabilidad Digital Inmutable</p>
+                                    <p className="text-[9px] font-bold text-gray-500 uppercase leading-relaxed tracking-wider">
+                                        Certificación técnica de origen y calidad física-sensorial. Los datos han sido encriptados en la red Axis para garantizar transparencia absoluta en la cadena de suministro industrial de café.
+                                    </p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="text-[8px] font-bold text-gray-300 uppercase break-all max-w-[120px] leading-tight font-mono">
+                                        {lot?.export_data?.final_hash?.slice(0, 24) || '12B02A-62F1-4ED4-B9A5-9CAFC4A3C3E1'}
+                                    </p>
+                                    <p className="text-[7px] font-bold text-gray-400 uppercase mt-3">© 2026 Axis Intelligence Group</p>
+                                    <p className="text-[7px] font-bold text-gray-400 uppercase">Industrial</p>
                                 </div>
                             </div>
                         </div>
+
+                        {/* Footer P2 */}
+                        <div className="px-10 py-4 border-t border-gray-100 mt-auto flex justify-between items-center">
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">{passportId}-P2</p>
+                        </div>
                     </div>
 
-                    {fetchedLotData?.export_data?.status === 'FINALIZADA' && (
-                        <>
-                            {/* INDICADOR VISUAL DE CORTE (No visible al imprimir ni exportar a PDF) */}
-                            <div className="w-full h-8 flex-none bg-black/5 no-export print:hidden flex items-center justify-center">
-                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-none">--- Page Break ---</span>
+                    {/* ══════════════ PÁGINA 3: LOGÍSTICA ══════════════ */}
+                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                        <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Axis Coffee Analytics</p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 03</p>
+                                </div>
+                            </div>
+                            <p className="text-[12px] font-bold uppercase" style={{ color: GREEN }}>{lotNum}</p>
+                        </div>
+
+                        <div className="px-10 py-7 flex flex-col gap-6">
+                            <h2 className="text-[22px] font-black text-black uppercase leading-tight">Shipment & Port Security</h2>
+
+                            {/* Hash */}
+                            <div className="p-5 rounded-xl bg-gray-50 border border-gray-100">
+                                <p className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3">Blockchain Fingerprint (Immutable Hash)</p>
+                                <p className="text-[11px] font-bold font-mono break-all text-black uppercase tracking-wider">
+                                    {lot?.export_data?.final_hash || 'PENDING-SIGNATURE-X-000-PENDING'}
+                                </p>
                             </div>
 
-                            {/* HOJA 3: CERTIFICADO INMUTABLE DE EXPORTACIÓN */}
-                            <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col overflow-hidden print:shadow-none print:border-none print:break-after-page"
-                                style={{ width: '816px', height: '1056px' }}>
-
-                                {/* Header P3 */}
-                                <div className="bg-brand-green/10 px-12 py-6 flex justify-between items-center border-b border-brand-green/20">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-8 h-8 bg-brand-green border border-brand-green-bright rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.3)]">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold tracking-[0.4em] text-brand-green-dark">IMMUTABLE LEDGER</p>
-                                            <p className="text-[7px] font-bold text-gray-600 uppercase tracking-widest leading-none mt-1">Export Validation Sealing | Page 03</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[9px] font-bold text-brand-green font-mono uppercase bg-white px-2 py-1 rounded shadow-sm border border-brand-green/20">SEALED</p>
-                                    </div>
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Port Gate Timestamp</p>
+                                    <p className="text-[14px] font-bold text-black font-mono">{lot?.export_data?.port_checkin_timestamp || '---'}</p>
                                 </div>
+                                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">GPS Localization</p>
+                                    <p className="text-[14px] font-bold text-black font-mono">{lot?.export_data?.port_checkin_location || '---'}</p>
+                                </div>
+                            </div>
 
-                                {/* Body P3 */}
-                                <div className="flex-1 flex flex-col p-12">
-                                    {/* Título y Hash Principal */}
-                                    <div className="text-center mb-12">
-                                        <h3 className="text-xl font-black text-black uppercase tracking-tight mb-4">Certificado de Exportación Definitivo</h3>
-                                        <div className="p-6 bg-gray-50 border border-brand-green/30 rounded-2xl inline-block w-full max-w-2xl">
-                                            <p className="text-[9px] text-gray-500 uppercase tracking-[0.2em] font-bold mb-2">Firma Digital de Contenedor (Final Hash)</p>
-                                            <p className="text-xl font-mono text-brand-green font-black tracking-widest break-all">
-                                                {fetchedLotData?.export_data?.final_hash}
-                                            </p>
-                                        </div>
+                            {/* Vessel block */}
+                            <div className="p-6 rounded-xl border-2 bg-white flex flex-col gap-4" style={{ borderColor: '#e2e8f0' }}>
+                                <p className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.3em]">International Vessel Carrier</p>
+                                <p className="text-[28px] font-black text-black uppercase leading-none">{lot?.export_data?.vessel_name || 'Pending Assignment'}</p>
+                                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+                                    <div>
+                                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Bill of Lading (B/L)</p>
+                                        <p className="text-[16px] font-bold text-black font-mono">{lot?.export_data?.bol_number || '---'}</p>
                                     </div>
-
-                                    {/* Grilla de Datos Inmutables */}
-                                    <div className="grid grid-cols-2 gap-8 mb-auto">
-                                        {/* Columna Izquierda: Origen y Seguridad */}
-                                        <div className="space-y-6">
-                                            <div>
-                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
-                                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Ingreso Portuario
-                                                </h4>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Timestamp</p>
-                                                        <p className="text-sm font-bold text-black font-mono">{fetchedLotData?.export_data?.port_checkin_timestamp}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Coordenadas Verificadas</p>
-                                                        <p className="text-sm font-bold text-black font-mono">{fetchedLotData?.export_data?.port_checkin_location}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Validador Autorizado</p>
-                                                        <p className="text-sm font-bold text-black uppercase">{fetchedLotData?.export_data?.port_validator_id}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
-                                                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span> Seguridad y Precintado
-                                                </h4>
-                                                <div className="grid grid-cols-3 gap-4">
-                                                    <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest mb-1">Contenedor</p>
-                                                        <p className="text-xs font-bold text-black uppercase">{fetchedLotData?.export_data?.container_number}</p>
-                                                    </div>
-                                                    <div className="p-3 bg-orange-50 rounded-xl border border-orange-200">
-                                                        <p className="text-[8px] text-orange-600 uppercase tracking-widest mb-1">Precinto Oficial</p>
-                                                        <p className="text-xs font-bold text-orange-700 uppercase font-mono">{fetchedLotData?.export_data?.seal_number}</p>
-                                                    </div>
-                                                    <div className="p-3 bg-blue-50 rounded-xl border border-blue-200">
-                                                        <p className="text-[8px] text-blue-600 uppercase tracking-widest mb-1">Total Sacos</p>
-                                                        <p className="text-xs font-bold text-blue-700 uppercase font-mono">{fetchedLotData?.export_data?.sacks_count || '280'} BULTOS</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Columna Derecha: Transporte Marítimo/Aéreo */}
-                                        <div className="space-y-6">
-                                            <div>
-                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
-                                                    <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span> Transporte Internacional
-                                                </h4>
-                                                <div className="space-y-4">
-                                                    <div className="p-4 bg-gray-900 border border-black rounded-2xl text-white">
-                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest mb-1">Vessel / Buque / Vuelo</p>
-                                                        <p className="text-lg font-black uppercase tracking-wider">{fetchedLotData?.export_data?.vessel_name}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Bill of Lading (BL) / Guía</p>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="px-2 py-0.5 bg-gray-100 border border-gray-200 text-[9px] font-bold text-gray-500 uppercase rounded">{fetchedLotData?.export_data?.bl_type || 'Master BL'}</span>
-                                                            <p className="text-base font-bold text-black font-mono">{fetchedLotData?.export_data?.bol_number}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[8px] text-gray-400 uppercase tracking-widest">Consignee (Título de Propiedad)</p>
-                                                        <p className="text-sm font-bold text-black uppercase">{fetchedLotData?.export_data?.consignee || 'NO ESPECIFICADO'}</p>
-                                                    </div>
-                                                    <div className="flex gap-8">
-                                                        <div>
-                                                            <p className="text-[8px] text-gray-400 uppercase tracking-widest">ETA</p>
-                                                            <p className="text-sm font-bold text-black">{fetchedLotData?.export_data?.eta}</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-[8px] text-gray-400 uppercase tracking-widest">Destino Final</p>
-                                                            <p className="text-sm font-bold text-black uppercase">{fetchedLotData?.export_data?.destination}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-8 p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-8 h-8 rounded-full bg-brand-green/20 flex items-center justify-center flex-shrink-0">
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[9px] font-bold text-black uppercase tracking-widest mb-1">Consistencia Verificada</p>
-                                                        <p className="text-[8px] text-gray-500 leading-relaxed uppercase">
-                                                            Los datos físicos en puerto validan origen. El contenedor está sellado y listo para despacho internacional mitigando riesgos FSMA/EUDR.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Footer Hoja 3 */}
-                                    <div className="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center opacity-70">
-                                        <p className="text-[7px] text-gray-400 uppercase font-bold tracking-[0.2em] leading-relaxed">Automated Output<br/>Blockchain Ledger Validation</p>
-                                        <p className="text-[7px] text-brand-green uppercase font-bold tracking-[0.2em]">{passportId} • HOJA 03 FINAL</p>
+                                    <div>
+                                        <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Estimated Arrival (ETA)</p>
+                                        <p className="text-[16px] font-bold text-black uppercase">{lot?.export_data?.eta || '---'}</p>
                                     </div>
                                 </div>
                             </div>
-                        </>
-                    )}
+
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col gap-2">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Final Consignee</p>
+                                    <p className="text-[16px] font-bold text-black uppercase leading-tight">{lot?.export_data?.consignee || '---'}</p>
+                                </div>
+                                <div className="p-5 rounded-xl border-2 flex flex-col items-center justify-center text-center gap-2" style={{ borderColor: GREEN }}>
+                                    <p className="text-[8px] font-bold uppercase tracking-widest" style={{ color: GREEN }}>Security Seal No.</p>
+                                    <p className="text-[22px] font-black text-black font-mono">{lot?.export_data?.seal_number || '---'}</p>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 p-5 rounded-xl border border-gray-100 bg-gray-50 flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center shrink-0">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-black uppercase tracking-widest border-b pb-1 mb-1" style={{ borderColor: GREEN }}>Official International Manifest Release</p>
+                                    <p className="text-[8px] font-bold text-gray-500 uppercase leading-relaxed tracking-tight">La cadena de custodia ha sido sellada electrónicamente bajo normativas Axis para exportación definitiva internacional.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="px-10 py-4 border-t border-gray-100 mt-auto flex justify-between items-center">
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">{passportId}-P3</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
-            {/* Footer: Acciones PDF - AHORA FUERA DE passport-document-area y DEL RECUADRO PRINCIPAL */}
-            <footer className="w-[816px] mx-auto mt-8 bg-[#0B0F19] rounded-2xl p-6 border border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 no-export shadow-2xl">
-                <div className="flex items-center gap-4 w-full justify-between">
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                        <span className="w-3 h-3 rounded-full bg-brand-green animate-pulse"></span>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hidden sm:inline-block">Documento Protegido por Axis Cryptofolio</span>
-                    </div>
-                    <div className="flex gap-4 w-full sm:w-auto">
-                        <button className="flex-1 md:flex-none px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all shadow-xl">Compartir Digital</button>
-                        <ExportReportButton elementId="passport-document-area" fileName={`PASSPORT-${passportId}`} />
-                    </div>
-                </div>
-            </footer>
-        </div>
+        </>
     );
 }

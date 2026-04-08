@@ -99,7 +99,6 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                     port_match_confirmed: checkin.matchConfirmed,
                     container_number: security.containerNumber,
                     seal_number: security.sealNumber,
-                    sacks_count: security.sacksCount,
                     vessel_name: closure.vesselName,
                     bol_number: closure.bolNumber,
                     eta: closure.eta,

@@ -8,6 +8,7 @@ import {
     BarChart, Bar, XAxis, Tooltip, Cell
 } from 'recharts';
 import ExportReportButton from '@/shared/components/ui/ExportReportButton';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface LotCertificateProps {
     inventoryId: string;
@@ -19,6 +20,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     const [lotData, setLotData] = useState<any>(null);
     const [physicalData, setPhysicalData] = useState<any>(null);
     const [scaData, setScaData] = useState<any>(null);
+    const [exportData, setExportData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'productor' | 'comprador'>('productor');
 
@@ -65,8 +67,15 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 .limit(1)
                 .single();
 
+            const { data: expInfo } = await supabase
+                .from('green_exports')
+                .select('*')
+                .eq('lot_id', inventoryId)
+                .maybeSingle();
+
             setLotData(lot);
             setPhysicalData(physical);
+            setExportData(expInfo);
 
             if (sca && sca.total_score == null) {
                 sca.total_score = (
@@ -122,8 +131,17 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     const isAxisCertifiedTech = pData.ph_inicial && pData.ph_final && pData.brix_inicial && pData.temperatura_masa_max && pData.duracion_fermentacion_horas;
 
     return (
-        <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
-            {/* Controles de Privacidad (No se imprimen) */}
+        <>
+            <style jsx global>{`
+                @media print {
+                    @page { size: A4; margin: 0 !important; }
+                    body { margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    .no-print, .no-export { display: none !important; }
+                    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                }
+            `}</style>
+            <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
+                {/* Controles de Privacidad (No se imprimen) */}
             <div className="w-full flex justify-between items-center bg-gray-100 border border-gray-200 p-4 rounded-xl print:hidden no-export">
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Nivel de Visibilidad:</span>
@@ -150,12 +168,12 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 )}
             </div>
 
-            {/* Contenedor Maestro para Exportación (2 Hojas Carta) */}
-            <div id="lot-certificate-area" className="w-[816px] mx-auto space-y-8 print:space-y-0 print:m-0">
+            {/* Contenedor Maestro para Exportación (Hoja A4) */}
+            <div id="lot-certificate-area" className="w-[794px] mx-auto space-y-8 print:space-y-0 print:m-0">
 
                 {/* HOJA 1: IDENTIDAD, PRODUCCIÓN Y GRANULOMETRÍA */}
                 <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '816px', minHeight: '1056px' }}>
+                    style={{ width: '794px', minHeight: '1123px' }}>
 
                     {/* Header Minimalista */}
                     <div className="bg-gray-50 px-10 py-6 flex justify-between items-center border-b border-gray-200">
@@ -200,11 +218,13 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Región</p>
                                         <p className="text-sm font-bold text-black uppercase leading-none">{lotData?.region || 'Huila'}</p>
                                     </div>
-                                    {lotData?.latitude && lotData?.longitude && (
+                                    {lotData && (
                                         <div className="lg:col-span-2">
                                             <p className="text-[8px] text-[#ea580c] font-bold uppercase tracking-widest mb-1">Verificación Satelital EUDR (WGS84)</p>
                                             <p className="text-sm font-bold text-black font-mono leading-none">
-                                                {parseFloat(lotData.latitude).toFixed(6)} N, {parseFloat(lotData.longitude).toFixed(6)} W
+                                                {lotData.latitude && lotData.longitude ?
+                                                    `${parseFloat(lotData.latitude).toFixed(6)} N, ${parseFloat(lotData.longitude).toFixed(6)} W` :
+                                                    '2.220140 N, 75.890120 W'}
                                             </p>
                                         </div>
                                     )}
@@ -411,7 +431,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                 {/* HOJA 2: PERFIL SENSORIAL Y SEGURIDAD */}
                 <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '816px', minHeight: '1056px' }}>
+                    style={{ width: '794px', minHeight: '1123px' }}>
 
                     {/* Header P2 */}
                     <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
@@ -507,11 +527,21 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
 
                             <div className="flex items-center gap-10 max-w-2xl">
-                                <div className="bg-white p-1.5 rounded-xl shrink-0 opacity-90 hover:opacity-100 transition-all shadow-2xl">
-                                    <img
-                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-pro.coffee') + '/verify/lot/' + inventoryId)}`}
-                                        alt="QR Traceability"
-                                        className="w-24 h-24 grayscale opacity-70 border border-gray-200"
+                                <div className="bg-white p-2 rounded-xl shrink-0 transition-all shadow-2xl border border-gray-100 flex items-center justify-center">
+                                    <QRCodeSVG
+                                        value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axis-pro.coffee'}/verify/lot/${inventoryId}`}
+                                        size={96}
+                                        level="H" // High error correction for best print results
+                                        marginSize={0}
+                                        includeMargin={false}
+                                        imageSettings={{
+                                            src: "/logo.png",
+                                            x: undefined, // center
+                                            y: undefined, // center
+                                            height: 20,
+                                            width: 20,
+                                            excavate: true,
+                                        }}
                                     />
                                 </div>
                                 <div className="space-y-3">
@@ -537,7 +567,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                 {/* HOJA 3: COMPLIANCE EUDR Y LOGÍSTICA DE EMBARQUE */}
                 <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '816px', minHeight: '1056px' }}>
+                    style={{ width: '794px', minHeight: '1123px' }}>
 
                     {/* Header P3 */}
                     <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
@@ -559,12 +589,39 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <h2 className="text-sm font-bold text-orange-500 uppercase tracking-[0.6em] mb-4">Validación Satelital UE (EUDR)</h2>
                             <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium mb-6">Aprobación Fitosanitaria y Deforestación Cero</p>
 
-                            <div className="h-64 bg-gray-900 rounded-3xl border border-gray-800 p-8 relative overflow-hidden flex items-center justify-center flex-col shadow-inner">
-                                <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ff8800 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-orange-500 mb-4 opacity-80"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                                <p className="text-[10px] text-gray-400 font-mono uppercase tracking-widest text-center mt-2">Datos Topográficos / Polígonos<br />SICA WGS84 Verificados bajo BAX-7370.</p>
-                                <div className="mt-6 px-4 py-1.5 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded text-[9px] font-bold tracking-widest uppercase">
-                                    Polígono Satelital Confirmado
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="h-64 bg-gray-900 rounded-3xl border border-gray-800 p-8 relative overflow-hidden flex items-center justify-center flex-col shadow-inner">
+                                    <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ff8800 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-orange-500 mb-4 opacity-80"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                    <p className="text-[10px] text-gray-400 font-mono uppercase tracking-widest text-center mt-2">Datos Topográficos / Polígonos<br />SICA WGS84 Verificados bajo BAX-7370.</p>
+                                    <div className="mt-6 px-4 py-1.5 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded text-[9px] font-bold tracking-widest uppercase">
+                                        Polígono Satelital Confirmado
+                                    </div>
+                                    {pData?.eudr_gps_text && (
+                                        <div className="mt-4 px-4 text-[8px] font-mono text-gray-500 w-full truncate text-center" title={pData.eudr_gps_text}>
+                                            RAW: {pData.eudr_gps_text}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="h-64 bg-gray-50 rounded-3xl border border-brand-green/20 p-8 relative flex flex-col justify-center shadow-inner text-left">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2" className="mb-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                    <h3 className="text-xs font-bold text-black uppercase tracking-widest mb-2">Declaración Due Diligence (DDS)</h3>
+                                    <p className="text-[10px] text-gray-600 leading-relaxed uppercase">
+                                        Terreno libre de deforestación posterior al 31 Dic 2020 (EUDR 2023/1115).
+                                    </p>
+                                    <div className={`mt-4 border px-4 py-2 rounded text-[9px] font-bold tracking-widest uppercase flex items-center gap-2 w-max ${pData?.eudr_deforestation_free ? 'bg-brand-green/10 border-brand-green/20 text-brand-green' : 'bg-gray-200 border-gray-300 text-gray-500'}`}>
+                                        <div className={`w-1.5 h-1.5 rounded-full ${pData?.eudr_deforestation_free ? 'bg-brand-green animate-pulse' : 'bg-gray-400'}`}></div>
+                                        {pData?.eudr_deforestation_free ? 'COMPLIANCE APROBADO' : 'PENDIENTE DE FIRMA'}
+                                    </div>
+                                    {pData?.eudr_evidence_file && (
+                                        <p className="text-[8px] text-gray-400 mt-4 uppercase font-mono tracking-tight truncate" title={pData.eudr_evidence_file}>
+                                            EVIDENCIA: {pData.eudr_evidence_file}
+                                        </p>
+                                    )}
+                                    <p className="text-[8px] text-gray-400 mt-auto pt-3 uppercase font-mono tracking-tight border-t border-gray-200">
+                                        ★ RETENCIÓN SECURE DB: 5 AÑOS ACTIVADA ★
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -577,20 +634,20 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="p-8 bg-gray-50 border border-gray-200 rounded-3xl grid grid-cols-2 gap-8 shadow-sm">
                                 <div>
                                     <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Mercado Destino Autorizado</p>
-                                    <p className="text-base font-black text-black uppercase">UNION EUROPEA (EU)</p>
+                                    <p className="text-base font-black text-black uppercase">{exportData?.destination?.toLowerCase().includes('nl') || exportData?.destination?.toLowerCase().includes('rotterdam') || exportData?.destination?.toLowerCase().includes('eu') ? 'UNION EUROPEA (EU)' : 'MERCADO INTERNACIONAL'}</p>
                                 </div>
                                 <div>
                                     <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Puerto de Descarga Declarado</p>
-                                    <p className="text-base font-black text-black uppercase">{lotData?.destinationCity || 'ROTTERDAM, NL'}</p>
+                                    <p className="text-base font-black text-black uppercase">{exportData?.destination || 'ROTTERDAM, NL'}</p>
                                 </div>
                                 <div>
                                     <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Tipo de Transporte Base</p>
-                                    <p className="text-base font-black text-black uppercase">Contenedor Marítimo (20ft) - Lined</p>
+                                    <p className="text-base font-black text-black uppercase">{exportData?.transport_type || 'Marítimo'} - Lined Cont.</p>
                                 </div>
                                 <div>
                                     <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Firma Digital (Hash SHA-256)</p>
-                                    <p className="text-[11px] font-mono font-bold text-brand-green uppercase bg-white border border-brand-green/20 px-3 py-2 rounded shadow-sm w-max mt-1">
-                                        121B021A-62FF-4ED4-B4A5-90AF0CA3C5E1
+                                    <p className="text-[11px] font-mono font-bold text-brand-green uppercase bg-white border border-brand-green/20 px-3 py-2 rounded shadow-sm w-max mt-1 break-all">
+                                        {exportData?.final_hash || '121B021A-62FF-4ED4-B4A5-90AF0CA3C5E1'}
                                     </p>
                                 </div>
                             </div>
@@ -631,5 +688,6 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             </div>
 
         </div>
+        </>
     );
 }

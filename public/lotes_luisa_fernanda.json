@@ -1,0 +1,77 @@
+{
+  "type": "FeatureCollection",
+  "producer": "LUISA FERNANDA GONZALEZ SAENZ",
+  "farm": "EL ROBLE",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LOTE 1",
+        "area_m2": 4173,
+        "variety": "C. Colombia",
+        "altitude_msnm": 1632,
+        "status": "PRODUCCION"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-75.717083, 2.201167]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LOTE 2",
+        "area_m2": 5320,
+        "variety": "C. Colombia",
+        "altitude_msnm": 1618,
+        "status": "PRODUCCION"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-75.716917, 2.201611]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LOTE 3",
+        "area_m2": 5937,
+        "variety": "C. Colombia",
+        "altitude_msnm": 1680,
+        "status": "PRODUCCION"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-75.716611, 2.202000]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LOTE 4",
+        "area_m2": 5004,
+        "variety": "C. Colombia",
+        "altitude_msnm": 1725,
+        "status": "PRODUCCION"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-75.716417, 2.202333]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LOTE 5",
+        "area_m2": 3385,
+        "variety": "C. Colombia",
+        "altitude_msnm": 1754,
+        "status": "LEVANTE"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-75.716250, 2.202583]
+      }
+    }
+  ]
+}

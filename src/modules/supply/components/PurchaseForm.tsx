@@ -50,7 +50,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         purchaseWeight: 0,
         purchaseValue: 0,
         purchaseDate: new Date().toISOString().split('T')[0],
-        lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
+        lotNumber: `FINCA-${new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' })}-LOTE1`,
         destination: 'export_green' as 'export_green',
         exportCertificate: '',
         isEuropeDestination: false as boolean,
@@ -79,6 +79,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
     const [expectedYield, setExpectedYield] = useState<number>(0);
     const [smartLinkText, setSmartLinkText] = useState('');
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+    const [availableLots, setAvailableLots] = useState<any[]>([]);
+    const [selectedLotId, setSelectedLotId] = useState<string>('');
 
     const nextStep = () => setCurrentStep(p => (Math.min(p + 1, 3) as 1 | 2 | 3));
     const prevStep = () => setCurrentStep(p => (Math.max(p - 1, 1) as 1 | 2 | 3));
@@ -216,10 +218,18 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                         region: found.departamento ? `${found.departamento}, ${found.municipio}` : prev.region,
                         processData: { ...prev.processData, eudr_polygon: found.poligono_geojson || '' }
                     }));
+
+                    if (found.lotes) {
+                        setAvailableLots(found.lotes);
+                    } else {
+                        setAvailableLots([]);
+                    }
+                    
                     setStatus({ type: 'success', message: `Anexus: Datos de finca "${found.nombre_finca}" extraídos mágicamente.` });
                     setTimeout(() => setStatus(null), 4000);
                 } else {
                     setStatus({ type: 'error', message: 'Cédula / SICA no encontrado en base de datos FNC.' });
+                    setAvailableLots([]);
                     setTimeout(() => setStatus(null), 4000);
                 }
             }
@@ -227,6 +237,27 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             console.error("Error buscando SICA:", error);
         } finally {
             setIsSearchingSica(false);
+        }
+    };
+
+    const handleLotSelect = (lotId: string) => {
+        setSelectedLotId(lotId);
+        const lot = availableLots.find(l => l.id === lotId);
+        if (lot) {
+            setFormData(prev => ({
+                ...prev,
+                variety: lot.variedad || prev.variety,
+                altitude: lot.altitud || prev.altitude,
+                latitude: lot.lat || prev.latitude,
+                longitude: lot.lon || prev.longitude,
+                processData: { 
+                    ...prev.processData, 
+                    eudr_polygon: lot.poligono || prev.processData.eudr_polygon 
+                }
+            }));
+            if (lot.variedad && !COFFEE_VARIETIES_BASE.includes(lot.variedad)) {
+                setCustomVariety(lot.variedad);
+            }
         }
     };
 
@@ -401,22 +432,26 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /></svg>
                                 Identificador de Lote (Manual / Auto)
                             </p>
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-4 w-full max-w-2xl px-4">
                                 <input
                                     type="text"
-                                    placeholder="AX-0000"
+                                    placeholder="FINCA-DD/MM/AA-LOTE1"
                                     value={formData.lotNumber}
                                     onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
-                                    className="bg-transparent text-5xl font-bold tracking-tighter text-white hover:text-brand-green-bright transition-colors uppercase outline-none text-center border-b border-white/10 focus:border-brand-green w-64"
+                                    className="bg-bg-main/40 text-xl font-bold tracking-tight text-white hover:text-brand-green-bright transition-colors uppercase outline-none text-center border border-white/5 focus:border-brand-green px-6 py-4 rounded-xl flex-1 shadow-inner"
                                     disabled={isSubmitting}
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setFormData({ ...formData, lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}` })}
-                                    className="p-4 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 text-brand-green transition-all"
-                                    title="Generar ID Aleatorio"
+                                    onClick={() => {
+                                        const farm = formData.farmName.trim().toUpperCase() || 'FINCA';
+                                        const date = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' });
+                                        setFormData({ ...formData, lotNumber: `${farm.replace(/\s+/g, '-')}-${date}-LOTE1` });
+                                    }}
+                                    className="p-4 bg-brand-green/10 hover:bg-brand-green/20 rounded-xl border border-brand-green/20 text-brand-green transition-all group/gen"
+                                    title="Auto-generar nombre por Finca"
                                 >
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover/gen:rotate-180 transition-transform duration-500"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
                                 </button>
                             </div>
                         </div>
@@ -464,9 +499,34 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     </button>
                                 </div>
                                 <p className="text-[10px] text-brand-green/60 uppercase tracking-widest mt-4 font-mono">
-                                    Demo: Digita "1109417355" (Yisela Vargas) para ver extracción simulada de hectáreas y polígonos EUDR.
+                                    Demo: Digita "1081492345" (Luisa Fernanda) para ver extracción de lotes del mapa georreferenciado.
                                 </p>
                             </div>
+
+                            {availableLots.length > 0 && (
+                                <div className="md:col-span-3 bg-blue-600/5 border border-blue-500/20 p-6 rounded-industrial animate-in zoom-in-95 duration-500 mb-6">
+                                    <label className="text-[10px] font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2 mb-3">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                        Selección de Lote Específico (Cruce de Mapa)
+                                    </label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                                        {availableLots.map(lot => (
+                                            <button
+                                                key={lot.id}
+                                                type="button"
+                                                onClick={() => handleLotSelect(lot.id)}
+                                                className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-lg shadow-blue-500/20' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/20'}`}
+                                            >
+                                                <span className="text-[10px] font-bold uppercase tracking-tight">{lot.id}</span>
+                                                <span className="text-[8px] font-mono opacity-60 italic">{lot.area_ha} HA</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-[9px] text-blue-400/60 uppercase tracking-widest mt-4 font-medium italic">
+                                        * Al seleccionar un lote, se cruzarán los datos con Global Forest Watch para validación EUDR.
+                                    </p>
+                                </div>
+                            )}
 
                             <div className="md:col-span-3 my-2 border-t border-white/5 relative">
                                 <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-bg-card px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
@@ -609,8 +669,52 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 <span className="text-xs font-bold text-gray-300 uppercase tracking-widest block">¿Este lote será exportado a la Unión Europea? (Requisito EUDR)</span>
                             </label>
                             {formData.isEuropeDestination && (
-                                <p className="text-[10px] text-brand-green-bright mt-2 uppercase tracking-tight ml-8 animate-in fade-in">Se activará la Validación EUDR si la finca es ≥ 4 Hectáreas.</p>
+                                <div className="mt-4 pl-8 border-l-2 border-brand-green/30 space-y-4 animate-in fade-in">
+                                    <p className="text-[10px] text-brand-green-bright uppercase tracking-tight">Se activará la Validación EUDR satelital si la finca es ≥ 4 Hectáreas.</p>
+                                    
+                                    <label className="flex items-center gap-3 cursor-pointer mt-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.processData?.eudr_deforestation_free || false}
+                                            onChange={(e) => setFormData({ ...formData, processData: { ...formData.processData, eudr_deforestation_free: e.target.checked } })}
+                                            className="w-5 h-5 accent-brand-green bg-bg-main border-white/20 rounded cursor-pointer"
+                                        />
+                                        <span className="text-xs font-bold text-white uppercase tracking-widest block">DDS - Declaración de Libre Deforestación (Post 31 Dic 2020)</span>
+                                    </label>
+                                    {formData.processData?.eudr_deforestation_free && (
+                                        <div className="mt-2 ml-8">
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Evidencia Documental (Carga Opcional)</label>
+                                            <input
+                                                type="file"
+                                                accept=".pdf,.jpg,.png"
+                                                className="w-full max-w-sm bg-bg-main border border-brand-green/30 rounded-industrial-sm px-4 py-2 focus:border-brand-green outline-none text-[10px] text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-brand-green/10 file:text-brand-green-bright hover:file:bg-brand-green/20"
+                                                onChange={(e) => {
+                                                    const fileName = e.target.files?.[0]?.name || '';
+                                                    setFormData({ ...formData, processData: { ...formData.processData, eudr_evidence_file: fileName } })
+                                                }}
+                                                disabled={isSubmitting}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
                             )}
+                        </div>
+
+                        {/* Campo Manual GPS Global */}
+                        <div className="bg-bg-card/30 border border-brand-green/20 rounded-industrial-sm p-4 mb-4">
+                            <label className="text-xs font-bold text-brand-green uppercase tracking-widest block mb-2 flex items-center gap-2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                                Geolocalización GPS / Polígono de la Finca (Texto Simple)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Ej. 2.220140 N, -75.890120 W o cadena GeoJSON/WKT"
+                                value={formData.processData?.eudr_gps_text || ''}
+                                onChange={(e) => setFormData({ ...formData, processData: { ...formData.processData, eudr_gps_text: e.target.value } })}
+                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-xs font-mono text-white placeholder:text-gray-600"
+                                disabled={isSubmitting}
+                            />
+                            <p className="text-[10px] text-gray-500 uppercase mt-2">Soporte directo para DDS Europeo (Reg. UE 2023/1115).</p>
                         </div>
 
                         {/* EUDR Conditional Module */}

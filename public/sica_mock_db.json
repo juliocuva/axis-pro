@@ -70,5 +70,30 @@
         "variedades_sembradas": "GEISHA, PINK BOURBON, TABI",
         "fecha_ultima_actualizacion": "2026-02-10",
         "sello_verificacion_fnc": "ACTIVO"
+    },
+    {
+        "codigo_sica": "41-300-9988",
+        "cedula_productor": "1081492345",
+        "nombre_productor": "LUISA FERNANDA GONZALEZ SAENZ",
+        "departamento": "HUILA",
+        "municipio": "SUAZA",
+        "vereda": "SAN PABLO",
+        "nombre_finca": "EL ROBLE",
+        "area_total_ha": 4.61,
+        "area_cafe_ha": 2.82,
+        "latitud_central": 2.201167,
+        "longitud_central": -75.717083,
+        "lotes": [
+            { "id": "LOTE 1", "area_ha": 0.4173, "variedad": "COLOMBIA", "lat": 2.201167, "lon": -75.717083, "altitud": 1632, "estado": "PRODUCCION", "poligono": "POINT(-75.717083 2.201167)" },
+            { "id": "LOTE 2", "area_ha": 0.5830, "variedad": "COLOMBIA", "lat": 2.201611, "lon": -75.716917, "altitud": 1618, "estado": "PRODUCCION", "poligono": "POINT(-75.716917 2.201611)" },
+            { "id": "LOTE 3", "area_ha": 0.8887, "variedad": "COLOMBIA", "lat": 2.202000, "lon": -75.716611, "altitud": 1680, "estado": "PRODUCCION", "poligono": "POINT(-75.716611 2.202000)" },
+            { "id": "LOTE 4", "area_ha": 0.5904, "variedad": "COLOMBIA", "lat": 2.202333, "lon": -75.716417, "altitud": 1725, "estado": "PRODUCCION", "poligono": "POINT(-75.716417 2.202333)" },
+            { "id": "LOTE 5", "area_ha": 0.3806, "variedad": "COLOMBIA", "lat": 2.202583, "lon": -75.716250, "altitud": 1754, "estado": "LEVANTE", "poligono": "POINT(-75.716250 2.202583)" }
+        ],
+        "poligono_geojson": "POLYGON((-75.717083 2.201167, -75.716917 2.201611, -75.716611 2.202000, -75.716417 2.202333, -75.716250 2.202583, -75.717083 2.201167))",
+        "altitud_promedio_msnm": 1680,
+        "variedades_sembradas": "C. COLOMBIA",
+        "fecha_ultima_actualizacion": "2024-12-09",
+        "sello_verificacion_fnc": "ACTIVO"
     }
 ]

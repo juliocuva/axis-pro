@@ -108,12 +108,16 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     });
 
     useEffect(() => {
-        const almondWeight = formData.excelsoWeight + formData.pasillaWeight;
-        const totalOut = almondWeight + formData.ciscoWeight;
+        const excelso = Number(formData.excelsoWeight) || 0;
+        const pasilla = Number(formData.pasillaWeight) || 0;
+        const cisco = Number(formData.ciscoWeight) || 0;
+
+        const almondWeight = excelso + pasilla;
+        const totalOut = almondWeight + cisco;
         const loss = Math.max(0, parchmentWeight - totalOut);
         const lossPct = parchmentWeight > 0 ? ((parchmentWeight - almondWeight) / parchmentWeight) * 100 : 0;
-        const yieldPct = parchmentWeight > 0 ? (formData.excelsoWeight / parchmentWeight) * 100 : 0;
-        const factor = formData.excelsoWeight > 0 ? (parchmentWeight / formData.excelsoWeight) * 70 : 0;
+        const yieldPct = parchmentWeight > 0 ? (excelso / parchmentWeight) * 100 : 0;
+        const factor = excelso > 0 ? (parchmentWeight / excelso) * 70 : 0;
 
         const params = PROCESS_PARAMS[formData.processType] || PROCESS_PARAMS['Lavado'];
         const theoreticalAlmond = parchmentWeight * params.conversion;

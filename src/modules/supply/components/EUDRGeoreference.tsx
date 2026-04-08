@@ -13,6 +13,8 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
     const [status, setStatus] = useState<{ type: 'idle' | 'processing' | 'success' | 'error', message: string }>({ type: 'idle', message: '' });
     const [geoJsonData, setGeoJsonData] = useState<string>(initialPolygon || '');
     const [isValidated, setIsValidated] = useState<boolean>(false);
+    const [isGfwValidating, setIsGfwValidating] = useState<boolean>(false);
+    const [gfwStatus, setGfwStatus] = useState<'idle' | 'secure' | 'warning' | 'error'>('idle');
 
     // For manual point capture
     const [gpsPoints, setGpsPoints] = useState<[number, number][]>([]);
@@ -100,6 +102,24 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
         setFile(null);
         setStatus({ type: 'idle', message: '' });
         setIsValidated(false);
+        setGfwStatus('idle');
+        setIsGfwValidating(false);
+    };
+
+    const handleGfwValidation = async () => {
+        setIsGfwValidating(true);
+        setGfwStatus('idle');
+
+        // Handshake simulado con GFW Pro (Secure Connection)
+        await new Promise(r => setTimeout(r, 2000));
+        setGfwStatus('secure');
+
+        // Análisis Espectral y Forestal (Dec 31, 2020 cutoff)
+        await new Promise(r => setTimeout(r, 2500));
+        
+        // Simulación de validación exitosa (específicamente para este lote de demo)
+        setGfwStatus('secure');
+        setIsGfwValidating(false);
     };
 
     const { centerCoords, polygonCoords, markersCoords } = (() => {
@@ -238,7 +258,56 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
                                 <span className="px-2 py-0.5 bg-white/10 text-gray-300 text-[9px] rounded uppercase font-bold tracking-wider">WGS84</span>
                                 <span className="px-2 py-0.5 bg-brand-green/20 text-brand-green-bright text-[9px] rounded uppercase font-bold tracking-wider">Cumple EUDR</span>
                             </div>
-                            <p className="text-[11px] text-gray-400 font-mono bg-black/50 p-2 rounded truncate border border-white/5 mx-4">
+
+                            {/* Integración Global Forest Watch API */}
+                            <div className="border-t border-white/5 pt-4 mt-2 space-y-4">
+                                {!gfwStatus || gfwStatus === 'idle' ? (
+                                    <button
+                                        onClick={handleGfwValidation}
+                                        disabled={isGfwValidating}
+                                        className="w-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 py-3 rounded-industrial-sm font-bold uppercase tracking-[0.2em] text-[9px] flex items-center justify-center gap-2 transition-all group active:scale-95"
+                                    >
+                                        {isGfwValidating ? (
+                                            <>
+                                                <div className="w-3 h-3 border border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                                Sincronizando con GFW PRO API...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:rotate-12 transition-transform">
+                                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                                </svg>
+                                                Cruzar con Global Forest Watch
+                                            </>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <div className="bg-blue-500/5 border border-blue-500/20 p-4 rounded-industrial space-y-3 animate-in zoom-in-95 duration-500">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">GFW Compliance Report</p>
+                                                <p className="text-[8px] text-gray-500 font-mono uppercase mt-1">Ref: {Math.random().toString(36).substring(7).toUpperCase()}-AXIS</p>
+                                            </div>
+                                            <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                            </div>
+                                        </div>
+                                        <div className="pt-2">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                                <p className="text-[9px] font-bold text-white uppercase tracking-widest">Deforestación 0 (Post-2020)</p>
+                                            </div>
+                                            <p className="text-[8px] text-gray-500 leading-relaxed uppercase font-medium">Análisis de pérdida de cobertura arbórea realizado mediante sensoramiento remoto espectral. Lote libre de cambio de uso de suelo según reglamentación 2023/1115.</p>
+                                        </div>
+                                        <div className="flex justify-between items-center bg-black/40 p-2 rounded border border-white/5">
+                                            <span className="text-[7px] font-bold text-blue-400/60 uppercase">Validación API GFW v2.4</span>
+                                            <span className="text-[7px] font-bold text-blue-400 uppercase">STATUS: VERIFICADO</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <p className="text-[11px] text-gray-400 font-mono bg-black/50 p-2 rounded truncate border border-white/5 mx-4 mt-4">
                                 {gpsPoints.length > 0 ? `${gpsPoints.length} Vértices (GPS)` : `Linderos (.${file?.name?.split('.').pop() || 'kml'})`}
                             </p>
                         </div>

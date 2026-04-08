@@ -69,7 +69,7 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                     });
 
                     // Remove filters and complex SVG patterns that crash html2canvas
-                    const filters = clonedDoc.querySelectorAll('filter, clipPath, mask');
+                    const filters = clonedDoc.querySelectorAll('filter, mask');
                     filters.forEach((el: any) => el.parentNode?.removeChild(el));
 
                     // Hide elements with blur classes which often break canvas
