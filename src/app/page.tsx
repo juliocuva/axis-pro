@@ -9,13 +9,14 @@ import SupplyModuleContainer from '@/modules/supply/components/SupplyModuleConta
 import TrillaModuleContainer from '@/modules/supply/components/TrillaModuleContainer';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 import GreenExportForm from '@/modules/export/components/GreenExportForm';
+import MasterControlCenter from '@/modules/admin/components/MasterControlCenter';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
 
 export default function Home() {
     const [user, setUser] = useState<{ name: string, email: string, companyId: string } | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive'>('launcher');
+    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive' | 'master'>('launcher');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -143,7 +144,16 @@ export default function Home() {
                     )}
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden">
-                        {/* Removed admin controls to keep it focused */}
+                        {user?.companyId === '99999999-9999-9999-9999-999999999999' && (
+                            <button
+                                onClick={() => setView('master')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-gray-400 hover:text-white'}`}
+                                title="Panel de Gobernanza Global"
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Gobernanza
+                            </button>
+                        )}
                         <button
                             onClick={() => setShowCloudVault(true)}
                             className="flex items-center gap-2 px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
@@ -183,99 +193,122 @@ export default function Home() {
 
             {view === 'launcher' && (
                 <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
-                    <section>
-                        <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
-                            <span className="w-8 h-px bg-white/10"></span>
-                            Emisión de Certificados de Calidad de Exportación
-                            <span className="w-full h-px bg-white/10"></span>
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <ModuleCard
-                                title="Origen Inmutable"
-                                description="Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas."
-                                status="active"
-                                color="brand-green"
-                                onClick={() => setView('supply')}
-                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
-                            />
-                            <ModuleCard
-                                title="Estándar Verde (Trilla)"
-                                description="Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales."
-                                status="active"
-                                color="purple-500"
-                                onClick={() => setView('trilla')}
-                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
-                            />
-                            <ModuleCard
-                                title="Pasaporte Aduanero"
-                                description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
-                                status="active"
-                                color="blue-500"
-                                onClick={() => setView('export')}
-                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
-                            />
-                        </div>
-                    </section>
+                    {user?.companyId !== '99999999-9999-9999-9999-999999999999' && (
+                        <section>
+                            <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
+                                <span className="w-8 h-px bg-white/10"></span>
+                                Emisión de Certificados de Calidad de Exportación
+                                <span className="w-full h-px bg-white/10"></span>
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <ModuleCard
+                                    title="Origen Inmutable"
+                                    description="Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas."
+                                    status="active"
+                                    color="brand-green"
+                                    onClick={() => setView('supply')}
+                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
+                                />
+                                <ModuleCard
+                                    title="Estándar Verde (Trilla)"
+                                    description="Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales."
+                                    status="active"
+                                    color="purple-500"
+                                    onClick={() => setView('trilla')}
+                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
+                                />
+                                <ModuleCard
+                                    title="Pasaporte Aduanero"
+                                    description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
+                                    status="active"
+                                    color="blue-500"
+                                    onClick={() => setView('export')}
+                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
+                                />
+                            </div>
+                        </section>
+                    )}
 
-                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 bg-bg-card border border-white/5 rounded-industrial p-8">
-                            <h3 className="text-sm font-bold uppercase tracking-widest mb-8 flex items-center gap-3">
-                                <span className="w-2 h-2 rounded-full bg-brand-green-bright"></span>
-                                Monitor Comercial Lotes Verdes
-                            </h3>
-                            <div className="space-y-4">
-                                {batches.map((batch, index) => {
-                                    return (
-                                        <div key={`${batch.id}-${index}`} className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-white/5 group hover:border-brand-green/30 transition-all">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-industrial-sm bg-white/5 flex items-center justify-center font-bold text-[10px] uppercase tracking-tighter">
-                                                    {batch.process.substring(0, 3)}
+                    {user?.companyId !== '99999999-9999-9999-9999-999999999999' ? (
+                        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2 bg-bg-card border border-white/5 rounded-industrial p-8">
+                                <h3 className="text-sm font-bold uppercase tracking-widest mb-8 flex items-center gap-3">
+                                    <span className="w-2 h-2 rounded-full bg-brand-green-bright"></span>
+                                    Monitor Comercial Lotes Verdes
+                                </h3>
+                                <div className="space-y-4">
+                                    {batches.map((batch, index) => {
+                                        return (
+                                            <div key={`${batch.id}-${index}`} className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-white/5 group hover:border-brand-green/30 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-industrial-sm bg-white/5 flex items-center justify-center font-bold text-[10px] uppercase tracking-tighter">
+                                                        {batch.process.substring(0, 3)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-xs font-bold uppercase text-white tracking-widest">Lote: {batch.id}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{batch.process} • {batch.greenWeight}kg</p>
+                                                            {batch.isDemo && (
+                                                                <span className="text-[8px] bg-brand-green/20 text-brand-green-bright px-2 py-0.5 rounded-md font-bold border border-brand-green/30 uppercase tracking-widest">Demo WGS84</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="text-xs font-bold uppercase text-white tracking-widest">Lote: {batch.id}</p>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{batch.process} • {batch.greenWeight}kg</p>
-                                                        {batch.isDemo && (
-                                                            <span className="text-[8px] bg-brand-green/20 text-brand-green-bright px-2 py-0.5 rounded-md font-bold border border-brand-green/30 uppercase tracking-widest">Demo WGS84</span>
-                                                        )}
-                                                    </div>
+                                                <div className="text-right">
+                                                    <p className={`text-[10px] font-bold uppercase tracking-widest text-brand-green-bright`}>
+                                                        LISTO PARA EXPORTAR
+                                                    </p>
+                                                    <p className="text-[8px] text-blue-400 font-bold uppercase mt-1 tracking-widest">SICA / EUDR Asignado</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className={`text-[10px] font-bold uppercase tracking-widest text-brand-green-bright`}>
-                                                    LISTO PARA EXPORTAR
-                                                </p>
-                                                <p className="text-[8px] text-blue-400 font-bold uppercase mt-1 tracking-widest">SICA / EUDR Asignado</p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                {batches.length === 0 && <div className="p-8 text-center text-gray-600 font-mono text-xs border border-dashed border-white/5 rounded-2xl">SIN REGISTROS EN ESTE TURNO</div>}
+                                        );
+                                    })}
+                                    {batches.length === 0 && <div className="p-8 text-center text-gray-600 font-mono text-xs border border-dashed border-white/5 rounded-2xl">SIN REGISTROS EN ESTE TURNO</div>}
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="bg-bg-card border border-white/5 rounded-industrial p-8 relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-brand-green/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-8 border-b border-white/5 pb-4">Estado del Sistema</h3>
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Sincronización Aduanera</span>
-                                    <span className="text-brand-green-bright font-bold">OPERATIVO</span>
-                                </div>
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Scanner WGS84 / GIS</span>
-                                    <span className="text-blue-500 font-bold">ACTIVO</span>
-                                </div>
-                                <div className="h-px bg-white/5 my-4"></div>
-                                <div className="text-center p-6 bg-white/2 border border-white/5 rounded-industrial-sm">
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Total Auditado (Mes)</p>
-                                    <p className="text-4xl font-bold text-white tracking-tighter">18,450 <span className="text-[10px] text-brand-green-bright font-bold">KG</span></p>
+                            <div className="bg-bg-card border border-white/5 rounded-industrial p-8 relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-brand-green/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-8 border-b border-white/5 pb-4">Estado del Sistema</h3>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Sincronización Aduanera</span>
+                                        <span className="text-brand-green-bright font-bold">OPERATIVO</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Scanner WGS84 / GIS</span>
+                                        <span className="text-blue-500 font-bold">ACTIVO</span>
+                                    </div>
+                                    <div className="h-px bg-white/5 my-4"></div>
+                                    <div className="text-center p-6 bg-white/2 border border-white/5 rounded-industrial-sm">
+                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Total Auditado (Mes)</p>
+                                        <p className="text-4xl font-bold text-white tracking-tighter">18,450 <span className="text-[10px] text-brand-green-bright font-bold">KG</span></p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                        </section>
+                    ) : (
+                        <section className="bg-bg-card border border-brand-green/20 rounded-industrial p-20 text-center space-y-8 animate-in zoom-in duration-500">
+                             <div className="w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto border border-brand-green/20">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00FF88" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                             </div>
+                             <div className="space-y-2">
+                                <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Terminal de Seguridad Axis</h2>
+                                <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.4em]">Control de Acceso y Gobernanza Global</p>
+                             </div>
+                             <p className="max-w-md mx-auto text-sm text-gray-400 leading-relaxed font-medium">
+                                Has ingresado con privilegios de nivel maestro. Tu terminal está optimizada para la auditoría de red, gestión de roles y cumplimiento normativo EUDR.
+                             </p>
+                             <button 
+                                onClick={() => setView('master')}
+                                className="px-10 py-4 bg-brand-green text-black text-xs font-black uppercase tracking-widest rounded-industrial-sm hover:bg-brand-green-bright transition-all shadow-2xl shadow-brand-green/30"
+                             >
+                                Entrar a la Bóveda de Control
+                             </button>
+                        </section>
+                    )}
                 </div>
             )}
 
@@ -359,7 +392,11 @@ export default function Home() {
                 </div>
             )}
 
-            {/* Removed Retail and Master Control View */}
+            {view === 'master' && (
+                <div className="max-w-7xl mx-auto py-10">
+                    <MasterControlCenter />
+                </div>
+            )}
 
             {/* --- PORTAL GLOBAL DE DOCUMENTOS (MODALES) --- */}
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import AxisNexusWidget from '@/shared/components/ai/AxisNexusWidget';
+
 import Footer from '@/shared/components/layout/Footer';
 
 const montserrat = Montserrat({
@@ -29,7 +29,7 @@ export default function RootLayout({
                     {children}
                 </main>
                 <Footer />
-                <AxisNexusWidget />
+
             </body>
         </html>
     );

@@ -8,25 +8,54 @@ import ClientRoastsArchive from './ClientRoastsArchive';
 
 export default function MasterControlCenter() {
     const [stats, setStats] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isMigrating, setIsMigrating] = useState(false);
     const [selectedTargetId, setSelectedTargetId] = useState('');
     const [reportCompany, setReportCompany] = useState<{ id: string, name: string } | null>(null);
     const [showLotsCompany, setShowLotsCompany] = useState<{ id: string, name: string } | null>(null);
     const [showRoastsCompany, setShowRoastsCompany] = useState<{ id: string, name: string } | null>(null);
+    const [verificationLogs, setVerificationLogs] = useState<any[]>([]);
+    const [dbError, setDbError] = useState<string | null>(null);
+    
+    // UI states
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
+    const [newUser, setNewUser] = useState({
+        email: '',
+        name: '',
+        role: 'caficultor',
+        companyId: ''
+    });
 
     useEffect(() => {
-        fetchMasterStats();
+        const loadInitialData = async () => {
+            setIsLoading(true);
+            await Promise.all([
+                fetchMasterStats(),
+                fetchUsers(),
+                fetchVerificationLogs()
+            ]);
+            setIsLoading(false);
+        };
+        loadInitialData();
     }, []);
 
-    const fetchMasterStats = async () => {
-        setIsLoading(true);
+    const fetchVerificationLogs = async () => {
         try {
-            // 1. Obtener todos los lotes
+            const res = await fetch('/api/track-verify');
+            if (res.ok) {
+                const logs = await res.json();
+                setVerificationLogs(logs.sort((a: any, b: any) => new Date(b.verified_at).getTime() - new Date(a.verified_at).getTime()));
+            }
+        } catch (err) {
+            console.error("No se pudieron cargar los logs de verificación", err);
+        }
+    };
+
+    const fetchMasterStats = async () => {
+        try {
             const { data: lots } = await supabase.from('coffee_purchase_inventory').select('id, company_id, status, farm_name, farmer_name');
-            // 2. Obtener todos los tuestes
             const { data: roasts } = await supabase.from('roast_batches').select('id, company_id');
-            // 3. Obtener análisis
             const { data: physical } = await supabase.from('physical_analysis').select('id, company_id');
             const { data: cupping } = await supabase.from('sca_cupping').select('id, company_id');
 
@@ -39,7 +68,6 @@ export default function MasterControlCenter() {
                 return null;
             };
 
-            // Agrupar por empresa
             const companyGroups: Record<string, any> = {};
 
             const processRecord = (record: any, type: string) => {
@@ -61,7 +89,6 @@ export default function MasterControlCenter() {
                     if (!companyGroups[cid].name && (record.farmer_name || record.farm_name)) {
                         companyGroups[cid].name = (record.farmer_name || record.farm_name).toUpperCase();
                     }
-
                     companyGroups[cid].lots++;
                     if (record.status === 'purchased') companyGroups[cid].purchased++;
                     if (record.status === 'thrashed') companyGroups[cid].thrashed++;
@@ -83,237 +110,345 @@ export default function MasterControlCenter() {
             setStats(Object.values(companyGroups));
         } catch (err) {
             console.error("Master Control Error:", err);
-        } finally {
-            setIsLoading(false);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            setUsers(data || []);
+        } catch (err: any) {
+            console.error("Error al cargar usuarios:", err);
+            setDbError(err.message || 'Error desconocido de red');
+        }
+    };
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .insert([{
+                    email: newUser.email,
+                    full_name: newUser.name,
+                    role: newUser.role,
+                    company_id: newUser.companyId || '99999999-9999-9999-9999-999999999999',
+                    status: 'active'
+                }]);
+
+            if (error) throw error;
+            
+            setShowAddUserModal(false);
+            setNewUser({ email: '', name: '', role: 'caficultor', companyId: '' });
+            await fetchUsers();
+            alert('Usuario registrado exitosamente en la red.');
+        } catch (err: any) {
+            alert('Error al crear usuario: ' + err.message);
+        }
+    };
+
+    const handleBlockUser = async (userId: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'blocked' ? 'active' : 'blocked';
+        const actionLabel = newStatus === 'blocked' ? 'BLOQUEAR' : 'ACTIVAR';
+        
+        if (window.confirm(`¿SEGURIDAD: Estás seguro de ${actionLabel} a este usuario?`)) {
+            try {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ status: newStatus })
+                    .eq('id', userId);
+                
+                if (error) throw error;
+                await fetchUsers();
+            } catch (err: any) {
+                alert('Fallo en la operación: ' + err.message);
+            }
         }
     };
 
     const handleMigration = async () => {
         if (!selectedTargetId) return;
-
-        // Confirmación de Seguridad Industrial
-        const confirmMsg = `¿ESTÁ SEGURO?\n\nEsta acción reasignará permanentemente todos los registros huérfanos a la empresa seleccionada.\n\nEsta operación no se puede deshacer desde esta interfaz.`;
-        if (!window.confirm(confirmMsg)) return;
+        if (!window.confirm('¿ESTÁ SEGURO?\n\nEsta acción reasignará permanentemente todos los registros huérfanos.')) return;
 
         setIsMigrating(true);
         try {
             const tables = ['coffee_purchase_inventory', 'roast_batches', 'physical_analysis', 'sca_cupping'];
-            let totalAffected = 0;
-
             for (const table of tables) {
-                const { data, error } = await supabase
-                    .from(table)
-                    .update({ company_id: selectedTargetId })
-                    .is('company_id', null)
-                    .select('id');
-
-                if (error) console.error(`Error migrando ${table}:`, error);
-                if (data) totalAffected += data.length;
+                await supabase.from(table).update({ company_id: selectedTargetId }).is('company_id', null);
             }
-
             setSelectedTargetId('');
             await fetchMasterStats();
-            alert(`Sincronización Exitosa: ${totalAffected} registros han sido rescatados y vinculados.`);
+            alert(`Sincronización Exitosa.`);
         } catch (err) {
             console.error("Migration Error:", err);
-            alert("Fallo Crítico: Error en la comunicación con la Bóveda Cloud.");
         } finally {
             setIsMigrating(false);
         }
     };
 
+    const roleDefinitions = [
+        { name: 'Caficultor', permissions: 'Ingreso Lotes, Red Blockchain' },
+        { name: 'Laboratorio', permissions: 'CRUD Físico, Control Mermas' },
+        { name: 'Catador', permissions: 'CRUD Perfil Sensorial (SCA)' },
+        { name: 'Tostador', permissions: 'Perfiles de Tueste' },
+        { name: 'Director', permissions: 'Aprobación Final Exportación' },
+        { name: 'Gerente', permissions: 'Administración Global' }
+    ];
+
+    const totalVolume = stats.reduce((acc, s) => acc + s.lots, 0) * 1500;
+    const activeCompanies = stats.filter(s => s.id !== 'unassigned').length;
+
     return (
-        <div className="space-y-12 animate-in fade-in duration-700">
-            <header className="flex justify-between items-end border-b border-white/5 pb-8">
+        <div className="space-y-10 animate-in fade-in duration-700 max-w-7xl mx-auto px-4 pb-20">
+            <header className="flex justify-between items-end border-b border-white/10 pb-6 mt-10">
                 <div>
-                    <h2 className="text-4xl font-bold text-white uppercase tracking-tighter">Terminal de Control Maestro</h2>
-                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.4em] mt-2">Visión Global de Operaciones y Facturación</p>
+                    <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Centro de Gobernanza</h2>
+                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.4em] mt-1">Super Admin • Ecosistema Axis</p>
                 </div>
-                <button
-                    onClick={fetchMasterStats}
-                    className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all flex items-center gap-3 group"
-                >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:rotate-180 transition-transform duration-500"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
-                    Actualizar Red
-                </button>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => setShowAddUserModal(true)}
+                        className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all flex items-center gap-3"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+                        Nuevo Operador
+                    </button>
+                    <button
+                        onClick={fetchMasterStats}
+                        className="px-6 py-3 bg-brand-green text-black rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest border border-brand-green hover:bg-brand-green-bright transition-all flex items-center gap-3 shadow-lg shadow-brand-green/20"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
+                        Refrescar Red
+                    </button>
+                </div>
             </header>
 
-            <div className="grid grid-cols-1 gap-8">
-                <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden shadow-2xl relative">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-green via-brand-green-bright to-transparent opacity-30"></div>
+            {/* SECCIÓN 1: KPIS */}
+            <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Salud y Adopción del Sistema</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="bg-bg-card border border-white/5 p-6 rounded-industrial relative overflow-hidden">
+                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2">Asociaciones Activas</p>
+                        <p className="text-4xl font-black text-white tracking-tighter">{activeCompanies}</p>
+                    </div>
+                    <div className="bg-bg-card border border-white/5 p-6 rounded-industrial relative overflow-hidden">
+                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2">Volumen Estimado (Kg)</p>
+                        <p className="text-4xl font-black text-white tracking-tighter">{totalVolume.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-bg-card border border-brand-green/20 p-6 rounded-industrial relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-brand-green/10 blur-xl rounded-full"></div>
+                        <p className="text-[9px] text-brand-green font-bold uppercase tracking-widest mb-2">Usuarios Activos Hoy</p>
+                        <p className="text-4xl font-black text-white tracking-tighter">
+                            {users.filter(u => u.last_active && new Date(u.last_active).toDateString() === new Date().toDateString()).length}
+                        </p>
+                    </div>
+                    <div className="bg-bg-card border border-purple-500/20 p-6 rounded-industrial relative overflow-hidden">
+                        <p className="text-[9px] text-purple-400 font-bold uppercase tracking-widest mb-2">Verificaciones Externas</p>
+                        <p className="text-4xl font-black text-white tracking-tighter">{verificationLogs.length}</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECCIÓN 2: USUARIOS */}
+            <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(0,223,154,0.6)]"></div>
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Auditoría de Usuarios y Accesos</h3>
+                </div>
+                
+                <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden shadow-2xl">
+                    {dbError && (
+                        <div className="p-8 bg-brand-red/10 border-b border-brand-red/20 space-y-4">
+                            <div className="flex items-center gap-3 text-brand-red">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <span className="text-[10px] font-black uppercase tracking-widest">Error de Sincronización en la Bóveda</span>
+                            </div>
+                            <p className="text-xs text-gray-400">El servidor reporta: <code className="text-brand-red bg-black/40 px-2 py-1 rounded">{dbError}</code></p>
+                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Esto ocurre usualmente si la tabla 'profiles' no ha sido creada. ¿Quieres que te muestre el código SQL necesario?</p>
+                        </div>
+                    )}
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-white/5 border-b border-white/10">
-                                <th className="p-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identidad (Company ID)</th>
-                                <th className="p-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lotes Totales</th>
-                                <th className="p-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Flujo de Lotes</th>
-                                <th className="p-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Tuestes (Batches)</th>
-                                <th className="p-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Análisis (Lab/Cup)</th>
-                                <th className="p-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Potencial Fact.</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Usuario / Email</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Asociación</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Rol</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Actividad</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">Acción</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                            {isLoading ? (
+                            {users.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="p-32 text-center">
-                                        <div className="inline-block w-10 h-10 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-6">Sincronizando con la Bóveda...</p>
+                                    <td colSpan={5} className="p-20 text-center">
+                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em]">No hay operadores registrados en la red</p>
+                                        <button onClick={() => setShowAddUserModal(true)} className="mt-4 text-brand-green text-[9px] font-bold uppercase underline">Registrar Primer Operador</button>
                                     </td>
                                 </tr>
-                            ) : stats.map((company, idx) => (
-                                <tr key={idx} className={`hover:bg-white/[0.03] transition-colors group ${company.id === 'unassigned' ? 'bg-brand-red/[0.03]' : ''}`}>
-                                    <td className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-2 h-2 rounded-full ${company.id === 'unassigned' ? 'bg-brand-red animate-pulse shadow-[0_0_12px_rgba(237,28,36,0.6)]' : 'bg-brand-green shadow-[0_0_8px_rgba(0,166,81,0.4)]'}`}></div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[11px] font-bold text-white uppercase tracking-tight">
-                                                    {company.name}
-                                                </span>
-                                                <span className="text-[9px] font-mono text-gray-500 uppercase tracking-tighter mt-0.5">
-                                                    {company.id === 'unassigned' ? 'ASIGNACIÓN PENDIENTE' : company.id}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-6">
-                                        <span className="text-2xl font-bold text-white tracking-tighter">{company.lots}</span>
-                                    </td>
-                                    <td className="p-6">
-                                        <div className="flex gap-2">
-                                            <span className="text-[9px] bg-orange-500/10 text-orange-400 px-3 py-1.5 rounded-md font-bold border border-orange-500/20" title="En Ingreso">ING: {company.purchased}</span>
-                                            <span className="text-[9px] bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-md font-bold border border-blue-500/20" title="En Trilla">TRI: {company.thrashed}</span>
-                                            <span className="text-[9px] bg-brand-green/10 text-brand-green-bright px-3 py-1.5 rounded-md font-bold border border-brand-green/20" title="Finalizados">FIN: {company.completed}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-6 text-center">
-                                        <span className="text-2xl font-bold text-white tracking-tighter">{company.roasts}</span>
-                                    </td>
-                                    <td className="p-6 text-center">
-                                        <div className="flex justify-center gap-6 text-[10px] font-bold">
-                                            <div className="text-center">
-                                                <p className="text-blue-400 mb-1">LAB</p>
-                                                <p className="text-lg text-white">{company.physical}</p>
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-brand-green-bright mb-1">CUP</p>
-                                                <p className="text-lg text-white">{company.cupping}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-6 text-right">
-                                        {company.id === 'unassigned' ? (
-                                            <div className="flex flex-col items-end gap-3">
-                                                <select
-                                                    value={selectedTargetId}
-                                                    onChange={(e) => setSelectedTargetId(e.target.value)}
-                                                    className="bg-bg-main border border-white/10 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest p-3 text-white outline-none focus:border-brand-green transition-all shadow-inner w-48"
-                                                >
-                                                    <option value="">ASIGNAR DESTINO...</option>
-                                                    {stats.filter(s => s.id !== 'unassigned').map(s => (
-                                                        <option key={s.id} value={s.id}>
-                                                            {s.id === '33333333-3333-3333-3333-000023000009' ? 'JULIO UVA' :
-                                                                s.id === '33333333-3333-3333-3333-000025000009' ? 'CATALINA PEREZ' :
-                                                                    s.id === '99999999-9999-9999-9999-999999999999' ? 'AXIS MASTER' :
-                                                                        s.id.substring(0, 10)}
-                                                        </option>
-                                                    ))}
-                                                    <option value="11111111-1111-1111-1111-111111111111">SAGRADO CORAZÓN</option>
-                                                </select>
-                                                <button
-                                                    onClick={handleMigration}
-                                                    disabled={!selectedTargetId || isMigrating}
-                                                    className="px-6 py-2.5 bg-brand-red text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-industrial-sm hover:bg-brand-red-bright transition-all disabled:opacity-50 shadow-lg shadow-brand-red/20"
-                                                >
-                                                    {isMigrating ? 'SINCRONIZANDO...' : 'EJECUTAR RESCATE'}
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-end gap-3">
-                                                <span className="gold-gradient-text font-bold tracking-widest text-2xl">
-                                                    {(company.roasts * 10 + company.physical * 5 + company.cupping * 5).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-                                                </span>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => setShowLotsCompany({
-                                                            id: company.id,
-                                                            name: company.name
-                                                        })}
-                                                        className="px-4 py-2 bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
-                                                    >
-                                                        Ver Lotes
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setShowRoastsCompany({
-                                                            id: company.id,
-                                                            name: company.name
-                                                        })}
-                                                        className="px-4 py-2 bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
-                                                    >
-                                                        Ver Tuestes
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setReportCompany({
-                                                            id: company.id,
-                                                            name: company.name
-                                                        })}
-                                                        className="px-4 py-2 bg-brand-green/10 text-brand-green border border-brand-green/30 hover:bg-brand-green/20 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all"
-                                                    >
-                                                        Reporte (AI)
-                                                    </button>
+                            ) : users.map((user) => {
+                                const isActiveToday = user.last_active && new Date(user.last_active).toDateString() === new Date().toDateString();
+                                return (
+                                    <tr key={user.id} className={`hover:bg-white/[0.02] transition-colors ${user.status === 'blocked' ? 'opacity-50 grayscale' : ''}`}>
+                                        <td className="p-5">
+                                            <div className="flex items-center gap-3">
+                                                {isActiveToday && <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse shadow-[0_0_8px_rgba(0,255,136,0.6)]"></div>}
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold text-white uppercase tracking-tight">{user.full_name || 'Sin Nombre'}</span>
+                                                    <span className="text-[10px] text-gray-500 font-mono mt-1">{user.email}</span>
                                                 </div>
                                             </div>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="p-5">
+                                            <span className="text-[10px] font-bold text-white bg-white/10 px-3 py-1.5 rounded uppercase tracking-widest border border-white/5">
+                                                {stats.find(s => s.id === user.company_id)?.name || 'Empresa'}
+                                            </span>
+                                        </td>
+                                        <td className="p-5">
+                                            <span className="text-[10px] text-brand-green font-bold uppercase tracking-widest">{user.role}</span>
+                                        </td>
+                                        <td className="p-5">
+                                            <div className="flex flex-col">
+                                                <span className={`text-[10px] font-bold uppercase ${isActiveToday ? 'text-white' : 'text-gray-600'}`}>
+                                                    {isActiveToday ? 'Activo Ahora' : 'Fuera de Línea'}
+                                                </span>
+                                                <span className="text-[9px] text-gray-700 font-mono mt-1">
+                                                    {user.last_active ? new Date(user.last_active).toLocaleString('es-CO', { hour12: true }) : 'Sin actividad'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="p-5 text-right">
+                                            <button
+                                                onClick={() => handleBlockUser(user.id, user.status)}
+                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${user.status === 'blocked' ? 'border-brand-green text-brand-green' : 'border-white/10 text-gray-400 hover:text-white hover:bg-brand-red/10'}`}
+                                            >
+                                                {user.status === 'blocked' ? 'Activar' : 'Anular'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
+            </section>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="bg-bg-card border border-white/5 p-10 rounded-industrial group hover:border-brand-green/30 transition-all relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-brand-green/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-brand-green/10 transition-all"></div>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mb-4">Empresas Activas</p>
-                        <p className="text-5xl font-bold text-white tracking-tighter">{stats.filter(s => s.id !== 'unassigned').length}</p>
+            {/* SECCIÓN 3: ROLES */}
+            <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.6)]"></div>
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Matriz de Roles y Permisos</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {roleDefinitions.map((role, idx) => (
+                        <div key={idx} className="bg-bg-card border border-white/5 p-6 rounded-industrial shadow-lg flex flex-col justify-between">
+                            <div>
+                                <div className="flex justify-between items-start mb-4">
+                                    <span className="text-xs font-black text-white uppercase tracking-tight">{role.name}</span>
+                                </div>
+                                <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">Permisos Activos:</p>
+                                <p className="text-[10px] text-gray-400 mb-6">{role.permissions}</p>
+                            </div>
+                            <div className="flex justify-between items-center border-t border-white/5 pt-4">
+                                <p className="text-[9px] text-gray-500 font-mono">
+                                    {users.filter(u => u.role?.toLowerCase() === role.name.toLowerCase()).length} USUARIOS
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* MODAL NUEVO OPERADOR */}
+            {showAddUserModal && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md bg-bg-card border border-white/10 rounded-industrial p-10 shadow-3xl">
+                        <h2 className="text-2xl font-bold text-white tracking-tighter uppercase mb-6 text-center">Nuevo Operador</h2>
+                        <form onSubmit={handleCreateUser} className="space-y-4">
+                            <div>
+                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={newUser.email}
+                                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Nombre</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newUser.name}
+                                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-white"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Rol</label>
+                                    <select
+                                        value={newUser.role}
+                                        onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm p-3 text-sm text-white"
+                                    >
+                                        {roleDefinitions.map(r => <option key={r.name} value={r.name.toLowerCase()}>{r.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Empresa</label>
+                                    <select
+                                        value={newUser.companyId}
+                                        onChange={(e) => setNewUser({...newUser, companyId: e.target.value})}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm p-3 text-sm text-white"
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        {stats.filter(s => s.id !== 'unassigned').map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 px-4 py-3 border border-white/10 rounded text-[10px] font-bold text-gray-500">CANCELAR</button>
+                                <button type="submit" className="flex-1 px-4 py-3 bg-brand-green text-black rounded text-[10px] font-bold">REGISTRAR</button>
+                            </div>
+                        </form>
                     </div>
-                    <div className="bg-bg-card border border-white/5 p-10 rounded-industrial group hover:border-brand-green/30 transition-all relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-blue-500/10 transition-all"></div>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mb-4">Volumen Total Lotes</p>
-                        <p className="text-5xl font-bold text-white tracking-tighter">{stats.reduce((acc, s) => acc + s.lots, 0)}</p>
+                </div>
+            )}
+
+            {/* MIGRATION UI */}
+            <div className="mt-20 border-t border-white/5 pt-10">
+                <h3 className="text-brand-red text-[10px] font-bold uppercase tracking-widest mb-6">Zona de Rescate de Datos (Legacy)</h3>
+                <div className="bg-brand-red/5 p-6 rounded-industrial border border-brand-red/20 flex items-center justify-between">
+                    <div>
+                        <p className="text-white text-xs font-bold uppercase">Registros Huérfanos Detectados: {stats.find(s => s.id === 'unassigned')?.lots || 0}</p>
+                        <p className="text-gray-500 text-[9px] uppercase mt-1">Vincular registros sin empresa a un nuevo perfil</p>
                     </div>
-                    <div className="bg-bg-card border border-white/5 p-10 rounded-industrial group hover:border-brand-red/30 transition-all relative overflow-hidden">
-                        <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 transition-all ${stats.find(s => s.id === 'unassigned')?.lots > 0 ? 'bg-brand-red/20 animate-pulse' : 'bg-white/5'}`}></div>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mb-4">Registros Huérfanos</p>
-                        <p className={`text-5xl font-bold tracking-tighter ${stats.find(s => s.id === 'unassigned')?.lots > 0 ? 'text-brand-red animate-pulse' : 'text-white'}`}>
-                            {stats.find(s => s.id === 'unassigned')?.lots || 0}
-                        </p>
+                    <div className="flex gap-4">
+                        <select
+                            value={selectedTargetId}
+                            onChange={(e) => setSelectedTargetId(e.target.value)}
+                            className="bg-bg-main border border-white/10 p-2 text-[9px] text-white"
+                        >
+                            <option value="">ASIGNAR A...</option>
+                            {stats.filter(s => s.id !== 'unassigned').map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                        <button onClick={handleMigration} disabled={isMigrating} className="bg-brand-red text-white text-[9px] font-bold px-6 py-2 rounded">EJECUTAR</button>
                     </div>
                 </div>
             </div>
 
-            {reportCompany && (
-                <ClientPerformanceReport
-                    companyId={reportCompany.id}
-                    companyName={reportCompany.name}
-                    onClose={() => setReportCompany(null)}
-                />
-            )}
-
-            {showLotsCompany && (
-                <ClientLotsArchive
-                    companyId={showLotsCompany.id}
-                    companyName={showLotsCompany.name}
-                    onClose={() => setShowLotsCompany(null)}
-                />
-            )}
-
-            {showRoastsCompany && (
-                <ClientRoastsArchive
-                    companyId={showRoastsCompany.id}
-                    companyName={showRoastsCompany.name}
-                    onClose={() => setShowRoastsCompany(null)}
-                />
-            )}
+            {reportCompany && <ClientPerformanceReport companyId={reportCompany.id} companyName={reportCompany.name} onClose={() => setReportCompany(null)} />}
+            {showLotsCompany && <ClientLotsArchive companyId={showLotsCompany.id} companyName={showLotsCompany.name} onClose={() => setShowLotsCompany(null)} />}
+            {showRoastsCompany && <ClientRoastsArchive companyId={showRoastsCompany.id} companyName={showRoastsCompany.name} onClose={() => setShowRoastsCompany(null)} />}
         </div>
     );
 }

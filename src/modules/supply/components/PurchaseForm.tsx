@@ -17,6 +17,9 @@ const PROCESS_TYPES: ProcessType[] = [
     'lavado', 'honey', 'honey_yellow', 'honey_red', 'honey_black', 'natural', 'anaerobico', 'semi_lavado', 'doble_fermentacion', 'co_fermentacion'
 ];
 
+const EXCEL_TEMPLATE_HEADER = "Fecha(DD/MM/AA),Caficultor,Finca,Variedad,Proceso(lavado/natural/honey),Peso(Kg),HorasFerm,pH_Final,Brix_Inicial\n";
+const EXCEL_TEMPLATE_EXAMPLE = "13/04/24,Juan Perez,El Roble,Caturra,Lavado,120,36,4.2,18";
+
 const COLOMBIAN_REGIONS = [
     'Huila', 'Antioquia', 'Tolima', 'Cauca', 'Caldas', 'Santander',
     'Valle del Cauca', 'Risaralda', 'Nariño', 'Quindío', 'Cundinamarca',
@@ -81,6 +84,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
     const [availableLots, setAvailableLots] = useState<any[]>([]);
     const [selectedLotId, setSelectedLotId] = useState<string>('');
+    const [recentFarmers, setRecentFarmers] = useState<any[]>([]);
+    const [showFarmerDirectory, setShowFarmerDirectory] = useState(false);
+    const [isSearchingSica, setIsSearchingSica] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
 
     const nextStep = () => setCurrentStep(p => (Math.min(p + 1, 3) as 1 | 2 | 3));
     const prevStep = () => setCurrentStep(p => (Math.max(p - 1, 1) as 1 | 2 | 3));
@@ -103,8 +110,25 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 setDynamicVarieties(merged);
             }
         };
+        
+        const fetchRecentFarmers = async () => {
+            if (!user?.companyId) return;
+            const { data, error } = await supabase
+                .from('coffee_purchase_inventory')
+                .select('farmer_name, farm_name, altitude, country, region, latitude, longitude, sicaId:process_data->sica_id')
+                .eq('company_id', user.companyId)
+                .order('created_at', { ascending: false })
+                .limit(40);
+
+            if (!error && data) {
+                // Unique by farmer name
+                const unique = Array.from(new Map(data.map(item => [item.farmer_name, item])).values());
+                setRecentFarmers(unique.slice(0, 8));
+            }
+        };
 
         fetchVarieties();
+        fetchRecentFarmers();
     }, [user?.companyId]);
 
     useEffect(() => {
@@ -194,7 +218,154 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         setFormData({ ...formData, purchaseValue: parseInt(rawValue) || 0 });
     };
 
-    const [isSearchingSica, setIsSearchingSica] = useState(false);
+    const handleDownloadTemplate = () => {
+        const blob = new Blob([EXCEL_TEMPLATE_HEADER + EXCEL_TEMPLATE_EXAMPLE], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Plantilla_Recoleccion_Axis.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setStatus({ type: 'success', message: '¡Plantilla descargada! Compártela con tus caficultores.' });
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsImporting(true);
+        setStatus({ type: 'success', message: 'Anexus: Procesando planilla de recolección...' });
+
+        try {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const text = event.target?.result as string;
+                const lines = text.split('\n').map(l => l.trim()).filter(line => line !== '');
+                
+                if (lines.length > 1) {
+                    // Detectar Separador (Coma o Punto y Coma)
+                    const header = lines[0];
+                    const separator = header.includes(';') ? ';' : ',';
+                    
+                    const dataLines = lines.slice(1);
+                    let successCount = 0;
+                    let lastError = '';
+
+                    for (const line of dataLines) {
+                        const data = line.split(separator);
+                        if (data.length < 5) continue; // Salto líneas vacías
+
+                        const lotInput = {
+                            purchaseDate: data[0]?.trim(),
+                            farmerName: data[1]?.trim(),
+                            sicaId: data[2]?.trim(),
+                            lotNumber: data[3]?.trim() || `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
+                            farmName: data[4]?.trim(),
+                            region: data[5]?.trim(),
+                            variety: data[6]?.trim(),
+                            process: (data[7]?.trim().toLowerCase() as ProcessType) || 'lavado',
+                            altitude: parseInt(data[8]) || 1600,
+                            purchaseWeight: parseFloat(data[9]) || 0,
+                            companyId: user?.companyId || '99999999-9999-9999-9999-999999999999',
+                            processData: {
+                                sica_id: data[2]?.trim(),
+                                duracion_fermentacion_horas: data[10]?.trim() || '36',
+                                ph_final: data[11]?.trim() || '4.0',
+                                brix_inicial: data[12]?.trim() || '18',
+                                notes_excel: data[32]?.trim()
+                            }
+                        };
+
+                        try {
+                            // 1. Crear el Lote en el Inventario
+                            const { data: lot, error: lotError } = await supabase
+                                .from('coffee_purchase_inventory')
+                                .insert([{
+                                    lot_number: lotInput.lotNumber,
+                                    farmer_name: lotInput.farmerName,
+                                    farm_name: lotInput.farmName,
+                                    altitude: lotInput.altitude,
+                                    country: 'Colombia',
+                                    region: lotInput.region,
+                                    variety: lotInput.variety,
+                                    process: lotInput.process,
+                                    purchase_weight: lotInput.purchaseWeight,
+                                    purchase_date: lotInput.purchaseDate,
+                                    company_id: lotInput.companyId,
+                                    process_data: lotInput.processData,
+                                    status: 'completed' // Ya viene con toda la data
+                                }])
+                                .select()
+                                .single();
+
+                            if (lotError) throw lotError;
+
+                            // 2. Crear Análisis Físico si hay data
+                            if (data[13] || data[14]) {
+                                await supabase.from('physical_analysis').insert([{
+                                    inventory_id: lot.id,
+                                    moisture_pct: parseFloat(data[13]) || 0,
+                                    density_gl: parseFloat(data[14]) || 0,
+                                    screen_size_distribution: {
+                                        m18: data[15], m17: data[16], m16: data[17]
+                                    },
+                                    defects_count: { total: data[18] },
+                                    grain_color: data[19],
+                                    company_id: lotInput.companyId
+                                }]);
+                            }
+
+                            // 3. Crear Catación SCA si hay data
+                            if (data[28]) {
+                                await supabase.from('sca_cupping').insert([{
+                                    inventory_id: lot.id,
+                                    fragrance_aroma: parseFloat(data[20]) || 0,
+                                    flavor: parseFloat(data[21]) || 0,
+                                    acidity: parseFloat(data[22]) || 0,
+                                    body: parseFloat(data[23]) || 0,
+                                    balance: parseFloat(data[24]) || 0,
+                                    uniformity: parseFloat(data[25]) || 10,
+                                    clean_cup: parseFloat(data[26]) || 10,
+                                    sweetness: parseFloat(data[27]) || 10,
+                                    overall: parseFloat(data[28]) ? 8.0 : 0, // Ajuste dinámico
+                                    notes: data[32]?.trim() || 'Importación Masiva AXIS',
+                                    company_id: lotInput.companyId
+                                }]);
+                            }
+
+                            successCount++;
+                        } catch (err: any) {
+                            console.error("Error importando fila:", err);
+                            lastError = err.message || 'Error desconocido en base de datos';
+                        }
+                    }
+
+                    if (successCount > 0) {
+                        setStatus({ 
+                            type: 'success', 
+                            message: `¡Misión Cumplida! Se han importado ${successCount} lotes integrales.` 
+                        });
+                        setTimeout(() => {
+                            if (onPurchaseComplete) onPurchaseComplete(null);
+                            else window.location.reload();
+                        }, 2000);
+                    } else {
+                        setStatus({ 
+                            type: 'error', 
+                            message: `Fallo en la carga: ${lastError || 'No se detectaron datos válidos en el archivo.'}. Verifica que el formato coincida con la plantilla.` 
+                        });
+                    }
+                }
+                setIsImporting(false);
+            };
+            reader.readAsText(file);
+        } catch (err) {
+            setStatus({ type: 'error', message: 'Error al leer el archivo. Asegúrate de que sea un CSV válido.' });
+            setIsImporting(false);
+        }
+    };
 
     const handleSicaSearch = async () => {
         if (!formData.sicaId) return;
@@ -238,6 +409,23 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         } finally {
             setIsSearchingSica(false);
         }
+    };
+
+    const handleFarmerSelect = (farmer: any) => {
+        setFormData(prev => ({
+            ...prev,
+            farmerName: farmer.farmer_name,
+            farmName: farmer.farm_name,
+            altitude: farmer.altitude,
+            country: farmer.country,
+            region: farmer.region,
+            latitude: farmer.latitude,
+            longitude: farmer.longitude,
+            sicaId: farmer.sicaId || prev.sicaId
+        }));
+        setShowFarmerDirectory(false);
+        setStatus({ type: 'success', message: `Perfil de ${farmer.farmer_name} cargado correctamente.` });
+        setTimeout(() => setStatus(null), 3000);
     };
 
     const handleLotSelect = (lotId: string) => {
@@ -333,36 +521,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         setCurrentStep(1);
     };
 
-    // AI Pattern Box Component
-    const AIPatternBox = () => {
-        const patterns: Record<string, string> = {
-            'Castillo': 'DTR entre 17.5% y 18.2% para puntajes > 86.5 pts.',
-            'Caturra': 'Curva de secado lenta (32h) favorece notas achocolatadas.',
-            'Geisha': 'Estabilidad térmica en reposo reduce astringencia lateral.',
-            'Bourbon': 'Balance ideal de acidez cítrica con MSNM > 1800.',
-            'default': 'Optimización de mallas 17/18 detectada mediante AXIS AI.'
-        };
-        const varietyKey = formData.variety === 'Otro' ? customVariety : formData.variety;
-        const message = patterns[varietyKey] || patterns.default;
+    // Removed AIPatternBox as per MVP requirement
 
-        return (
-            <div className="mt-4 p-6 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm transition-all duration-500 animate-in fade-in slide-in-from-right-4">
-                <div className="p-6 bg-white/2 border border-white/5 rounded-industrial-sm mb-4">
-                    <p className="text-xs text-gray-400 uppercase mb-3 font-bold tracking-widest flex items-center gap-2">
-                        <span className="w-2 h-2 bg-brand-green rounded-full animate-pulse"></span>
-                        Patrón de Éxito Identificado (AXIS AI)
-                    </p>
-                    <p className="text-sm font-medium leading-relaxed">
-                        "{message}"
-                    </p>
-                </div>
-                <div className="flex justify-between items-center px-2">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold opacity-70 tracking-tight">Rendimiento Estimado: {expectedYield.toFixed(2)} KG Excelso</p>
-                    <span className="text-[11px] text-brand-green font-bold uppercase tracking-widest bg-brand-green/10 px-2 py-0.5 rounded-full">Probabilidad: 94.2%</span>
-                </div>
-            </div>
-        );
-    };
 
     const isAlreadyRegistered = !!selectedLot;
 
@@ -416,6 +576,28 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-bg-main border-2 transition-all duration-500 ${currentStep >= 3 ? 'border-brand-green shadow-[0_0_20px_rgba(0,255,136,0.5)] text-brand-green' : 'border-white/20 text-gray-600'}`}>3</div>
                     <span className={`text-[10px] font-bold uppercase tracking-widest bg-bg-main px-3 transition-colors ${currentStep === 3 ? 'text-brand-green-bright' : 'text-gray-500'}`}>Beneficio (Productor)</span>
                 </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-bg-card border border-white/5 p-6 rounded-industrial mb-8">
+                <div className="space-y-1">
+                    <p className="text-[10px] text-brand-green font-black uppercase tracking-[0.3em]">Herramientas de Recolección Externa</p>
+                    <p className="text-xs text-gray-500 font-medium tracking-tight italic">Usa estas herramientas para que el caficultor llene la data técnica en Excel.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={handleDownloadTemplate}
+                        className="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Descargar Plantilla
+                    </button>
+                    <label className="cursor-pointer bg-brand-green/20 hover:bg-brand-green/30 border border-brand-green/30 px-6 py-3 rounded-full text-[10px] text-brand-green-bright font-black uppercase tracking-widest transition-all flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Cargar Excel Lleno
+                        <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
+                    </label>
+                </div>
             </div>
 
             <fieldset disabled={isSubmitting} className="border-none p-0 m-0 min-h-[450px] relative transition-all">
@@ -492,8 +674,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-2">
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover/btn:scale-110 transition-transform"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                                                Magia Anexus
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                                Buscar Productor
                                             </span>
                                         )}
                                     </button>
@@ -528,9 +710,34 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 </div>
                             )}
 
-                            <div className="md:col-span-3 my-2 border-t border-white/5 relative">
-                                <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-bg-card px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                                    Datos Variables / Manuales
+                            <div className="md:col-span-3 my-4 border-t border-white/5 pt-10 relative">
+                                <div className="absolute left-1/2 -translate-x-1/2 -top-3 bg-bg-card px-4 flex items-center gap-3">
+                                    <span className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em]">Directorio de Confianza (Modo Concierge)</span>
+                                </div>
+                                
+                                <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar scroll-smooth">
+                                    {recentFarmers.length > 0 ? recentFarmers.map((f, i) => (
+                                        <button
+                                            key={i}
+                                            type="button"
+                                            onClick={() => handleFarmerSelect(f)}
+                                            className="flex-shrink-0 bg-white/5 border border-white/10 hover:border-brand-green/40 hover:bg-brand-green/5 p-4 rounded-industrial-sm transition-all text-left min-w-[200px]"
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <p className="text-[10px] font-black text-white uppercase truncate">{f.farmer_name}</p>
+                                                <span className="text-[8px] bg-brand-green/10 text-brand-green px-1.5 py-0.5 rounded font-mono font-bold">LOTE {f.lot_number?.split('-').pop() || '01'}</span>
+                                            </div>
+                                            <p className="text-[9px] text-gray-500 uppercase tracking-tighter mt-1 truncate">{f.farm_name} • {f.region}</p>
+                                        </button>
+                                    )) : (
+                                        <div className="w-full text-center py-4 text-[9px] text-gray-700 uppercase tracking-widest italic">Inicia tu primer registro para construir tu directorio</div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="md:col-span-3 my-2 relative py-4">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                    Identificación Individual de Lote
                                 </span>
                             </div>
                             <div>
@@ -998,7 +1205,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
                         )}
 
-                        <AIPatternBox />
                     </section>
                 )}
 

@@ -172,8 +172,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             <div id="lot-certificate-area" className="w-[794px] mx-auto space-y-8 print:space-y-0 print:m-0">
 
                 {/* HOJA 1: IDENTIDAD, PRODUCCIÓN Y GRANULOMETRÍA */}
-                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '794px', minHeight: '1123px' }}>
+                <div className="bg-white border text-black relative flex flex-col print:border-none print:break-after-page"
+                    style={{ width: '794px', minHeight: '1123px', borderColor: '#e5e7eb' }}>
 
                     {/* Header Minimalista */}
                     <div className="bg-gray-50 px-10 py-6 flex justify-between items-center border-b border-gray-200">
@@ -233,7 +233,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                             {/* Score Destacado Sutil */}
                             <div className="bg-gray-50 border border-gray-200 p-1.5 rounded-xl shrink-0 self-center">
-                                <div className="bg-white px-8 py-5 rounded-lg flex flex-col items-center border border-gray-200 shadow-2xl">
+                                <div className="bg-white px-8 py-5 rounded-lg flex flex-col items-center border border-gray-200">
                                     <p className="text-[9px] font-bold text-brand-green uppercase tracking-[0.3em] mb-1">Puntaje basado en estándares SCA</p>
                                     <p className="text-5xl font-bold text-black tracking-tighter leading-none">
                                         {scaData?.total_score != null ? Number(scaData.total_score).toFixed(2) : '00.00'}
@@ -430,8 +430,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 <div className="w-full h-8 print:hidden"></div>
 
                 {/* HOJA 2: PERFIL SENSORIAL Y SEGURIDAD */}
-                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '794px', minHeight: '1123px' }}>
+                <div className="bg-white border text-black relative flex flex-col print:border-none print:break-after-page"
+                    style={{ width: '794px', minHeight: '1123px', borderColor: '#e5e7eb' }}>
 
                     {/* Header P2 */}
                     <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
@@ -460,7 +460,6 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                             {/* Chart & Data (Static Container) */}
                             <div className="w-full h-[450px] relative flex justify-center items-center">
-                                <div className="absolute inset-0 bg-brand-green/[0.03] rounded-full blur-[100px] max-w-[500px] h-[500px] mx-auto top-1/2 -translate-y-1/2"></div>
 
                                 <RadarChart width={500} height={450} cx="50%" cy="50%" outerRadius="75%" data={scaRadarData} className="relative z-10">
                                     <PolarGrid stroke="#e5e7eb" strokeWidth={1} />
@@ -524,24 +523,17 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                         {/* Footer Hoja 2: Seguridad y QR */}
                         <div className="bg-white p-12 flex justify-between items-center gap-12 relative overflow-hidden border-t border-gray-200 mt-auto">
-                            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                            <div className="absolute top-0 left-0 w-full h-[1px] bg-gray-200"></div>
 
                             <div className="flex items-center gap-10 max-w-2xl">
-                                <div className="bg-white p-2 rounded-xl shrink-0 transition-all shadow-2xl border border-gray-100 flex items-center justify-center">
+                                <div className="bg-white p-2 rounded-xl shrink-0 border border-gray-200 flex items-center justify-center">
                                     <QRCodeSVG
                                         value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axis-pro.coffee'}/verify/lot/${inventoryId}`}
                                         size={96}
-                                        level="H" // High error correction for best print results
+                                        style={{ width: "96px", height: "96px" }}
+                                        level="H" 
                                         marginSize={0}
                                         includeMargin={false}
-                                        imageSettings={{
-                                            src: "/logo.png",
-                                            x: undefined, // center
-                                            y: undefined, // center
-                                            height: 20,
-                                            width: 20,
-                                            excavate: true,
-                                        }}
                                     />
                                 </div>
                                 <div className="space-y-3">
@@ -566,8 +558,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 <div className="w-full h-8 print:hidden"></div>
 
                 {/* HOJA 3: COMPLIANCE EUDR Y LOGÍSTICA DE EMBARQUE */}
-                <div className="bg-white border border-gray-200 shadow-2xl relative flex flex-col print:shadow-none print:border-none print:break-after-page"
-                    style={{ width: '794px', minHeight: '1123px' }}>
+                <div className="bg-white border text-black relative flex flex-col print:border-none print:break-after-page"
+                    style={{ width: '794px', minHeight: '1123px', borderColor: '#e5e7eb' }}>
 
                     {/* Header P3 */}
                     <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
@@ -590,8 +582,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium mb-6">Aprobación Fitosanitaria y Deforestación Cero</p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="h-64 bg-gray-900 rounded-3xl border border-gray-800 p-8 relative overflow-hidden flex items-center justify-center flex-col shadow-inner">
-                                    <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ff8800 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                                <div className="h-64 bg-gray-900 rounded-3xl border border-gray-800 p-8 relative overflow-hidden flex items-center justify-center flex-col">
                                     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-orange-500 mb-4 opacity-80"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                                     <p className="text-[10px] text-gray-400 font-mono uppercase tracking-widest text-center mt-2">Datos Topográficos / Polígonos<br />SICA WGS84 Verificados bajo BAX-7370.</p>
                                     <div className="mt-6 px-4 py-1.5 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded text-[9px] font-bold tracking-widest uppercase">
@@ -604,7 +595,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     )}
                                 </div>
 
-                                <div className="h-64 bg-gray-50 rounded-3xl border border-brand-green/20 p-8 relative flex flex-col justify-center shadow-inner text-left">
+                                <div className="h-64 bg-gray-50 rounded-3xl border border-brand-green/20 p-8 relative flex flex-col justify-center text-left">
                                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2" className="mb-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
                                     <h3 className="text-xs font-bold text-black uppercase tracking-widest mb-2">Declaración Due Diligence (DDS)</h3>
                                     <p className="text-[10px] text-gray-600 leading-relaxed uppercase">
@@ -631,7 +622,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <h2 className="text-sm font-bold text-blue-600 uppercase tracking-[0.6em] mb-4">Logística de Embarque y Pasaporte Aduanero</h2>
                             <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium mb-6">Trazabilidad Comercial Inmutable</p>
 
-                            <div className="p-8 bg-gray-50 border border-gray-200 rounded-3xl grid grid-cols-2 gap-8 shadow-sm">
+                            <div className="p-8 bg-gray-50 border border-gray-200 rounded-3xl grid grid-cols-2 gap-8">
                                 <div>
                                     <p className="text-[9px] text-gray-500 uppercase mb-2 tracking-widest">Mercado Destino Autorizado</p>
                                     <p className="text-base font-black text-black uppercase">{exportData?.destination?.toLowerCase().includes('nl') || exportData?.destination?.toLowerCase().includes('rotterdam') || exportData?.destination?.toLowerCase().includes('eu') ? 'UNION EUROPEA (EU)' : 'MERCADO INTERNACIONAL'}</p>

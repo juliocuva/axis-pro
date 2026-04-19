@@ -57,6 +57,10 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                 onclone: (clonedDoc) => {
                     const itemsToHide = clonedDoc.querySelectorAll('.no-export');
                     itemsToHide.forEach((el: any) => el.style.display = 'none');
+                    
+                    // Remueve explícitamente elementos que rompen html2canvas
+                    const badElements = clonedDoc.querySelectorAll('[data-html2canvas-ignore="true"]');
+                    badElements.forEach((el: any) => el.remove());
 
                     // Force charts to have non-zero dimensions
                     // Force charts to have non-zero dimensions
@@ -69,7 +73,7 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                     });
 
                     // Remove filters and complex SVG patterns that crash html2canvas
-                    const filters = clonedDoc.querySelectorAll('filter, mask');
+                    const filters = clonedDoc.querySelectorAll('filter, mask, pattern');
                     filters.forEach((el: any) => el.parentNode?.removeChild(el));
 
                     // Hide elements with blur classes which often break canvas
@@ -78,6 +82,24 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                         el.style.filter = 'none';
                         el.style.backdropFilter = 'none';
                     });
+                    
+                    // Remove radial gradients that can cause createPattern errors
+                    const radialElements = clonedDoc.querySelectorAll('[style*="radial-gradient"]');
+                    radialElements.forEach((el: any) => {
+                        el.style.backgroundImage = 'none';
+                    });
+
+                    // FATAL ERROR PREVENTION: Strip any element that has explicit 0 width/height avoiding createPattern error
+                    const allNodes = clonedDoc.querySelectorAll('svg, canvas, img');
+                    allNodes.forEach((node: any) => {
+                        const w = node.getAttribute('width');
+                        const h = node.getAttribute('height');
+                        const styleW = node.style.width;
+                        const styleH = node.style.height;
+                        if (w === '0' || h === '0' || styleW === '0px' || styleH === '0px' || styleW === '0' || styleH === '0') {
+                            node.remove();
+                        }
+                    });
                 }
             });
 
@@ -85,39 +107,34 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             element.style.cssText = originalStyle;
             if (parent) parent.style.cssText = originalParentStyle;
 
-            const imgData = canvas.toDataURL('image/jpeg', 0.75);
+            // En vez de generar un PDF, lo descargamos como Imagen de Alta Calidad (solicitud del usuario)
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-            let tempPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            const imgProps = tempPdf.getImageProperties(imgData);
-            const pdfWidth = 210; // A4 width in mm
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            // Descargar como imagen JPG
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = `${fileName}.jpg`;
+            link.click();
 
-            const pageHeight = 297; // A4 height in mm
-            let heightLeft = pdfHeight;
-            let position = 0;
-
-            const pdfCustom = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            pdfCustom.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft > 0) {
-                position = heightLeft - pdfHeight; // Negative offset to shift image up
-                pdfCustom.addPage();
-                pdfCustom.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pageHeight;
+            // Save copy to local IMP directory via API
+            try {
+                const response = await fetch('/api/pdf/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // Reutilizamos el nombre de la variable de la API pero mandamos el JPG
+                    body: JSON.stringify({ pdfBase64: imgData, fileName: `${fileName}` })
+                });
+                if (!response.ok) {
+                    console.error('Failed to save to IMP folder');
+                }
+            } catch (saveErr) {
+                console.error('Error saving to IMP folder:', saveErr);
             }
 
-            pdfCustom.save(`${fileName}.pdf`);
-
-            if (btn) btn.innerText = 'PDF GENERADO ✓';
+            if (btn) btn.innerText = 'IMAGEN GENERADA ✓';
             setTimeout(() => { if (btn) btn.innerText = 'DESCARGAR REPORTE INDUSTRIAL'; }, 2000);
         } catch (error) {
-            console.error('Error generating PDF:', error);
+            console.error('Error generating Image:', error);
             if (btn) btn.innerText = 'ERROR AL GENERAR';
         }
     };

@@ -35,6 +35,13 @@ export default function PublicPassportVerification() {
                 .maybeSingle();
 
             if (exportData) {
+                // Tracking de vista externa (Asíncrono para no bloquear la carga)
+                fetch('/api/track-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lot_id: lotId, user_agent: navigator.userAgent })
+                }).catch(e => console.error('Tracking error', e));
+
                 setData({
                     export: exportData,
                     lotId: lotId
@@ -48,6 +55,13 @@ export default function PublicPassportVerification() {
                     .maybeSingle();
 
                 if (lotItem) {
+                    // Tracking para lote directo
+                    fetch('/api/track-verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ lot_id: id, user_agent: navigator.userAgent })
+                    }).catch(e => console.error('Tracking error', e));
+
                     // Si es un UUID de inventario, redirigir a la ruta de lotes
                     window.location.href = `/verify/lot/${id}`;
                     return;

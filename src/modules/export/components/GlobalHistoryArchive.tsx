@@ -12,6 +12,10 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
     const [viewMode, setViewMode] = useState<'passport' | 'certificate' | null>(null);
     const [sealerItem, setSealerItem] = useState<any | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [filterType, setFilterType] = useState<'ALL' | 'EXPORT' | 'LOTE'>('ALL');
 
     useEffect(() => {
         fetchGlobalHistory();
@@ -77,9 +81,21 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
 
     const openReport = (item: any) => {
         setSelectedItem(item);
-        // Si es un manifiesto de exportación, ver pasaporte. Si es un lote de inventario, ver certificado.
         setViewMode(item.type === 'MANIFIESTO' || item.type === 'EXPORT' ? 'passport' : 'certificate');
     };
+
+    // Filtrado y Búsqueda
+    const filteredHistory = history.filter(item => {
+        const matchesSearch = item.label.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesType = filterType === 'ALL' || item.type === filterType;
+        return matchesSearch && matchesType;
+    });
+
+    // Paginación
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
 
     return (
         <>
@@ -121,14 +137,54 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
 
             <div className="space-y-8 animate-in fade-in duration-700">
 
-                <header className="flex justify-between items-end">
-                    <div>
-                        <h3 className="text-2xl font-bold text-white uppercase tracking-tighter">Archivo de Nube AXIS</h3>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-1">Visualización de historial verificado in-situ</p>
+                <header className="space-y-6">
+                    <div className="flex justify-between items-end">
+                        <div>
+                            <h3 className="text-2xl font-bold text-white uppercase tracking-tighter">Archivo de Nube AXIS</h3>
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-1">Visualización de historial verificado in-situ</p>
+                        </div>
+                        <button onClick={fetchGlobalHistory} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
+                        </button>
                     </div>
-                    <button onClick={fetchGlobalHistory} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
-                    </button>
+
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-1 relative group">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-brand-green transition-colors">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                placeholder="Buscar por Nombre del Caficultor o Lote (Ej: Londoño)..." 
+                                className="w-full bg-bg-card border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-white uppercase outline-none focus:border-brand-green transition-all"
+                                value={searchTerm}
+                                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                            />
+                        </div>
+                        <div className="flex items-center gap-4 bg-bg-card border border-white/10 rounded-2xl p-1 px-4">
+                            <span className="text-[9px] font-bold text-gray-500 uppercase">Ver:</span>
+                            {[10, 25, 50, 100].map((n) => (
+                                <button
+                                    key={n}
+                                    onClick={() => { setItemsPerPage(n); setCurrentPage(1); }}
+                                    className={`px-3 py-2 rounded-lg text-[9px] font-black transition-all ${itemsPerPage === n ? 'bg-white/10 text-brand-green-bright' : 'text-gray-600 hover:text-white'}`}
+                                >
+                                    {n}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex bg-bg-card border border-white/10 rounded-2xl p-1">
+                            {['ALL', 'EXPORT', 'LOTE'].map((t) => (
+                                <button
+                                    key={t}
+                                    onClick={() => { setFilterType(t as any); setCurrentPage(1); }}
+                                    className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${filterType === t ? 'bg-brand-green text-black' : 'text-gray-500 hover:text-white'}`}
+                                >
+                                    {t === 'ALL' ? 'Todo' : t === 'EXPORT' ? 'Exports' : 'Lotes'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </header>
 
                 <div className="bg-bg-card border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
@@ -152,14 +208,14 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                         </div>
                                     </td>
                                 </tr>
-                            ) : history.length === 0 ? (
+                            ) : currentItems.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-8 py-20 text-center">
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">No hay manifiestos generados aún.</p>
+                                    <td colSpan={5} className="px-8 py-20 text-center text-gray-600 italic font-mono">
+                                        No se encontraron resultados para "{searchTerm}"
                                     </td>
                                 </tr>
                             ) : (
-                                history.map((item) => (
+                                currentItems.map((item) => (
                                     <tr key={item.id} className="hover:bg-white/2 transition-colors group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
@@ -226,6 +282,37 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                             )}
                         </tbody>
                     </table>
+                    
+                    <div className="bg-white/2 border-t border-white/5 p-6 flex justify-between items-center bg-black/20">
+                        <div className="space-y-1">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                Mostrando <span className="text-white">{indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredHistory.length)}</span> de <span className="text-brand-green-bright">{filteredHistory.length}</span> registros
+                            </p>
+                            {searchTerm && <p className="text-[9px] text-gray-600 italic uppercase">Filtro activo: "{searchTerm}"</p>}
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Página {currentPage} / {totalPages || 1}</p>
+                            <div className="flex gap-2">
+                                <button 
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                    className="px-5 py-2.5 border border-white/10 rounded-xl text-[9px] font-black uppercase disabled:opacity-10 hover:bg-white/5 hover:border-white/30 transition-all flex items-center gap-2"
+                                >
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="15 18 9 12 15 6"/></svg>
+                                    Anterior
+                                </button>
+                                <button 
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                    className="px-5 py-2.5 border border-white/10 rounded-xl text-[9px] font-black uppercase disabled:opacity-10 hover:bg-white/5 hover:border-white/30 transition-all flex items-center gap-2"
+                                >
+                                    Siguiente
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

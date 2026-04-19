@@ -1,0 +1,9 @@
+[
+  {
+    "id": "mock-001",
+    "lot_id": "AX-LOT-1234-202X",
+    "ip_address": "84.12.33.19 (Mock EU)",
+    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X)",
+    "verified_at": "2026-04-07T14:30:00.000Z"
+  }
+]
