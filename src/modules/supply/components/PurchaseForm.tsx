@@ -924,26 +924,33 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             <p className="text-[10px] text-gray-500 uppercase mt-2">Soporte directo para DDS Europeo (Reg. UE 2023/1115).</p>
                         </div>
 
-                        {/* EUDR Conditional Module */}
-                        {(formData.farmSizeHectares ?? 0) >= 4 ? (
-                            <div className="bg-brand-green/5 border border-brand-green/30 rounded-industrial-sm p-4 animate-in slide-in-from-top-4 duration-500 shadow-inner mb-4">
+                        {/* EUDR Georeferencing Module */}
+                        {(formData.isEuropeDestination || (formData.farmSizeHectares ?? 0) >= 4) ? (
+                            <div className="bg-brand-green/5 border border-brand-green/30 rounded-industrial-sm p-6 animate-in slide-in-from-top-4 duration-500 shadow-inner mb-6">
                                 <div className="flex items-start justify-between gap-4 mb-4">
                                     <div className="flex items-center gap-2">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                                        <h4 className="text-sm font-bold text-brand-green-bright uppercase tracking-tight">Georreferenciación EUDR Requerida</h4>
+                                        <div className="w-8 h-8 rounded-lg bg-brand-green/20 flex items-center justify-center border border-brand-green/30">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-black text-brand-green-bright uppercase tracking-tight">Georreferenciación AXIS (EUDR)</h4>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Mapeo In-Situ / Carga SICA</p>
+                                        </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] rounded uppercase font-bold">Europa</span>
-                                        <span className="px-2 py-0.5 bg-brand-green/20 text-brand-green text-[10px] rounded uppercase font-bold">&ge; 4 Hectáreas</span>
+                                        {(formData.farmSizeHectares ?? 0) >= 4 ? (
+                                            <span className="px-2 py-0.5 bg-red-500/20 text-red-500 text-[9px] rounded uppercase font-black border border-red-500/20">REQUERIDO</span>
+                                        ) : (
+                                            <span className="px-2 py-0.5 bg-brand-green/20 text-brand-green text-[9px] rounded uppercase font-black border border-brand-green/20">TEST / OPCIONAL</span>
+                                        )}
                                     </div>
                                 </div>
-                                <p className="text-xs text-brand-green/80 mb-6 leading-relaxed">
-                                    La finca excede el área mínima (≥ 4 He) y su destino es Europa. Para cumplir con la normativa de la UE, ¿tiene los datos en un archivo digital (SICA) para cargarlo y que el sistema monte las coordenadas, o prefiere realizar la captura de puntos en campo ahora mismo?
+                                <p className="text-[11px] text-gray-400 mb-6 leading-relaxed">
+                                    Capture el polígono del lote caminando el perímetro o cargue un archivo SICA. Esto es indispensable para exportación Europea y cumplimiento de trazabilidad industrial.
                                 </p>
 
                                 <EUDRGeoreference
                                     onPolygonChange={(geoJson) => {
-                                        console.log("Polygon Updated for EUDR:", geoJson);
                                         setFormData(prev => ({
                                             ...prev,
                                             processData: {
@@ -953,11 +960,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                         }));
                                     }}
                                 />
-                            </div>
-                        ) : ((formData.farmSizeHectares ?? 0) > 0) ? (
-                            <div className="bg-white/5 border border-white/10 rounded-sm p-4 flex items-center gap-3 mb-4 animate-in fade-in">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Finca exenta de georreferenciación en polígono (&lt; 4 He).</p>
                             </div>
                         ) : null}
 

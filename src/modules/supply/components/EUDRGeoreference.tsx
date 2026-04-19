@@ -31,6 +31,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
     const watchId = useRef<number | null>(null);
     const captureIntervalId = useRef<NodeJS.Timeout | null>(null);
     const countdownIntervalId = useRef<NodeJS.Timeout | null>(null);
+    const currentPositionRef = useRef<[number, number] | null>(null);
 
     // Persistence Effect
     useEffect(() => {
@@ -72,6 +73,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
             (pos) => {
                 const { latitude, longitude, accuracy } = pos.coords;
                 setCurrentPosition([latitude, longitude]);
+                currentPositionRef.current = [latitude, longitude];
                 setGpsAccuracy(accuracy);
             },
             (err) => {
@@ -95,7 +97,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
         if (isCapturing) {
             setNextCaptureSeconds(10);
             
-            // Interval to capture points
+            // Interval to capture points (reads from Ref to avoid stale closure)
             captureIntervalId.current = setInterval(() => {
                 handleCapturePoint();
                 setNextCaptureSeconds(10);
@@ -114,12 +116,13 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
             if (captureIntervalId.current) clearInterval(captureIntervalId.current);
             if (countdownIntervalId.current) clearInterval(countdownIntervalId.current);
         };
-    }, [isCapturing, currentPosition]); // Added currentPosition to ensure we have context
+    }, [isCapturing]);
 
     const handleCapturePoint = () => {
-        if (!currentPosition) return;
+        const currentPos = currentPositionRef.current;
+        if (!currentPos) return;
 
-        const p: [number, number] = [currentPosition[1], currentPosition[0]];
+        const p: [number, number] = [currentPos[1], currentPos[0]];
         setGpsPoints(prev => {
             if (prev.length > 0) {
                 const last = prev[prev.length - 1];
@@ -226,7 +229,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${isCapturing ? 'animate-pulse bg-blue-500' : 'bg-brand-green'}`}></span>
-                        <h3 className="text-white font-black text-lg uppercase">Mapeo Automático</h3>
+                        <h3 className="text-white font-black text-lg uppercase tracking-tight">Mapeo Automático AXIS</h3>
                     </div>
                 </div>
                 {(geoJsonData || gpsPoints.length > 0) && (
@@ -243,10 +246,10 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
                     <>
                         <div className="absolute top-4 left-4 z-20 bg-black/60 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${gpsAccuracy && gpsAccuracy < 15 ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
-                            <span className="text-[10px] text-white font-mono">Precisión: {gpsAccuracy?.toFixed(1) || '--'}m</span>
+                            <span className="text-[10px] text-white font-mono uppercase tracking-widest">Precisión: {gpsAccuracy?.toFixed(1) || '--'}m</span>
                         </div>
                         <div className="absolute top-4 right-4 z-20 bg-brand-green/20 px-3 py-1.5 rounded-full border border-brand-green/30 flex items-center gap-2">
-                            <span className="text-[10px] text-brand-green-bright font-black">SIGUIENTE PUNTO: {nextCaptureSeconds}s</span>
+                            <span className="text-[10px] text-brand-green-bright font-black uppercase">Próximo Punto: {nextCaptureSeconds}s</span>
                         </div>
                     </>
                 )}
@@ -255,7 +258,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
                     {!geoJsonData && gpsPoints.length > 0 && (
                         <div className="text-center">
                             <p className="text-7xl font-black text-white drop-shadow-2xl">{gpsPoints.length}</p>
-                            <p className="text-[10px] text-brand-green-bright uppercase font-black bg-black/40 px-3 py-1 rounded-full">Puntos Capturados</p>
+                            <p className="text-[10px] text-brand-green-bright uppercase font-black bg-black/40 px-3 py-1 rounded-full">Vértices</p>
                         </div>
                     )}
                 </div>
@@ -275,9 +278,9 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
                         <div className="text-center">
                              <h4 className="text-xl font-black text-white uppercase">Validación EUDR</h4>
                              <button onClick={handleGfwValidation} disabled={isGfwValidating} className="mt-4 w-full bg-blue-600/20 text-blue-400 py-4 rounded-xl font-black text-[10px] uppercase">
-                                {isGfwValidating ? 'Buscando Deforestación...' : 'Analizar con Global Forest Watch'}
+                                {isGfwValidating ? 'Analizando GFW...' : 'Analizar con Global Forest Watch'}
                              </button>
-                             {gfwStatus === 'secure' && <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold uppercase text-[10px]">Sin Deforestación Detectada</div>}
+                             {gfwStatus === 'secure' && <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold uppercase text-[10px]">Lote Seguro / Sin Deforestación</div>}
                         </div>
                     )}
                 </div>
@@ -288,7 +291,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
                     {!isCapturing ? (
                         <button onClick={startTracking} className="w-full bg-brand-green text-black py-7 rounded-full font-black uppercase text-sm shadow-xl active:scale-95 transition-all flex flex-col items-center">
                             <span>INICIAR RECORRIDO AUTOMÁTICO</span>
-                            <span className="text-[9px] opacity-60">PUNTO CADA 10 SEGUNDOS</span>
+                            <span className="text-[9px] opacity-60">1 PUNTO CADA 10 SEGUNDOS</span>
                         </button>
                     ) : (
                         <div className="flex flex-col gap-3">
