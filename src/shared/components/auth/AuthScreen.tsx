@@ -160,10 +160,9 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                         {[
                             { title: 'Origen Inmutable', desc: 'Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas.', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', color: 'brand-green' },
-                            { title: 'Estándar Verde (Trilla)', desc: 'Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales.', icon: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0', color: 'purple-500' },
                             { title: 'Pasaporte Aduanero', desc: 'Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA.', icon: 'M22 12h-4l-3 9L9 3l-3 9H2', color: 'blue-500' }
                         ].map((item, idx) => (
                             <div key={idx} className="h-full flex flex-col">
