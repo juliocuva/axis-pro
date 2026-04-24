@@ -5,7 +5,8 @@ import { supabase } from '@/shared/lib/supabase';
 import {
     Radar, RadarChart, PolarGrid,
     PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
-    BarChart, Bar, XAxis, Tooltip, Cell
+    BarChart, Bar, XAxis, YAxis, Tooltip, Cell,
+    LineChart, Line, CartesianGrid, ReferenceLine, AreaChart, Area
 } from 'recharts';
 import ExportReportButton from '@/shared/components/ui/ExportReportButton';
 import { QRCodeSVG } from 'qrcode.react';
@@ -42,27 +43,41 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
     const fetchFullData = async () => {
         try {
-            const { data: lot } = await supabase
+            let query = supabase
                 .from('coffee_purchase_inventory')
                 .select('*')
-                .eq('id', inventoryId)
-                .eq('company_id', user?.companyId)
-                .single();
+                .eq('id', inventoryId);
+            
+            if (user?.companyId) {
+                query = query.eq('company_id', user.companyId);
+            }
+            
+            const { data: lot } = await query.single();
 
-            const { data: physical } = await supabase
+            let physQuery = supabase
                 .from('physical_analysis')
                 .select('*')
-                .eq('inventory_id', inventoryId)
-                .eq('company_id', user?.companyId)
+                .eq('inventory_id', inventoryId);
+                
+            if (user?.companyId) {
+                physQuery = physQuery.eq('company_id', user.companyId);
+            }
+            
+            const { data: physical } = await physQuery
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .single();
 
-            const { data: sca } = await supabase
+            let scaQuery = supabase
                 .from('sca_cupping')
                 .select('*')
-                .eq('inventory_id', inventoryId)
-                .eq('company_id', user?.companyId)
+                .eq('inventory_id', inventoryId);
+                
+            if (user?.companyId) {
+                scaQuery = scaQuery.eq('company_id', user.companyId);
+            }
+
+            const { data: sca } = await scaQuery
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .single();
@@ -126,6 +141,21 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         { name: 'M12', val: physicalData.screen_size_distribution.size12 },
         { name: 'Fondo', val: physicalData.screen_size_distribution.under12 },
     ] : [];
+    
+    // Mockup de Datos de Tostión
+    const roastCurveData = [
+        { time: 0, beanTemp: 20, airTemp: 200, ror: 0 },
+        { time: 1, beanTemp: 90, airTemp: 180, ror: 15 },
+        { time: 2, beanTemp: 110, airTemp: 185, ror: 12 },
+        { time: 3, beanTemp: 130, airTemp: 190, ror: 11 },
+        { time: 4, beanTemp: 150, airTemp: 195, ror: 10 },
+        { time: 5, beanTemp: 165, airTemp: 200, ror: 9 },
+        { time: 6, beanTemp: 180, airTemp: 205, ror: 8 },
+        { time: 7, beanTemp: 195, airTemp: 210, ror: 7 },
+        { time: 8, beanTemp: 205, airTemp: 215, ror: 6 },
+        { time: 9, beanTemp: 212, airTemp: 218, ror: 4 },
+        { time: 10, beanTemp: 218, airTemp: 220, ror: 2 },
+    ];
 
     const pData = lotData?.process_data || {};
     const isAxisCertifiedTech = pData.ph_inicial && pData.ph_final && pData.brix_inicial && pData.temperatura_masa_max && pData.duracion_fermentacion_horas;
@@ -134,8 +164,16 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         <>
             <style jsx global>{`
                 @media print {
-                    @page { size: A4; margin: 0 !important; }
-                    body { margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    @page { 
+                        size: A4; 
+                        margin: 15mm !important; 
+                    }
+                    body { 
+                        margin: 0 !important; 
+                        background: white !important;
+                        -webkit-print-color-adjust: exact !important; 
+                        print-color-adjust: exact !important; 
+                    }
                     .no-print, .no-export { display: none !important; }
                     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                 }
@@ -168,20 +206,20 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 )}
             </div>
 
-            {/* Contenedor Maestro para Exportación (Hoja A4) */}
-            <div id="lot-certificate-area" className="w-[794px] mx-auto space-y-8 print:space-y-0 print:m-0">
+            {/* Contenedor Maestro para Exportación (Hoja A4 con márgenes de seguridad) */}
+            <div id="lot-certificate-area" className="w-[750px] mx-auto space-y-8 print:space-y-0 print:m-0">
 
                 {/* HOJA 1: IDENTIDAD, PRODUCCIÓN Y GRANULOMETRÍA */}
                 <div className="bg-white border text-black relative flex flex-col print:border-none print:break-after-page"
-                    style={{ width: '794px', minHeight: '1123px', borderColor: '#e5e7eb' }}>
+                    style={{ width: '750px', minHeight: '1060px', borderColor: '#e5e7eb' }}>
 
                     {/* Header Minimalista */}
                     <div className="bg-gray-50 px-10 py-6 flex justify-between items-center border-b border-gray-200">
                         <div className="flex items-center gap-4">
-                            <img src="/logo.png" alt="AXIS" className="w-8 h-8 opacity-80" />
+                            <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
                             <div>
-                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">AXIS COFFEE ANALYTICS</p>
-                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Industrial Quality Protocol | Page 01</p>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
+                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Origen de Alta Montaña | Page 01</p>
                             </div>
                         </div>
                         <div className="text-right">
@@ -234,7 +272,9 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             {/* Score Destacado Sutil */}
                             <div className="bg-gray-50 border border-gray-200 p-1.5 rounded-xl shrink-0 self-center">
                                 <div className="bg-white px-8 py-5 rounded-lg flex flex-col items-center border border-gray-200">
-                                    <p className="text-[9px] font-bold text-brand-green uppercase tracking-[0.3em] mb-1">Puntaje basado en estándares SCA</p>
+                                    <p className="text-[9px] font-bold text-brand-green uppercase tracking-[0.3em] mb-1">
+                                        {scaData?.is_cva_version ? 'Coffee Value Assessment (CVA v2.0)' : 'Puntaje basado en estándares SCA'}
+                                    </p>
                                     <p className="text-5xl font-bold text-black tracking-tighter leading-none">
                                         {scaData?.total_score != null ? Number(scaData.total_score).toFixed(2) : '00.00'}
                                     </p>
@@ -431,15 +471,15 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                 {/* HOJA 2: PERFIL SENSORIAL Y SEGURIDAD */}
                 <div className="bg-white border text-black relative flex flex-col print:border-none print:break-after-page"
-                    style={{ width: '794px', minHeight: '1123px', borderColor: '#e5e7eb' }}>
+                    style={{ width: '750px', minHeight: '1060px', borderColor: '#e5e7eb' }}>
 
                     {/* Header P2 */}
                     <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
                         <div className="flex items-center gap-4">
-                            <img src="/logo.png" alt="AXIS" className="w-8 h-8 opacity-80" />
+                            <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
                             <div>
-                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">AXIS COFFEE ANALYTICS</p>
-                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Industrial Quality Protocol | Page 02</p>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
+                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Origen de Alta Montaña | Page 02</p>
                             </div>
                         </div>
                         <div className="text-right">
@@ -454,8 +494,12 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         <div className="w-full relative flex flex-col pt-12 items-center">
                             {/* Title (Normal Flow) */}
                             <div className="flex flex-col items-center mb-6">
-                                <h2 className="text-sm font-bold text-brand-green uppercase tracking-[0.6em] mb-4">Evaluación Sensorial basada en estándares de la SCA</h2>
-                                <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium">Análisis de Perfil Organoléptico de Especialidad</p>
+                                <h2 className="text-sm font-bold text-brand-green uppercase tracking-[0.6em] mb-4">
+                                    {scaData?.is_cva_version ? 'SCA Coffee Value Assessment (CVA)' : 'Evaluación Sensorial basada en estándares de la SCA'}
+                                </h2>
+                                <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium">
+                                    {scaData?.is_cva_version ? 'Protocolo Descriptivo y Afectivo 2025-2026' : 'Análisis de Perfil Organoléptico de Especialidad'}
+                                </p>
                             </div>
 
                             {/* Chart & Data (Static Container) */}
@@ -559,14 +603,14 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                 {/* HOJA 3: COMPLIANCE EUDR Y LOGÍSTICA DE EMBARQUE */}
                 <div className="bg-white border text-black relative flex flex-col print:border-none print:break-after-page"
-                    style={{ width: '794px', minHeight: '1123px', borderColor: '#e5e7eb' }}>
+                    style={{ width: '750px', minHeight: '1060px', borderColor: '#e5e7eb' }}>
 
                     {/* Header P3 */}
                     <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
                         <div className="flex items-center gap-4">
-                            <img src="/logo.png" alt="AXIS" className="w-8 h-8 opacity-80" />
+                            <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
                             <div>
-                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">AXIS COFFEE ANALYTICS</p>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
                                 <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Export Compliance Protocol | Page 03</p>
                             </div>
                         </div>
@@ -651,9 +695,127 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         </div>
                     </div>
                 </div>
+
+                {/* INDICADOR VISUAL DE CORTE (No visible al imprimir) */}
+                <div className="w-full h-8 print:hidden"></div>
+
+                {/* HOJA 4: CURVA DE TOSTIÓN E INTELIGENCIA TÉRMICA */}
+                <div className="bg-white border text-black relative flex flex-col print:border-none print:break-after-page shadow-2xl print:shadow-none"
+                    style={{ width: '750px', minHeight: '1060px', borderColor: '#e5e7eb' }}>
+
+                    {/* Header P4 */}
+                    <div className="bg-gray-50 px-12 py-6 flex justify-between items-center border-b border-gray-200">
+                        <div className="flex items-center gap-4">
+                            <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
+                            <div>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
+                                <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Roast Intelligence Protocol | Page 04</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[9px] font-bold text-orange-500 font-mono uppercase ">BATCH ID: {lotData?.lot_number || '---'}-R</p>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 p-12 flex flex-col gap-8">
+                        <div className="space-y-4 text-center">
+                            <h2 className="text-sm font-bold text-gray-900 uppercase tracking-[0.6em]">Perfil de Tostión Dinámico</h2>
+                            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium">Control de Transferencia Térmica y Cinética de Reacción</p>
+                        </div>
+
+                        {/* Contenedor de la Curva */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-[32px] p-8 h-[500px] relative mt-4">
+                            <div className="absolute top-6 right-10 flex gap-6 z-20">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-1 bg-orange-500 rounded-full"></div>
+                                    <span className="text-[9px] font-bold text-gray-500 uppercase">Bean Temp</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-1 bg-blue-400 rounded-full"></div>
+                                    <span className="text-[9px] font-bold text-gray-500 uppercase">Air Temp</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-1 bg-brand-green/30 rounded-full"></div>
+                                    <span className="text-[9px] font-bold text-gray-500 uppercase">RoR</span>
+                                </div>
+                            </div>
+
+                            <div className="w-full h-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={roastCurveData} margin={{ top: 40, right: 30, left: 0, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                                        <XAxis 
+                                            dataKey="time" 
+                                            label={{ value: 'Tiempo (min)', position: 'insideBottomRight', offset: -10, fontSize: 10, fill: '#666' }}
+                                            tick={{ fontSize: 10, fill: '#999' }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+                                        <YAxis 
+                                            yId="temp"
+                                            label={{ value: 'Temp (°C)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#666' }}
+                                            tick={{ fontSize: 10, fill: '#999' }}
+                                            domain={[0, 250]}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+                                        <YAxis 
+                                            yId="ror"
+                                            orientation="right"
+                                            domain={[0, 25]}
+                                            hide
+                                        />
+                                        <Tooltip 
+                                            contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '10px' }}
+                                        />
+                                        <ReferenceLine yId="temp" y={205} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'right', value: '1st Crack', fill: '#ef4444', fontSize: 9, fontWeight: 'bold' }} />
+                                        <ReferenceLine yId="temp" x={10} stroke="#000" strokeWidth={2} label={{ position: 'top', value: 'DROP', fill: '#000', fontSize: 10, fontWeight: 'black' }} />
+                                        
+                                        <Line yId="temp" type="monotone" dataKey="beanTemp" stroke="#f97316" strokeWidth={4} dot={false} isAnimationActive={false} />
+                                        <Line yId="temp" type="monotone" dataKey="airTemp" stroke="#60a5fa" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Métricas de Tostión */}
+                        <div className="grid grid-cols-4 gap-4 mt-4">
+                            <div className="bg-gray-50 border border-gray-200 p-6 rounded-2xl text-center">
+                                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Tiempo Total</p>
+                                <p className="text-xl font-black text-black tracking-tight">10:45 <span className="text-[10px] text-gray-500">m:s</span></p>
+                            </div>
+                            <div className="bg-gray-50 border border-gray-200 p-6 rounded-2xl text-center">
+                                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Pérdida (Merma)</p>
+                                <p className="text-xl font-black text-brand-red tracking-tight">14.2 <span className="text-[10px] text-gray-500">%</span></p>
+                            </div>
+                            <div className="bg-gray-50 border border-gray-200 p-6 rounded-2xl text-center">
+                                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Agtron (Grounded)</p>
+                                <p className="text-xl font-black text-orange-600 tracking-tight">58.4 <span className="text-[10px] text-gray-500">Ag</span></p>
+                            </div>
+                            <div className="bg-gray-50 border border-gray-200 p-6 rounded-2xl text-center">
+                                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">DTR</p>
+                                <p className="text-xl font-black text-black tracking-tight">18.5 <span className="text-[10px] text-gray-500">%</span></p>
+                            </div>
+                        </div>
+
+                        {/* Notas del Tostador */}
+                        <div className="bg-orange-50/50 border border-orange-200 p-8 rounded-3xl mt-4">
+                            <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mb-4">Observaciones del Maestro Tostador</h4>
+                            <p className="text-sm font-medium text-gray-800 leading-relaxed italic">
+                                "Tueste medio diseñado para resaltar la acidez cítrica y prolongar el dulzor del caramelo. Se aplicó una reducción de gas al inicio del primer crack para evitar el flick y mantener un RoR descendente constante hasta el drop."
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Footer P4 */}
+                    <div className="mt-auto pt-8 pb-10 px-12 flex justify-between items-center border-t border-gray-100 opacity-30">
+                        <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">Axis Intelligence Coffee Division | Roast Analytics</p>
+                        <p className="text-[7px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}-P4</p>
+                    </div>
+                </div>
             </div> {/* Cierra el area de impresion lot-certificate-area */}
 
-            {/* Panel de Control Inferior (No exportable) */}
+            {/* Panel de Control Inferior */}
             <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-gray-100 border border-gray-200 rounded-2xl shadow-2xl print:hidden">
                 <ExportReportButton
                     elementId="lot-certificate-area"
@@ -677,7 +839,6 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     Cerrar Certificado
                 </button>
             </div>
-
         </div>
         </>
     );

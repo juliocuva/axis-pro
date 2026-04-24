@@ -10,13 +10,14 @@ import TrillaModuleContainer from '@/modules/supply/components/TrillaModuleConta
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 import GreenExportForm from '@/modules/export/components/GreenExportForm';
 import MasterControlCenter from '@/modules/admin/components/MasterControlCenter';
+import RoastIntelligenceContainer from '@/modules/production/components/RoastIntelligenceContainer';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
 
 export default function Home() {
-    const [user, setUser] = useState<{ name: string, email: string, companyId: string } | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive' | 'master'>('launcher');
+    const [user, setUser] = useState<{ name: string, email: string, companyId: string, role?: string } | null>(null);
+    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive' | 'master' | 'production'>('launcher');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -118,17 +119,23 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-bg-main p-8 transition-colors duration-400">
             <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-white/5 pb-8">
-                <div onClick={handleLogoClick} className="cursor-pointer group select-none">
-                    <div className="flex items-center gap-4 mb-2">
+                <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-green/30 transition-all">
-                            <img src="/logo.png" alt="AXIS Logo" className="w-full h-full object-contain p-1" />
+                            <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-1" />
                         </div>
-                        <h1 className="text-xl font-bold tracking-tighter uppercase">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-2 font-bold">PRO V2.0</span></h1>
-                        {isDemoUnlocked && <span className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-md animate-pulse">DEMO DESBLOQUEADA</span>}
+                        <div className="flex flex-col">
+                            <h1 className="text-xl font-bold tracking-tighter uppercase leading-none">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-1 font-bold">PRO</span></h1>
+                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1.5">by Mouselab • Sagrado Corazón</p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Sincronización Cloud Activa</p>
+                    <div className="h-10 w-[1px] bg-white/5 hidden md:block"></div>
+                    <div className="hidden md:flex flex-col">
+                        <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
+                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-none">Terminal Activa</p>
+                        </div>
+                        <p className="text-[8px] text-gray-600 font-bold uppercase tracking-tighter mt-1">ID: BAX-7370-MASTER</p>
                     </div>
                 </div>
 
@@ -144,7 +151,7 @@ export default function Home() {
                     )}
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden">
-                        {user?.companyId === '99999999-9999-9999-9999-999999999999' && (
+                        {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor') && (
                             <button
                                 onClick={() => setView('master')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-gray-400 hover:text-white'}`}
@@ -193,7 +200,45 @@ export default function Home() {
 
             {view === 'launcher' && (
                 <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
-                    {user?.companyId !== '99999999-9999-9999-9999-999999999999' && (
+                    {(user?.role === 'gerente' || user?.role === 'auditor') ? (
+                        <section>
+                            <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
+                                <span className="w-8 h-px bg-white/10"></span>
+                                Panel de Gerencia y Supervisión de Asociación
+                                <span className="w-full h-px bg-white/10"></span>
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ModuleCard
+                                    title="Mi Equipo y Roles"
+                                    description="Gestión delegada de personal: Catadores, Tostadores y Operadores de tu asociación."
+                                    status="active"
+                                    color="brand-green"
+                                    onClick={() => setView('master')}
+                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
+                                />
+                                {user?.role !== 'auditor' && (
+                                    <>
+                                        <ModuleCard
+                                            title="Lotes Certificados"
+                                            description="Auditoría de lotes con aval EUDR y pasaportes digitales listos para exportación."
+                                            status="active"
+                                            color="blue-500"
+                                            onClick={() => setView('archive')}
+                                            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>}
+                                        />
+                                        <ModuleCard
+                                            title="Tostión y CVA 2.0"
+                                            description="Supervisión de calidad sensorial y perfiles de tueste de la asociación."
+                                            status="active"
+                                            color="orange-500"
+                                            onClick={() => setView('production')}
+                                            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
+                                        />
+                                    </>
+                                )}
+                            </div>
+                        </section>
+                    ) : (
                         <section>
                             <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
                                 <span className="w-8 h-px bg-white/10"></span>
@@ -218,6 +263,14 @@ export default function Home() {
                                     icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
                                 />
                                 <ModuleCard
+                                    title="Tostión Inteligente"
+                                    description="Control de curvas de tueste y Evaluación CVA 2.0 (Descriptiva/Afectiva) para control de calidad."
+                                    status="active"
+                                    color="orange-500"
+                                    onClick={() => setView('production')}
+                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
+                                />
+                                <ModuleCard
                                     title="Pasaporte Aduanero"
                                     description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
                                     status="active"
@@ -229,8 +282,8 @@ export default function Home() {
                         </section>
                     )}
 
-                    {user?.companyId !== '99999999-9999-9999-9999-999999999999' ? (
-                        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Acceso Universal al Monitor Comercial para todos los usuarios */}
+                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div className="lg:col-span-2 bg-bg-card border border-white/5 rounded-industrial p-8">
                                 <h3 className="text-sm font-bold uppercase tracking-widest mb-8 flex items-center gap-3">
                                     <span className="w-2 h-2 rounded-full bg-brand-green-bright"></span>
@@ -289,16 +342,17 @@ export default function Home() {
                                 </div>
                             </div>
                         </section>
-                    ) : (
-                        <section className="bg-bg-card border border-brand-green/20 rounded-industrial p-20 text-center space-y-8 animate-in zoom-in duration-500">
+                    {/* SECCIÓN ESPECIAL SOLO PARA EMAIL MAESTRO / AUDITOR */}
+                    {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor') && (
+                        <section className="bg-bg-card border border-brand-green/20 rounded-industrial p-20 text-center space-y-8 animate-in zoom-in duration-500 mt-20">
                              <div className="w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto border border-brand-green/20">
                                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00FF88" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                              </div>
                              <div className="space-y-2">
-                                <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Terminal de Seguridad Axis</h2>
+                                <h2 className="text-3xl font-black text-text-main uppercase tracking-tighter">Terminal de Seguridad Axis</h2>
                                 <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.4em]">Control de Acceso y Gobernanza Global</p>
                              </div>
-                             <p className="max-w-md mx-auto text-sm text-gray-400 leading-relaxed font-medium">
+                             <p className="max-w-md mx-auto text-sm text-text-offset leading-relaxed font-medium">
                                 Has ingresado con privilegios de nivel maestro. Tu terminal está optimizada para la auditoría de red, gestión de roles y cumplimiento normativo EUDR.
                              </p>
                              <button 
@@ -324,7 +378,11 @@ export default function Home() {
                 </div>
             )}
 
-            {/* Removed Production View */}
+            {view === 'production' && (
+                <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <RoastIntelligenceContainer user={user} />
+                </div>
+            )}
 
             {/* BIENVENIDA ELIMINADA - SE ENVIARÁ POR CORREO ELECTRÓNICO */}
 
