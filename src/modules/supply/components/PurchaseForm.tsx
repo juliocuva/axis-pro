@@ -144,34 +144,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [isDirty]);
 
-    // Track dirty state and AUTOSAVE to local storage
+    // Track dirty state
     useEffect(() => {
         if (formData.farmerName !== '' || formData.sicaId !== '') {
             setIsDirty(true);
-            // Autoguardado silencioso en memoria local
-            localStorage.setItem('axis_purchase_draft', JSON.stringify(formData));
         }
     }, [formData]);
 
-    // Recuperación de borrador al iniciar
-    useEffect(() => {
-        const draft = localStorage.getItem('axis_purchase_draft');
-        if (draft && !selectedLot) {
-            try {
-                const parsed = JSON.parse(draft);
-                if (window.confirm(`Axis: He encontrado detalles de un lote previo (Productor: ${parsed.farmerName || '---'}).\n\n¿Deseas RECUPERAR estos datos para no tener que escribirlos de nuevo?`)) {
-                    setFormData(parsed);
-                    setIsDirty(true);
-                } else {
-                    // Borrado explícito y definitivo si el usuario no lo quiere
-                    localStorage.removeItem('axis_purchase_draft');
-                    setIsDirty(false);
-                }
-            } catch (e) {
-                localStorage.removeItem('axis_purchase_draft');
-            }
-        }
-    }, []);
+    // Recuperación de borrador desactivada por requerimiento de usuario
 
     useEffect(() => {
         if (selectedLot) {
@@ -234,9 +214,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             if (!isBase) setCustomVariety(selectedLot.variety);
             setDisplayValue(formatCOP(String(selectedLot.purchase_value || 0)));
             setIsDirty(false); // Reset dirty on explicit load
-        } else {
-            // SEGURIDAD: Solo resetear si NO hay cambios o si el usuario confirma
-            if (!isDirty || window.confirm('Axis: ¿Deseas limpiar el formulario para un NUEVO LOTE? Se perderán los datos actuales.')) {
+            // SEGURIDAD: Resetear directamente si no hay lote seleccionado
+            if (!selectedLot) {
                 setFormData(initialFormState);
                 setCustomVariety('');
                 setDisplayValue('');
@@ -246,7 +225,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 setCurrentStep(1);
                 setIsDirty(false);
             }
-        }
     }, [selectedLot]);
 
     // Cálculo dinámico de rendimiento esperado (Factor de rendimiento estándar ~81%)

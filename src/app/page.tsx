@@ -245,30 +245,14 @@ export default function Home() {
                                 Emisión de Certificados de Calidad de Exportación
                                 <span className="w-full h-px bg-white/10"></span>
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <ModuleCard
                                     title="Origen Inmutable"
-                                    description="Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas."
+                                    description="Fijación de coordenadas GIS/WGS84, polígonos EUDR y protocolos de calidad integrados (Trilla/Tostión)."
                                     status="active"
                                     color="brand-green"
                                     onClick={() => setView('supply')}
                                     icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
-                                />
-                                <ModuleCard
-                                    title="Estándar Verde (Trilla)"
-                                    description="Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales."
-                                    status="active"
-                                    color="purple-500"
-                                    onClick={() => setView('trilla')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
-                                />
-                                <ModuleCard
-                                    title="Tostión Inteligente"
-                                    description="Control de curvas de tueste y Evaluación CVA 2.0 (Descriptiva/Afectiva) para control de calidad."
-                                    status="active"
-                                    color="orange-500"
-                                    onClick={() => setView('production')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
                                 />
                                 <ModuleCard
                                     title="Pasaporte Aduanero"
