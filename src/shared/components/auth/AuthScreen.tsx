@@ -183,7 +183,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             {/* 3.5 CLIENT LOGOS (Social Proof) */}
             <section className="py-20 bg-black/20 border-b border-white/5 overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 mb-12">
-                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.5em] text-center italic">Integrado con la confianza de</p>
+                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.5em] text-center">Integrado con la confianza de</p>
                 </div>
                 <div className="flex justify-center items-center opacity-80 hover:opacity-100 transition-all duration-700 flex-wrap mx-auto px-6" style={{ gap: '12vw' }}>
                     <div className="flex flex-col items-center gap-4">

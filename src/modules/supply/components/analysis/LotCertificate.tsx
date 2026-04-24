@@ -218,7 +218,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         <div className="flex items-center gap-4">
                             <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
                             <div>
-                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">ASOCIACIÓN TATAMA SANTUARIO</p>
                                 <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Origen de Alta Montaña | Page 01</p>
                             </div>
                         </div>
@@ -478,7 +478,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         <div className="flex items-center gap-4">
                             <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
                             <div>
-                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">ASOCIACIÓN TATAMA SANTUARIO</p>
                                 <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Origen de Alta Montaña | Page 02</p>
                             </div>
                         </div>
@@ -540,7 +540,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="flex flex-col">
                                     {/* Quote resting on a line */}
                                     <div className="pb-4 border-b border-gray-200 w-full text-center">
-                                        <p className="text-xl font-light text-black tracking-tight leading-relaxed opacity-90 max-w-[85%] italic mx-auto">
+                                        <p className="text-xl font-light text-black tracking-tight leading-relaxed opacity-90 max-w-[85%] mx-auto">
                                             "{scaData?.notes || 'bacancito, chocolate y frutos rojos'}"
                                         </p>
                                     </div>
@@ -610,7 +610,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         <div className="flex items-center gap-4">
                             <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
                             <div>
-                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">ASOCIACIÓN TATAMA SANTUARIO</p>
                                 <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Export Compliance Protocol | Page 03</p>
                             </div>
                         </div>
@@ -708,7 +708,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         <div className="flex items-center gap-4">
                             <img src="/tatama.png" alt="TATAMA" className="h-10 w-auto object-contain" />
                             <div>
-                                <p className="text-[10px] font-bold tracking-[0.4em] text-black italic">ASOCIACIÓN TATAMA SANTUARIO</p>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-black">ASOCIACIÓN TATAMA SANTUARIO</p>
                                 <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest leading-none mt-1">Roast Intelligence Protocol | Page 04</p>
                             </div>
                         </div>
@@ -801,7 +801,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         {/* Notas del Tostador */}
                         <div className="bg-orange-50/50 border border-orange-200 p-8 rounded-3xl mt-4">
                             <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mb-4">Observaciones del Maestro Tostador</h4>
-                            <p className="text-sm font-medium text-gray-800 leading-relaxed italic">
+                            <p className="text-sm font-medium text-gray-800 leading-relaxed">
                                 "Tueste medio diseñado para resaltar la acidez cítrica y prolongar el dulzor del caramelo. Se aplicó una reducción de gas al inicio del primer crack para evitar el flick y mantener un RoR descendente constante hasta el drop."
                             </p>
                         </div>

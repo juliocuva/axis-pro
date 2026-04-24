@@ -17,9 +17,6 @@ const PROCESS_TYPES: ProcessType[] = [
     'lavado', 'honey', 'honey_yellow', 'honey_red', 'honey_black', 'natural', 'anaerobico', 'semi_lavado', 'doble_fermentacion', 'co_fermentacion'
 ];
 
-const EXCEL_TEMPLATE_HEADER = "Fecha(DD/MM/AA),Caficultor,Finca,Variedad,Proceso(lavado/natural/honey),Peso(Kg),HorasFerm,pH_Final,Brix_Inicial\n";
-const EXCEL_TEMPLATE_EXAMPLE = "13/04/24,Juan Perez,El Roble,Caturra,Lavado,120,36,4.2,18";
-
 const COLOMBIAN_REGIONS = [
     'Huila', 'Antioquia', 'Tolima', 'Cauca', 'Caldas', 'Santander',
     'Valle del Cauca', 'Risaralda', 'Nariño', 'Quindío', 'Cundinamarca',
@@ -33,7 +30,7 @@ const COUNTRIES = [
 interface PurchaseFormProps {
     onPurchaseComplete?: (lot: any) => void;
     selectedLot?: any;
-    user: { email: string, name: string, companyId: string } | null;
+    user: { email: string, name: string, companyId: string, role?: string } | null;
 }
 
 export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: PurchaseFormProps) {
@@ -53,6 +50,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         purchaseWeight: 0,
         purchaseValue: 0,
         purchaseDate: new Date().toISOString().split('T')[0],
+        harvestDate: new Date().toISOString().split('T')[0],
         lotNumber: `FINCA-${new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' })}-LOTE1`,
         destination: 'export_green' as 'export_green',
         exportCertificate: '',
@@ -131,6 +129,50 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         fetchRecentFarmers();
     }, [user?.companyId]);
 
+    const [isDirty, setIsDirty] = useState(false);
+
+    // Bloqueo de salida accidental del navegador (Botón atrás / Cerrar pestaña)
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = ''; // Standard para mostrar el diálogo del navegador
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    // Track dirty state and AUTOSAVE to local storage
+    useEffect(() => {
+        if (formData.farmerName !== '' || formData.sicaId !== '') {
+            setIsDirty(true);
+            // Autoguardado silencioso en memoria local
+            localStorage.setItem('axis_purchase_draft', JSON.stringify(formData));
+        }
+    }, [formData]);
+
+    // Recuperación de borrador al iniciar
+    useEffect(() => {
+        const draft = localStorage.getItem('axis_purchase_draft');
+        if (draft && !selectedLot) {
+            try {
+                const parsed = JSON.parse(draft);
+                if (window.confirm(`Axis: He encontrado detalles de un lote previo (Productor: ${parsed.farmerName || '---'}).\n\n¿Deseas RECUPERAR estos datos para no tener que escribirlos de nuevo?`)) {
+                    setFormData(parsed);
+                    setIsDirty(true);
+                } else {
+                    // Borrado explícito y definitivo si el usuario no lo quiere
+                    localStorage.removeItem('axis_purchase_draft');
+                    setIsDirty(false);
+                }
+            } catch (e) {
+                localStorage.removeItem('axis_purchase_draft');
+            }
+        }
+    }, []);
+
     useEffect(() => {
         if (selectedLot) {
             const isBase = COFFEE_VARIETIES_BASE.includes(selectedLot.variety);
@@ -147,6 +189,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 purchaseWeight: Number(selectedLot.purchase_weight) || 0,
                 purchaseValue: Number(selectedLot.purchase_value) || 0,
                 purchaseDate: selectedLot.purchase_date || new Date().toISOString().split('T')[0],
+                harvestDate: selectedLot.harvest_date || selectedLot.purchase_date || new Date().toISOString().split('T')[0],
                 lotNumber: selectedLot.lot_number || `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
                 destination: 'export_green',
                 exportCertificate: selectedLot.export_certificate || '',
@@ -190,14 +233,19 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             });
             if (!isBase) setCustomVariety(selectedLot.variety);
             setDisplayValue(formatCOP(String(selectedLot.purchase_value || 0)));
+            setIsDirty(false); // Reset dirty on explicit load
         } else {
-            setFormData(initialFormState);
-            setCustomVariety('');
-            setDisplayValue('');
-            setSmartLinkText('');
-            setStatus(null);
-            setShowSuccessModal(false);
-            setCurrentStep(1);
+            // SEGURIDAD: Solo resetear si NO hay cambios o si el usuario confirma
+            if (!isDirty || window.confirm('Axis: ¿Deseas limpiar el formulario para un NUEVO LOTE? Se perderán los datos actuales.')) {
+                setFormData(initialFormState);
+                setCustomVariety('');
+                setDisplayValue('');
+                setSmartLinkText('');
+                setStatus(null);
+                setShowSuccessModal(false);
+                setCurrentStep(1);
+                setIsDirty(false);
+            }
         }
     }, [selectedLot]);
 
@@ -216,155 +264,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         const formatted = formatCOP(rawValue);
         setDisplayValue(formatted);
         setFormData({ ...formData, purchaseValue: parseInt(rawValue) || 0 });
-    };
-
-    const handleDownloadTemplate = () => {
-        const blob = new Blob([EXCEL_TEMPLATE_HEADER + EXCEL_TEMPLATE_EXAMPLE], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "Plantilla_Recoleccion_Axis.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setStatus({ type: 'success', message: '¡Plantilla descargada! Compártela con tus caficultores.' });
-    };
-
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setIsImporting(true);
-        setStatus({ type: 'success', message: 'Anexus: Procesando planilla de recolección...' });
-
-        try {
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const text = event.target?.result as string;
-                const lines = text.split('\n').map(l => l.trim()).filter(line => line !== '');
-                
-                if (lines.length > 1) {
-                    // Detectar Separador (Coma o Punto y Coma)
-                    const header = lines[0];
-                    const separator = header.includes(';') ? ';' : ',';
-                    
-                    const dataLines = lines.slice(1);
-                    let successCount = 0;
-                    let lastError = '';
-
-                    for (const line of dataLines) {
-                        const data = line.split(separator);
-                        if (data.length < 5) continue; // Salto líneas vacías
-
-                        const lotInput = {
-                            purchaseDate: data[0]?.trim(),
-                            farmerName: data[1]?.trim(),
-                            sicaId: data[2]?.trim(),
-                            lotNumber: data[3]?.trim() || `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
-                            farmName: data[4]?.trim(),
-                            region: data[5]?.trim(),
-                            variety: data[6]?.trim(),
-                            process: (data[7]?.trim().toLowerCase() as ProcessType) || 'lavado',
-                            altitude: parseInt(data[8]) || 1600,
-                            purchaseWeight: parseFloat(data[9]) || 0,
-                            companyId: user?.companyId || '99999999-9999-9999-9999-999999999999',
-                            processData: {
-                                sica_id: data[2]?.trim(),
-                                duracion_fermentacion_horas: data[10]?.trim() || '36',
-                                ph_final: data[11]?.trim() || '4.0',
-                                brix_inicial: data[12]?.trim() || '18',
-                                notes_excel: data[32]?.trim()
-                            }
-                        };
-
-                        try {
-                            // 1. Crear el Lote en el Inventario
-                            const { data: lot, error: lotError } = await supabase
-                                .from('coffee_purchase_inventory')
-                                .insert([{
-                                    lot_number: lotInput.lotNumber,
-                                    farmer_name: lotInput.farmerName,
-                                    farm_name: lotInput.farmName,
-                                    altitude: lotInput.altitude,
-                                    country: 'Colombia',
-                                    region: lotInput.region,
-                                    variety: lotInput.variety,
-                                    process: lotInput.process,
-                                    purchase_weight: lotInput.purchaseWeight,
-                                    purchase_date: lotInput.purchaseDate,
-                                    company_id: lotInput.companyId,
-                                    process_data: lotInput.processData,
-                                    status: 'completed' // Ya viene con toda la data
-                                }])
-                                .select()
-                                .single();
-
-                            if (lotError) throw lotError;
-
-                            // 2. Crear Análisis Físico si hay data
-                            if (data[13] || data[14]) {
-                                await supabase.from('physical_analysis').insert([{
-                                    inventory_id: lot.id,
-                                    moisture_pct: parseFloat(data[13]) || 0,
-                                    density_gl: parseFloat(data[14]) || 0,
-                                    screen_size_distribution: {
-                                        m18: data[15], m17: data[16], m16: data[17]
-                                    },
-                                    defects_count: { total: data[18] },
-                                    grain_color: data[19],
-                                    company_id: lotInput.companyId
-                                }]);
-                            }
-
-                            // 3. Crear Catación SCA si hay data
-                            if (data[28]) {
-                                await supabase.from('sca_cupping').insert([{
-                                    inventory_id: lot.id,
-                                    fragrance_aroma: parseFloat(data[20]) || 0,
-                                    flavor: parseFloat(data[21]) || 0,
-                                    acidity: parseFloat(data[22]) || 0,
-                                    body: parseFloat(data[23]) || 0,
-                                    balance: parseFloat(data[24]) || 0,
-                                    uniformity: parseFloat(data[25]) || 10,
-                                    clean_cup: parseFloat(data[26]) || 10,
-                                    sweetness: parseFloat(data[27]) || 10,
-                                    overall: parseFloat(data[28]) ? 8.0 : 0, // Ajuste dinámico
-                                    notes: data[32]?.trim() || 'Importación Masiva AXIS',
-                                    company_id: lotInput.companyId
-                                }]);
-                            }
-
-                            successCount++;
-                        } catch (err: any) {
-                            console.error("Error importando fila:", err);
-                            lastError = err.message || 'Error desconocido en base de datos';
-                        }
-                    }
-
-                    if (successCount > 0) {
-                        setStatus({ 
-                            type: 'success', 
-                            message: `¡Misión Cumplida! Se han importado ${successCount} lotes integrales.` 
-                        });
-                        setTimeout(() => {
-                            if (onPurchaseComplete) onPurchaseComplete(null);
-                            else window.location.reload();
-                        }, 2000);
-                    } else {
-                        setStatus({ 
-                            type: 'error', 
-                            message: `Fallo en la carga: ${lastError || 'No se detectaron datos válidos en el archivo.'}. Verifica que el formato coincida con la plantilla.` 
-                        });
-                    }
-                }
-                setIsImporting(false);
-            };
-            reader.readAsText(file);
-        } catch (err) {
-            setStatus({ type: 'error', message: 'Error al leer el archivo. Asegúrate de que sea un CSV válido.' });
-            setIsImporting(false);
-        }
     };
 
     const handleSicaSearch = async () => {
@@ -489,6 +388,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             } else {
                 setStatus({ type: 'success', message: result.message });
                 setShowSuccessModal(true);
+                
+                // LIMPIEZA DE BORRADOR: El lote ya está en la nube seguro
+                localStorage.removeItem('axis_purchase_draft');
+                setIsDirty(false);
 
                 // Actualizar lista de variedades
                 if (formData.variety === 'Otro' && !dynamicVarieties.includes(customVariety)) {
@@ -511,6 +414,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
     };
 
     const handleNewLot = () => {
+        // LIMPIEZA TOTAL: Borramos el rastro del navegador para evitar mensajes fantasma
+        localStorage.removeItem('axis_purchase_draft');
+        setIsDirty(false);
+        
         setShowSuccessModal(false);
         setFormData({
             ...initialFormState,
@@ -519,6 +426,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         setDisplayValue('');
         setStatus(null);
         setCurrentStep(1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     // Removed AIPatternBox as per MVP requirement
@@ -541,13 +449,45 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                         <p className="text-gray-400 leading-relaxed text-sm">
                             Identificador <span className="text-brand-green-bright font-mono font-bold">{formData.lotNumber}</span> ha sido persistido exitosamente en el Core de <span className="text-white font-bold">Axis Coffee Pro</span>.
                         </p>
-                        <button
-                            type="button"
-                            onClick={handleNewLot}
-                            className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-5 rounded-industrial-sm transition-all uppercase tracking-widest text-sm shadow-lg shadow-brand-green/20 active:scale-95"
-                        >
-                            Crear Nuevo Lote
-                        </button>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    handleNewLot();
+                                }}
+                                className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-5 rounded-industrial-sm transition-all uppercase tracking-widest text-sm shadow-lg shadow-brand-green/20"
+                            >
+                                Nuevo Lote (Limpiar Todo)
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    // CONSERVAR ÚLTIMO DATO (Elena)
+                                    // Limpiamos la memoria pero mantenemos el estado local para fluidez
+                                    localStorage.removeItem('axis_purchase_draft');
+                                    setIsDirty(true); 
+                                    
+                                    setShowSuccessModal(false);
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}`,
+                                        purchaseWeight: 0,
+                                        purchaseValue: 0,
+                                        processData: {
+                                            ...prev.processData,
+                                            // Limpiar datos de análisis físico si existen para que no se hereden
+                                            brix_inicial: '18.5',
+                                            duracion_fermentacion_horas: '72'
+                                        }
+                                    }));
+                                    setCurrentStep(1);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="w-full bg-white/5 hover:bg-white/10 text-brand-green-bright font-bold py-4 rounded-industrial-sm transition-all border border-brand-green/20 uppercase tracking-widest text-[10px]"
+                            >
+                                Conservar Productor (Mantener a {formData.farmerName.split(' ')[0] || 'Elena'})
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -578,28 +518,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 </button>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-bg-card border border-white/5 p-6 rounded-industrial mb-8">
-                <div className="space-y-1">
-                    <p className="text-[10px] text-brand-green font-black uppercase tracking-[0.3em]">Herramientas de Recolección Externa</p>
-                    <p className="text-xs text-gray-500 font-medium tracking-tight italic">Usa estas herramientas para que el caficultor llene la data técnica en Excel.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={handleDownloadTemplate}
-                        className="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Descargar Plantilla
-                    </button>
-                    <label className="cursor-pointer bg-brand-green/20 hover:bg-brand-green/30 border border-brand-green/30 px-6 py-3 rounded-full text-[10px] text-brand-green-bright font-black uppercase tracking-widest transition-all flex items-center gap-2">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        Cargar Excel Lleno
-                        <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
-                    </label>
-                </div>
-            </div>
-
             <fieldset disabled={isSubmitting} className="border-none p-0 m-0 min-h-[450px] relative transition-all">
                 {currentStep === 1 && (
                     <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
@@ -607,6 +525,30 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
                             Datos Principales de Origen
                         </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div className="bg-brand-red/5 border border-brand-red/20 p-4 rounded-industrial">
+                                <label className="text-[10px] font-bold text-brand-red-bright uppercase tracking-[0.2em] mb-2 block">Fecha de Recolección (Cosecha)</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={formData.harvestDate}
+                                    onChange={(e) => setFormData({ ...formData, harvestDate: e.target.value })}
+                                    className="w-full bg-bg-main border border-brand-red/30 rounded-industrial-sm px-4 py-3 text-brand-red-bright font-bold outline-none focus:border-brand-red"
+                                />
+                                <p className="text-[8px] text-gray-500 mt-2 uppercase">Vital para determinar la edad y frescura del lote.</p>
+                            </div>
+                            <div className="bg-white/2 p-4 rounded-industrial border border-white/5 opacity-60">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 block">Fecha de Ingreso / Compra</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={formData.purchaseDate}
+                                    onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-gray-500 font-bold outline-none"
+                                />
+                            </div>
+                        </div>
 
                         <div className="flex flex-col items-center justify-center p-8 bg-bg-main border border-white/5 rounded-industrial-sm group relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-1 bg-brand-green/20"></div>
@@ -700,11 +642,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                                 className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-lg shadow-blue-500/20' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/20'}`}
                                             >
                                                 <span className="text-[10px] font-bold uppercase tracking-tight">{lot.id}</span>
-                                                <span className="text-[8px] font-mono opacity-60 italic">{lot.area_ha} HA</span>
+                                                <span className="text-[8px] font-mono opacity-60">{lot.area_ha} HA</span>
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="text-[9px] text-blue-400/60 uppercase tracking-widest mt-4 font-medium italic">
+                                    <p className="text-[9px] text-blue-400/60 uppercase tracking-widest mt-4 font-medium">
                                         * Al seleccionar un lote, se cruzarán los datos con Global Forest Watch para validación EUDR.
                                     </p>
                                 </div>
@@ -730,7 +672,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                             <p className="text-[9px] text-gray-500 uppercase tracking-tighter mt-1 truncate">{f.farm_name} • {f.region}</p>
                                         </button>
                                     )) : (
-                                        <div className="w-full text-center py-4 text-[9px] text-gray-700 uppercase tracking-widest italic">Inicia tu primer registro para construir tu directorio</div>
+                                        <div className="w-full text-center py-4 text-[9px] text-gray-700 uppercase tracking-widest">Inicia tu primer registro para construir tu directorio</div>
                                     )}
                                 </div>
                             </div>
@@ -829,7 +771,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     <input
                                         type="text"
                                         placeholder="Pegue aquí el enlace..."
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-[#ea580c] outline-none text-xs text-gray-300 italic"
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-[#ea580c] outline-none text-xs text-gray-300"
                                         value={smartLinkText}
                                         onChange={(e) => setSmartLinkText(e.target.value)}
                                         disabled={isSubmitting}
@@ -886,7 +828,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                             onChange={(e) => setFormData({ ...formData, processData: { ...formData.processData, eudr_deforestation_free: e.target.checked } })}
                                             className="w-5 h-5 accent-brand-green bg-bg-main border-white/20 rounded cursor-pointer"
                                         />
-                                        <span className="text-xs font-bold text-white uppercase tracking-widest block">DDS - Declaración de Libre Deforestación (Post 31 Dic 2020)</span>
+                                        <span className="text-xs font-bold text-text-main uppercase tracking-widest block">DDS - Declaración de Libre Deforestación (Post 31 Dic 2020)</span>
                                     </label>
                                     {formData.processData?.eudr_deforestation_free && (
                                         <div className="mt-2 ml-8">
@@ -918,7 +860,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 placeholder="Ej. 2.220140 N, -75.890120 W o cadena GeoJSON/WKT"
                                 value={formData.processData?.eudr_gps_text || ''}
                                 onChange={(e) => setFormData({ ...formData, processData: { ...formData.processData, eudr_gps_text: e.target.value } })}
-                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-xs font-mono text-white placeholder:text-gray-600"
+                                className="w-full bg-bg-main border border-border-main rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-xs font-mono text-text-main placeholder:text-text-offset"
                                 disabled={isSubmitting}
                             />
                             <p className="text-[10px] text-gray-500 uppercase mt-2">Soporte directo para DDS Europeo (Reg. UE 2023/1115).</p>
@@ -950,6 +892,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 </p>
 
                                 <EUDRGeoreference
+                                    userEmail={user?.email}
+                                    farmName={formData.farmName}
                                     onPolygonChange={(geoJson) => {
                                         setFormData(prev => ({
                                             ...prev,

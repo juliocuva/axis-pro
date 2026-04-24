@@ -22,7 +22,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
     const [sca, setSca] = useState<any>(initialScaData);
     const [phys, setPhys] = useState<any>(null);
 
-    const batchId = initialLotData?.id || initialLotData?.lot_number || initialLotData?.batch_id;
+    const batchId = initialLotData?.id;
     const passportId = `AX-${initialLotData?.lot_number || '9822'}-${new Date().getFullYear()}`;
 
     useEffect(() => {
@@ -159,11 +159,11 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                         {/* Header */}
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                                    <img src="/tatama.png" alt="TATAMA" className="w-full h-full object-contain p-1" />
                                 </div>
                                 <div>
-                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Axis Coffee Analytics</p>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Asociación Tatama</p>
                                     <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 01</p>
                                 </div>
                             </div>
@@ -329,11 +329,11 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                         {/* Header */}
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                                    <img src="/tatama.png" alt="TATAMA" className="w-full h-full object-contain p-1" />
                                 </div>
                                 <div>
-                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Axis Coffee Analytics</p>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Asociación Tatama</p>
                                     <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 02</p>
                                 </div>
                             </div>
@@ -423,11 +423,11 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                     <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                                    <img src="/tatama.png" alt="TATAMA" className="w-full h-full object-contain p-1" />
                                 </div>
                                 <div>
-                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Axis Coffee Analytics</p>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Asociación Tatama</p>
                                     <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 03</p>
                                 </div>
                             </div>
