@@ -182,15 +182,18 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
             {/* 3.5 CLIENT LOGOS (Social Proof) */}
             <section className="py-20 bg-black/20 border-b border-white/5 overflow-hidden">
-                <div className="max-w-7xl mx-auto px-6 mb-10">
-                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.5em] text-center">Con la confianza de</p>
+                <div className="max-w-7xl mx-auto px-6 mb-12">
+                    <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.5em] text-center italic">Integrado con la confianza de</p>
                 </div>
-                <div className="flex justify-center items-center opacity-80 hover:opacity-100 transition-opacity duration-500 flex-wrap mx-auto px-6" style={{ gap: '15vw' }}>
+                <div className="flex justify-center items-center opacity-80 hover:opacity-100 transition-all duration-700 flex-wrap mx-auto px-6" style={{ gap: '12vw' }}>
                     <div className="flex flex-col items-center gap-4">
-                        <img src="/logo.png" alt="Sagrado Corazón" className="h-16 md:h-20 object-contain" />
-                        <p className="text-[9px] text-brand-green font-bold uppercase tracking-[0.3em]">Axis Coffee Pro • Powered by Mouselab</p>
+                        <img src="/logo.png" alt="Sagrado Corazón" className="h-14 md:h-20 object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
+                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.4em]">Sagrado Corazón</p>
                     </div>
-                    <img src="/mouselab.png" alt="Mouselab" className="h-10 md:h-16 object-contain filter grayscale invert opacity-80" />
+                    <div className="flex flex-col items-center gap-4">
+                        <img src="/mouselab.png" alt="Mouselab" className="h-10 md:h-14 object-contain filter grayscale invert opacity-70" />
+                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.4em]">Mouselab Technology</p>
+                    </div>
                 </div>
             </section>
 
