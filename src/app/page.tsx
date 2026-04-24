@@ -119,9 +119,9 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-bg-main p-8 transition-colors duration-400">
             <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-white/5 pb-8">
-                <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-green/30 transition-all">
+                <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center">
+                    <div className="flex items-center mr-6">
+                        <div className="w-12 h-12 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-green/30 transition-all mr-4">
                             <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-1" />
                         </div>
                         <div className="flex flex-col">
@@ -129,23 +129,23 @@ export default function Home() {
                             <p className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1.5">by Mouselab • Sagrado Corazón</p>
                         </div>
                     </div>
-                    <div className="h-10 w-[1px] bg-white/5 hidden md:block"></div>
+                    <div className="h-10 w-[1px] bg-white/5 hidden md:block mr-6"></div>
                     <div className="hidden md:flex flex-col">
-                        <div className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
+                        <div className="flex items-center">
+                            <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse mr-2"></span>
                             <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-none">Terminal Activa</p>
                         </div>
                         <p className="text-[8px] text-gray-600 font-bold uppercase tracking-tighter mt-1">ID: BAX-7370-MASTER</p>
                     </div>
                 </div>
 
-                <nav className="flex items-center gap-4">
+                <nav className="flex items-center">
                     {view !== 'launcher' && (
                         <button
                             onClick={() => setView('launcher')}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-bg-offset hover:bg-white/10 rounded-industrial-sm text-[10px] font-bold transition-all border border-border-main uppercase tracking-widest text-gray-400 hover:text-white"
+                            className="flex items-center px-4 py-2.5 bg-bg-offset hover:bg-white/10 rounded-industrial-sm text-[10px] font-bold transition-all border border-border-main uppercase tracking-widest text-gray-400 hover:text-white mr-4"
                         >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="mr-2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                             Volver al Panel
                         </button>
                     )}
@@ -154,28 +154,28 @@ export default function Home() {
                         {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor') && (
                             <button
                                 onClick={() => setView('master')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex items-center px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-gray-400 hover:text-white'}`}
                                 title="Panel de Gobernanza Global"
                             >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="mr-2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                                 Gobernanza
                             </button>
                         )}
                         <button
                             onClick={() => setShowCloudVault(true)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
+                            className="flex items-center px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
                             title="Bóveda de Documentos"
                         >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="mr-2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
                             Bóveda en la Nube
                         </button>
                     </div>
 
-                    <div className="w-px h-6 bg-border-main mx-2"></div>
+                    <div className="w-px h-6 bg-border-main mx-4"></div>
 
                     <button
                         onClick={toggleTheme}
-                        className="w-11 h-11 rounded-industrial-sm bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white/10 transition-all group"
+                        className="w-11 h-11 rounded-industrial-sm bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white/10 transition-all group mr-4"
                         title={theme === 'dark' ? 'Modo Luz' : 'Modo Oscuro'}
                     >
                         {theme === 'dark' ? (
@@ -207,33 +207,39 @@ export default function Home() {
                                 Panel de Gerencia y Supervisión de Asociación
                                 <span className="w-full h-px bg-white/10"></span>
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <ModuleCard
-                                    title="Mi Equipo y Roles"
-                                    description="Gestión delegada de personal: Catadores, Tostadores y Operadores de tu asociación."
-                                    status="active"
-                                    color="brand-green"
-                                    onClick={() => setView('master')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
-                                />
+                            <div className="flex flex-wrap -mx-3">
+                                <div className="w-full md:w-1/2 px-3 mb-6">
+                                    <ModuleCard
+                                        title="Mi Equipo y Roles"
+                                        description="Gestión delegada de personal: Catadores, Tostadores y Operadores de tu asociación."
+                                        status="active"
+                                        color="brand-green"
+                                        onClick={() => setView('master')}
+                                        icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
+                                    />
+                                </div>
                                 {user?.role !== 'auditor' && (
                                     <>
-                                        <ModuleCard
-                                            title="Lotes Certificados"
-                                            description="Auditoría de lotes con aval EUDR y pasaportes digitales listos para exportación."
-                                            status="active"
-                                            color="blue-500"
-                                            onClick={() => setView('archive')}
-                                            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>}
-                                        />
-                                        <ModuleCard
-                                            title="Tostión y CVA 2.0"
-                                            description="Supervisión de calidad sensorial y perfiles de tueste de la asociación."
-                                            status="active"
-                                            color="orange-500"
-                                            onClick={() => setView('production')}
-                                            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
-                                        />
+                                        <div className="w-full md:w-1/2 px-3 mb-6">
+                                            <ModuleCard
+                                                title="Lotes Certificados"
+                                                description="Auditoría de lotes con aval EUDR y pasaportes digitales listos para exportación."
+                                                status="active"
+                                                color="blue-500"
+                                                onClick={() => setView('archive')}
+                                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>}
+                                            />
+                                        </div>
+                                        <div className="w-full md:w-1/2 px-3 mb-6">
+                                            <ModuleCard
+                                                title="Tostión y CVA 2.0"
+                                                description="Supervisión de calidad sensorial y perfiles de tueste de la asociación."
+                                                status="active"
+                                                color="orange-500"
+                                                onClick={() => setView('production')}
+                                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
+                                            />
+                                        </div>
                                     </>
                                 )}
                             </div>
@@ -245,39 +251,47 @@ export default function Home() {
                                 Emisión de Certificados de Calidad de Exportación
                                 <span className="w-full h-px bg-white/10"></span>
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <ModuleCard
-                                    title="Origen Inmutable"
-                                    description="Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas."
-                                    status="active"
-                                    color="brand-green"
-                                    onClick={() => setView('supply')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
-                                />
-                                <ModuleCard
-                                    title="Estándar Verde (Trilla)"
-                                    description="Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales."
-                                    status="active"
-                                    color="purple-500"
-                                    onClick={() => setView('trilla')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
-                                />
-                                <ModuleCard
-                                    title="Tostión Inteligente"
-                                    description="Control de curvas de tueste y Evaluación CVA 2.0 (Descriptiva/Afectiva) para control de calidad."
-                                    status="active"
-                                    color="orange-500"
-                                    onClick={() => setView('production')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
-                                />
-                                <ModuleCard
-                                    title="Pasaporte Aduanero"
-                                    description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
-                                    status="active"
-                                    color="blue-500"
-                                    onClick={() => setView('export')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
-                                />
+                            <div className="flex flex-wrap -mx-3">
+                                <div className="w-full md:w-1/3 px-3 mb-6">
+                                    <ModuleCard
+                                        title="Origen Inmutable"
+                                        description="Fijación de coordenadas GIS/WGS84 y polígonos EUDR requeridos para aduanas europeas y asiáticas."
+                                        status="active"
+                                        color="brand-green"
+                                        onClick={() => setView('supply')}
+                                        icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
+                                    />
+                                </div>
+                                <div className="w-full md:w-1/3 px-3 mb-6">
+                                    <ModuleCard
+                                        title="Estándar Verde (Trilla)"
+                                        description="Transformación a Café Oro, control estricto de humedad y bioseguridad para fletes internacionales."
+                                        status="active"
+                                        color="purple-500"
+                                        onClick={() => setView('trilla')}
+                                        icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0" /></svg>}
+                                    />
+                                </div>
+                                <div className="w-full md:w-1/3 px-3 mb-6">
+                                    <ModuleCard
+                                        title="Tostión Inteligente"
+                                        description="Control de curvas de tueste y Evaluación CVA 2.0 (Descriptiva/Afectiva) para control de calidad."
+                                        status="active"
+                                        color="orange-500"
+                                        onClick={() => setView('production')}
+                                        icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
+                                    />
+                                </div>
+                                <div className="w-full md:w-1/3 px-3 mb-6">
+                                    <ModuleCard
+                                        title="Pasaporte Aduanero"
+                                        description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
+                                        status="active"
+                                        color="blue-500"
+                                        onClick={() => setView('export')}
+                                        icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
+                                    />
+                                </div>
                             </div>
                         </section>
                     )}
