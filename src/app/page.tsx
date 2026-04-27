@@ -125,7 +125,8 @@ export default function Home() {
                             <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-1" />
                         </div>
                         <div className="flex flex-col">
-                            <h1 className="text-xl font-bold tracking-tighter uppercase leading-none">AXIS COFFEE <span className="text-brand-green-bright text-[10px] ml-1 font-bold">PRO</span></h1>
+                            <h1 className="text-xl font-bold tracking-tighter uppercase leading-none">AXISONE <span className="text-brand-green-bright text-[10px] ml-1 font-bold">COFFEE</span></h1>
+
                             <p className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1.5">by Mouselab • Sagrado Corazón</p>
                         </div>
                     </div>
@@ -492,7 +493,8 @@ export default function Home() {
                         <div className="bg-white/2 border border-white/5 rounded-industrial p-16 space-y-12 shadow-inner text-gray-300">
                             <section className="space-y-4">
                                 <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Estatus Tecnológico: Sistema Operativo</h3>
-                                <p className="text-sm leading-relaxed">AXIS COFFEE PRO es una solución industrial operativa demostrada en entornos reales. El sistema centraliza la trazabilidad desde la recepción en finca hasta el retail transfronterizo.</p>
+                                <p className="text-sm leading-relaxed">AXISONE COFFEE es una solución industrial operativa demostrada en entornos reales. El sistema centraliza la trazabilidad desde la recepción en finca hasta el retail transfronterizo.</p>
+
                             </section>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

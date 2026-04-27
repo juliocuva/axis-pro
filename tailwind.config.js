@@ -20,11 +20,15 @@ module.exports = {
             },
             colors: {
                 brand: {
-                    green: "#006837",
-                    "green-bright": "#00a651",
+                    green: "#006056",
+                    "green-bright": "#008f7d",
+                    "green-soft": "#C2D3CD",
+                    "green-muted": "#80AFAB",
                     red: "#a31e22",
                     "red-bright": "#ed1c24",
                 },
+                carbon: "#1A1A1A",
+                "soft-white": "#F8FAF9",
                 bg: {
                     main: "rgb(var(--bg-main))",
                     card: "rgb(var(--bg-card))",

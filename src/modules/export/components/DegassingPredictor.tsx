@@ -9,7 +9,7 @@ export default function DegassingPredictor() {
     const [batches, setBatches] = useState<any[]>([]);
     const [selectedBatchId, setSelectedBatchId] = useState<string>('');
     const [config, setConfig] = useState<DegassingConfig>({
-        process: 'washed',
+        process: 'lavado',
         roastDevelopment: 'medium',
         packagingType: 'valve',
         routeTemperature: 'temperate'

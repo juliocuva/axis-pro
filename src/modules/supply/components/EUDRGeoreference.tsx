@@ -7,9 +7,11 @@ const DynamicLeafletMap = dynamic(() => import('./LeafletMap'), { ssr: false });
 interface EUDRGeoreferenceProps {
     onPolygonChange?: (geoJson: string) => void;
     initialPolygon?: string;
+    userEmail?: string;
+    farmName?: string;
 }
 
-export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EUDRGeoreferenceProps) {
+export default function EUDRGeoreference({ onPolygonChange, initialPolygon, userEmail, farmName }: EUDRGeoreferenceProps) {
     const [file, setFile] = useState<File | null>(null);
     const [status, setStatus] = useState<{ type: 'idle' | 'processing' | 'success' | 'error' | 'offline', message: string }>({ type: 'idle', message: '' });
     const [geoJsonData, setGeoJsonData] = useState<string>(initialPolygon || '');
@@ -194,7 +196,26 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
             if (result.success) {
                 setLossHa(result.lossDetectedHa || 0);
                 setValidationSource(result.verifiedBy || 'GFW');
-                setGfwStatus(result.isDeforestationFree ? 'secure' : 'warning');
+                const newStatus = result.isDeforestationFree ? 'secure' : 'warning';
+                setGfwStatus(newStatus);
+
+                // ACTUALIZACIÓN DE AUDITORÍA: Guardamos el resultado del análisis satelital
+                try {
+                   await fetch('/api/track-verify', {
+                       method: 'POST',
+                       headers: { 'Content-Type': 'application/json' },
+                       body: JSON.stringify({
+                           email: userEmail || 'unknown@axis.pro',
+                           farm_name: farmName || 'Parcela Escaneada',
+                           polygon: geoJsonData,
+                           eudr_status: result.isDeforestationFree ? 'EUDR_PASSED' : 'EUDR_FAILED',
+                           user_agent: navigator.userAgent
+                       })
+                   });
+               } catch (logError) {
+                   console.error("Error actualizando log de auditoría:", logError);
+               }
+
             } else { setGfwStatus('error'); }
         } catch (e) { setGfwStatus('error'); }
         finally { setIsGfwValidating(false); }
@@ -272,7 +293,53 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon }: EU
                                 <span className="text-[10px] text-gray-400 font-bold uppercase">Polígono Escaneado</span>
                                 <span className="text-white font-bold">{gpsPoints.length} Vértices</span>
                             </div>
-                            <button onClick={() => setIsValidated(true)} className="w-full bg-brand-green text-black font-black py-5 rounded-industrial shadow-lg uppercase text-xs">Aceptar y Guardar</button>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={async () => {
+                                        setIsValidated(true);
+                                        // PERSISTENCIA INMEDIATA: Guardamos en logs de trazabilidad
+                                        try {
+                                            await fetch('/api/track-verify', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    email: userEmail || 'unknown@axis.pro',
+                                                    farm_name: farmName || 'Parcela Escaneada',
+                                                    polygon: geoJsonData,
+                                                    eudr_status: 'captured',
+                                                    user_agent: navigator.userAgent
+                                                })
+                                            });
+                                            console.log("AXIS LOG: Mapeo persistido en Bóveda de Trazabilidad.");
+                                        } catch (e) {
+                                            console.error("Error persistiendo mapeo:", e);
+                                        }
+                                    }} 
+                                    className="flex-1 bg-brand-green text-black font-black py-5 rounded-industrial shadow-lg uppercase text-xs"
+                                >
+                                    Aceptar y Guardar
+                                </button>
+                                
+                                <button
+                                    onClick={() => {
+                                        const blob = new Blob([geoJsonData || ''], { type: 'application/json' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `EUDR_${farmName || 'Lote'}_${new Date().toISOString().split('T')[0]}.geojson`;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                        URL.revokeObjectURL(url);
+                                    }}
+                                    title="Descargar GeoJSON"
+                                    className="px-6 bg-white/5 border border-white/10 text-white rounded-industrial hover:bg-white/10 transition-all flex items-center justify-center group"
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:translate-y-0.5 transition-transform">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="text-center">

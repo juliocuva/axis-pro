@@ -116,24 +116,21 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
         setIsRoasting(false);
         setRoastEnded(true);
 
-        const batchLabel = `AX-${Math.floor(1000 + Math.random() * 9000)}`;
-        const res = await finalizeRoastBatch({
-            batch_id_label: batchLabel,
-            inventory_id: lotData?.id || null,
-            roast_date: new Date().toISOString().split('T')[0],
-            process: lotData?.process || 'Lavado',
-            green_weight: 35,
-            roasted_weight: 29.8,
-            total_time_seconds: elapsedTime,
-            final_temp: currentTemp,
-            company_id: user?.companyId
-        });
+        // ENVIAMOS TELEMETRÍA REAL AL FORMULARIO DE INGRESO
+        const capturedTelemetry = btHistory.map(p => ({
+            t: p.t,
+            bt: p.temp,
+            et: p.temp + 20 // ET estimado si no hay sensor dual
+        }));
 
-        if (!res.success) {
-            window.alert(`Error al guardar el tueste: ${res.message}`);
-        } else {
-            console.log("Tueste sellado exitosamente:", res.data);
-        }
+        // Notificamos que queremos ir al registro oficial con estos datos
+        window.dispatchEvent(new CustomEvent('roast-session-data', { 
+            detail: { 
+                telemetry: capturedTelemetry,
+                time: elapsedTime,
+                temp: currentTemp
+            } 
+        }));
     };
 
     const generatePoints = (data: any[], maxVal: number) => {

@@ -3,6 +3,19 @@
 @tailwind utilities;
 
 :root {
+    --bg-main: 248, 250, 249; /* #F8FAF9 */
+    --bg-card: 255, 255, 255;
+    --bg-card-hover: 245, 245, 240;
+    --text-main: 26, 26, 26; /* #1A1A1A (Carbon) */
+    --text-offset: 74, 85, 83; /* #4A5553 (Gris Pizarra) */
+    --border-main: rgba(194, 211, 205, 0.5); /* #C2D3CD (Verde Salvia) */
+    --bg-offset: rgba(194, 211, 205, 0.1);
+}
+
+
+html[data-theme='dark'],
+[data-theme='dark'],
+[data-theme='dark'] body {
     --bg-main: 5, 7, 6;
     --bg-card: 15, 20, 17;
     --bg-card-hover: 22, 29, 25;
@@ -12,22 +25,24 @@
     --bg-offset: rgba(255, 255, 255, 0.03);
 }
 
-html[data-theme='light'],
-[data-theme='light'],
-[data-theme='light'] body {
-    --bg-main: 193, 220, 206;
-    --bg-card: 210, 232, 222;
-    --bg-card-hover: 220, 240, 230;
-    --text-main: 15, 30, 25;
-    --text-offset: 70, 90, 85;
-    --border-main: rgba(0, 50, 30, 0.15);
-    --bg-offset: rgba(255, 255, 255, 0.4);
-}
-
 body {
     color: rgb(var(--text-main));
     background: rgb(var(--bg-main));
     transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: rgb(var(--text-main));
+    font-weight: 900;
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgb(var(--text-offset)) !important;
+    opacity: 0.6;
+}
+
+input, textarea, select {
+    color: rgb(var(--text-main));
 }
 
 /* Premium Industrial Scrollbar */
@@ -40,13 +55,14 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(0, 166, 81, 0.2);
+    background: rgba(0, 96, 86, 0.2);
     border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 166, 81, 0.4);
+    background: rgba(0, 96, 86, 0.4);
 }
+
 
 /* Animations Logic */
 @keyframes fadeIn {

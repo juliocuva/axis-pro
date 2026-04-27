@@ -13,8 +13,17 @@ const COFFEE_VARIETIES_BASE: string[] = [
     'SL28', 'Tabi', 'Typica', 'Wush Wush'
 ];
 
-const PROCESS_TYPES: ProcessType[] = [
-    'lavado', 'honey', 'honey_yellow', 'honey_red', 'honey_black', 'natural', 'anaerobico', 'semi_lavado', 'doble_fermentacion', 'co_fermentacion'
+const PROCESS_TYPES: ProcessType[] = ['lavado', 'honey', 'natural'];
+
+const FERMENTATION_STYLES = [
+    { id: 'estandar', label: 'Estándar' },
+    { id: 'anaerobico', label: 'Anaeróbico' },
+    { id: 'doble_fermentacion', label: 'Doble Fermentación' },
+    { id: 'co_fermentacion', label: 'Co-Fermentación' },
+    { id: 'honey_yellow', label: 'Yellow Honey' },
+    { id: 'honey_red', label: 'Red Honey' },
+    { id: 'honey_black', label: 'Black Honey' },
+    { id: 'semi_lavado', label: 'Semi-Lavado / Gilling Basah' }
 ];
 
 const COLOMBIAN_REGIONS = [
@@ -59,6 +68,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         latitude: 0,
         longitude: 0,
         processData: {
+            fermentation_style: 'estandar',
             ph_inicial: '4.5',
             ph_final: '3.8',
             brix_inicial: '18.5',
@@ -70,6 +80,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             duracion_secado: '',
             agente_infusion: ''
         } as any
+
     };
 
     const [formData, setFormData] = useState(initialFormState);
@@ -197,7 +208,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             agente_infusion: ''
                         };
                     }
-                    return hasData ? pd : {
+                    return hasData ? {
+                        ...pd,
+                        fermentation_style: pd.fermentation_style || 'estandar'
+                    } : {
+                        fermentation_style: 'estandar',
                         ph_inicial: '4.5',
                         ph_final: '3.8',
                         brix_inicial: '18.5',
@@ -209,22 +224,25 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                         duracion_secado: '',
                         agente_infusion: ''
                     };
+
                 })()
             });
             if (!isBase) setCustomVariety(selectedLot.variety);
             setDisplayValue(formatCOP(String(selectedLot.purchase_value || 0)));
             setIsDirty(false); // Reset dirty on explicit load
-            // SEGURIDAD: Resetear directamente si no hay lote seleccionado
-            if (!selectedLot) {
-                setFormData(initialFormState);
-                setCustomVariety('');
-                setDisplayValue('');
-                setSmartLinkText('');
-                setStatus(null);
-                setShowSuccessModal(false);
-                setCurrentStep(1);
-                setIsDirty(false);
-            }
+        }
+        
+        // SEGURIDAD: Resetear directamente si no hay lote seleccionado
+        if (!selectedLot) {
+            setFormData(initialFormState);
+            setCustomVariety('');
+            setDisplayValue('');
+            setSmartLinkText('');
+            setStatus(null);
+            setShowSuccessModal(false);
+            setCurrentStep(1);
+            setIsDirty(false);
+        }
     }, [selectedLot]);
 
     // Cálculo dinámico de rendimiento esperado (Factor de rendimiento estándar ~81%)
@@ -1067,20 +1085,41 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
 
                             {/* 2. Tipo de proceso */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Tipo de Proceso</label>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Proceso Base</label>
                                 <select
                                     value={formData.process}
                                     onChange={(e) => setFormData(prev => ({ ...prev, process: e.target.value as ProcessType }))}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 focus:border-brand-green outline-none uppercase appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 focus:border-brand-green outline-none uppercase appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-white"
                                     disabled={isSubmitting}
                                 >
                                     {PROCESS_TYPES.map(p => (
                                         <option key={p} value={p}>
-                                            {p.replace(/_/g, ' ').toUpperCase()}
+                                            {p.toUpperCase()}
                                         </option>
                                     ))}
                                 </select>
                             </div>
+
+                            {/* 2.1 Estilo de fermentación */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-xs font-bold text-blue-400 uppercase tracking-widest">Estilo de Fermentación / Variación</label>
+                                <select
+                                    value={formData.processData?.fermentation_style || 'estandar'}
+                                    onChange={(e) => setFormData(prev => ({ 
+                                        ...prev, 
+                                        processData: { ...prev.processData, fermentation_style: e.target.value } 
+                                    }))}
+                                    className="w-full bg-bg-main border border-blue-500/30 rounded-industrial-sm px-5 py-3 focus:border-blue-400 outline-none uppercase appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%233b82f6%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-blue-300"
+                                    disabled={isSubmitting}
+                                >
+                                    {FERMENTATION_STYLES.map(style => (
+                                        <option key={style.id} value={style.id}>
+                                            {style.label.toUpperCase()}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
 
                             {/* 3. Método de secado */}
                             <div className="flex flex-col gap-2">
@@ -1128,6 +1167,111 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 />
                             </div>
                         )}
+
+                        {/* SECCIÓN DE ALQUIMIA (FISICOQUÍMICA) */}
+                        <div className="pt-8 border-t border-white/5 space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                    Alquimia de Fermentación (Fisicoquímica)
+                                </h4>
+                                <span className="text-[9px] text-gray-500 font-mono uppercase">Control de Variables Críticas</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <NumericInput
+                                    label="pH Inicial"
+                                    value={formData.processData?.ph_inicial || ''}
+                                    onChange={(val) => setFormData(prev => ({ 
+                                        ...prev, 
+                                        processData: { ...prev.processData, ph_inicial: val } 
+                                    }))}
+                                    step={0.1}
+                                    variant="blue"
+                                    inputClassName="text-sm"
+                                />
+                                <NumericInput
+                                    label="pH Final"
+                                    value={formData.processData?.ph_final || ''}
+                                    onChange={(val) => setFormData(prev => ({ 
+                                        ...prev, 
+                                        processData: { ...prev.processData, ph_final: val } 
+                                    }))}
+                                    step={0.1}
+                                    variant="blue"
+                                    inputClassName="text-sm"
+                                />
+                                <NumericInput
+                                    label="Grados Brix"
+                                    value={formData.processData?.brix_inicial || ''}
+                                    onChange={(val) => setFormData(prev => ({ 
+                                        ...prev, 
+                                        processData: { ...prev.processData, brix_inicial: val } 
+                                    }))}
+                                    step={0.1}
+                                    unit="°Bx"
+                                    variant="blue"
+                                    inputClassName="text-sm"
+                                />
+                                <NumericInput
+                                    label="Temp. Máx (°C)"
+                                    value={formData.processData?.temperatura_masa_max || ''}
+                                    onChange={(val) => setFormData(prev => ({ 
+                                        ...prev, 
+                                        processData: { ...prev.processData, temperatura_masa_max: val } 
+                                    }))}
+                                    step={0.5}
+                                    unit="°C"
+                                    variant="industrial"
+                                    inputClassName="text-sm"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Recipiente</label>
+                                    <select
+                                        value={formData.processData?.recipiente_fermentacion || ''}
+                                        onChange={(e) => setFormData(prev => ({ 
+                                            ...prev, 
+                                            processData: { ...prev.processData, recipiente_fermentacion: e.target.value } 
+                                        }))}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-500 uppercase appearance-none transition-all"
+                                    >
+                                        <option value="">Seleccionar</option>
+                                        <option value="Bioreactor Inoxidable">Bioreactor Inoxidable</option>
+                                        <option value="Tanque Plástico">Tanque Plástico</option>
+                                        <option value="Bolsa GrainPro">Bolsa GrainPro</option>
+                                        <option value="Tanque Cemento">Tanque Cemento</option>
+                                    </select>
+                                </div>
+                                <NumericInput
+                                    label="Horas Fermentación"
+                                    value={formData.processData?.duracion_fermentacion_horas || ''}
+                                    onChange={(val) => setFormData(prev => ({ 
+                                        ...prev, 
+                                        processData: { ...prev.processData, duracion_fermentacion_horas: val } 
+                                    }))}
+                                    unit="Hrs"
+                                    variant="industrial"
+                                    inputClassName="text-sm"
+                                />
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Agente de Infusión</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej. Frutas, Levaduras, Canela..."
+                                        value={formData.processData?.agente_infusion || ''}
+                                        onChange={(e) => setFormData(prev => ({ 
+                                            ...prev, 
+                                            processData: { ...prev.processData, agente_infusion: e.target.value } 
+                                        }))}
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-xs font-bold text-white outline-none focus:border-blue-500 uppercase transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
 
                     </section>
                 )}

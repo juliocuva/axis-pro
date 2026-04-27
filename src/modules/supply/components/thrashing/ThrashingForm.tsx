@@ -58,18 +58,25 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     console.error("AXIS DB ERROR (Trilla):", error);
                 } else if (data) {
                     console.log("AXIS DB SUCCESS (Trilla):", data);
-                    // Map process from DB to our internal types
-                    let processType = 'Lavado';
-                    const dbProcess = (data.process || '').toUpperCase();
-                    if (dbProcess.includes('HONEY YELLOW')) processType = 'Yellow Honey';
-                    else if (dbProcess.includes('HONEY RED')) processType = 'Red Honey';
-                    else if (dbProcess.includes('HONEY BLACK')) processType = 'Black Honey';
-                    else if (dbProcess.includes('HONEY')) processType = 'Honey';
-                    else if (dbProcess.includes('NATURAL')) processType = 'Natural';
-                    else if (dbProcess.includes('SEMI LAVADO')) processType = 'Semi Lavado';
-                    else if (dbProcess.includes('ANAEROBICO')) processType = 'Anaerobico';
-                    else if (dbProcess.includes('DOBLE FERMENTACION')) processType = 'Doble Fermentacion';
-                    else if (dbProcess.includes('CO FERMENTACION')) processType = 'Co Fermentacion';
+                    // Map process and fermentation style from DB to our internal parameters
+                    let processKey = 'Lavado';
+                    const dbProcess = (data.process || 'lavado').toLowerCase();
+                    const fs = (data.process_data?.fermentation_style || 'estandar').toLowerCase();
+
+                    if (dbProcess === 'natural') {
+                        processKey = 'Natural';
+                    } else if (dbProcess === 'honey') {
+                        if (fs === 'honey_yellow') processKey = 'Yellow Honey';
+                        else if (fs === 'honey_red') processKey = 'Red Honey';
+                        else if (fs === 'honey_black') processKey = 'Black Honey';
+                        else processKey = 'Honey';
+                    } else { // Default to Lavado base
+                        if (fs === 'anaerobico') processKey = 'Anaerobico';
+                        else if (fs === 'doble_fermentacion') processKey = 'Doble Fermentacion';
+                        else if (fs === 'co_fermentacion') processKey = 'Co Fermentacion';
+                        else if (fs === 'semi_lavado') processKey = 'Semi Lavado';
+                        else processKey = 'Lavado';
+                    }
 
                     const thrashedW = Number(data.thrashed_weight) || 0;
                     setFormData(prev => ({
@@ -77,9 +84,10 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         excelsoWeight: thrashedW,
                         pasillaWeight: Number(data.pasilla_weight) || 0,
                         ciscoWeight: Number(data.cisco_weight) || 0,
-                        processType: processType,
+                        processType: processKey,
                         humidity: Number(data.humidity) || 11.0
                     }));
+
 
                     if (thrashedW > 0) {
                         setIsAlreadyThrashed(true);

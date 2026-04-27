@@ -4,26 +4,40 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import LiveRoastMonitor from './LiveRoastMonitor';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
+import RoastCurveVisualizer from './RoastCurveVisualizer';
+import CVAAssessmentForm from './CVAAssessmentForm';
 
 interface RoastIntelligenceContainerProps {
-    user: { email: string, name: string, companyId: string } | null;
+    user: { email: string, name: string, companyId: string, role?: string } | null;
 }
 
 import RoastEntryForm from './RoastEntryForm';
 
 export default function RoastIntelligenceContainer({ user }: RoastIntelligenceContainerProps) {
-    const [view, setView] = useState<'live' | 'archive' | 'entry'>('live');
+    const [view, setView] = useState<'live' | 'archive' | 'entry' | 'cupping'>('live');
     const [selectedLot, setSelectedLot] = useState<any>(null);
+    const [capturedSession, setCapturedSession] = useState<any>(null);
 
     // Listen to inter-component navigation
     useEffect(() => {
         const handleViewChange = (e: any) => {
-            if (['live', 'archive', 'entry'].includes(e.detail)) {
+            if (['live', 'archive', 'entry', 'cupping'].includes(e.detail)) {
                 setView(e.detail);
             }
         };
+        
+        const handleSessionData = (e: any) => {
+            // Recibimos la curva capturada del monitor
+            setCapturedSession(e.detail);
+            setView('entry');
+        };
+
         window.addEventListener('change-view', handleViewChange);
-        return () => window.removeEventListener('change-view', handleViewChange);
+        window.addEventListener('roast-session-data', handleSessionData);
+        return () => {
+            window.removeEventListener('change-view', handleViewChange);
+            window.removeEventListener('roast-session-data', handleSessionData);
+        };
     }, []);
 
     // ... rest of the existing state ...
@@ -56,18 +70,21 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     }, [demoMode]);
 
     const loadMasterProfile = (roast: any) => {
+        // PRIORIDAD: Usar los puntos REALES de telemetría si existen
+        const realPoints = roast.roast_curve || [];
+        
         const simulatedMaster = {
             id: roast.id,
             label: roast.batch_id_label,
             notes: roast.sensor_notes || ['Chocolate', 'Cuerpo Denso'],
             score: roast.sca_score || 86.5,
-            points: Array.from({ length: 720 }, (_, i) => ({
+            points: realPoints.length > 0 ? realPoints : Array.from({ length: 720 }, (_, i) => ({
                 t: i,
                 temp: 50 + Math.pow(i, 0.78) * 0.9 + (i > 300 ? Math.sin(i / 60) * 1.5 : 0)
             })),
             events: {
-                dryEnd: 310,
-                firstCrack: 540
+                dryEnd: realPoints.find((p: any) => p.bt >= 150)?.t || 310,
+                firstCrack: realPoints.find((p: any) => p.bt >= 195)?.t || 540
             }
         };
         setMasterProfile(simulatedMaster);
@@ -207,6 +224,13 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                 >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
                     03. Archivo
+                </button>
+                <button
+                    onClick={() => setView('cupping')}
+                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${view === 'cupping' ? 'bg-amber-600 text-white shadow-lg' : 'bg-bg-card text-gray-400 hover:text-white'}`}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l3 7h-6l3-7zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    04. Evaluación CVA
                 </button>
             </nav>
 
@@ -439,6 +463,17 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                     </button>
                                 </div>
                             </div>
+
+                            {/* VISUALIZADOR DE CURVA MAESTRA SELECCIONADA */}
+                            {masterProfile && (
+                                <div className="animate-in slide-in-from-bottom-4 duration-700">
+                                    <div className="flex items-center gap-3 mb-6 px-4">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Telemetría del Perfil Maestro Activo</h3>
+                                    </div>
+                                    <RoastCurveVisualizer data={masterProfile.points} title={`Curva de Referencia: ${masterProfile.label}`} />
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="min-h-[600px] border border-white/5 rounded-industrial p-12 bg-bg-card relative overflow-hidden flex flex-col items-center justify-center">
@@ -475,25 +510,46 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 {/* Option 2 */}
                                 <div className="bg-bg-main border border-white/5 hover:border-orange-500/30 p-8 rounded-industrial-sm flex flex-col group transition-all duration-500 hover:shadow-[0_10px_40px_rgba(249,115,22,0.1)]">
                                     <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500 mb-6 border border-orange-500/20 group-hover:scale-110 transition-transform">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                     </div>
-                                    <h4 className="text-white font-bold uppercase tracking-tight text-lg mb-3">2. Tueste Manual (Vieja Guardia)</h4>
+                                    <h4 className="text-white font-bold uppercase tracking-tight text-lg mb-3">2. Registro e Importación</h4>
                                     <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed mb-8 flex-1">
-                                        Formulario de ingreso directo para el tostador profesional. Registra los parámetros bajo tu propia experiencia para calcular en segundos el rendimiento y la merma de tu lote.
+                                        Cargue archivos .CSV / .ALOG de su tostadora o registre manualmente los parámetros de rendimiento y merma industrial.
                                     </p>
-                                    <button
-                                        onClick={() => setView('entry')}
-                                        className="w-full bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/50 p-3 rounded transition-colors text-[10px] font-bold uppercase tracking-widest text-center"
-                                    >
-                                        Registrar Tueste
-                                    </button>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setView('entry')}
+                                            className="w-full bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/50 p-3 rounded transition-colors text-[9px] font-bold uppercase tracking-widest text-center"
+                                        >
+                                            Registrar Manual
+                                        </button>
+                                        <button
+                                            onClick={() => setView('entry')}
+                                            className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 p-3 rounded transition-colors text-[9px] font-bold uppercase tracking-widest text-center"
+                                        >
+                                            Importar Curva
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
                 </>
             ) : view === 'entry' ? (
-                <RoastEntryForm user={user} lotData={selectedLot} />
+                <RoastEntryForm 
+                    user={user} 
+                    lotData={selectedLot} 
+                    initialTelemetry={capturedSession?.telemetry}
+                />
+            ) : view === 'cupping' ? (
+                <CVAAssessmentForm 
+                    inventoryId={selectedLot?.id} 
+                    companyId={user?.companyId || ''}
+                    onSave={() => {
+                        setView('live');
+                        fetchReadyToRoastLots(); // Refrescar para ver el nuevo puntaje
+                    }} 
+                />
             ) : (
                 <GlobalHistoryArchive user={user} />
             )}

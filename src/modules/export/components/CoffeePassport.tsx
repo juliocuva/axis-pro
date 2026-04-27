@@ -142,7 +142,8 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                 <div className="no-print w-[794px] mx-auto flex justify-between items-center bg-white border border-gray-200 p-3 rounded-xl mb-6 mt-8 shadow-2xl">
                     <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full" style={{ background: GREEN }}></span>
-                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Axis Coffee Passport — Vista Previa</span>
+                        <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">AXISONE COFFEE Passport — Vista Previa</span>
+
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={onClose} className="px-4 py-1.5 border border-gray-200 rounded-lg text-[10px] font-bold uppercase text-gray-600 hover:bg-gray-50">Cerrar</button>

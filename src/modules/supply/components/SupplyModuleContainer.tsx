@@ -69,7 +69,8 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                              activeTab === 'roast' ? 'Tostión Inteligente' : 'Archivo'}
                         </h2>
                         <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.3em]">
-                            Axis Coffee Pro • Sistema de Trazabilidad Industrial
+                            AXISONE COFFEE • Sistema de Trazabilidad Industrial
+
                         </p>
                     </header>
 
@@ -101,7 +102,7 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                         )}
 
                         {activeTab === 'purchase' && <PurchaseForm selectedLot={selectedLot} user={user} onPurchaseComplete={(lot) => { setSelectedLot(lot); fetchRecentLots(); }} />}
-                        {activeTab === 'thrashing' && selectedLot && <ThrashingForm inventoryId={selectedLot.id} user={user} onThrashingComplete={fetchRecentLots} />}
+                        {activeTab === 'thrashing' && selectedLot && <ThrashingForm inventoryId={selectedLot.id} parchmentWeight={selectedLot.purchase_weight} user={user} onThrashingComplete={fetchRecentLots} />}
                         {activeTab === 'analysis' && selectedLot && <PhysicalAnalysisForm inventoryId={selectedLot.id} user={user} onAnalysisComplete={fetchRecentLots} />}
                         {activeTab === 'cupping' && selectedLot && <CVAAssessmentForm inventoryId={selectedLot.id} user={user} onCuppingComplete={fetchRecentLots} />}
                         {activeTab === 'roast' && <RoastIntelligenceContainer user={user} />}
@@ -116,6 +117,7 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                     </button>
                     <div className="bg-bg-card border border-white/5 p-6 rounded-industrial h-[600px] flex flex-col">
                         <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 pb-4 border-b border-white/5">Sincronización Viva</h4>
+
                         <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar">
                             {recentLots.map(lot => (
                                 <div key={lot.id} onClick={() => handleLotSelect(lot)} className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedLot?.id === lot.id ? 'bg-brand-green/10 border-brand-green/30' : 'bg-white/2 border-white/5 hover:border-white/10'}`}>

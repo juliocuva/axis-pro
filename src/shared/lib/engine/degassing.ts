@@ -23,7 +23,7 @@ const BASE_PRESSURE: Record<'light' | 'medium' | 'dark', number> = {
     dark: 2.5
 };
 
-const DECAY_K: Record<ProcessType, number> = {
+const DECAY_K: Record<string, number> = {
     lavado: 0.15,
     'Lavado': 0.15,
     washed: 0.15,

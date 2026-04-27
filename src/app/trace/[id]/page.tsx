@@ -33,14 +33,17 @@ export default function TraceabilityStoryPage() {
 
     return (
         <div className="min-h-screen bg-bg-main p-4 md:p-12 flex flex-col items-center justify-center">
-            <header className="mb-12 text-center">
+            <header className="mb-12 text-center flex flex-col items-center">
+                <div className="w-20 h-20 mb-6 flex items-center justify-center p-2">
+                    <img src="/tatama.png" alt="Asociación Tatama" className="w-full h-full object-contain" />
+                </div>
                 <div className="flex items-center justify-center gap-3 mb-2">
                     <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center text-white">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                     </div>
-                    <h1 className="text-xl font-bold text-white tracking-widest uppercase">AXIS <span className="text-purple-400">CONNECT</span></h1>
+                    <h1 className="text-xl font-bold text-white tracking-widest uppercase">AXISONE <span className="text-brand-green-bright">VERIFY</span></h1>
                 </div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-[0.4em]">Transparencia Radical del Grano</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-bold">Archivo generado para la Asociación Tatama</p>
             </header>
 
             <div className="max-w-md w-full bg-bg-main border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
@@ -54,7 +57,7 @@ export default function TraceabilityStoryPage() {
                 <div className="p-8 -mt-12 bg-bg-main rounded-t-[3rem] relative space-y-8">
                     <header>
                         <div className="flex justify-between items-start">
-                            <h3 className="text-3xl font-bold uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Sagrado'}<br />{story?.producer?.split(' ')[1] || 'Corazón'}</h3>
+                            <h3 className="text-3xl font-bold uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
                             <span className="bg-brand-green/20 text-brand-green text-[10px] font-bold px-3 py-1 rounded-full uppercase border border-brand-green/20">Lote {story?.roast?.batch_id_label || id}</span>
                         </div>
                         <p className="text-xs text-gray-400 mt-6 leading-relaxed font-medium">
@@ -92,7 +95,7 @@ export default function TraceabilityStoryPage() {
                     </div>
 
                     <div className="p-6 bg-purple-600/10 border border-purple-500/20 text-white rounded-3xl space-y-2">
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Recomendación Sagrada</h4>
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Recomendación Tatama</h4>
                         <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                     </div>
 
@@ -106,7 +109,7 @@ export default function TraceabilityStoryPage() {
             </div>
 
             <footer className="mt-12 text-center pb-8 opacity-50">
-                <p className="text-[8px] text-gray-600 uppercase tracking-widest">© {new Date().getFullYear()} AXIS COFFEE PRO | Consumer Experience</p>
+                <p className="text-[8px] text-gray-600 uppercase tracking-widest">© {new Date().getFullYear()} AXISONE COFFEE | Consumer Experience</p>
             </footer>
         </div>
     );

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#0a0a0a] border-t border-white/5 py-8 mt-auto z-50">
+    <footer className="w-full bg-bg-card border-t border-border-main py-8 mt-auto z-50">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8">
         
         {/* Logos Section */}
@@ -23,7 +23,7 @@ export default function Footer() {
           <div className="flex flex-col items-center gap-2">
             <Image 
               src="/logo.png" 
-              alt="Axis Coffee Pro Logo" 
+              alt="AXISONE COFFEE Logo" 
               width={120} 
               height={40}
               priority 
@@ -41,7 +41,8 @@ export default function Footer() {
             Mouselab es la entidad titular de todos los derechos de propiedad intelectual, secretos industriales y derechos de autor sobre la arquitectura de software, algoritmos de Inteligencia Artificial y diseños visuales presentados.
           </p>
           <p>
-            Axis Coffee Pro es una marca comercial propiedad de Mouselab. El acceso a este material, demostración o enlaces no constituye una licencia de uso, transferencia de derechos ni permiso para la ingeniería inversa o reproducción total o parcial. Cualquier uso no autorizado será perseguido bajo las leyes de propiedad intelectual de la República de Colombia y los tratados internacionales de la OMPI (WIPO).
+            AXISONE COFFEE es una marca comercial propiedad de Mouselab. El acceso a este material, demostración o enlaces no constituye una licencia de uso, transferencia de derechos ni permiso para la ingeniería inversa o reproducción total o parcial. Cualquier uso no autorizado será perseguido bajo las leyes de propiedad intelectual de la República de Colombia y los tratados internacionales de la OMPI (WIPO).
+
           </p>
         </div>
 

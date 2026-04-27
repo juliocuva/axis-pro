@@ -201,7 +201,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 {isAxisCertifiedTech && (
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-green/10 border border-brand-green/20 rounded-full">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                        <span className="text-[9px] font-bold text-brand-green uppercase tracking-widest">AXIS-Certified-Tech</span>
+                        <span className="text-[9px] font-bold text-brand-green uppercase tracking-widest">AXISONE-Certified-Tech</span>
+
                     </div>
                 )}
             </div>
@@ -461,7 +462,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                     {/* Footer Hoja 1 */}
                     <div className="mt-auto px-12 py-8 flex justify-between items-center opacity-20 border-t border-gray-200">
-                        <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.4</p>
+                        <p className="text-[7px] font-bold text-gray-500 uppercase tracking-widest">AXISONE Intelligence Coffee Division | Traceability Protocol Ver 2.4</p>
+
                         <p className="text-[7px] font-mono text-gray-600 uppercase tracking-widest">{inventoryId.substring(0, 8).toUpperCase()}-P1</p>
                     </div>
                 </div>
@@ -572,7 +574,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="flex items-center gap-10 max-w-2xl">
                                 <div className="bg-white p-2 rounded-xl shrink-0 border border-gray-200 flex items-center justify-center">
                                     <QRCodeSVG
-                                        value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axis-pro.coffee'}/verify/lot/${inventoryId}`}
+                                        value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axisonecoffee.com'}/verify/lot/${inventoryId}`}
+
                                         size={96}
                                         style={{ width: "96px", height: "96px" }}
                                         level="H" 
@@ -583,7 +586,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="space-y-3">
                                     <p className="text-[9px] font-bold text-black uppercase tracking-[0.5em]">Trazabilidad Digital Inmutable</p>
                                     <p className="text-[10px] text-gray-600 uppercase font-medium leading-[1.6] tracking-wider opacity-70">
-                                        Certificación técnica de origen y calidad física-sensorial. Los datos han sido encriptados en la red AXIS para garantizar transparencia absoluta en la cadena de suministro industrial de café.
+                                        Certificación técnica de origen y calidad física-sensorial. Los datos han sido encriptados en la red AXISONE para garantizar transparencia absoluta en la cadena de suministro industrial de café.
+
                                     </p>
                                 </div>
                             </div>
@@ -592,7 +596,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="px-4 py-2 bg-gray-100 rounded-lg border border-gray-200">
                                     <p className="text-[8px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}</p>
                                 </div>
-                                <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive - BAX-7370</span></p>
+                                <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXISONE INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive - BAX-7370</span></p>
+
                             </div>
                         </div>
                     </div>
@@ -690,7 +695,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                         {/* Footer Hoja 3 (mini version) */}
                         <div className="mt-auto pt-8 flex justify-between items-center border-t border-gray-200">
-                            <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXIS INTELLIGENCE GROUP</p>
+                            <p className="text-[7px] text-gray-700 uppercase font-bold tracking-widest leading-none">© 2026 AXISONE INTELLIGENCE GROUP</p>
+
                             <p className="text-[7px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}-P3</p>
                         </div>
                     </div>
@@ -752,7 +758,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             tickLine={false}
                                         />
                                         <YAxis 
-                                            yId="temp"
+                                            yAxisId="temp"
                                             label={{ value: 'Temp (°C)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#666' }}
                                             tick={{ fontSize: 10, fill: '#999' }}
                                             domain={[0, 250]}
@@ -760,7 +766,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             tickLine={false}
                                         />
                                         <YAxis 
-                                            yId="ror"
+                                            yAxisId="ror"
                                             orientation="right"
                                             domain={[0, 25]}
                                             hide
@@ -768,11 +774,11 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         <Tooltip 
                                             contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '10px' }}
                                         />
-                                        <ReferenceLine yId="temp" y={205} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'right', value: '1st Crack', fill: '#ef4444', fontSize: 9, fontWeight: 'bold' }} />
-                                        <ReferenceLine yId="temp" x={10} stroke="#000" strokeWidth={2} label={{ position: 'top', value: 'DROP', fill: '#000', fontSize: 10, fontWeight: 'black' }} />
+                                        <ReferenceLine yAxisId="temp" y={205} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'right', value: '1st Crack', fill: '#ef4444', fontSize: 9, fontWeight: 'bold' }} />
+                                        <ReferenceLine yAxisId="temp" x={10} stroke="#000" strokeWidth={2} label={{ position: 'top', value: 'DROP', fill: '#000', fontSize: 10, fontWeight: 'black' }} />
                                         
-                                        <Line yId="temp" type="monotone" dataKey="beanTemp" stroke="#f97316" strokeWidth={4} dot={false} isAnimationActive={false} />
-                                        <Line yId="temp" type="monotone" dataKey="airTemp" stroke="#60a5fa" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
+                                        <Line yAxisId="temp" type="monotone" dataKey="beanTemp" stroke="#f97316" strokeWidth={4} dot={false} isAnimationActive={false} />
+                                        <Line yAxisId="temp" type="monotone" dataKey="airTemp" stroke="#60a5fa" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>

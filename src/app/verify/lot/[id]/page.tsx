@@ -18,7 +18,8 @@ export default function PublicLotVerification() {
         <div className="min-h-screen bg-bg-main p-4 md:p-12 w-full overflow-y-auto pb-[150px]">
             <div className="w-full">
                 <header className="mb-8 text-center">
-                    <h1 className="text-xl font-bold text-white tracking-widest uppercase">AXIS COFFEE <span className="text-brand-green-bright">VERIFY</span></h1>
+                    <h1 className="text-xl font-bold text-white tracking-widest uppercase">AXISONE <span className="text-brand-green-bright">VERIFY</span></h1>
+
                     <p className="text-[10px] text-gray-500 uppercase tracking-[0.4em] mt-2">Protocolo de Trazabilidad Pública</p>
                 </header>
 
@@ -31,7 +32,8 @@ export default function PublicLotVerification() {
                 </div>
 
                 <footer className="mt-12 text-center pb-8 w-full">
-                    <p className="text-[8px] text-gray-600 uppercase tracking-widest">© {new Date().getFullYear()} AXIS COFFEE PRO | Inteligencia de Origen</p>
+                    <p className="text-[8px] text-gray-600 uppercase tracking-widest">© {new Date().getFullYear()} AXISONE COFFEE | Inteligencia de Origen</p>
+
                 </footer>
             </div>
         </div>

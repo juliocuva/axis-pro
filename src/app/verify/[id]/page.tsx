@@ -86,7 +86,8 @@ export default function PublicPassportVerification() {
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0" /><line x1="12" y1="2" x2="12" y2="12" /></svg>
             </div>
             <h1 className="text-2xl font-bold text-white mb-4 uppercase tracking-tighter">Activo No Verificado</h1>
-            <p className="text-gray-500 uppercase text-[10px] tracking-[0.4em] max-w-xs leading-relaxed">El identificador digital <span className="text-white">{id}</span> no existe en el registro distribuido de AXIS COFFEE.</p>
+            <p className="text-gray-500 uppercase text-[10px] tracking-[0.4em] max-w-xs leading-relaxed">El identificador digital <span className="text-white">{id}</span> no existe en el registro distribuido de AXISONE COFFEE.</p>
+
             <button
                 onClick={() => window.location.href = '/'}
                 className="mt-12 px-10 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-white border border-white/5 transition-all"

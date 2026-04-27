@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
+import RoastCurveVisualizer from './RoastCurveVisualizer';
 
-export default function RoastEntryForm({ user, lotData }: { user: { companyId: string } | null, lotData?: any }) {
+export default function RoastEntryForm({ user, lotData, initialTelemetry }: { user: { companyId: string } | null, lotData?: any, initialTelemetry?: any[] }) {
     const [formData, setFormData] = useState({
         batchId: 'AX-TOST-' + Math.floor(Math.random() * 9000 + 1000),
         roastDate: new Date().toISOString().split('T')[0],
@@ -18,8 +19,15 @@ export default function RoastEntryForm({ user, lotData }: { user: { companyId: s
     const [curveStatus, setCurveStatus] = useState<{ type: 'idle' | 'processing' | 'success' | 'error', message: string }>({ type: 'idle', message: '' });
 
     const [stats, setStats] = useState({ roastLoss: 0, netYield: 0 });
+    const [curveData, setCurveData] = useState<any[]>(initialTelemetry || []); // Almacena los puntos reales
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    
+    useEffect(() => {
+        if (initialTelemetry && initialTelemetry.length > 0) {
+            setCurveStatus({ type: 'success', message: '¡Telemetría de sesión capturada y sincronizada!' });
+        }
+    }, [initialTelemetry]);
 
     // Initial load from lotData
     useEffect(() => {
@@ -63,6 +71,7 @@ export default function RoastEntryForm({ user, lotData }: { user: { companyId: s
                         roasted_weight: formData.roastedWeight,
                         selected_weight: formData.selectedWeight || formData.roastedWeight,
                         quakers_grams: formData.quakersGrams,
+                        roast_curve: curveData, // Guardamos la telemetría real
                         company_id: user?.companyId
                     }
                 ]);
@@ -99,15 +108,39 @@ export default function RoastEntryForm({ user, lotData }: { user: { companyId: s
         setCurveFile(file);
         setCurveStatus({ type: 'processing', message: 'Analizando telemetría de la curva...' });
 
-        // Simulación de parseo de archivo CSV de Artisan / Cropster
-        setTimeout(() => {
-            if (file.name.endsWith('.csv') || file.name.endsWith('.alog')) {
-                setCurveStatus({ type: 'success', message: '¡Curva Artisan/Cropster procesada con éxito! ROR Máximo detectado: 14.5 °C/min.' });
-            } else {
-                setCurveStatus({ type: 'error', message: 'Formato inválido. Sube un CSV de telemetría térmica.' });
-                setCurveFile(null);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const text = event.target?.result as string;
+                const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
+                
+                // Parseo simple para Artisan/CSV (Tiempo, BT, ET)
+                const points = lines.slice(1).map((line, index) => {
+                    const parts = line.split(/[;,]/);
+                    if (parts.length >= 2) {
+                        return {
+                            t: parseFloat(parts[0]) || index,
+                            bt: parseFloat(parts[1]) || 0,
+                            et: parseFloat(parts[2]) || 0
+                        };
+                    }
+                    return null;
+                }).filter(p => p !== null);
+
+                if (points.length > 0) {
+                    setCurveData(points);
+                    setCurveStatus({ 
+                        type: 'success', 
+                        message: `¡Telemetría cargada! ${points.length} puntos detectados. T-Max: ${Math.max(...points.map(p => p!.bt))}°C.` 
+                    });
+                } else {
+                    throw new Error("No se detectaron puntos válidos.");
+                }
+            } catch (err) {
+                setCurveStatus({ type: 'error', message: 'Error al parsear el log térmico.' });
             }
-        }, 1500);
+        };
+        reader.readAsText(file);
     };
 
     return (
@@ -135,9 +168,9 @@ export default function RoastEntryForm({ user, lotData }: { user: { companyId: s
             {/* LOT IDENTIFICATION */}
             {lotData && (
                 <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm flex flex-col md:flex-row gap-6 justify-between items-center mb-8">
-                    <div>
+                    <div className="flex-1">
                         <p className="text-[10px] text-brand-green uppercase font-bold tracking-[0.2em] mb-1">Materia Prima Vinculada</p>
-                        <p className="text-xl font-bold text-white uppercase">{lotData.farmer_name || 'Productor'} • {lotData.variety || 'Café'}</p>
+                        <p className="text-xl font-bold text-white uppercase">{lotData.farmer_name || 'Productor'} • {lotData.variety || 'Variedad Tatama'}</p>
                     </div>
                     <div className="flex gap-6 text-center">
                         <div className="bg-white/5 px-4 py-2 rounded border border-white/5">
@@ -203,6 +236,24 @@ export default function RoastEntryForm({ user, lotData }: { user: { companyId: s
                         />
                     </div>
                 </div>
+
+                {/* VISUALIZADOR DE CURVA (VISTA PREVIA) */}
+                {curveData.length > 0 && (
+                    <div className="relative z-10 animate-in zoom-in duration-500">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse"></div>
+                            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Vista Previa de Telemetría Sincronizada</h4>
+                        </div>
+                        <RoastCurveVisualizer data={curveData} />
+                        <button 
+                            type="button" 
+                            onClick={() => { setCurveData([]); setCurveFile(null); setCurveStatus({ type: 'idle', message: '' }); }}
+                            className="mt-4 text-[9px] font-bold text-red-500 uppercase tracking-widest hover:underline"
+                        >
+                            Quitar Archivo y Limpiar Curva
+                        </button>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                     <div>

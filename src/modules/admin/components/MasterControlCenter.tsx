@@ -15,6 +15,8 @@ export default function MasterControlCenter() {
     const [reportCompany, setReportCompany] = useState<{ id: string, name: string } | null>(null);
     const [showLotsCompany, setShowLotsCompany] = useState<{ id: string, name: string } | null>(null);
     const [showRoastsCompany, setShowRoastsCompany] = useState<{ id: string, name: string } | null>(null);
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    const [allLots, setAllLots] = useState<any[]>([]); // Nuevo estado para la lista maestra de lotes
     const [verificationLogs, setVerificationLogs] = useState<any[]>([]);
     const [dbError, setDbError] = useState<string | null>(null);
     
@@ -27,13 +29,24 @@ export default function MasterControlCenter() {
         companyId: ''
     });
 
+    // Menú de gestión por usuario
+    const [activeManagementId, setActiveManagementId] = useState<string | null>(null);
+
     useEffect(() => {
         const loadInitialData = async () => {
             setIsLoading(true);
+            
+            // Cargar usuario actual para filtrado
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            if (authUser) {
+                const { data: profile } = await supabase.from('profiles').select('*').eq('email', authUser.email).single();
+                setCurrentUser(profile);
+            }
+
             await Promise.all([
                 fetchMasterStats(),
                 fetchUsers(),
-                fetchVerificationLogs()
+                fetchAllLots() // Cargar la lista maestra de lotes
             ]);
             setIsLoading(false);
         };
@@ -42,13 +55,23 @@ export default function MasterControlCenter() {
 
     const fetchVerificationLogs = async () => {
         try {
-            const res = await fetch('/api/track-verify');
-            if (res.ok) {
-                const logs = await res.json();
-                setVerificationLogs(logs.sort((a: any, b: any) => new Date(b.verified_at).getTime() - new Date(a.verified_at).getTime()));
-            }
+            const { data } = await supabase.from('eudr_validations').select('*').order('created_at', { ascending: false });
+            setVerificationLogs(data || []);
         } catch (err) {
-            console.error("No se pudieron cargar los logs de verificación", err);
+            console.error("Error cargando logs:", err);
+        }
+    };
+
+    const fetchAllLots = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('coffee_purchase_inventory')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            setAllLots(data || []);
+        } catch (err) {
+            console.error("Error al cargar lotes maestros:", err);
         }
     };
 
@@ -63,7 +86,6 @@ export default function MasterControlCenter() {
                 if (id === '33333333-3333-3333-3333-000023000009') return 'JULIO UVA (ADMIN)';
                 if (id === '33333333-3333-3333-3333-000025000009') return 'CATALINA PEREZ';
                 if (id === '99999999-9999-9999-9999-999999999999') return 'AXIS MASTER';
-                if (id === '11111111-1111-1111-1111-111111111111') return 'SAGRADO CORAZÓN';
                 if (id === 'unassigned') return 'DATOS HUERFANOS';
                 return null;
             };
@@ -82,7 +104,8 @@ export default function MasterControlCenter() {
                         completed: 0,
                         roasts: 0,
                         physical: 0,
-                        cupping: 0
+                        cupping: 0,
+                        users: 0
                     };
                 }
                 if (type === 'lot') {
@@ -93,6 +116,8 @@ export default function MasterControlCenter() {
                     if (record.status === 'purchased') companyGroups[cid].purchased++;
                     if (record.status === 'thrashed') companyGroups[cid].thrashed++;
                     if (record.status === 'completed') companyGroups[cid].completed++;
+                } else if (type === 'users') {
+                    companyGroups[cid].users++;
                 } else {
                     companyGroups[cid][type]++;
                 }
@@ -102,6 +127,10 @@ export default function MasterControlCenter() {
             roasts?.forEach(r => processRecord(r, 'roasts'));
             physical?.forEach(p => processRecord(p, 'physical'));
             cupping?.forEach(c => processRecord(c, 'cupping'));
+
+            // INTEGRACIÓN: También procesar usuarios para que las empresas aparezcan aunque no tengan lotes
+            const { data: allUsers } = await supabase.from('profiles').select('company_id');
+            allUsers?.forEach(u => processRecord(u, 'users'));
 
             Object.values(companyGroups).forEach(group => {
                 if (!group.name) group.name = 'CLIENTE CORPORATIVO';
@@ -119,11 +148,34 @@ export default function MasterControlCenter() {
                 .from('profiles')
                 .select('*')
                 .order('created_at', { ascending: false });
+            
             if (error) throw error;
-            setUsers(data || []);
+            
+            // FILTRADO DE SEGURIDAD: Solo juliocuva@gmail.com tiene acceso total a la red global
+            let filteredUsers = data || [];
+            if (currentUser && currentUser.email !== 'juliocuva@gmail.com') {
+                filteredUsers = filteredUsers.filter(u => u.company_id === currentUser.company_id);
+            }
+            
+            setUsers(filteredUsers);
         } catch (err: any) {
             console.error("Error al cargar usuarios:", err);
             setDbError(err.message || 'Error desconocido de red');
+        }
+    };
+
+    const handleUpdateUser = async (userId: string, updates: { role?: string, company_id?: string }) => {
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', userId);
+            
+            if (error) throw error;
+            setActiveManagementId(null);
+            await fetchUsers();
+        } catch (err: any) {
+            alert('Error al actualizar: ' + err.message);
         }
     };
 
@@ -170,6 +222,27 @@ export default function MasterControlCenter() {
         }
     };
 
+    const handleDeleteLot = async (lotId: string, lotNumber: string) => {
+        if (!window.confirm(`¿SEGURIDAD CRÍTICA?\n\nEstás a punto de ELIMINAR PERMANENTEMENTE el lote ${lotNumber}.\n\nEsta acción borrará también todos los análisis físicos y de catación asociados.\n\n¿Deseas continuar?`)) return;
+
+        try {
+            // Eliminar registros asociados primero (Cascada manual para seguridad)
+            await supabase.from('physical_analysis').delete().eq('inventory_id', lotId);
+            await supabase.from('sca_cupping').delete().eq('inventory_id', lotId);
+            
+            // Eliminar el lote principal
+            const { error } = await supabase.from('coffee_purchase_inventory').delete().eq('id', lotId);
+            
+            if (error) throw error;
+            
+            alert('Lote eliminado con éxito.');
+            await fetchAllLots();
+            await fetchMasterStats();
+        } catch (err: any) {
+            alert('Error al eliminar: ' + err.message);
+        }
+    };
+
     const handleMigration = async () => {
         if (!selectedTargetId) return;
         if (!window.confirm('¿ESTÁ SEGURO?\n\nEsta acción reasignará permanentemente todos los registros huérfanos.')) return;
@@ -206,7 +279,7 @@ export default function MasterControlCenter() {
         <div className="space-y-10 animate-in fade-in duration-700 max-w-7xl mx-auto px-4 pb-20">
             <header className="flex justify-between items-end border-b border-white/10 pb-6 mt-10">
                 <div>
-                    <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Centro de Gobernanza</h2>
+                    <h2 className="text-4xl font-black text-text-main uppercase tracking-tighter">Centro de Gobernanza</h2>
                     <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.4em] mt-1">Super Admin • Ecosistema Axis</p>
                 </div>
                 <div className="flex gap-4">
@@ -226,8 +299,94 @@ export default function MasterControlCenter() {
                     </button>
                 </div>
             </header>
+            
+            {/* PANEL DE DIAGNÓSTICO RÁPIDO */}
+            <section className="bg-bg-card border border-brand-green/20 p-6 rounded-industrial">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em]">Estado de la Red Axis</h3>
+                        <p className="text-xs text-text-offset mt-1">Conexión con la Bóveda Central (Supabase)</p>
+                    </div>
+                    <div className="flex gap-8">
+                        <div className="text-center">
+                            <p className="text-[9px] text-gray-500 font-bold uppercase">Perfiles en Red</p>
+                            <p className="text-xl font-black text-text-main">{users.length}</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-[9px] text-gray-500 font-bold uppercase">Estado de Tabla</p>
+                            <p className={`text-[10px] font-bold uppercase ${dbError ? 'text-brand-red' : 'text-brand-green'}`}>
+                                {dbError ? 'ERROR DE ESQUEMA' : 'ACTIVA'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            {/* SECCIÓN 1: KPIS */}
+            {/* NUEVA SECCIÓN: AUDITORÍA GLOBAL DE LOTES */}
+             <section className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Lotes Generados en la Red Axis</h3>
+                    </div>
+                    <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full uppercase tracking-widest">
+                        {allLots.length} Registros Totales
+                    </span>
+                </div>
+                
+                <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden shadow-2xl">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-white/5 border-b border-white/10">
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">No. Lote</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Origen / Caficultor</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Asociación</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Estado EUDR</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">Peso (Kg) / Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5 font-medium">
+                                {allLots.slice(0, 10).map((lot) => (
+                                    <tr key={lot.id} className="hover:bg-white/[0.02] transition-colors">
+                                        <td className="p-5 text-xs font-black text-text-main">{lot.lot_number}</td>
+                                        <td className="p-5 text-xs">
+                                            <div className="flex flex-col">
+                                                <span className="text-text-main uppercase font-bold">{lot.farmer_name}</span>
+                                                <span className="text-[9px] text-gray-500 uppercase tracking-tighter">{lot.farm_name} • {lot.region}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-5 text-[10px] font-bold text-gray-400 uppercase">
+                                            {stats.find(s => s.id === lot.company_id)?.name || 'INCOGNITO'}
+                                        </td>
+                                        <td className="p-5">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${lot.status === 'completed' ? 'bg-brand-green' : 'bg-orange-500'}`}></div>
+                                                <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                                                    {lot.status === 'completed' ? 'Verificado Satélite' : 'En Sincronización'}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="p-5 text-right flex items-center justify-end gap-6">
+                                            <span className="text-xs font-black text-text-main">{lot.purchase_weight.toLocaleString()} KG</span>
+                                            {currentUser?.email === 'juliocuva@gmail.com' && (
+                                                <button 
+                                                    onClick={() => handleDeleteLot(lot.id, lot.lot_number)}
+                                                    className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[8px] font-bold px-3 py-1.5 rounded border border-red-500/20 transition-all uppercase tracking-widest"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECCIÓN: ESTADÍSTICAS DE ADOPCIÓN */}
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
@@ -240,18 +399,67 @@ export default function MasterControlCenter() {
                     </div>
                     <div className="bg-bg-card border border-white/5 p-6 rounded-industrial relative overflow-hidden">
                         <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2">Volumen Estimado (Kg)</p>
-                        <p className="text-4xl font-black text-white tracking-tighter">{totalVolume.toLocaleString()}</p>
+                        <p className="text-4xl font-black text-text-main tracking-tighter">{totalVolume.toLocaleString()}</p>
                     </div>
                     <div className="bg-bg-card border border-brand-green/20 p-6 rounded-industrial relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-brand-green/10 blur-xl rounded-full"></div>
                         <p className="text-[9px] text-brand-green font-bold uppercase tracking-widest mb-2">Usuarios Activos Hoy</p>
-                        <p className="text-4xl font-black text-white tracking-tighter">
+                        <p className="text-4xl font-black text-text-main tracking-tighter">
                             {users.filter(u => u.last_active && new Date(u.last_active).toDateString() === new Date().toDateString()).length}
                         </p>
                     </div>
                     <div className="bg-bg-card border border-purple-500/20 p-6 rounded-industrial relative overflow-hidden">
                         <p className="text-[9px] text-purple-400 font-bold uppercase tracking-widest mb-2">Verificaciones Externas</p>
                         <p className="text-4xl font-black text-white tracking-tighter">{verificationLogs.length}</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECCIÓN 1.5: ASOCIACIONES REGISTRADAS */}
+            <section className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cartera de Asociaciones y Clientes</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-4">
+                    <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden shadow-2xl">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-white/5 border-b border-white/10">
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Organización</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Usuarios</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Lotes</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Laboratorio</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Catación</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">Herramientas</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {stats.length === 0 ? (
+                                    <tr><td colSpan={6} className="p-10 text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">No hay organizaciones detectadas</td></tr>
+                                ) : stats.map((company) => (
+                                    <tr key={company.id} className="hover:bg-white/[0.02] transition-colors">
+                                        <td className="p-5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded bg-bg-main border border-white/10 flex items-center justify-center">
+                                                    <span className="text-[10px] font-black text-brand-green">{company.name?.substring(0, 2)}</span>
+                                                </div>
+                                                <span className="text-xs font-black text-text-main uppercase tracking-tight">{company.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-5 text-center text-xs font-bold text-purple-400">{company.users || 0}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-text-main">{company.lots}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-gray-400">{company.physical}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-orange-400">{company.cupping}</td>
+                                        <td className="p-5 text-right flex justify-end gap-2">
+                                            <button onClick={() => setReportCompany(company)} className="text-[8px] font-bold bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded uppercase tracking-widest border border-white/10 transition-all">Reporte</button>
+                                            <button onClick={() => setShowLotsCompany(company)} className="text-[8px] font-bold bg-brand-green/10 hover:bg-brand-green/20 text-brand-green px-3 py-1.5 rounded uppercase tracking-widest border border-brand-green/20 transition-all">Lotes</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -323,10 +531,49 @@ export default function MasterControlCenter() {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="p-5 text-right">
+                                        <td className="p-5 text-right flex justify-end gap-2 relative">
+                                            <button
+                                                onClick={() => setActiveManagementId(activeManagementId === user.id ? null : user.id)}
+                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${activeManagementId === user.id ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-500/30 text-blue-400 hover:bg-blue-500/10'}`}
+                                            >
+                                                {activeManagementId === user.id ? 'Cerrar' : 'Gestionar'}
+                                            </button>
+
+                                            {/* DROPDOWN DE GESTIÓN INDUSTRIAL */}
+                                            {activeManagementId === user.id && (
+                                                <div className="absolute right-0 top-full mt-2 w-64 bg-bg-card border border-white/10 rounded-industrial shadow-3xl z-[100] p-4 text-left animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    <div className="mb-4">
+                                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2 px-1">Asignar Rol</p>
+                                                        <div className="grid grid-cols-2 gap-1.5">
+                                                            {['operador', 'gerente', 'catador', 'barista', 'tostador'].map(role => (
+                                                                <button
+                                                                    key={role}
+                                                                    onClick={() => handleUpdateUser(user.id, { role })}
+                                                                    className={`text-[9px] font-bold uppercase p-2 rounded border transition-all ${user.role === role ? 'bg-brand-green/20 border-brand-green/40 text-brand-green-bright' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white hover:bg-white/10'}`}
+                                                                >
+                                                                    {role}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="pt-4 border-t border-white/5">
+                                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2 px-1">Cambiar Asociación</p>
+                                                        <select
+                                                            value={user.company_id}
+                                                            onChange={(e) => handleUpdateUser(user.id, { company_id: e.target.value.toUpperCase() })}
+                                                            className="w-full bg-bg-main border border-white/10 rounded p-2 text-[9px] text-white font-bold uppercase outline-none focus:border-brand-green/50"
+                                                        >
+                                                            {stats.filter(s => s.id !== 'unassigned').map(s => (
+                                                                <option key={s.id} value={s.id.toUpperCase()}>{s.name || 'EMPRESA'}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            )}
                                             <button
                                                 onClick={() => handleBlockUser(user.id, user.status)}
-                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${user.status === 'blocked' ? 'border-brand-green text-brand-green' : 'border-white/10 text-gray-400 hover:text-white hover:bg-brand-red/10'}`}
+                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${user.status === 'blocked' ? 'border-brand-green text-brand-green' : 'border-border-main text-text-offset hover:text-text-main hover:bg-brand-red/10'}`}
                                             >
                                                 {user.status === 'blocked' ? 'Activar' : 'Anular'}
                                             </button>
@@ -369,29 +616,29 @@ export default function MasterControlCenter() {
             {/* MODAL NUEVO OPERADOR */}
             {showAddUserModal && (
                 <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-                    <div className="w-full max-w-md bg-bg-card border border-white/10 rounded-industrial p-10 shadow-3xl">
-                        <h2 className="text-2xl font-bold text-white tracking-tighter uppercase mb-6 text-center">Nuevo Operador</h2>
-                        <form onSubmit={handleCreateUser} className="space-y-4">
-                            <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={newUser.email}
-                                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-white"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Nombre</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={newUser.name}
-                                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-white"
-                                />
-                            </div>
+                        <div className="bg-bg-card border border-border-main p-10 rounded-industrial shadow-3xl">
+                            <h2 className="text-2xl font-black text-text-main tracking-tighter uppercase mb-6 text-center">Nuevo Operador</h2>
+                            <form onSubmit={handleCreateUser} className="space-y-4">
+                                <div>
+                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={newUser.email}
+                                        onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                                        className="w-full bg-bg-main border border-border-main rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-text-main placeholder:text-text-offset"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Nombre</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={newUser.name}
+                                        onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                                        className="w-full bg-bg-main border border-border-main rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-text-main placeholder:text-text-offset"
+                                    />
+                                </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Rol</label>
@@ -429,7 +676,7 @@ export default function MasterControlCenter() {
                 <h3 className="text-brand-red text-[10px] font-bold uppercase tracking-widest mb-6">Zona de Rescate de Datos (Legacy)</h3>
                 <div className="bg-brand-red/5 p-6 rounded-industrial border border-brand-red/20 flex items-center justify-between">
                     <div>
-                        <p className="text-white text-xs font-bold uppercase">Registros Huérfanos Detectados: {stats.find(s => s.id === 'unassigned')?.lots || 0}</p>
+                        <p className="text-text-main text-xs font-black uppercase">Registros Huérfanos Detectados: {stats.find(s => s.id === 'unassigned')?.lots || 0}</p>
                         <p className="text-gray-500 text-[9px] uppercase mt-1">Vincular registros sin empresa a un nuevo perfil</p>
                     </div>
                     <div className="flex gap-4">

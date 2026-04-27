@@ -9,7 +9,7 @@ import { NumericInput } from '@/shared/components/ui/NumericInput';
 type RetailView = 'inventory' | 'labels' | 'traceability' | 'sales' | 'archive';
 
 interface RetailModuleContainerProps {
-    user: { email: string, name: string, companyId: string } | null;
+    user: { email: string, name: string, companyId: string, role?: string } | null;
 }
 
 export default function RetailModuleContainer({ user }: RetailModuleContainerProps) {
@@ -398,7 +398,7 @@ function LabelGenerator() {
                     </div>
                     <div>
                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Marca Destino</label>
-                        <input type="text" placeholder="Sagrado Corazón" className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 outline-none" />
+                        <input type="text" placeholder="Asociación Tatama" className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 outline-none font-bold" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <button type="button" className="py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold uppercase">Vista Previa</button>
@@ -500,7 +500,7 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                         <>
                             <header>
                                 <div className="flex justify-between items-start">
-                                    <h3 className="text-3xl font-bold uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Sagrado'}<br />{story?.producer?.split(' ')[1] || 'Corazón'}</h3>
+                                    <h3 className="text-3xl font-bold uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
                                     <span className="bg-brand-green/20 text-brand-green text-[10px] font-bold px-3 py-1 rounded-full uppercase border border-brand-green/20">Lote {story?.roast?.batch_id_label || searchBatch}</span>
                                 </div>
                                 <p className="text-xs text-gray-400 mt-6 leading-relaxed font-medium">
@@ -538,7 +538,7 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                             </div>
 
                             <div className="p-6 bg-purple-600/10 border border-purple-500/20 text-white rounded-3xl space-y-2">
-                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Recomendación Sagrada</h4>
+                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Recomendación Tatama</h4>
                                 <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                             </div>
 

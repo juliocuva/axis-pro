@@ -5,10 +5,10 @@ import path from 'path';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { lot_id, user_agent } = body;
+        const { lot_id, user_agent, email, polygon, eudr_status, farm_name } = body;
 
-        if (!lot_id) {
-            return NextResponse.json({ error: 'Missing lot_id' }, { status: 400 });
+        if (!email) {
+            return NextResponse.json({ error: 'Missing user email' }, { status: 400 });
         }
 
         const projectRoot = process.cwd();
@@ -26,7 +26,11 @@ export async function POST(request: Request) {
 
         const newLog = {
             id: `verif-${Date.now()}-${Math.floor(Math.random()*1000)}`,
-            lot_id,
+            lot_id: lot_id || `PENDING-${Date.now()}`,
+            farm_name: farm_name || 'Sin Nombre',
+            email,
+            polygon: polygon || null,
+            eudr_status: eudr_status || 'not_checked',
             ip_address: request.headers.get('x-forwarded-for') || 'IP Privada (Tracking Activo)',
             user_agent: user_agent || request.headers.get('user-agent') || 'Unknown Browser',
             verified_at: new Date().toISOString()

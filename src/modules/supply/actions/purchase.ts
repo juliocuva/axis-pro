@@ -19,18 +19,16 @@ export async function createCoffeePurchase(formData: any) {
         const cleanFarmName = sanitizeString(formData.farmName);
         const cleanLotNumber = sanitizeString(formData.lotNumber);
 
-        // 2. Validaciones de Rangos Físicos y Lógica de Negocio
-        if (formData.altitude < 800 || formData.altitude > 2500) {
-            throw new Error(`La altura (${formData.altitude} MSNM) está fuera del rango permitido (800-2500).`);
-        }
-
+        // 2. Validaciones Flexibilizadas para Fase de Piloto/Importación
+        // Se permite altura 0 o fuera de rango para evitar bloqueos en recepción
+        const altitude = parseInt(formData.altitude) || 0;
+        
         if (formData.purchaseWeight <= 0) {
             throw new Error("ERROR INDUSTRIAL: El peso de compra debe ser un valor positivo.");
         }
 
-        if (formData.purchaseValue <= 0) {
-            throw new Error("ERROR INDUSTRIAL: El valor de compra debe ser un valor positivo.");
-        }
+        // Se permite purchaseValue = 0 para lotes en proceso de liquidación
+        const purchaseValue = parseFloat(formData.purchaseValue) || 0;
 
         // 3. Verificación de Identificador Único (Lote AX-XXXX) con Código 409
         const { data: existingLot, error: checkError } = await supabase
@@ -57,22 +55,23 @@ export async function createCoffeePurchase(formData: any) {
             farmer_name: cleanFarmerName,
             farm_name: cleanFarmName,
             lot_number: cleanLotNumber,
-            altitude: formData.altitude,
-            country: formData.country,
-            region: formData.region,
-            variety: formData.variety,
-            process: formData.process,
-            purchase_weight: formData.purchaseWeight,
-            purchase_value: formData.purchaseValue,
-            purchase_date: formData.purchaseDate,
-            destination: formData.destination,
-            export_certificate: formData.exportCertificate,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
+            altitude: altitude, // USAR VALOR LIMPIO
+            country: formData.country || 'Colombia',
+            region: formData.region || 'Huila',
+            variety: formData.variety || 'Caturra',
+            process: formData.process || 'lavado',
+            purchase_weight: parseFloat(formData.purchaseWeight) || 0,
+            purchase_value: purchaseValue, // USAR VALOR LIMPIO
+            purchase_date: formData.purchaseDate || new Date().toISOString().split('T')[0],
+            harvest_date: formData.harvestDate || formData.purchaseDate || new Date().toISOString().split('T')[0],
+            destination: formData.destination || 'local',
+            export_certificate: formData.exportCertificate || false,
+            latitude: parseFloat(formData.latitude) || 0,
+            longitude: parseFloat(formData.longitude) || 0,
             process_data: formData.processData || {},
             company_id: formData.companyId,
-            status: formData.coffeeType === 'excelso' ? 'thrashed' : 'purchased',
-            coffee_type: formData.coffeeType,
+            status: formData.status || (formData.coffeeType === 'excelso' ? 'thrashed' : 'purchased'),
+            coffee_type: formData.coffeeType || 'pergamino',
             thrashed_weight: formData.coffeeType === 'excelso' ? formData.purchaseWeight : null
         };
 
@@ -146,6 +145,7 @@ export async function updateCoffeePurchase(lotId: string, formData: any) {
             purchase_weight: formData.purchaseWeight,
             purchase_value: formData.purchaseValue,
             purchase_date: formData.purchaseDate,
+            harvest_date: formData.harvestDate,
             destination: formData.destination,
             export_certificate: formData.exportCertificate,
             latitude: formData.latitude,

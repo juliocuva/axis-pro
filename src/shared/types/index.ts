@@ -1,21 +1,15 @@
-export type ProcessType =
-    | 'lavado'
-    | 'washed'
-    | 'honey'
+export type ProcessType = 'lavado' | 'honey' | 'natural';
+
+export type FermentationStyle =
+    | 'estandar'
+    | 'anaerobico'
+    | 'doble_fermentacion'
+    | 'co_fermentacion'
     | 'honey_yellow'
     | 'honey_red'
     | 'honey_black'
-    | 'natural'
-    | 'semi_lavado'
-    | 'semi-washed'
-    | 'doble_fermentacion'
-    | 'co_fermentacion'
-    | 'Lavado'
-    | 'Yellow Honey'
-    | 'Red Honey'
-    | 'Black Honey'
-    | 'Natural'
-    | 'anaerobico';
+    | 'semi_lavado';
+
 
 export type CoffeeVariety =
     | ''
