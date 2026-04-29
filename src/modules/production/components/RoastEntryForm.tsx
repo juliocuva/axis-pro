@@ -496,9 +496,22 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-brand-green text-black px-12 py-5 rounded-industrial-sm font-bold uppercase tracking-widest hover:bg-brand-green-bright transition-all disabled:opacity-50"
+                        className="w-full sm:w-auto bg-brand-green text-black px-12 py-5 rounded-industrial-sm font-black uppercase tracking-[0.2em] text-xs hover:bg-brand-green-bright transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-2xl"
                     >
-                        {isSubmitting ? 'Registrando...' : 'Sellar Tueste (Guardar)'}
+                        {isSubmitting ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                SINCRONIZANDO CON LA NUBE...
+                            </>
+                        ) : (
+                            <>
+                                SELLAR PROCESO Y VERIFICAR
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                    <path d="m9 12 2 2 4-4" />
+                                </svg>
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

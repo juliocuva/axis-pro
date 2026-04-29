@@ -386,9 +386,30 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 type="button"
                 onClick={handleSave}
                 disabled={isSaving || isAlreadySealed}
-                className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadySealed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-brand-green hover:bg-brand-green-bright text-black disabled:opacity-30'}`}
+                className={`w-full font-black py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadySealed ? 'bg-brand-green/20 text-brand-green-bright border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-brand-green hover:bg-brand-green-bright text-black disabled:opacity-30'}`}
             >
-                {isAlreadySealed ? 'PROCESO SELLADO Y VERIFICADO' : isSaving ? 'SINCRONIZANDO CON SERVIDOR AXIS...' : 'SELLAR EVALUACIÓN CVA'}
+                {isAlreadySealed ? (
+                    <>
+                        PROCESO SELLADO Y VERIFICADO
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            <path d="m9 12 2 2 4-4" />
+                        </svg>
+                    </>
+                ) : isSaving ? (
+                    <>
+                        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        SINCRONIZANDO CON LA NUBE...
+                    </>
+                ) : (
+                    <>
+                        SELLAR PROCESO Y VERIFICAR
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:rotate-12 transition-transform">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    </>
+                )}
             </button>
         </div>
       </div>

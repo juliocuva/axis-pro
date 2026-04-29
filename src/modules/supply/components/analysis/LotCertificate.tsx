@@ -270,11 +270,19 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     </div>
                 </div>
 
-                <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-gray-100 border border-gray-200 rounded-2xl shadow-2xl print:hidden">
+                <div className="w-full flex flex-wrap justify-center sm:justify-end gap-3 no-export mt-8 p-4 bg-gray-50/50 backdrop-blur-sm border border-gray-200 rounded-2xl print:hidden">
                     <ExportReportButton elementId="lot-certificate-area" fileName={`REPORT-AXIS-${lotData?.lot_number || 'LOT'}-${lotData?.farm_name || 'COFFEE'}`} />
-                    <button onClick={downloadQRCode} className="px-8 py-4 bg-white hover:bg-gray-50 text-[#006056] border border-gray-200 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg>Descargar Código QR</button>
-                    <button onClick={() => window.print()} className="px-8 py-4 bg-black hover:bg-gray-800 text-white border border-gray-800 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>IMPRIMIR / PDF NATIVO</button>
-                    <button onClick={onClose} className="px-10 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-black rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all border border-gray-200 active:scale-95 shadow-xl">Cerrar Certificado</button>
+                    <button onClick={downloadQRCode} className="px-5 py-2.5 bg-white hover:bg-gray-50 text-[#006056] border border-gray-200 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg>
+                        Descargar QR
+                    </button>
+                    <button onClick={() => window.print()} className="px-5 py-2.5 bg-black hover:bg-gray-800 text-white border border-black rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        Imprimir / PDF
+                    </button>
+                    <button onClick={onClose} className="px-6 py-2.5 bg-gray-200/50 hover:bg-gray-200 text-gray-600 hover:text-black rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border border-gray-300 active:scale-95">
+                        Cerrar
+                    </button>
                 </div>
             </div>
         </>

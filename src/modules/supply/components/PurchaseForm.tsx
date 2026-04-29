@@ -1238,9 +1238,17 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                         SINCRONIZANDO CON LA NUBE...
                                     </div>
                                 </>
-                            ) : isAlreadyRegistered ? (
+                            ) : (selectedLot?.status === 'completed' || selectedLot?.status === 'sealed') ? (
                                 <>
-                                    ACTUALIZAR DATOS DEL LOTE
+                                    PROCESO SELLADO Y VERIFICADO
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                        <path d="m9 12 2 2 4-4" />
+                                    </svg>
+                                </>
+                            ) : selectedLot?.id ? (
+                                <>
+                                    SELLAR PROCESO Y VERIFICAR
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:rotate-12 transition-transform">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                         <polyline points="22 4 12 14.01 9 11.01" />
@@ -1248,11 +1256,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 </>
                             ) : (
                                 <>
-                                    REGISTRAR INGRESO Y PREPARAR PARA TRILLA
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:rotate-12 transition-transform">
-                                        <path d="M4 12V4a2 2 0 0 1 2-2h10l4 4v5" />
-                                        <path d="M10 12l2 2 4-4" />
-                                        <path d="M4 18h16" />
+                                    REGISTRAR INGRESO AL SISTEMA AXIS
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                        <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
                                 </>
                             )}

@@ -91,7 +91,7 @@ export async function createCoffeePurchase(formData: any) {
             delete legacyData.export_certificate;
             delete legacyData.latitude;
             delete legacyData.longitude;
-            delete legacyData.process_data;
+            // MANTENER process_data SIEMPRE
 
             insertResponse = await supabase
                 .from('coffee_purchase_inventory')
@@ -171,7 +171,7 @@ export async function updateCoffeePurchase(lotId: string, formData: any) {
             delete legacyData.export_certificate;
             delete legacyData.latitude;
             delete legacyData.longitude;
-            delete legacyData.process_data;
+            // MANTENER process_data SIEMPRE
 
             updateResponse = await supabase
                 .from('coffee_purchase_inventory')
