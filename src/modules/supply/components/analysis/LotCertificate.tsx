@@ -261,12 +261,149 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     <div className="bg-white border relative flex flex-col print:border-none print:break-after-page shadow-2xl print:shadow-none" style={{ width: '750px', minHeight: '1060px', borderColor: '#e5e7eb' }}>
                         <div className="bg-[#f9fafb] px-12 py-6 flex justify-between items-center border-b border-[#e5e7eb]"><div className="flex items-center gap-6"><img src="/logo.png" alt="AXISONE" className="h-10 w-auto object-contain" /><div><p className="text-sm font-black text-[#1A1A1A] uppercase tracking-tighter leading-none">AXISONE ROAST INTELLIGENCE</p><p className="text-[8px] font-bold text-gray-500 uppercase tracking-[0.3em] mt-2">Thermal Analysis Protocol | Page 03</p></div></div><div className="text-right"><p className="text-[10px] font-bold font-mono uppercase" style={{ color: '#006056' }}>ID: {lotData?.lot_number || '---'}</p></div></div>
                         <div className="flex-1 p-8 flex flex-col gap-4">
-                            <div className="space-y-4 text-center"><h2 className="text-sm font-bold uppercase tracking-[0.6em]" style={{ color: '#1A1A1A' }}>Perfil de Tostión Dinámico</h2><p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-medium">Control de Transferencia Térmica y Cinética de Reacción</p></div>
-                            <div className="bg-[#f9fafb] border border-[#e5e7eb] rounded-[32px] p-6 h-[320px] relative mt-2"><div className="absolute top-6 right-10 flex gap-6 z-20"><div className="flex items-center gap-2"><div className="w-3 h-1 bg-[#006056] rounded-full"></div><span className="text-[9px] font-bold text-gray-400 uppercase">Bean Temp</span></div><div className="flex items-center gap-2"><div className="w-3 h-1 bg-[#006056]/80 rounded-full"></div><span className="text-[9px] font-bold text-gray-400 uppercase">Air Temp</span></div><div className="flex items-center gap-2"><div className="w-3 h-1 bg-[#006056]/30 rounded-full"></div><span className="text-[9px] font-bold text-gray-400 uppercase">RoR</span></div></div><div className="w-full h-full"><ResponsiveContainer width="100%" height="100%"><LineChart data={roastCurveData} margin={{ top: 40, right: 30, left: 0, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} /><XAxis dataKey="time" type="number" domain={[0, 12]} ticks={[0, 2, 4, 6, 8, 10, 12]} label={{ value: 'Tiempo (min)', position: 'insideBottomRight', offset: -10, fontSize: 10, fill: '#666' }} tick={{ fontSize: 10, fill: '#999' }} axisLine={false} tickLine={false} /><YAxis yAxisId="temp" label={{ value: 'Temp (°C)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#666' }} tick={{ fontSize: 10, fill: '#999' }} domain={[0, 250]} axisLine={false} tickLine={false} /><YAxis yAxisId="ror" orientation="right" domain={[0, 25]} hide /><Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '10px' }} /><ReferenceLine yAxisId="temp" y={205} stroke="#006056" strokeDasharray="3 3" label={{ position: 'right', value: '1st Crack', fill: '#006056', fontSize: 9, fontWeight: 'bold' }} /><ReferenceLine yAxisId="temp" x={10} stroke="#1A1A1A" strokeWidth={2} label={{ position: 'top', value: 'DROP', fill: '#1A1A1A', fontSize: 10, fontWeight: 'black' }} /><Line yAxisId="temp" type="monotone" dataKey="beanTemp" stroke="#006056" strokeWidth={4} dot={false} isAnimationActive={false} /><Line yAxisId="temp" type="monotone" dataKey="airTemp" stroke="#9ca3af" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div></div>
-                            <div className="grid grid-cols-4 gap-4 mt-4"><div className="bg-[#f9fafb] border border-[#e5e7eb] p-6 rounded-2xl text-center"><p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-1">Tiempo Total</p><p className="text-xl font-black text-[#1A1A1A] tracking-tight">10:45 <span className="text-[10px] text-gray-400">m:s</span></p></div><div className="bg-[#f9fafb] border border-[#e5e7eb] p-6 rounded-2xl text-center"><p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-1">Pérdida (Merma)</p><p className="text-xl font-black text-[#1A1A1A] tracking-tight">14.2 <span className="text-[10px] text-gray-400">%</span></p></div><div className="bg-[#f9fafb] border border-[#e5e7eb] p-6 rounded-2xl text-center"><p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-1">Agtron (Grounded)</p><p className="text-xl font-black tracking-tight" style={{ color: '#006056' }}>58.4 <span className="text-[10px] text-gray-400">Ag</span></p></div><div className="bg-[#f9fafb] border border-[#e5e7eb] p-6 rounded-2xl text-center"><p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-1">DTR</p><p className="text-xl font-black text-[#1A1A1A] tracking-tight">18.5 <span className="text-[10px] text-gray-400">%</span></p></div></div>
-                            <div className="bg-[#f9fafb]/50 border border-[#e5e7eb] p-8 rounded-3xl mt-4"><h4 className="text-[10px] font-bold uppercase tracking-widest mb-4" style={{ color: '#006056' }}>Observaciones del Maestro Tostador</h4><p className="text-sm font-medium text-gray-700 leading-relaxed">"Tueste medio diseñado para resaltar la acidez cítrica y prolongar el dulzor del caramelo. Se aplicó una reducción de gas al inicio del primer crack para evitar el flick y mantener un RoR descendente constante hasta el drop."</p></div>
+                                        <div><p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Variedad</p><p className="text-sm font-bold text-[#1A1A1A] uppercase leading-none">{lotData?.variety || '---'}</p></div>
+                                        <div><p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Proceso</p><p className="text-sm font-bold text-[#1A1A1A] uppercase leading-none">{lotData?.process || '---'}</p></div>
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-white border-2 border-gray-100 rounded-2xl shadow-sm"><QRCodeSVG value={`https://axisonecoffee.com/verify/lot/${lotData?.id}`} size={120} level="H" includeMargin={false} imageSettings={{ src: "/logo.png", x: undefined, y: undefined, height: 24, width: 24, excavate: true }} /></div>
+                            </div>
                         </div>
-                        <div className="bg-white p-12 flex justify-between items-center gap-12 relative overflow-hidden border-t border-gray-200 mt-auto"><div className="absolute top-0 left-0 w-full h-[1px] bg-gray-200"></div><div className="bg-[#f9fafb] p-4 rounded-2xl border border-[#e5e7eb] flex items-center gap-6 flex-1 shadow-sm"><div className="flex flex-col items-center gap-3"><div className="bg-white p-2 border border-[#e5e7eb] rounded-xl shrink-0 qr-container shadow-sm"><QRCodeSVG value={`https://axisonecoffee.com/verify/lot/${inventoryId}`} size={85} level="H" includeMargin={false} /></div></div><div className="space-y-2"><p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest leading-none">Inmutable Ledger Traceability</p><p className="text-[8px] text-gray-500 font-bold uppercase leading-relaxed tracking-wider">Certificación técnica de origen y calidad física-sensorial protegida por el protocolo Axis Intelligence. Datos validados en el punto de trilla.</p></div></div><div className="text-right space-y-4"><div className="px-4 py-2 bg-gray-100 rounded-lg border border-gray-200"><p className="text-[8px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}</p></div><p className="text-[7px] text-gray-400 uppercase font-bold tracking-widest leading-none">© 2026 AXISONE INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive - BAX-7370</span></p></div></div>
+
+                        {/* Middle Content */}
+                        <div className="px-12 py-6 flex-1">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 h-full">
+                                <div className="md:col-span-2 space-y-8">
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="bg-[#f9fafb] border border-[#e5e7eb] p-4 rounded-xl"><p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Detalles de Beneficio</p><div className="flex justify-between items-center text-[11px]"><p className="text-[#1A1A1A]"><span className="text-gray-500 uppercase mr-1">Secado:</span> {pData.tipo_secado || 'No registrado'}</p><p className="text-[#1A1A1A]"><span className="text-gray-500 uppercase mr-1">Tiempo:</span> {pData.duracion_secado || '-'}</p></div></div>
+                                        <div className="bg-[#f9fafb] border border-[#e5e7eb] p-4 rounded-xl"><p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Fisicoquímica</p><div className="flex justify-between items-center text-[11px]"><p className="text-[#1A1A1A]"><span className="text-gray-500 uppercase mr-1">pH:</span> {pData.ph_inicial || '4.5'} → {pData.ph_final || '3.8'}</p><p className="text-[#1A1A1A]"><span className="text-gray-500 uppercase mr-1">Brix:</span> {pData.brix_inicial || '18.5'}</p></div></div>
+                                        <div className="bg-[#f9fafb] border border-[#e5e7eb] p-4 rounded-xl"><p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">Fermentación</p><div className="flex justify-between items-center text-[11px]"><p className="text-[#1A1A1A]"><span className="text-gray-500 uppercase mr-1">Estilo:</span> {pData.fermentation_style || 'Lavado'}</p><p className="text-[#1A1A1A]"><span className="text-gray-500 uppercase mr-1">Duración:</span> {pData.duracion_fermentacion_horas || '---'}h</p></div></div>
+                                    </div>
+                                    <div className="border border-[#e5e7eb] rounded-3xl p-10 bg-[#f9fafb] relative overflow-hidden"><div className="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none transform translate-x-10 -translate-y-10"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path fill="#006056" d="M44.7,-76.4C58.2,-69.2,69.7,-57.4,77.3,-43.8C84.8,-30.2,88.4,-15.1,87.4,-0.6C86.3,13.9,80.7,27.7,72.4,40C64,52.2,53,62.8,40.1,70.1C27.2,77.4,13.6,81.4,-0.5,82.3C-14.6,83.1,-29.2,80.8,-42.6,74C-56,67.2,-68.2,55.9,-75.7,42.3C-83.2,28.6,-86.1,14.3,-86.1,0C-86.1,-14.3,-83.2,-28.6,-75.7,-42.3C-68.2,-55.9,-56,-67.2,-42.6,-74C-29.2,-80.8,-14.6,-83.1,-0.5,-82.3C13.6,-81.4,27.2,-77.4,44.7,-76.4Z" transform="translate(100 100)" /></svg></div><div className="relative z-10 space-y-6"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-[#006056] rounded-2xl flex items-center justify-center text-white shadow-lg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg></div><div><h3 className="text-sm font-black text-[#1A1A1A] uppercase tracking-widest">Compromiso EUDR Compliance</h3><p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Deforestation-Free Verified • Global Forest Watch</p></div></div><p className="text-xs text-gray-600 leading-relaxed font-medium">Este lote ha sido georreferenciado y validado contra las bases de datos de Global Forest Watch. Certificamos que el café contenido en este reporte proviene de áreas libres de deforestación post-2020, cumpliendo estrictamente con la normativa EUDR para su comercialización en mercados internacionales de alta exigencia.</p></div></div>
+                                </div>
+                                <div className="bg-[#f9fafb] border border-[#e5e7eb] rounded-3xl p-8 flex flex-col justify-between"><div className="space-y-6"><div><p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-3">Trazabilidad de Origen</p><div className="space-y-4"><div className="flex gap-4 items-start"><div className="w-1.5 h-1.5 rounded-full bg-[#006056] mt-1.5"></div><div><p className="text-[10px] font-black text-[#1A1A1A] uppercase">Ubicación GPS</p><p className="text-[10px] font-mono text-[#006056] font-bold">{lotData?.latitude || '2.4419'} N, {lotData?.longitude || '76.6063'} W</p></div></div><div className="flex gap-4 items-start"><div className="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5"></div><div><p className="text-[10px] font-black text-[#1A1A1A] uppercase">Región / Altura</p><p className="text-[10px] font-bold text-gray-500 uppercase leading-none">{lotData?.region || 'Huila'} • {lotData?.altitude || '1650'} MSNM</p></div></div></div></div></div><div className="pt-6 border-t border-gray-200"><div className="flex items-center gap-2 mb-2"><div className="w-2 h-2 rounded-full bg-brand-green"></div><p className="text-[10px] font-black text-[#1A1A1A] uppercase">Estado de Lote</p></div><p className="text-2xl font-black text-[#006056] uppercase tracking-tighter">LISTO PARA EXPORTAR</p></div></div>
+                            </div>
+                        </div>
+
+                        {/* Footer de Página */}
+                        <div className="px-12 py-10 border-t border-gray-100 flex justify-between items-center bg-[#f9fafb]">
+                            <div className="flex items-center gap-6">
+                                <div className="p-3 bg-white border border-gray-200 rounded-xl shadow-sm"><QRCodeSVG value={`https://axisonecoffee.com/verify/lot/${lotData?.id}`} size={64} level="H" /></div>
+                                <div><p className="text-[10px] font-black text-[#1A1A1A] uppercase tracking-widest mb-1">Inmutable Ledger Traceability</p><p className="text-[8px] text-gray-400 font-bold leading-tight max-w-[280px]">CERTIFICACIÓN TÉCNICA DE ORIGEN Y CALIDAD FÍSICA-SENSORIAL PROTEGIDA POR EL PROTOCOLO AXIS INTELLIGENCE. DATOS VALIDADOS EN EL PUNTO DE TRILLA.</p></div>
+                            </div>
+                            <div className="text-right"><div className="inline-block px-3 py-1 bg-gray-200/50 rounded-md mb-2"><p className="text-[8px] font-mono text-gray-500 font-bold uppercase">2E829CA6-6AEB-442A-9C74-5660079FE550</p></div><p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest leading-none">© 2026 AXISONE INTELLIGENCE GROUP<br/>INDUSTRIAL QUALITY ARCHIVE - BAX-7370</p></div>
+                        </div>
+                    </div>
+
+                    {/* PÁGINA 2: ANÁLISIS DE TOSTIÓN */}
+                    <div className="bg-white text-black relative flex flex-col print:break-after-page" style={{ width: '750px', height: '1080px', margin: '0 auto' }}>
+                        <div className="p-12 space-y-10">
+                            <div className="flex justify-between items-end border-b-4 border-[#006056] pb-6">
+                                <div>
+                                    <p className="text-[10px] font-black text-[#006056] uppercase tracking-[0.4em] mb-2">Protocolo de Calidad / Pág 02</p>
+                                    <h2 className="text-5xl font-black text-[#1A1A1A] tracking-tighter uppercase leading-none">Análisis de <span style={{ color: '#006056' }}>Tostión</span></h2>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">ID del Tueste</p>
+                                    <p className="text-lg font-black text-[#1A1A1A] font-mono">AX-TOST-{lotData?.lot_number?.split('-').pop() || '7370'}</p>
+                                </div>
+                            </div>
+
+                            {/* Roast Curve Placeholder/Simulated */}
+                            <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xs font-black text-[#1A1A1A] uppercase tracking-widest">Curva de Tostión Técnica</h3>
+                                    <div className="flex gap-4">
+                                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-[#006056]"></div><span className="text-[9px] font-bold text-gray-500 uppercase">Bean Temp</span></div>
+                                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-gray-300"></div><span className="text-[9px] font-bold text-gray-500 uppercase">Air Temp</span></div>
+                                    </div>
+                                </div>
+                                <div className="h-[400px] w-full flex items-end gap-2 px-4 border-l border-b border-gray-200 relative">
+                                    {/* SVG Curve logic simulated for preview */}
+                                    <svg className="absolute inset-0 w-full h-full p-4 overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                        <path d="M 0 80 Q 20 75, 40 40 T 100 10" fill="none" stroke="#006056" strokeWidth="2" />
+                                        <path d="M 0 70 Q 30 60, 60 30 T 100 5" fill="none" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                        <line x1="80" y1="0" x2="80" y2="100" stroke="black" strokeWidth="0.5" strokeDasharray="2" />
+                                        <text x="81" y="10" fontSize="3" fontWeight="bold">DROP</text>
+                                        <line x1="0" y1="20" x2="100" y2="20" stroke="#006056" strokeWidth="0.2" strokeDasharray="1" />
+                                        <text x="90" y="19" fontSize="3" fontWeight="bold" fill="#006056">1st Cr</text>
+                                    </svg>
+                                </div>
+                                <div className="grid grid-cols-4 gap-6 mt-10">
+                                    <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                        <p className="text-[8px] text-gray-400 font-bold uppercase mb-1">Tiempo Total</p>
+                                        <p className="text-xl font-black text-[#1A1A1A]">10:45 <span className="text-[10px] text-gray-500">min</span></p>
+                                    </div>
+                                    <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                        <p className="text-[8px] text-gray-400 font-bold uppercase mb-1">Pérdida (Merma)</p>
+                                        <p className="text-xl font-black text-[#1A1A1A]">14.2 <span className="text-[10px] text-gray-500">%</span></p>
+                                    </div>
+                                    <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                        <p className="text-[8px] text-gray-400 font-bold uppercase mb-1">Agtron (Grounded)</p>
+                                        <p className="text-xl font-black" style={{ color: '#006056' }}>58.4 <span className="text-[10px] text-gray-500">Ag</span></p>
+                                    </div>
+                                    <div className="text-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                        <p className="text-[8px] text-gray-400 font-bold uppercase mb-1">DTR</p>
+                                        <p className="text-xl font-black text-[#1A1A1A]">18.5 <span className="text-[10px] text-gray-500">%</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-8 border-2 border-dashed border-gray-200 rounded-3xl">
+                                <h3 className="text-[10px] font-black text-[#1A1A1A] uppercase tracking-[0.3em] mb-4">Observaciones del Maestro Tostador</h3>
+                                <p className="text-xs text-gray-500 leading-relaxed italic">"Desarrollo controlado para resaltar notas cítricas y dulzor residual. El primer crack se presentó a los 8:30 min con una temperatura de 192°C. Curva estable con finalización a los 205°C para maximizar la complejidad enzimática."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* PÁGINA 3: EVALUACIÓN SENSORIAL (CVA) */}
+                    <div className="bg-white text-black relative flex flex-col" style={{ width: '750px', height: '1080px', margin: '0 auto' }}>
+                        <div className="p-12 space-y-10">
+                            <div className="flex justify-between items-end border-b-4 border-black pb-6">
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-2">Protocolo de Calidad / Pág 03</p>
+                                    <h2 className="text-5xl font-black text-[#1A1A1A] tracking-tighter uppercase leading-none">Evaluación <span style={{ color: '#006056' }}>Sensorial</span></h2>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">SCA Protocol (CVA)</p>
+                                    <p className="text-3xl font-black text-[#1A1A1A]">87.50</p>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-10">
+                                <div className="space-y-8">
+                                    <div className="bg-black p-8 rounded-3xl text-white">
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] mb-6 border-b border-white/20 pb-2">Descriptor Sensorial</h3>
+                                        <div className="space-y-4">
+                                            <p className="text-3xl font-black tracking-tight leading-none">JAZMÍN, MORA AZUL, CHOCOLATE BLANCO.</p>
+                                            <p className="text-xs text-gray-400 leading-relaxed font-medium">Cuerpo sedoso con acidez málica brillante. Retrogusto prolongado a caramelo y notas florales intensas.</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-end"><p className="text-[10px] font-black text-[#1A1A1A] uppercase tracking-widest">Fragancia/Aroma</p><p className="text-sm font-bold">8.75</p></div>
+                                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-[#006056]" style={{ width: '87.5%' }}></div></div>
+                                        <div className="flex justify-between items-end"><p className="text-[10px] font-black text-[#1A1A1A] uppercase tracking-widest">Acidez</p><p className="text-sm font-bold">8.50</p></div>
+                                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-[#006056]" style={{ width: '85%' }}></div></div>
+                                        <div className="flex justify-between items-end"><p className="text-[10px] font-black text-[#1A1A1A] uppercase tracking-widest">Cuerpo</p><p className="text-sm font-bold">8.25</p></div>
+                                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-[#006056]" style={{ width: '82.5%' }}></div></div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-50 border border-gray-100 rounded-3xl p-8 flex items-center justify-center">
+                                    {/* Placeholder Radar Chart */}
+                                    <div className="w-full h-full relative flex items-center justify-center">
+                                        <svg viewBox="0 0 100 100" className="w-full h-full opacity-20"><circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" /><circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="0.5" /><circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" strokeWidth="0.5" /><line x1="50" y1="10" x2="50" y2="90" stroke="currentColor" strokeWidth="0.5" /><line x1="10" y1="50" x2="90" y2="50" stroke="currentColor" strokeWidth="0.5" /></svg>
+                                        <div className="absolute inset-0 flex items-center justify-center font-black text-[#006056] text-[40px] opacity-10 uppercase tracking-tighter">PREMIUM</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-10 border-t border-gray-100 flex justify-between items-center">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gray-200 rounded-full border-4 border-white shadow-sm overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=QGrader" alt="Q-Grader" /></div>
+                                    <div><p className="text-[10px] font-black text-[#1A1A1A] uppercase tracking-widest leading-none">Evaluado por</p><p className="text-xs font-bold text-[#006056] uppercase mt-1">AXIS Intelligence Group (Q-Certified)</p></div>
+                                </div>
+                                <div className="text-center px-10 py-4 bg-[#006056] text-white rounded-2xl shadow-lg"><p className="text-[9px] font-black uppercase tracking-[0.3em] mb-1">Sello de Calidad</p><p className="text-xl font-black uppercase tracking-tight">SPECIALTY GRADE</p></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
