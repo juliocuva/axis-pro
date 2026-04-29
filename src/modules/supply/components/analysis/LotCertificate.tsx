@@ -150,15 +150,13 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     return (
         <>
             <style jsx global>{`
-                @media (max-width: 768px) {
-                    .lot-certificate-area { transform: scale(calc(100vw / 780px)); transform-origin: top left; width: 750px !important; }
-                    .no-export { width: 100% !important; flex-direction: column; }
-                }
                 @media print {
-                    @page { size: A4; margin: 15mm !important; }
-                    body { margin: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                    .no-print, .no-export { display: none !important; }
+                    @page { size: A4; margin: 0 !important; }
+                    body { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    #lot-certificate-area { width: 750px !important; margin: 0 auto !important; padding: 15mm 0 !important; transform: scale(1) !important; }
+                    .no-export, .no-print, header, footer, nav { display: none !important; }
                     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    .print\:break-after-page { break-after: page !important; page-break-after: always !important; }
                 }
                 @media (max-width: 768px) {
                     #lot-certificate-area { transform: scale(calc(100vw / 820)); transform-origin: top center; margin-left: auto; margin-right: auto; }
