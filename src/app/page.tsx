@@ -121,13 +121,13 @@ export default function Home() {
             <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-white/5 pb-8">
                 <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-green/30 transition-all">
-                            <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-1" />
+                        <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-green/30 transition-all">
+                            <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
                         </div>
                         <div className="flex flex-col">
-                            <h1 className="text-xl font-bold tracking-tighter uppercase leading-none">AXISONE <span className="text-brand-green-bright text-[10px] ml-1 font-bold">COFFEE</span></h1>
+                            <h1 className="text-4xl font-bold tracking-tighter uppercase leading-none">AXISONE <span className="text-brand-green-bright text-sm ml-1 font-bold">COFFEE</span></h1>
 
-                            <p className="text-[8px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1.5">by Mouselab • Sagrado Corazón</p>
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-2">by Mouselab • Sagrado Corazón</p>
                         </div>
                     </div>
                     <div className="h-10 w-[1px] bg-white/5 hidden md:block"></div>
@@ -180,7 +180,7 @@ export default function Home() {
                         title={theme === 'dark' ? 'Modo Luz' : 'Modo Oscuro'}
                     >
                         {theme === 'dark' ? (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-orange-400 group-hover:rotate-12 transition-transform">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white group-hover:rotate-12 transition-transform">
                                 <circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                             </svg>
                         ) : (
@@ -223,7 +223,7 @@ export default function Home() {
                                             title="Lotes Certificados"
                                             description="Auditoría de lotes con aval EUDR y pasaportes digitales listos para exportación."
                                             status="active"
-                                            color="blue-500"
+                                            color="gray-500"
                                             onClick={() => setView('archive')}
                                             icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>}
                                         />
@@ -231,7 +231,7 @@ export default function Home() {
                                             title="Tostión y CVA 2.0"
                                             description="Supervisión de calidad sensorial y perfiles de tueste de la asociación."
                                             status="active"
-                                            color="orange-500"
+                                            color="gray-500"
                                             onClick={() => setView('production')}
                                             icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
                                         />
@@ -259,7 +259,7 @@ export default function Home() {
                                     title="Pasaporte Aduanero"
                                     description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
                                     status="active"
-                                    color="blue-500"
+                                    color="gray-500"
                                     onClick={() => setView('export')}
                                     icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
                                 />
@@ -298,7 +298,7 @@ export default function Home() {
                                                     <p className={`text-[10px] font-bold uppercase tracking-widest text-brand-green-bright`}>
                                                         LISTO PARA EXPORTAR
                                                     </p>
-                                                    <p className="text-[8px] text-blue-400 font-bold uppercase mt-1 tracking-widest">SICA / EUDR Asignado</p>
+                                                    <p className="text-[8px] text-gray-400 font-bold uppercase mt-1 tracking-widest">SICA / EUDR Asignado</p>
                                                 </div>
                                             </div>
                                         );
@@ -317,7 +317,7 @@ export default function Home() {
                                     </div>
                                     <div className="flex justify-between items-center text-xs">
                                         <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Scanner WGS84 / GIS</span>
-                                        <span className="text-blue-500 font-bold">ACTIVO</span>
+                                        <span className="text-brand-green-bright font-bold">ACTIVO</span>
                                     </div>
                                     <div className="h-px bg-white/5 my-4"></div>
                                     <div className="text-center p-6 bg-white/2 border border-white/5 rounded-industrial-sm">
@@ -415,13 +415,13 @@ export default function Home() {
                         <div className="flex bg-bg-card p-1 rounded-industrial-sm border border-white/5 shadow-xl">
                             <button
                                 onClick={() => setView('export')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'export' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'export' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
                                 Emisión de Pasaportes
                             </button>
                             <button
                                 onClick={() => setView('archive')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'archive' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'archive' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-500 hover:text-white'}`}
                             >
                                 Archivo Confidencial Nube
                             </button>
@@ -477,7 +477,7 @@ export default function Home() {
                     <div className="max-w-4xl mx-auto space-y-12">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-blue-500/10 rounded-industrial-sm flex items-center justify-center text-blue-400">
+                                <div className="w-12 h-12 bg-brand-green/10 rounded-industrial-sm flex items-center justify-center text-brand-green-bright">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                                 </div>
                                 <h2 className="text-4xl font-bold uppercase tracking-tighter text-white">Manual de Ingeniería Pro</h2>
@@ -503,15 +503,15 @@ export default function Home() {
                                     <p className="text-xs leading-relaxed">Control de trilla, factor de rendimiento y protocolos basados en estándares de la SCA ciegos con firma digital.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-orange-400 uppercase">Inteligencia de Tostión</h4>
+                                    <h4 className="text-sm font-bold text-white uppercase">Inteligencia de Tostión</h4>
                                     <p className="text-xs leading-relaxed">Monitoreo espectral en vivo, Perfiles Espejo y asistente IA para control de variables físicas.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-blue-400 uppercase">Comercio Global</h4>
+                                    <h4 className="text-sm font-bold text-white uppercase">Comercio Global</h4>
                                     <p className="text-xs leading-relaxed">Pasaportes digitales QR y motores dinámicos de desgasificación para logística segura.</p>
                                 </div>
                                 <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-purple-400 uppercase">Sello Inmutable</h4>
+                                    <h4 className="text-sm font-bold text-white uppercase">Sello Inmutable</h4>
                                     <p className="text-xs leading-relaxed">Generación de Hashes y QR dinámicos que prueban criptográficamente la autenticidad del café ante cualquier puerto.</p>
                                 </div>
                             </div>

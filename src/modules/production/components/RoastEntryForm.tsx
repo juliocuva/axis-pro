@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
 import RoastCurveVisualizer from './RoastCurveVisualizer';
+import EUDRComplianceBadge from '@/modules/supply/components/EUDRComplianceBadge';
 
 export default function RoastEntryForm({ user, lotData, initialTelemetry }: { user: { companyId: string } | null, lotData?: any, initialTelemetry?: any[] }) {
     const [formData, setFormData] = useState({
@@ -19,9 +20,35 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
     const [curveStatus, setCurveStatus] = useState<{ type: 'idle' | 'processing' | 'success' | 'error', message: string }>({ type: 'idle', message: '' });
 
     const [stats, setStats] = useState({ roastLoss: 0, netYield: 0 });
+    const [expectedStats, setExpectedStats] = useState<{ minLoss: number, maxLoss: number }>({ minLoss: 12, maxLoss: 16 });
     const [curveData, setCurveData] = useState<any[]>(initialTelemetry || []); // Almacena los puntos reales
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+    const loadDemoData = () => {
+        const demoGreen = 24.5;
+        const demoRoasted = 20.8;
+        setFormData({
+            batchId: 'AX-TOST-GEISHA-' + Math.floor(Math.random() * 900 + 100),
+            roastDate: new Date().toISOString().split('T')[0],
+            greenWeight: demoGreen,
+            roastedWeight: demoRoasted,
+            selectedWeight: 20.72,
+            quakersGrams: 8,
+        });
+
+        // Generar curva simulada de alta fidelidad para la demo
+        const simulatedPoints = Array.from({ length: 720 }, (_, i) => ({
+            t: i,
+            bt: 50 + Math.pow(i, 0.78) * 0.9 + (i > 300 ? Math.sin(i / 60) * 1.5 : 0),
+            et: 70 + Math.pow(i, 0.75) * 1.1 + (i > 250 ? Math.cos(i / 50) * 2.0 : 0)
+        }));
+        setCurveData(simulatedPoints);
+        setCurveStatus({ type: 'success', message: '¡Perfil Geisha Natural cargado para demostración!' });
+        
+        const rLoss = ((demoGreen - demoRoasted) / demoGreen) * 100;
+        setStats({ roastLoss: rLoss, netYield: (20.72 / demoGreen) * 100 });
+    };
     
     useEffect(() => {
         if (initialTelemetry && initialTelemetry.length > 0) {
@@ -36,6 +63,22 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 ...prev,
                 greenWeight: lotData.thrashed_weight || lotData.purchase_weight || 0
             }));
+
+            const d = Number(lotData.physical_analysis?.[0]?.density_gl) || 710;
+            const p = (lotData.process || 'washed').toLowerCase();
+            
+            let min = 14;
+            let max = 16;
+            
+            if (d >= 750) { min = 15.0; max = 16.0; }
+            else if (d <= 680) { min = 13.5; max = 14.5; }
+            
+            if (p.includes('natural') || p.includes('honey') || p.includes('anaerobico')) {
+                min -= 1.0;
+                max -= 1.0;
+            }
+            
+            setExpectedStats({ minLoss: min, maxLoss: max });
         }
     }, [lotData]);
 
@@ -56,8 +99,13 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         setStatus(null);
 
         try {
-            if (formData.roastedWeight <= 0) throw new Error("El peso tostado debe ser mayor a 0.");
-            if (formData.greenWeight <= 0) throw new Error("Debe ingresar el peso verde (carga).");
+            const greenW = Number(formData.greenWeight) || 0;
+            const roastedW = Number(formData.roastedWeight) || 0;
+            const selectedW = formData.selectedWeight ? Number(formData.selectedWeight) : roastedW;
+            const quakersG = Number(formData.quakersGrams) || 0;
+
+            if (roastedW <= 0) throw new Error("El peso tostado debe ser mayor a 0.");
+            if (greenW <= 0) throw new Error("Debe ingresar el peso verde (carga).");
 
             const { error } = await supabase
                 .from('roast_batches')
@@ -67,10 +115,10 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         batch_id_label: formData.batchId,
                         process: lotData?.process || 'Lavado',
                         roast_date: formData.roastDate,
-                        green_weight: formData.greenWeight,
-                        roasted_weight: formData.roastedWeight,
-                        selected_weight: formData.selectedWeight || formData.roastedWeight,
-                        quakers_grams: formData.quakersGrams,
+                        green_weight: greenW,
+                        roasted_weight: roastedW,
+                        selected_weight: selectedW,
+                        quakers_grams: quakersG,
                         roast_curve: curveData, // Guardamos la telemetría real
                         company_id: user?.companyId
                     }
@@ -94,8 +142,9 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             }, 3000);
 
         } catch (err: any) {
-            console.error(err);
-            setStatus({ type: 'error', message: err.message || 'Error al guardar el lote.' });
+            console.error("AXIS DB ERROR:", err);
+            const errorMsg = err?.message || err?.details || (typeof err === 'string' ? err : JSON.stringify(err));
+            setStatus({ type: 'error', message: `Fallo en Base de Datos: ${errorMsg}` });
         } finally {
             setIsSubmitting(false);
         }
@@ -155,15 +204,27 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 Volver al Panel Principal
             </button>
 
-            <div className="text-center mb-10">
-                <div className="inline-block px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full mb-4">
-                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest">Ingreso Rápido Industrial</p>
+            <div className="text-center mb-10 relative">
+                <div className="absolute top-0 right-0">
+                    <button
+                        onClick={loadDemoData}
+                        className="group flex items-center gap-2 bg-brand-green/10 hover:bg-brand-green text-brand-green hover:text-black border border-brand-green/30 px-4 py-2 rounded-full transition-all duration-500 shadow-lg shadow-brand-green/5"
+                        title="Cargar Datos de Demostración"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:animate-bounce"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <span className="text-[9px] font-black uppercase tracking-widest">Auto-Fill Demo</span>
+                    </button>
+                </div>
+                <div className="inline-block px-3 py-1 bg-brand-green/10 border border-brand-green/20 rounded-full mb-4">
+                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-widest">Ingreso Rápido Industrial</p>
                 </div>
                 <h2 className="text-3xl font-bold text-white mb-2 uppercase tracking-tighter">Registro de Tostión</h2>
-                <p className="text-gray-500 text-sm max-w-2xl mx-auto">
-                    Formulario simplificado para registrar un tueste realizado en máquina (Artisan / Cropster) y calcular automáticamente el rendimiento.
+                <p className="text-gray-500 text-sm max-w-2xl mx-auto uppercase font-bold tracking-wider text-[10px]">
+                    Sincronización algorítmica de curvas térmicas y balance de masas industrial.
                 </p>
             </div>
+
+            <EUDRComplianceBadge lotData={lotData} className="mb-8" />
 
             {/* LOT IDENTIFICATION */}
             {lotData && (
@@ -208,8 +269,8 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         <p className="text-[10px] text-gray-500 uppercase tracking-wider leading-relaxed">Arrastre o seleccione el log térmico generado por su máquina (Artisan / Cropster) en formato .CSV o .ALOG</p>
 
                         {curveStatus.type === 'processing' && (
-                            <div className="mt-3 flex items-center gap-2 text-[10px] text-orange-500 font-bold uppercase tracking-widest animate-pulse">
-                                <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="mt-3 flex items-center gap-2 text-[10px] text-brand-green font-bold uppercase tracking-widest animate-pulse">
+                                <div className="w-4 h-4 border-2 border-brand-green border-t-transparent rounded-full animate-spin"></div>
                                 {curveStatus.message}
                             </div>
                         )}
@@ -262,7 +323,8 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             type="text"
                             value={formData.batchId}
                             onChange={(e) => setFormData({ ...formData, batchId: e.target.value.toUpperCase() })}
-                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none transition-all font-mono text-lg text-white font-bold"
+                            placeholder="EJ: AX-TOST-7721"
+                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none transition-all font-mono text-lg text-white font-bold placeholder:opacity-20"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -289,6 +351,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         required
                         disabled={isSubmitting}
                         variant="industrial"
+                        formatThousands={true}
                     />
                     <NumericInput
                         label="Café Tostado (OUT)"
@@ -296,9 +359,11 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         onChange={(val) => setFormData({ ...formData, roastedWeight: val })}
                         step={0.1}
                         unit="KG"
+                        placeholder="Ej: 20.80"
                         required
                         disabled={isSubmitting}
                         variant="industrial"
+                        formatThousands={true}
                     />
                 </div>
 
@@ -309,7 +374,9 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         onChange={(val) => setFormData({ ...formData, selectedWeight: val })}
                         step={0.1}
                         unit="KG"
+                        placeholder="Ej: 20.72"
                         disabled={isSubmitting}
+                        formatThousands={true}
                     />
                     <NumericInput
                         label="Quakers / Defectos (Gramos)"
@@ -319,15 +386,43 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         unit="G"
                         disabled={isSubmitting}
                         variant="orange"
+                        formatThousands={true}
                     />
                 </div>
+
+                {/* Cuadro de Predicción de Merma */}
+                {formData.greenWeight > 0 && (
+                    <div className="relative z-10 bg-brand-green/5 border border-brand-green/20 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 my-6">
+                        <div className="flex items-center gap-4 flex-1">
+                            <div className="w-10 h-10 bg-brand-green/10 rounded-full flex items-center justify-center border border-brand-green/30">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                            <div>
+                                <h4 className="text-[10px] font-bold text-brand-green uppercase tracking-widest mb-1">Predicción de Merma (IA)</h4>
+                                <p className="text-[10px] text-gray-400">Según densidad ({lotData?.physical_analysis?.[0]?.density_gl || '--'} g/L) y proceso ({lotData?.process || '--'})</p>
+                            </div>
+                        </div>
+                        <div className="text-right border-l border-white/10 pl-6">
+                            <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Pérdida Esperada</p>
+                            <p className="text-xl font-bold text-white">{expectedStats.minLoss.toFixed(1)}% - {expectedStats.maxLoss.toFixed(1)}%</p>
+                        </div>
+                        <div className="text-right border-l border-white/10 pl-6">
+                            <p className="text-[9px] text-gray-500 uppercase font-bold mb-1">Rango OUT Proyectado</p>
+                            <p className="text-xl font-bold text-brand-green-bright tracking-tight">
+                                {(formData.greenWeight * (1 - expectedStats.maxLoss / 100)).toLocaleString('es-CO', {maximumFractionDigits: 1})} <span className="text-[12px] text-gray-500">KG</span>
+                                <span className="text-white font-normal mx-2">-</span>
+                                {(formData.greenWeight * (1 - expectedStats.minLoss / 100)).toLocaleString('es-CO', {maximumFractionDigits: 1})} <span className="text-[12px] text-gray-500">KG</span>
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Dashboard en vivo */}
                 {(formData.greenWeight > 0 && formData.roastedWeight > 0) && (
                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-center text-center md:text-left pt-6 border-t border-white/5 gap-6">
                         <div>
                             <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Merma (Pérdida por Evaporación)</p>
-                            <p className={`text-2xl font-bold ${stats.roastLoss > 16.5 || stats.roastLoss < 12 ? 'text-brand-red' : 'text-orange-500'}`}>{stats.roastLoss.toFixed(2)}%</p>
+                            <p className={`text-2xl font-bold ${stats.roastLoss > 16.5 || stats.roastLoss < 12 ? 'text-brand-red' : 'text-brand-green'}`}>{stats.roastLoss.toFixed(2)}%</p>
                         </div>
                         <div>
                             <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Rendimiento Industrial</p>

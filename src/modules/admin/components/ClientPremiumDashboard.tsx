@@ -90,12 +90,12 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
             <header className="flex justify-between items-end border-b border-white/5 pb-6">
                 <div>
                     <h2 className="text-3xl font-black text-white outline-none uppercase tracking-tighter flex items-center gap-3">
-                        <span className="w-2 h-8 bg-yellow-500 rounded-full"></span>
-                        Dashboard Ejecutivo <span className="text-yellow-500">Premium</span>
+                        <span className="w-2 h-8 bg-brand-green rounded-full"></span>
+                        Dashboard Ejecutivo <span className="text-brand-green">Premium</span>
                     </h2>
                     <p className="text-[10px] text-gray-500 mt-2 font-bold uppercase tracking-[0.3em]">Client Reporting Dashboard - Inteligencia de Quinta Ola</p>
                 </div>
-                <button className="bg-yellow-500 text-black px-6 py-3 rounded-industrial-sm font-bold uppercase tracking-widest text-xs hover:bg-yellow-400 transition-all flex items-center gap-2 shadow-lg shadow-yellow-500/20">
+                <button className="bg-brand-green text-black px-6 py-3 rounded-industrial-sm font-bold uppercase tracking-widest text-xs hover:bg-brand-green/80 transition-all flex items-center gap-2 shadow-lg shadow-brand-green/20">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
                     Generar Reporte Mensual (PDF)
                 </button>
@@ -132,8 +132,8 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
                 </div>
 
                 {/* KPI 2: SCA Consistency */}
-                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-blue-500/30 transition-all">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl pointer-events-none group-hover:bg-blue-500/10 transition-colors"></div>
+                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-brand-green/30 transition-all">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl pointer-events-none group-hover:bg-brand-green/10 transition-colors"></div>
                     <div className="relative z-10 flex-1">
                         <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Previsibilidad de Perfil</h4>
                         <p className="text-lg font-bold text-white uppercase tracking-tight mb-2">Consistencia Sensorial (Q-Score)</p>
@@ -150,25 +150,25 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
                             </ResponsiveContainer>
                         </div>
                         <div className="flex justify-center gap-4 text-[9px] font-bold uppercase tracking-widest mt-2">
-                            <span className="flex items-center gap-1 text-blue-400"><span className="w-2 h-2 bg-blue-500 rounded-full"></span> Último Lote</span>
+                            <span className="flex items-center gap-1 text-brand-green-bright"><span className="w-2 h-2 bg-brand-green rounded-full"></span> Último Lote</span>
                             <span className="flex items-center gap-1 text-brand-green-bright"><span className="w-2 h-2 border-2 border-brand-green-bright border-dashed rounded-full"></span> Promedio Anual</span>
                         </div>
                     </div>
                 </div>
 
                 {/* KPI 3: Premium Value */}
-                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-orange-500/30 transition-all">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl pointer-events-none group-hover:bg-orange-500/10 transition-colors"></div>
+                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-brand-green/30 transition-all">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl pointer-events-none group-hover:bg-brand-green/10 transition-colors"></div>
                     <div className="relative z-10 flex flex-col h-full justify-between">
                         <div>
                             <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Retorno de Inversión</h4>
                             <p className="text-lg font-bold text-white uppercase tracking-tight mb-2">Prima de Valor de Origen</p>
                         </div>
 
-                        <div className="bg-bg-main p-6 rounded border border-white/5 text-center my-6 flex-1 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-orange-500/20 transition-all">
-                            <div className="absolute inset-0 bg-gradient-to-b from-orange-500/0 to-orange-500/5"></div>
+                        <div className="bg-bg-main p-6 rounded border border-white/5 text-center my-6 flex-1 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-brand-green/20 transition-all">
+                            <div className="absolute inset-0 bg-gradient-to-b from-brand-green/0 to-brand-green-dark/5"></div>
                             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 relative z-10">Premium Logrado (vs Bolsa NY)</span>
-                            <span className="text-5xl font-black text-orange-400 tracking-tighter relative z-10">+${premiumValue.toFixed(2)} <span className="text-lg text-gray-400">USD/lb</span></span>
+                            <span className="text-5xl font-black text-brand-green-bright tracking-tighter relative z-10">+${premiumValue.toFixed(2)} <span className="text-lg text-gray-400">USD/lb</span></span>
                         </div>
 
                         <p className="text-[9px] text-gray-400 leading-relaxed bg-white/5 p-3 rounded-md border border-white/5">

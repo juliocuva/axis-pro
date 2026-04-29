@@ -225,13 +225,13 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             <h3 className="text-brand-green-bright text-[10px] font-bold uppercase tracking-widest mb-6 border-b border-brand-green/20 pb-2">Asistente Aduanero Inmutable</h3>
 
                             {formData.targetMarket === 'europa' && (
-                                <div className="p-5 rounded-2xl bg-orange-500/10 border border-orange-500/30 space-y-3 animate-in fade-in zoom-in duration-300">
+                                <div className="p-5 rounded-2xl bg-brand-green/10 border border-brand-green/30 space-y-3 animate-in fade-in zoom-in duration-300">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-                                                <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
+                                            <div className="w-8 h-8 rounded-full bg-brand-green/20 flex items-center justify-center">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-brand-green animate-pulse"></span>
                                             </div>
-                                            <span className="text-sm font-bold text-orange-400 uppercase tracking-tighter">ALERTA LEGAL: EUROPA (EUDR)</span>
+                                            <span className="text-sm font-bold text-brand-green-bright uppercase tracking-tighter">ALERTA LEGAL: EUROPA (EUDR)</span>
                                         </div>
                                         {isEudrNonCompliant() && (
                                             <span className="bg-brand-red text-white text-[9px] font-bold px-2 py-1 rounded-md animate-pulse uppercase">
@@ -239,7 +239,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-[10px] text-orange-200/70 font-bold uppercase leading-relaxed tracking-wider">
+                                    <p className="text-[10px] text-gray-200/70 font-bold uppercase leading-relaxed tracking-wider">
                                         Detectado destino dentro de la UE. El Reglamento 2023/1115 exige comprobación estricta de deforestación cero. El pasaporte generado <strong>incluirá obligatoriamente los Polígonos WGS84 de las fincas de origen</strong> y censurará datos irrelevantes de calidad sensorial para agilizar la entrada aduanera.
                                     </p>
 
@@ -255,14 +255,14 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             )}
 
                             {formData.targetMarket === 'usa' && (
-                                <div className="p-5 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-3 animate-in fade-in zoom-in duration-300">
+                                <div className="p-5 rounded-2xl bg-brand-green/10 border border-brand-green/30 space-y-3 animate-in fade-in zoom-in duration-300">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span>
+                                        <div className="w-8 h-8 rounded-full bg-brand-green/20 flex items-center justify-center">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-brand-green/80 animate-pulse"></span>
                                         </div>
-                                        <span className="text-sm font-bold text-blue-400 uppercase tracking-tighter">NORMATIVA FDA / FSMA</span>
+                                        <span className="text-sm font-bold text-brand-green-bright uppercase tracking-tighter">NORMATIVA FDA / FSMA</span>
                                     </div>
-                                    <p className="text-[10px] text-blue-200/70 font-bold uppercase leading-relaxed tracking-wider">
+                                    <p className="text-[10px] text-gray-200/70 font-bold uppercase leading-relaxed tracking-wider">
                                         Destino Norteamérica. El pasaporte priorizará el registro inmutable de Eventos de Custodia y los controles de bioseguridad (humedad) para evitar retenciones de la FDA por riesgo biológico o Bioterrorismo.
                                     </p>
                                 </div>

@@ -204,8 +204,8 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`inline-block px-3 py-1 text-[9px] font-bold uppercase tracking-widest rounded-full border ${lot.status === 'purchased' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
-                                                lot.status === 'thrashed' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                            <span className={`inline-block px-3 py-1 text-[9px] font-bold uppercase tracking-widest rounded-full border ${lot.status === 'purchased' ? 'bg-brand-green/10 text-brand-green-bright border-brand-green/20' :
+                                                lot.status === 'thrashed' ? 'bg-brand-green/10 text-brand-green-bright border-brand-green/20' :
                                                     lot.status === 'completed' ? 'bg-brand-green/10 text-brand-green-bright border-brand-green/20' :
                                                         'bg-gray-500/10 text-gray-400 border-gray-500/20'
                                                 }`}>

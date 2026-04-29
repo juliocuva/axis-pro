@@ -36,11 +36,11 @@ export default function RoastCurveVisualizer({ data, title = "Telemetría Térmi
                 </div>
                 <div className="flex gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        <div className="w-2 h-2 bg-brand-green rounded-full"></div>
                         <span className="text-[8px] text-gray-500 font-bold uppercase">Bean Temp (BT)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <div className="w-2 h-2 bg-brand-green/80 rounded-full"></div>
                         <span className="text-[8px] text-gray-500 font-bold uppercase">Air Temp (ET)</span>
                     </div>
                 </div>

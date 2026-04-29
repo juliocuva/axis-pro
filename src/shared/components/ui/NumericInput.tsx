@@ -14,6 +14,7 @@ interface NumericInputProps {
     disabled?: boolean;
     required?: boolean;
     variant?: 'default' | 'industrial' | 'blue' | 'red' | 'orange';
+    formatThousands?: boolean;
 }
 
 export const NumericInput: React.FC<NumericInputProps> = ({
@@ -29,7 +30,8 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     inputClassName = '',
     disabled = false,
     required = false,
-    variant = 'industrial'
+    variant = 'industrial',
+    formatThousands = false
 }) => {
     const handleIncrement = () => {
         if (disabled) return;
@@ -52,17 +54,17 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     const variantStyles = {
         default: 'border-white/10 text-white focus:border-brand-green',
         industrial: 'border-white/10 text-brand-green-bright focus:border-brand-green',
-        blue: 'border-blue-500/50 text-blue-400 focus:border-blue-400',
+        blue: 'border-brand-green/50 text-brand-green-bright focus:border-brand-green-soft',
         red: 'border-brand-red/50 text-brand-red focus:border-brand-red',
-        orange: 'border-orange-500/50 text-orange-400 focus:border-orange-500'
+        orange: 'border-brand-green/50 text-brand-green-bright focus:border-brand-green'
     };
 
     const arrowColor = {
         default: 'text-brand-green',
         industrial: 'text-brand-green',
-        blue: 'text-blue-400',
+        blue: 'text-brand-green-bright',
         red: 'text-brand-red',
-        orange: 'text-orange-400'
+        orange: 'text-brand-green-bright'
     };
 
     return (
@@ -77,17 +79,27 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                     type="text"
                     inputMode="decimal"
                     required={required}
-                    value={value !== undefined ? value : ''}
+                    value={formatThousands && value !== undefined && value !== '' ? String(value).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ".") : (value !== undefined ? value : '')}
                     placeholder={placeholder}
                     disabled={disabled}
                     onChange={(e) => {
-                        // Allow only numbers, dot, and comma
-                        let val = e.target.value.replace(/[^0-9.,]/g, '');
-                        // Convert comma to dot for internal state consistency if desired, or keep as typed
-                        val = val.replace(',', '.');
+                        let val = e.target.value;
+                        if (formatThousands) {
+                            // Strip dots (thousands separators)
+                            val = val.replace(/\./g, '');
+                            // Convert comma to dot for standard decimal format
+                            val = val.replace(',', '.');
+                            // Ensure only numbers and one dot
+                            val = val.replace(/[^0-9.]/g, '');
+                            const parts = val.split('.');
+                            if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+                        } else {
+                            val = val.replace(/[^0-9.,]/g, '');
+                            val = val.replace(',', '.');
+                        }
                         onChange(val);
                     }}
-                    className={`block w-full bg-bg-main border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-24 ${variantStyles[variant]} ${inputClassName} placeholder:text-white/60 placeholder:font-normal`}
+                    className={`block w-full bg-bg-main border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-white/60 placeholder:font-normal`}
                 />
                 <div
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"

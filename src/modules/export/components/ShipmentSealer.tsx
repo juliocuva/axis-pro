@@ -201,7 +201,7 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                                     <div className="space-y-2 md:col-span-2">
                                         <div className="flex justify-between items-end mb-1">
                                             <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Geolocalización del Escaneo</label>
-                                            <button type="button" onClick={getLocation} className="text-[9px] text-blue-400 hover:text-blue-300 uppercase tracking-widest font-bold flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/></svg> Capturar GPS</button>
+                                            <button type="button" onClick={getLocation} className="text-[9px] text-brand-green-bright hover:text-gray-300 uppercase tracking-widest font-bold flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/></svg> Capturar GPS</button>
                                         </div>
                                         <input type="text" value={checkin.location} onChange={e => setCheckin({...checkin, location: e.target.value})} placeholder="Ej: 3.879541, -77.025482 (Buenaventura)" className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white font-mono focus:border-brand-green outline-none" />
                                     </div>
@@ -217,23 +217,23 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
 
                             {/* PASO 2: Seguridad */}
                             <div className={`col-start-1 row-start-1 space-y-6 transition-all duration-500 ${step === 2 ? 'opacity-100 translate-x-0 z-10 relative' : step > 2 ? 'opacity-0 -translate-x-10 pointer-events-none absolute w-full' : 'opacity-0 translate-x-10 pointer-events-none absolute w-full'}`}>
-                                <h3 className="text-orange-400 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center gap-3 border-b border-orange-500/20 pb-3">
-                                    <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span> 2. Seguridad de Embalaje (Precintado)
+                                <h3 className="text-brand-green-bright text-[11px] font-bold uppercase tracking-[0.2em] flex items-center gap-3 border-b border-brand-green/20 pb-3">
+                                    <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span> 2. Seguridad de Embalaje (Precintado)
                                 </h3>
                                 <p className="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed">Paso crítico para blindaje legal. Estos datos se cifrarán de inmediato.</p>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Número de Contenedor</label>
-                                        <input type="text" value={security.containerNumber} onChange={e => setSecurity({...security, containerNumber: e.target.value.toUpperCase()})} placeholder="Ej: MSKU1234567" className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-mono tracking-widest focus:border-orange-500 outline-none" />
+                                        <input type="text" value={security.containerNumber} onChange={e => setSecurity({...security, containerNumber: e.target.value.toUpperCase()})} placeholder="Ej: MSKU1234567" className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-mono tracking-widest focus:border-brand-green outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Número de Precinto (Seal)</label>
-                                        <input type="text" value={security.sealNumber} onChange={e => setSecurity({...security, sealNumber: e.target.value.toUpperCase()})} placeholder="Ej: SEAL-88992211" className="w-full bg-orange-500/5 border border-orange-500/20 rounded-xl px-4 py-3 text-sm text-orange-400 font-bold uppercase font-mono tracking-widest focus:border-orange-500 outline-none placeholder:text-orange-500/30" />
+                                        <input type="text" value={security.sealNumber} onChange={e => setSecurity({...security, sealNumber: e.target.value.toUpperCase()})} placeholder="Ej: SEAL-88992211" className="w-full bg-brand-green/5 border border-brand-green/20 rounded-xl px-4 py-3 text-sm text-brand-green-bright font-bold uppercase font-mono tracking-widest focus:border-brand-green outline-none placeholder:text-brand-green/30" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Número de Sacos (Bultos)</label>
-                                        <input type="number" value={security.sacksCount || ''} onChange={e => setSecurity({...security, sacksCount: parseInt(e.target.value) || 0})} placeholder="Ej: 280" className="w-full bg-orange-500/5 border border-orange-500/20 rounded-xl px-4 py-3 text-sm text-orange-400 font-bold uppercase font-mono tracking-widest focus:border-orange-500 outline-none placeholder:text-orange-500/30" />
+                                        <input type="number" value={security.sacksCount || ''} onChange={e => setSecurity({...security, sacksCount: parseInt(e.target.value) || 0})} placeholder="Ej: 280" className="w-full bg-brand-green/5 border border-brand-green/20 rounded-xl px-4 py-3 text-sm text-brand-green-bright font-bold uppercase font-mono tracking-widest focus:border-brand-green outline-none placeholder:text-brand-green/30" />
                                     </div>
                                 </div>
                                 <div className="mt-4 p-4 rounded-xl border border-dashed border-white/20 bg-white/2 flex flex-col items-center justify-center py-8">
@@ -243,24 +243,24 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                                 
                                 <div className="pt-4 flex justify-between">
                                     <button onClick={() => setStep(1)} className="px-6 py-4 bg-transparent text-gray-500 hover:text-white font-bold uppercase text-[10px] tracking-[0.2em] rounded-xl transition-all uppercase border border-white/5">Atrás</button>
-                                    <button onClick={() => setStep(3)} disabled={!security.containerNumber || !security.sealNumber || security.sacksCount <= 0} className="px-8 py-4 bg-orange-500 text-black hover:bg-orange-400 font-bold uppercase text-[10px] tracking-[0.2em] rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-gray-400 flex items-center gap-3">Continuar Fase 3 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
+                                    <button onClick={() => setStep(3)} disabled={!security.containerNumber || !security.sealNumber || security.sacksCount <= 0} className="px-8 py-4 bg-brand-green text-black hover:bg-brand-green/80 font-bold uppercase text-[10px] tracking-[0.2em] rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-gray-400 flex items-center gap-3">Continuar Fase 3 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
                                 </div>
                             </div>
 
                             {/* PASO 3: Cierre */}
                             <div className={`col-start-1 row-start-1 space-y-6 transition-all duration-500 ${step === 3 ? 'opacity-100 translate-x-0 z-10 relative' : 'opacity-0 translate-x-10 pointer-events-none absolute w-full'}`}>
-                                <h3 className="text-blue-400 text-[11px] font-bold uppercase tracking-[0.2em] flex items-center gap-3 border-b border-blue-500/20 pb-3">
-                                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> 3. Cierre de Ciclo en Buque
+                                <h3 className="text-brand-green-bright text-[11px] font-bold uppercase tracking-[0.2em] flex items-center gap-3 border-b border-brand-green/20 pb-3">
+                                    <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span> 3. Cierre de Ciclo en Buque
                                 </h3>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Vessel Name & Voyage</label>
-                                        <input type="text" value={closure.vesselName} onChange={e => setClosure({...closure, vesselName: e.target.value.toUpperCase()})} placeholder="Ej: MSC GULSUN 102E" className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-bold focus:border-blue-500 outline-none" />
+                                        <input type="text" value={closure.vesselName} onChange={e => setClosure({...closure, vesselName: e.target.value.toUpperCase()})} placeholder="Ej: MSC GULSUN 102E" className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-bold focus:border-brand-green outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Tipo de BL</label>
-                                        <select value={closure.blType || 'Master BL'} onChange={e => setClosure({...closure, blType: e.target.value})} className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-mono focus:border-blue-500 outline-none appearance-none">
+                                        <select value={closure.blType || 'Master BL'} onChange={e => setClosure({...closure, blType: e.target.value})} className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-mono focus:border-brand-green outline-none appearance-none">
                                             <option value="Master BL">Master BL (Naviera a FF)</option>
                                             <option value="House BL">House BL (FF a Consignatario)</option>
                                             <option value="Direct BL">Direct BL (Naviera a Cliente)</option>
@@ -268,15 +268,15 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Bill of Lading (BL)</label>
-                                        <input type="text" value={closure.bolNumber} onChange={e => setClosure({...closure, bolNumber: e.target.value.toUpperCase()})} placeholder="Ej: BOL-8900445" className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-mono focus:border-blue-500 outline-none" />
+                                        <input type="text" value={closure.bolNumber} onChange={e => setClosure({...closure, bolNumber: e.target.value.toUpperCase()})} placeholder="Ej: BOL-8900445" className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-mono focus:border-brand-green outline-none" />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Consignee (Destinatario Final / Título de Propiedad)</label>
-                                        <input type="text" value={closure.consignee || ''} onChange={e => setClosure({...closure, consignee: e.target.value.toUpperCase()})} placeholder="Ej: STUMPTOWN COFFEE ROASTERS INC." className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-bold focus:border-blue-500 outline-none" />
+                                        <input type="text" value={closure.consignee || ''} onChange={e => setClosure({...closure, consignee: e.target.value.toUpperCase()})} placeholder="Ej: STUMPTOWN COFFEE ROASTERS INC." className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white uppercase font-bold focus:border-brand-green outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Estimated Time of Arrival (ETA)</label>
-                                        <input type="date" value={closure.eta} onChange={e => setClosure({...closure, eta: e.target.value})} className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white  focus:border-blue-500 outline-none" />
+                                        <input type="date" value={closure.eta} onChange={e => setClosure({...closure, eta: e.target.value})} className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 text-sm text-white  focus:border-brand-green outline-none" />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <div className="flex justify-between items-end mb-1">

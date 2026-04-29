@@ -260,8 +260,8 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                 <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
                                     <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Densidad</p>
                                     <div>
-                                        <p className="text-[36px] font-black text-black leading-none">{physData?.density_gl ?? '0'}<span className="text-[14px] text-blue-500 ml-1">g/L</span></p>
-                                        <p className="text-[8px] font-bold text-blue-400 uppercase mt-2">{physData?.water_activity ? `${physData.water_activity} AW` : '--- AW'}</p>
+                                        <p className="text-[36px] font-black text-black leading-none">{physData?.density_gl ?? '0'}<span className="text-[14px] text-brand-green ml-1">g/L</span></p>
+                                        <p className="text-[8px] font-bold text-brand-green-bright uppercase mt-2">{physData?.water_activity ? `${physData.water_activity} AW` : '--- AW'}</p>
                                     </div>
                                 </div>
                                 <div className="p-5 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-between">
@@ -343,9 +343,15 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
 
                         <div className="px-10 py-7 flex flex-col gap-6">
                             <div>
-                                <h2 className="text-[22px] font-black text-black uppercase leading-tight tracking-tight mb-1">Evaluación Sensorial Basada en Estándares de la SCA</h2>
-                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.3em]">Análisis de Perfil Organoléptico de Especialidad</p>
+                                <h2 className="text-[22px] font-black text-black uppercase leading-tight tracking-tight mb-1">
+                                    {sca?.is_cva_version ? 'SCA Coffee Value Assessment (CVA)' : 'Evaluación Sensorial Basada en Estándares de la SCA'}
+                                </h2>
+                                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.3em]">
+                                    {sca?.is_cva_version ? 'Basado en el Protocolo Descriptivo SCA-103 + Afectivo SCA-104' : 'Análisis de Perfil Organoléptico de Especialidad'}
+                                </p>
                             </div>
+
+
 
                             <div className="flex gap-8 items-center">
                                 {/* Radar Chart */}

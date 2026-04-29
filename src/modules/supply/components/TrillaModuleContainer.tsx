@@ -85,7 +85,7 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
                             value={selectedLotId}
                             onChange={handleLotChange}
                             disabled={isLoading}
-                            className="w-full bg-white/5 border border-white/10 text-white text-xs py-3.5 px-4 rounded-industrial appearance-none focus:outline-none focus:border-purple-500 cursor-pointer font-bold uppercase tracking-wider transition-all hover:bg-white/10"
+                            className="w-full bg-white/5 border border-white/10 text-white text-xs py-3.5 px-4 rounded-industrial appearance-none focus:outline-none focus:border-brand-green cursor-pointer font-bold uppercase tracking-wider transition-all hover:bg-white/10"
                         >
                             {isLoading ? (
                                 <option>Cargando Lotes...</option>

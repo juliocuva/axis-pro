@@ -85,13 +85,13 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                             </div>
                         </div>
 
-                        <div className="bg-black/30 border border-white/5 p-6 rounded-industrial hover:border-blue-500/30 transition-colors">
+                        <div className="bg-black/30 border border-white/5 p-6 rounded-industrial hover:border-brand-green/30 transition-colors">
                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Merma Promedio</p>
                             <div className="flex items-end gap-3">
                                 <p className="text-4xl font-black text-white">14.2</p>
                                 <p className="text-sm text-gray-500 mb-1 font-mono">%</p>
                             </div>
-                            <div className="mt-4 inline-flex text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded">
+                            <div className="mt-4 inline-flex text-[10px] font-bold text-brand-green-bright bg-brand-green/10 px-2 py-1 rounded">
                                 -1.2% Optimizado
                             </div>
                         </div>
@@ -125,8 +125,8 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                             <div className="bg-black/50 border border-white/5 p-5 rounded-lg border-l-2 border-l-gold shadow-xl shadow-gold/5">
                                 <p className="text-sm text-gray-300 font-medium">Logrando <strong className="text-gold">alta consistencia</strong> en tuestes <strong className="text-white">Medio-Claro</strong> superando promedios comerciales.</p>
                             </div>
-                            <div className="bg-black/50 border border-white/5 p-5 rounded-lg border-l-2 border-l-blue-400 shadow-xl shadow-blue-400/5">
-                                <p className="text-sm text-gray-300 font-medium">Predicción: Necesitarás reabastecimiento para <strong className="text-white">Dubai</strong> en <strong className="text-blue-400">14 días</strong>.</p>
+                            <div className="bg-black/50 border border-white/5 p-5 rounded-lg border-l-2 border-l-blue-400 shadow-xl shadow-brand-green/5">
+                                <p className="text-sm text-gray-300 font-medium">Predicción: Necesitarás reabastecimiento para <strong className="text-white">Dubai</strong> en <strong className="text-brand-green-bright">14 días</strong>.</p>
                             </div>
                         </div>
                     </div>

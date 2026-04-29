@@ -49,9 +49,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                         const labelMap: any = {
                             temp: { name: 'BT', color: 'text-brand-green-bright', unit: '°C' },
                             et: { name: 'ET', color: 'text-gray-400', unit: '°C' },
-                            ror: { name: 'RoR', color: 'text-orange-400', unit: 'Δ' },
-                            gas: { name: 'GAS', color: 'text-orange-600', unit: '%' },
-                            pressure: { name: 'PRES', color: 'text-cyan-400', unit: 'WC' }
+                            ror: { name: 'RoR', color: 'text-brand-green-bright', unit: 'Δ' },
+                            gas: { name: 'GAS', color: 'text-brand-green', unit: '%' },
+                            pressure: { name: 'PRES', color: 'text-brand-green-bright', unit: 'WC' }
                         };
                         const meta = labelMap[entry.dataKey] || { name: entry.name, color: 'text-white', unit: '' };
 
@@ -173,10 +173,10 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
 
             <div className="bg-bg-card border border-white/5 rounded-industrial p-10 relative overflow-hidden shadow-2xl">
                 {/* Background Spectral Gradient */}
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 via-red-500 via-orange-500 to-yellow-500 opacity-50"></div>
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-green via-purple-500 via-red-500 via-orange-500 to-brand-green-dark opacity-50"></div>
 
                 {/* Simulated Heat Signature Overlay */}
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-orange-500/5 blur-[120px] rounded-full animate-pulse-slow"></div>
+                <div className="absolute -top-24 -right-24 w-96 h-96 bg-brand-green/5 blur-[120px] rounded-full animate-pulse-slow"></div>
                 <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-brand-green/5 blur-[120px] rounded-full"></div>
 
                 <div className="flex flex-wrap justify-between gap-8 mb-10 relative z-10">
@@ -211,7 +211,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Masa Resultante</p>
-                            <p className="text-4xl font-bold text-orange-500 tracking-tighter">
+                            <p className="text-4xl font-bold text-brand-green tracking-tighter">
                                 {selectedRoast ? selectedRoast.roasted_weight : '29.8'}
                                 <span className="text-xs text-gray-500 ml-2">KG</span>
                             </p>
@@ -353,14 +353,14 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-cyan-400 opacity-50"></div>
+                    <div className="absolute top-0 left-0 w-1 h-full bg-brand-green/80 opacity-50"></div>
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Punto de Giro (TP)</p>
                     <p className="text-2xl font-bold text-white tracking-tight">01:00 <span className="text-xs text-gray-500 ml-1">95°C</span></p>
                 </div>
                 <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-orange-500 opacity-50"></div>
+                    <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-50"></div>
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Primer Crack (FC)</p>
-                    <p className="text-2xl font-bold text-orange-400 tracking-tight">09:00 <span className="text-xs text-gray-500 ml-1">202°C</span></p>
+                    <p className="text-2xl font-bold text-brand-green-bright tracking-tight">09:00 <span className="text-xs text-gray-500 ml-1">202°C</span></p>
                 </div>
                 <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-50"></div>

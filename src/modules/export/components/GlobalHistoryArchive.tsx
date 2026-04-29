@@ -53,13 +53,24 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                 .eq('company_id', user?.companyId)
                 .order('created_at', { ascending: false });
 
+            // Traemos también los tuestes (Tostión) para cruzar datos
+            const { data: roasts } = await supabase
+                .from('roast_batches')
+                .select('*')
+                .eq('company_id', user?.companyId)
+                .order('roast_date', { ascending: false });
+
             if (lots) {
                 const formatted = lots.map(lot => {
-                    // Calcular en qué punto de los 4 procesos está
+                    // Calcular en qué punto de los 5 procesos está
                     let step = 1; // Ingreso (siempre 1)
                     if (lot.status === 'thrashed' || lot.status === 'completed' || lot.thrashed_weight > 0) step = 2;
                     if (lot.status === 'completed' || lot.status === 'physical_analyzed') step = 3;
                     if (lot.status === 'completed') step = 4;
+                    
+                    // Fase 5: Tostión (Si existe un tueste asociado a este lot_id)
+                    const roasted = roasts?.some(r => r.lot_id === lot.id);
+                    if (roasted) step = 5;
 
                     return {
                         id: lot.id,
@@ -73,13 +84,6 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                 });
                 allHistory = [...allHistory, ...formatted];
             }
-
-            // Traemos también los tuestes (Tostión)
-            const { data: roasts } = await supabase
-                .from('roast_batches')
-                .select('*')
-                .eq('company_id', user?.companyId)
-                .order('roast_date', { ascending: false });
             
             if (roasts) {
                 const formatted = roasts.map(r => ({
@@ -88,7 +92,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     label: `${r.batch_id_label}`,
                     date: r.roast_date,
                     status: 'Tostado',
-                    step: 4,
+                    step: 5,
                     raw: r
                 }));
                 allHistory = [...allHistory, ...formatted];
@@ -182,7 +186,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                              </div>
                              <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                                 <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Merma</p>
-                                <p className="text-lg font-bold text-orange-500">
+                                <p className="text-lg font-bold text-brand-green">
                                     {(((selectedItem.raw.green_weight - selectedItem.raw.roasted_weight)/selectedItem.raw.green_weight)*100).toFixed(2)}%
                                 </p>
                              </div>
@@ -300,7 +304,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                     <tr key={item.id} className="hover:bg-white/2 transition-colors group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                                <div className="w-8 h-8 rounded-lg bg-brand-green/10 flex items-center justify-center text-brand-green-bright">
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                                                 </div>
                                                 <span className="text-xs font-bold text-white">{item.type}</span>
@@ -311,19 +315,19 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-1.5">
-                                                {[1, 2, 3, 4].map((s) => (
+                                                {[1, 2, 3, 4, 5].map((s) => (
                                                     <div
                                                         key={s}
                                                         className={`w-3 h-3 rounded-full border ${item.type === 'EXPORT'
                                                             ? 'bg-brand-green border-brand-green'
                                                             : (item.step >= s ? 'bg-brand-green border-brand-green' : 'border-white/10 bg-white/5')
                                                             } transition-all duration-500`}
-                                                        title={`Paso ${s}: ${s === 1 ? 'Ingreso' : s === 2 ? 'Trilla' : s === 3 ? 'Laboratorio' : 'Catación'}`}
+                                                        title={`Paso ${s}: ${s === 1 ? 'Ingreso' : s === 2 ? 'Trilla' : s === 3 ? 'Laboratorio' : s === 4 ? 'Catación' : 'Tostión'}`}
                                                     ></div>
                                                 ))}
                                                 {item.type !== 'EXPORT' && (
                                                     <span className="ml-2 text-[9px] font-bold text-gray-500 uppercase">
-                                                        {item.step}/4
+                                                        {item.step}/5
                                                     </span>
                                                 )}
                                                 {item.type === 'EXPORT' && (
@@ -334,7 +338,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                         <td className="px-8 py-6">
                                             <span className="text-xs font-bold text-gray-500">{item.date}</span>
                                             {item.type === 'EXPORT' && (
-                                              <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-brand-green/20 text-brand-green border border-brand-green/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}`}>
+                                              <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-brand-green/20 text-brand-green border border-brand-green/30' : 'bg-brand-green/20 text-brand-green-bright border border-brand-green/30'}`}>
                                                   {item.raw.status === 'FINALIZADA' ? 'Inmutable' : 'Borrador'}
                                               </span>
                                             )}
@@ -344,7 +348,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                 {item.type === 'EXPORT' && item.raw.status !== 'FINALIZADA' ? (
                                                     <button
                                                         onClick={() => setSealerItem(item)}
-                                                        className="px-6 py-2 bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest border border-orange-500/20 transition-all"
+                                                        className="px-6 py-2 bg-brand-green/10 text-brand-green-bright hover:bg-brand-green hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest border border-brand-green/20 transition-all"
                                                     >
                                                         Sellar Embarque
                                                     </button>
@@ -455,7 +459,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                         <div key={log.id} className="p-5 bg-white/2 border border-white/5 rounded-2xl flex justify-between items-center group hover:bg-white/5 transition-all">
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-3">
-                                                    <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[9px] font-black rounded uppercase border border-blue-500/20">{log.eudr_status || 'CAPTURED'}</span>
+                                                    <span className="px-2 py-0.5 bg-brand-green/10 text-brand-green-bright text-[9px] font-black rounded uppercase border border-brand-green/20">{log.eudr_status || 'CAPTURED'}</span>
                                                     <span className="text-sm font-bold text-white uppercase">{log.farm_name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest">

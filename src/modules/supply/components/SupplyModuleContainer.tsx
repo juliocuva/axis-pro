@@ -31,7 +31,7 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
     const fetchRecentLots = async () => {
         const { data: recent } = await supabase
             .from('coffee_purchase_inventory')
-            .select('*')
+            .select('*, roast_batches(id)')
             .eq('company_id', user?.companyId)
             .order('created_at', { ascending: false })
             .limit(10);
@@ -119,19 +119,28 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                         <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 pb-4 border-b border-white/5">Sincronización Viva</h4>
 
                         <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar">
-                            {recentLots.map(lot => (
-                                <div key={lot.id} onClick={() => handleLotSelect(lot)} className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedLot?.id === lot.id ? 'bg-brand-green/10 border-brand-green/30' : 'bg-white/2 border-white/5 hover:border-white/10'}`}>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <p className="text-[10px] font-bold text-white uppercase truncate">{lot.farmer_name}</p>
-                                        <div className="flex gap-1">
-                                            {[1,2,3,4].map(i => (
-                                                <div key={i} className={`w-1.5 h-1.5 rounded-full ${i <= (lot.status === 'completed' ? 4 : lot.status === 'thrashed' ? 2 : 1) ? 'bg-brand-green' : 'bg-white/10'}`}></div>
-                                            ))}
+                            {recentLots.map(lot => {
+                                // Cálculo de fase para los 5 puntos
+                                let step = 1;
+                                if (lot.status === 'thrashed' || lot.status === 'completed' || lot.thrashed_weight > 0) step = 2;
+                                if (lot.status === 'completed' || lot.status === 'physical_analyzed') step = 3;
+                                if (lot.status === 'completed') step = 4;
+                                if (lot.roast_batches && lot.roast_batches.length > 0) step = 5;
+
+                                return (
+                                    <div key={lot.id} onClick={() => handleLotSelect(lot)} className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedLot?.id === lot.id ? 'bg-brand-green/10 border-brand-green/30' : 'bg-white/2 border-white/5 hover:border-white/10'}`}>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <p className="text-[10px] font-bold text-white uppercase truncate">{lot.farmer_name}</p>
+                                            <div className="flex gap-1">
+                                                {[1,2,3,4,5].map(i => (
+                                                    <div key={i} className={`w-1.5 h-1.5 rounded-full ${i <= step ? 'bg-brand-green' : 'bg-white/10'}`}></div>
+                                                ))}
+                                            </div>
                                         </div>
+                                        <p className="text-[9px] font-mono text-gray-500">{lot.lot_number}</p>
                                     </div>
-                                    <p className="text-[9px] font-mono text-gray-500">{lot.lot_number}</p>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </aside>

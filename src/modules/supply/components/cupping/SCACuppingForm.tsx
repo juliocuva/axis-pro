@@ -171,7 +171,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                     </div>
                     <div className="text-right">
                         <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Calificación Final</p>
-                        <p className={`text-6xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-blue-400' : 'text-orange-500'}`}>
+                        <p className={`text-6xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-brand-green-bright' : 'text-brand-green'}`}>
                             {totalScore.toFixed(2)}
                         </p>
                     </div>
@@ -223,7 +223,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     type="button"
                                     disabled={isSubmitting || isAlreadySealed}
                                     onClick={() => setScores({ ...scores, defects_intensity: 2 })}
-                                    className={`flex-1 py-1 px-2 rounded text-[8px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-orange-500 border-orange-500 text-white' : 'border-white/10 text-gray-500'}`}
+                                    className={`flex-1 py-1 px-2 rounded text-[8px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-brand-green border-brand-green text-white' : 'border-white/10 text-gray-500'}`}
                                 >
                                     TAINT (MANCHA -2)
                                 </button>
@@ -313,7 +313,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                         </ResponsiveContainer>
                     </div>
                     <div className="pb-4 text-center space-y-3 relative z-10">
-                        <span className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
+                        <span className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-brand-green/20 text-brand-green-bright border-brand-green/30'}`}>
                             {totalScore >= 85 ? '✓ SPECIALTY COFFEE' : '✓ PREMIUM GRADE'}
                         </span>
                         <div className="pt-4 border-t border-white/5 w-full">

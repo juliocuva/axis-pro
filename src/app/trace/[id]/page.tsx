@@ -27,7 +27,7 @@ export default function TraceabilityStoryPage() {
 
     if (loading) return (
         <div className="min-h-screen bg-bg-main flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-purple-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-green"></div>
         </div>
     );
 
@@ -38,7 +38,7 @@ export default function TraceabilityStoryPage() {
                     <img src="/tatama.png" alt="Asociación Tatama" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center text-white">
+                    <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center text-white">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                     </div>
                     <h1 className="text-xl font-bold text-white tracking-widest uppercase">AXISONE <span className="text-brand-green-bright">VERIFY</span></h1>
@@ -81,7 +81,7 @@ export default function TraceabilityStoryPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-purple-400">Notas Catadas</h4>
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green-bright">Notas Catadas</h4>
                         <div className="flex flex-wrap gap-2 text-[9px]">
                             {story?.notes?.map((note: string) => (
                                 <span key={note} className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">{note}</span>
@@ -94,8 +94,8 @@ export default function TraceabilityStoryPage() {
                         </div>
                     </div>
 
-                    <div className="p-6 bg-purple-600/10 border border-purple-500/20 text-white rounded-3xl space-y-2">
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Recomendación Tatama</h4>
+                    <div className="p-6 bg-brand-green/10 border border-brand-green/20 text-white rounded-3xl space-y-2">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-green-bright">Recomendación Tatama</h4>
                         <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                     </div>
 

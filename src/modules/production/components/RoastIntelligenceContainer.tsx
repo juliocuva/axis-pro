@@ -6,6 +6,7 @@ import LiveRoastMonitor from './LiveRoastMonitor';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 import RoastCurveVisualizer from './RoastCurveVisualizer';
 import CVAAssessmentForm from './CVAAssessmentForm';
+import EUDRComplianceBadge from '@/modules/supply/components/EUDRComplianceBadge';
 
 interface RoastIntelligenceContainerProps {
     user: { email: string, name: string, companyId: string, role?: string } | null;
@@ -171,6 +172,20 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
         const s = lot.sca_cupping[0];
         if (s.total_score) return s.total_score.toFixed(2);
 
+        if (s.is_cva_version && s.cva_affective) {
+            const aff = s.cva_affective;
+            const totalAffectiveScore = (
+                (Number(aff.fragranceQuality) || 0) + 
+                (Number(aff.flavorQuality) || 0) + 
+                (Number(aff.aftertasteQuality) || 0) + 
+                (Number(aff.acidityQuality) || 0) + 
+                (Number(aff.sweetnessQuality) || 0) + 
+                (Number(aff.mouthfeelQuality) || 0) + 
+                (Number(aff.overallImpression) || 0)
+            );
+            return (totalAffectiveScore + 30).toFixed(2);
+        }
+
         const sum =
             (Number(s.fragrance_aroma) || 0) + (Number(s.flavor) || 0) + (Number(s.aftertaste) || 0) +
             (Number(s.acidity) || 0) + (Number(s.body) || 0) + (Number(s.balance) || 0) +
@@ -217,20 +232,6 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                     className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase tracking-widest ${view === 'entry' ? 'bg-brand-green text-black shadow-lg' : 'bg-bg-card text-gray-400 hover:text-white'}`}
                 >
                     02. Registro Tueste
-                </button>
-                <button
-                    onClick={() => setView('archive')}
-                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${view === 'archive' ? 'bg-blue-600 text-white shadow-lg' : 'bg-bg-card text-gray-400 hover:text-white'}`}
-                >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-                    03. Archivo
-                </button>
-                <button
-                    onClick={() => setView('cupping')}
-                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${view === 'cupping' ? 'bg-amber-600 text-white shadow-lg' : 'bg-bg-card text-gray-400 hover:text-white'}`}
-                >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l3 7h-6l3-7zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                    04. Evaluación CVA
                 </button>
             </nav>
 
@@ -333,10 +334,12 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 </div>
                             </div>
 
+                            <EUDRComplianceBadge lotData={selectedLot} className="mb-2" />
+
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {/* 1. INDICADORES CRÍTICOS (DATOS QUE DICTAN TERMODINÁMICA) */}
                                 <div className="bg-bg-card border border-white/10 p-8 rounded-industrial relative overflow-hidden flex flex-col justify-between group">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl pointer-events-none group-hover:bg-orange-500/10 transition-colors"></div>
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl pointer-events-none group-hover:bg-brand-green/10 transition-colors"></div>
                                     <div className="mb-6 relative z-10">
                                         <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">1. Indicadores Críticos</h4>
                                         <p className="text-[10px] text-gray-600 font-medium">Dictan la Temperatura de Carga</p>
@@ -393,7 +396,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         </div>
                                         <div className="flex justify-between items-center bg-white/5 p-4 rounded border border-white/5">
                                             <span className="text-[10px] text-gray-400 font-bold uppercase">Altura</span>
-                                            <span className="text-sm font-bold text-white tracking-wider">{selectedLot.altitude || '1,750'} <span className="text-[9px] text-gray-500">msnm</span></span>
+                                            <span className="text-sm font-bold text-white tracking-wider">{selectedLot.altitude ? Number(selectedLot.altitude).toLocaleString('es-CO') : '1.750'} <span className="text-[9px] text-gray-500">msnm</span></span>
                                         </div>
                                     </div>
                                 </div>
@@ -427,7 +430,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                             <div className="flex items-end gap-2 h-16 border-b border-white/10 pb-1">
                                                 {/* Bar Chart Mock for mesh distribution */}
                                                 <div className="w-1/4 bg-white/10 hover:bg-white/30 transition-all rounded-t-sm group relative" style={{ height: `${meshViz.under14}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-gray-600 font-bold">&lt;14</span></div>
-                                                <div className="w-1/4 bg-blue-500/50 hover:bg-blue-500 transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m15_16}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-gray-500 font-bold">15-16</span></div>
+                                                <div className="w-1/4 bg-brand-green/50 hover:bg-brand-green transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m15_16}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-gray-500 font-bold">15-16</span></div>
                                                 <div className="w-1/4 bg-brand-green/70 hover:bg-brand-green transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m17_18}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-brand-green font-bold">17-18</span></div>
                                                 <div className="w-1/4 bg-white/20 hover:bg-white/40 transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m19}%` }}><span className="absolute -bottom-4 text-[8px] w-full text-center text-gray-500 font-bold">19+</span></div>
                                             </div>
@@ -439,11 +442,11 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                             {/* 4. OBJETIVO DE TUESTE (FOOTER) */}
                             <div className="bg-gradient-to-r from-bg-card to-white/5 border border-white/10 p-8 rounded-industrial flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                                    <div className="w-16 h-16 bg-brand-green/10 rounded-full flex items-center justify-center border border-brand-green/20">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
                                     </div>
                                     <div>
-                                        <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-1">4. Objetivo de Tueste</h4>
+                                        <h4 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.2em] mb-1">4. Objetivo de Tueste</h4>
                                         <p className="text-sm font-bold text-white mb-2">Perfil Base: {masterProfile?.label || 'Curva Inteligente AXIS (TRL-7)'}</p>
                                         <p className="text-[10px] text-gray-400 leading-relaxed max-w-lg">
                                             {masterProfile ? 'Curva de Campeón Global Ghost sincronizada.' : `Estrategia: Carga a ${dynamicChargeTemp}°C, Desarrollo Corto (${dynamicDevPct}%) para resaltar acidez floral debido al proceso ${selectedLot.process || 'Lavado'} y su alta puntuación.`}
@@ -457,7 +460,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                     </div>
                                     <button
                                         onClick={() => setView('entry')}
-                                        className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-5 rounded-industrial-sm text-[11px] font-bold uppercase tracking-widest shadow-2xl transition-all transform hover:-translate-y-1"
+                                        className="bg-brand-green hover:bg-brand-green text-white px-8 py-5 rounded-industrial-sm text-[11px] font-bold uppercase tracking-widest shadow-2xl transition-all transform hover:-translate-y-1"
                                     >
                                         Iniciar Registro Tueste
                                     </button>
@@ -468,7 +471,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                             {masterProfile && (
                                 <div className="animate-in slide-in-from-bottom-4 duration-700">
                                     <div className="flex items-center gap-3 mb-6 px-4">
-                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+                                        <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
                                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Telemetría del Perfil Maestro Activo</h3>
                                     </div>
                                     <RoastCurveVisualizer data={masterProfile.points} title={`Curva de Referencia: ${masterProfile.label}`} />
@@ -478,7 +481,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                     ) : (
                         <div className="min-h-[600px] border border-white/5 rounded-industrial p-12 bg-bg-card relative overflow-hidden flex flex-col items-center justify-center">
                             <div className="absolute top-0 right-0 w-96 h-96 bg-brand-green/5 blur-[100px] pointer-events-none rounded-full"></div>
-                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500/5 blur-[80px] pointer-events-none rounded-full"></div>
+                            <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-green/5 blur-[80px] pointer-events-none rounded-full"></div>
 
                             <div className="text-center mb-16 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                                 <div className="w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-brand-green/20 relative">
@@ -508,8 +511,8 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 </div>
 
                                 {/* Option 2 */}
-                                <div className="bg-bg-main border border-white/5 hover:border-orange-500/30 p-8 rounded-industrial-sm flex flex-col group transition-all duration-500 hover:shadow-[0_10px_40px_rgba(249,115,22,0.1)]">
-                                    <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center text-orange-500 mb-6 border border-orange-500/20 group-hover:scale-110 transition-transform">
+                                <div className="bg-bg-main border border-white/5 hover:border-brand-green/30 p-8 rounded-industrial-sm flex flex-col group transition-all duration-500 hover:shadow-[0_10px_40px_rgba(249,115,22,0.1)]">
+                                    <div className="w-12 h-12 bg-brand-green/10 rounded-lg flex items-center justify-center text-brand-green mb-6 border border-brand-green/20 group-hover:scale-110 transition-transform">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                     </div>
                                     <h4 className="text-white font-bold uppercase tracking-tight text-lg mb-3">2. Registro e Importación</h4>
@@ -519,7 +522,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                     <div className="grid grid-cols-2 gap-3">
                                         <button
                                             onClick={() => setView('entry')}
-                                            className="w-full bg-orange-500/10 hover:bg-orange-500 text-orange-500 hover:text-white border border-orange-500/50 p-3 rounded transition-colors text-[9px] font-bold uppercase tracking-widest text-center"
+                                            className="w-full bg-brand-green/10 hover:bg-brand-green text-brand-green hover:text-white border border-brand-green/50 p-3 rounded transition-colors text-[9px] font-bold uppercase tracking-widest text-center"
                                         >
                                             Registrar Manual
                                         </button>
@@ -535,23 +538,12 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                         </div>
                     )}
                 </>
-            ) : view === 'entry' ? (
+            ) : (
                 <RoastEntryForm 
                     user={user} 
                     lotData={selectedLot} 
                     initialTelemetry={capturedSession?.telemetry}
                 />
-            ) : view === 'cupping' ? (
-                <CVAAssessmentForm 
-                    inventoryId={selectedLot?.id} 
-                    companyId={user?.companyId || ''}
-                    onSave={() => {
-                        setView('live');
-                        fetchReadyToRoastLots(); // Refrescar para ver el nuevo puntaje
-                    }} 
-                />
-            ) : (
-                <GlobalHistoryArchive user={user} />
             )}
         </div>
     );

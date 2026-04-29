@@ -6,9 +6,9 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function inspectSchema() {
-    console.log('--- INSPECCIONANDO TABLA GREEN_EXPORTS ---');
+    console.log('--- INSPECCIONANDO TABLA ROAST_BATCHES ---');
     const { data, error } = await supabase
-        .from('green_exports')
+        .from('roast_batches')
         .select('*')
         .limit(1);
 
@@ -16,6 +16,7 @@ async function inspectSchema() {
         console.error('Error:', error);
     } else if (data && data.length > 0) {
         console.log('Columnas encontradas:', Object.keys(data[0]));
+        console.log('Datos de muestra:', data[0]);
     } else {
         console.log('Tabla vacía o sin registros de muestra.');
     }

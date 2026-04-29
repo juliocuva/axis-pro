@@ -326,10 +326,10 @@ export default function MasterControlCenter() {
              <section className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+                        <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Lotes Generados en la Red Axis</h3>
                     </div>
-                    <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-brand-green-bright bg-brand-green/10 px-3 py-1 rounded-full uppercase tracking-widest">
                         {allLots.length} Registros Totales
                     </span>
                 </div>
@@ -361,7 +361,7 @@ export default function MasterControlCenter() {
                                         </td>
                                         <td className="p-5">
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${lot.status === 'completed' ? 'bg-brand-green' : 'bg-orange-500'}`}></div>
+                                                <div className={`w-1.5 h-1.5 rounded-full ${lot.status === 'completed' ? 'bg-brand-green' : 'bg-brand-green'}`}></div>
                                                 <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
                                                     {lot.status === 'completed' ? 'Verificado Satélite' : 'En Sincronización'}
                                                 </span>
@@ -389,7 +389,7 @@ export default function MasterControlCenter() {
             {/* SECCIÓN: ESTADÍSTICAS DE ADOPCIÓN */}
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
+                    <div className="w-2 h-2 bg-brand-green rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Salud y Adopción del Sistema</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -408,8 +408,8 @@ export default function MasterControlCenter() {
                             {users.filter(u => u.last_active && new Date(u.last_active).toDateString() === new Date().toDateString()).length}
                         </p>
                     </div>
-                    <div className="bg-bg-card border border-purple-500/20 p-6 rounded-industrial relative overflow-hidden">
-                        <p className="text-[9px] text-purple-400 font-bold uppercase tracking-widest mb-2">Verificaciones Externas</p>
+                    <div className="bg-bg-card border border-brand-green/20 p-6 rounded-industrial relative overflow-hidden">
+                        <p className="text-[9px] text-brand-green-bright font-bold uppercase tracking-widest mb-2">Verificaciones Externas</p>
                         <p className="text-4xl font-black text-white tracking-tighter">{verificationLogs.length}</p>
                     </div>
                 </div>
@@ -418,7 +418,7 @@ export default function MasterControlCenter() {
             {/* SECCIÓN 1.5: ASOCIACIONES REGISTRADAS */}
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
+                    <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cartera de Asociaciones y Clientes</h3>
                 </div>
                 
@@ -448,10 +448,10 @@ export default function MasterControlCenter() {
                                                 <span className="text-xs font-black text-text-main uppercase tracking-tight">{company.name}</span>
                                             </div>
                                         </td>
-                                        <td className="p-5 text-center text-xs font-bold text-purple-400">{company.users || 0}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-brand-green-bright">{company.users || 0}</td>
                                         <td className="p-5 text-center text-xs font-bold text-text-main">{company.lots}</td>
                                         <td className="p-5 text-center text-xs font-bold text-gray-400">{company.physical}</td>
-                                        <td className="p-5 text-center text-xs font-bold text-orange-400">{company.cupping}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-brand-green-bright">{company.cupping}</td>
                                         <td className="p-5 text-right flex justify-end gap-2">
                                             <button onClick={() => setReportCompany(company)} className="text-[8px] font-bold bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded uppercase tracking-widest border border-white/10 transition-all">Reporte</button>
                                             <button onClick={() => setShowLotsCompany(company)} className="text-[8px] font-bold bg-brand-green/10 hover:bg-brand-green/20 text-brand-green px-3 py-1.5 rounded uppercase tracking-widest border border-brand-green/20 transition-all">Lotes</button>
@@ -534,7 +534,7 @@ export default function MasterControlCenter() {
                                         <td className="p-5 text-right flex justify-end gap-2 relative">
                                             <button
                                                 onClick={() => setActiveManagementId(activeManagementId === user.id ? null : user.id)}
-                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${activeManagementId === user.id ? 'bg-blue-600 border-blue-600 text-white' : 'border-blue-500/30 text-blue-400 hover:bg-blue-500/10'}`}
+                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${activeManagementId === user.id ? 'bg-brand-green border-brand-green text-white' : 'border-brand-green/30 text-brand-green-bright hover:bg-brand-green/10'}`}
                                             >
                                                 {activeManagementId === user.id ? 'Cerrar' : 'Gestionar'}
                                             </button>
@@ -589,7 +589,7 @@ export default function MasterControlCenter() {
             {/* SECCIÓN 3: ROLES */}
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.6)]"></div>
+                    <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(249,115,22,0.6)]"></div>
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Matriz de Roles y Permisos</h3>
                 </div>
                 
@@ -600,7 +600,7 @@ export default function MasterControlCenter() {
                                 <div className="flex justify-between items-start mb-4">
                                     <span className="text-xs font-black text-white uppercase tracking-tight">{role.name}</span>
                                 </div>
-                                <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">Permisos Activos:</p>
+                                <p className="text-[10px] text-brand-green-bright font-bold uppercase tracking-widest mb-1">Permisos Activos:</p>
                                 <p className="text-[10px] text-gray-400 mb-6">{role.permissions}</p>
                             </div>
                             <div className="flex justify-between items-center border-t border-white/5 pt-4">

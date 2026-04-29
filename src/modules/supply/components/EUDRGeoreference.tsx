@@ -243,13 +243,13 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
     return (
         <div className="bg-bg-main sm:bg-bg-card border-y sm:border border-white/5 sm:rounded-industrial max-w-2xl mx-auto sm:p-6 w-full flex flex-col shadow-2xl pb-8 sm:pb-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 flex">
-                <div className={`h-full transition-all duration-500 ${isOffline ? 'bg-orange-500 w-full' : 'bg-brand-green w-full'}`}></div>
+                <div className={`h-full transition-all duration-500 ${isOffline ? 'bg-brand-green w-full' : 'bg-brand-green w-full'}`}></div>
             </div>
 
             <div className="p-4 sm:p-0 mb-4 flex justify-between items-center z-10">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${isCapturing ? 'animate-pulse bg-blue-500' : 'bg-brand-green'}`}></span>
+                        <span className={`w-2 h-2 rounded-full ${isCapturing ? 'animate-pulse bg-brand-green' : 'bg-brand-green'}`}></span>
                         <h3 className="text-white font-black text-lg uppercase tracking-tight">Mapeo Automático AXIS</h3>
                     </div>
                 </div>
@@ -266,7 +266,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                 {isCapturing && (
                     <>
                         <div className="absolute top-4 left-4 z-20 bg-black/60 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${gpsAccuracy && gpsAccuracy < 15 ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${gpsAccuracy && gpsAccuracy < 15 ? 'bg-brand-green' : 'bg-red-500'}`}></div>
                             <span className="text-[10px] text-white font-mono uppercase tracking-widest">Precisión: {gpsAccuracy?.toFixed(1) || '--'}m</span>
                         </div>
                         <div className="absolute top-4 right-4 z-20 bg-brand-green/20 px-3 py-1.5 rounded-full border border-brand-green/30 flex items-center gap-2">
@@ -344,10 +344,10 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                     ) : (
                         <div className="text-center">
                              <h4 className="text-xl font-black text-white uppercase">Validación EUDR</h4>
-                             <button onClick={handleGfwValidation} disabled={isGfwValidating} className="mt-4 w-full bg-blue-600/20 text-blue-400 py-4 rounded-xl font-black text-[10px] uppercase">
+                             <button onClick={handleGfwValidation} disabled={isGfwValidating} className="mt-4 w-full bg-brand-green/20 text-brand-green-bright py-4 rounded-xl font-black text-[10px] uppercase">
                                 {isGfwValidating ? 'Analizando GFW...' : 'Analizar con Global Forest Watch'}
                              </button>
-                             {gfwStatus === 'secure' && <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold uppercase text-[10px]">Lote Seguro / Sin Deforestación</div>}
+                             {gfwStatus === 'secure' && <div className="mt-4 p-4 bg-brand-green/10 border border-brand-green/30 text-brand-green-bright font-bold uppercase text-[10px]">Lote Seguro / Sin Deforestación</div>}
                         </div>
                     )}
                 </div>
@@ -362,7 +362,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                         </button>
                     ) : (
                         <div className="flex flex-col gap-3">
-                            <button onClick={handleFinishMapping} disabled={gpsPoints.length < 3} className="w-full bg-blue-500 text-white py-7 rounded-full font-black uppercase text-sm shadow-lg active:scale-95 disabled:opacity-50">
+                            <button onClick={handleFinishMapping} disabled={gpsPoints.length < 3} className="w-full bg-brand-green text-white py-7 rounded-full font-black uppercase text-sm shadow-lg active:scale-95 disabled:opacity-50">
                                 FINALIZAR Y CERRAR LOTE
                             </button>
                             <button onClick={stopTracking} className="bg-white/5 border border-white/10 text-white py-4 rounded-2xl font-black uppercase text-[10px]">Pausar Rastreo</button>

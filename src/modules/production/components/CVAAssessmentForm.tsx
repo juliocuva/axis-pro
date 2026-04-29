@@ -6,6 +6,7 @@ import {
     Radar, RadarChart, PolarGrid,
     PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer
 } from 'recharts';
+import EUDRComplianceBadge from '@/modules/supply/components/EUDRComplianceBadge';
 
 // Tipos de datos basados en el standard SCA CVA v2
 interface CVAData {
@@ -43,7 +44,7 @@ interface CVAAssessmentFormProps {
 }
 
 const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => (
-  <div className="space-y-3 mb-6">
+  <div className="space-y-4">
     <div className="flex justify-between items-center">
       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</label>
       <span className="text-brand-green-bright font-mono font-bold text-sm bg-brand-green/10 px-2 py-0.5 rounded">{value}</span>
@@ -69,8 +70,9 @@ const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, 
 );
 
 const QualityScale = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => (
-  <div className="space-y-3 mb-6">
-    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">{label}</label>
+  <div className="space-y-2">
+    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">{label}</label>
+
     <div className="flex justify-between gap-1">
       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
         <button
@@ -80,7 +82,7 @@ const QualityScale = ({ label, value, onChange, disabled }: { label: string, val
           onClick={() => onChange(num)}
           className={`w-8 h-8 rounded-full border text-[10px] font-bold transition-all flex items-center justify-center
             ${value === num 
-              ? 'bg-amber-500 border-amber-400 text-black scale-110 shadow-[0_0_15px_rgba(245,158,11,0.4)]' 
+              ? 'bg-brand-green border-brand-green-soft text-black scale-110 shadow-[0_0_15px_rgba(255,255,255,0.4)]' 
               : disabled ? 'border-white/5 bg-white/2 text-gray-600 cursor-not-allowed' : 'border-white/10 bg-white/5 text-gray-500 hover:border-white/30'}`}
         >
           {num}
@@ -95,6 +97,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAlreadySealed, setIsAlreadySealed] = useState(false);
+  const [lotDetails, setLotDetails] = useState<any>(null);
   const [data, setData] = useState<CVAData>({
     descriptive: {
         fragranceIntensity: 0,
@@ -168,6 +171,16 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
           }
           setIsAlreadySealed(true);
         }
+
+        // Fetch lot details for EUDR
+        const { data: lotData } = await supabase
+          .from('coffee_purchase_inventory')
+          .select('*')
+          .eq('id', inventoryId.trim())
+          .single();
+        
+        if (lotData) setLotDetails(lotData);
+
       } catch (err) {
         console.error("AXIS ERROR (CVA Fetch):", err);
       } finally {
@@ -211,7 +224,6 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         .insert([{
           inventory_id: inventoryId,
           company_id: resolvedCompanyId,
-          total_score: totalScore,
           fragrance_aroma: data.affective.fragranceQuality,
           flavor: data.affective.flavorQuality,
           aftertaste: data.affective.aftertasteQuality,
@@ -237,14 +249,14 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
       onSave?.();
     } catch (err) {
       console.error(err);
-      alert('Error al sincronizar CVA');
+      alert(`Error al sincronizar CVA: ${err?.message || JSON.stringify(err)}`);
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-700 relative">
+    <div className="flex flex-col gap-8 animate-in fade-in duration-700 relative">
       {isLoading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-industrial">
           <div className="flex flex-col items-center gap-4">
@@ -254,32 +266,34 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         </div>
       )}
 
-      {/* COLUMNA DE FORMULARIOS (Izquierda/Arriba) */}
-      <div className="flex-1 lg:max-w-[65%] space-y-8">
+      {/* FILA SUPERIOR: FORMULARIOS */}
+      <div className="w-full space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-white/5 pb-6 gap-4">
             <div>
-            <div className="inline-block px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] text-amber-500 uppercase font-black tracking-widest mb-2">
+            <div className="inline-block px-2 py-0.5 bg-brand-green/10 border border-brand-green/20 rounded text-[9px] text-brand-green uppercase font-black tracking-widest mb-2">
                 Coffee Value Assessment • SCA 2025-2026
             </div>
             <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Evaluación de Valor</h2>
             <p className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest flex items-center gap-2">
-                Protocolo Descriptivo SCA-103 + Afectivo SCA-104
+                Basado en el Protocolo Descriptivo SCA-103 + Afectivo SCA-104
             </p>
             </div>
             <div className="text-right">
             <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Puntaje CVA</p>
-            <p className={`text-5xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-blue-400' : 'text-orange-500'}`}>
+            <p className={`text-5xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-brand-green-bright' : 'text-brand-green'}`}>
                 {totalScore.toFixed(2)}
             </p>
             </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8">
+        <EUDRComplianceBadge lotData={lotDetails} className="mb-4" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* PARTE 1: DESCRIPTIVA */}
             <div className="bg-bg-card p-8 rounded-industrial border border-white/5 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-brand-green shadow-[0_0_10px_rgba(0,166,81,0.5)]"></div>
-                <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-8">Parte 1: Análisis Descriptivo (Intensidad 0-15)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+                <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Análisis Descriptivo (Intensidad 0-15)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-14">
                     <IntensitySlider label="Fragancia" value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isAlreadySealed} />
                     <IntensitySlider label="Aroma" value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isAlreadySealed} />
                     <IntensitySlider label="Sabor" value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isAlreadySealed} />
@@ -287,35 +301,37 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     <IntensitySlider label="Acidez" value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isAlreadySealed} />
                     <IntensitySlider label="Dulzor" value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isAlreadySealed} />
                 </div>
-                <div className="pt-4 border-t border-white/5 mt-4">
+                <div className="pt-8 border-t border-white/5 mt-8">
                     <IntensitySlider label="Cuerpo (Sensación en Boca)" value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed} />
                 </div>
             </div>
 
             {/* PARTE 2: AFECTIVA */}
             <div className="bg-bg-card p-8 rounded-industrial border border-white/5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1 h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
-                <h3 className="text-xs font-black text-amber-500 uppercase tracking-widest mb-8">Parte 2: Análisis Afectivo (Calidad 1-9)</h3>
-                <div className="space-y-2">
+                <div className="absolute top-0 right-0 w-1 h-full bg-brand-green shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
+                <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Análisis Afectivo (Calidad 1-9)</h3>
+                <div className="flex flex-col gap-y-4">
+
                     <QualityScale label="Fragancia / Aroma" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label="Sabor" value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label="Sabor Residual" value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label="Acidez" value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label="Dulzor" value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label="Cuerpo" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)} disabled={isAlreadySealed} />
-                    <div className="pt-6 border-t border-white/5">
+                    <div className="pt-4 border-t border-white/5 mt-0">
                         <QualityScale label="IMPRESIÓN GLOBAL" value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
                     </div>
                 </div>
             </div>
+
         </div>
       </div>
 
-      {/* COLUMNA DE VISUALIZACIÓN Y ACCIONES (Derecha/Abajo) */}
-      <div className="w-full lg:w-96 space-y-8">
+      {/* FILA INFERIOR: VISUALIZACIÓN Y ACCIONES */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* GRÁFICO DE HUELLA ORGANOLÉPTICA */}
         <div className="bg-bg-card border border-white/5 p-6 rounded-industrial flex flex-col items-center space-y-4 relative overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-amber-500/5 blur-3xl opacity-50"></div>
+            <div className="absolute inset-0 bg-brand-green/5 blur-3xl opacity-50"></div>
             <h4 className="text-[12px] font-bold text-gray-300 uppercase tracking-[0.4em] text-center leading-relaxed relative z-10 px-4 pt-2">
                 Huella Organoléptica<br />estándar CVA
             </h4>
@@ -328,15 +344,15 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                         <Radar
                             name="Calidad"
                             dataKey="A"
-                            stroke="#f59e0b"
-                            fill="#f59e0b"
+                            stroke="#ffffff"
+                            fill="#ffffff"
                             fillOpacity={0.6}
                         />
                     </RadarChart>
                 </ResponsiveContainer>
             </div>
             <div className="pb-4 text-center space-y-3 relative z-10 w-full border-t border-white/5 pt-6">
-                <span className={`px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
+                <span className={`px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-brand-green/20 text-brand-green-bright border-brand-green/30'}`}>
                     {totalScore >= 85 ? '✓ SPECIALTY COFFEE' : '✓ PREMIUM GRADE'}
                 </span>
             </div>
@@ -370,9 +386,9 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 type="button"
                 onClick={handleSave}
                 disabled={isSaving || isAlreadySealed}
-                className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadySealed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-white hover:bg-brand-green-bright text-black hover:text-white disabled:opacity-30'}`}
+                className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadySealed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-brand-green hover:bg-brand-green-bright text-black disabled:opacity-30'}`}
             >
-                {isAlreadySealed ? 'EVALUACIÓN CVA SELLADA' : isSaving ? 'SELLANDO...' : 'SELLAR EVALUACIÓN CVA'}
+                {isAlreadySealed ? 'PROCESO SELLADO Y VERIFICADO' : isSaving ? 'SINCRONIZANDO CON SERVIDOR AXIS...' : 'SELLAR EVALUACIÓN CVA'}
             </button>
         </div>
       </div>

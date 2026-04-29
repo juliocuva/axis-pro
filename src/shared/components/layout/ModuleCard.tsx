@@ -25,26 +25,12 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
             shadow: 'hover:shadow-brand-green/20',
             glow: 'bg-brand-green-bright shadow-[0_0_25px_rgba(0,255,136,0.6)]'
         },
-        'orange-500': {
-            border: 'hover:border-orange-500/30',
-            bg: 'group-hover:bg-orange-500/10',
-            text: 'text-orange-400',
-            shadow: 'hover:shadow-orange-500/20',
-            glow: 'bg-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.6)]'
-        },
-        'blue-500': {
-            border: 'hover:border-blue-500/30',
-            bg: 'group-hover:bg-blue-500/10',
-            text: 'text-blue-400',
-            shadow: 'hover:shadow-blue-500/20',
-            glow: 'bg-blue-500 shadow-[0_0_25px_rgba(59,130,246,0.6)]'
-        },
-        'purple-500': {
-            border: 'hover:border-purple-500/30',
-            bg: 'group-hover:bg-purple-500/10',
-            text: 'text-purple-400',
-            shadow: 'hover:shadow-purple-500/20',
-            glow: 'bg-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.6)]'
+        'gray-500': {
+            border: 'hover:border-gray-500/30',
+            bg: 'group-hover:bg-gray-500/10',
+            text: 'text-gray-400',
+            shadow: 'hover:shadow-gray-500/20',
+            glow: 'bg-gray-500 shadow-[0_0_25px_rgba(156,163,175,0.6)]'
         }
     };
 
@@ -80,7 +66,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
 
             {isRecommended && (
                 <div className="absolute top-6 right-6">
-                    <span className="bg-blue-500/20 text-blue-400 text-[9px] px-2 py-1 rounded-full border border-blue-500/20 font-bold tracking-widest uppercase animate-pulse">
+                    <span className="bg-brand-green/20 text-brand-green-bright text-[9px] px-2 py-1 rounded-full border border-brand-green/20 font-bold tracking-widest uppercase animate-pulse">
                         Sugerido para Exp.
                     </span>
                 </div>

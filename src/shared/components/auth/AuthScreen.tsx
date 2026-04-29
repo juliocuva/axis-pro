@@ -83,21 +83,23 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <div className="max-w-7xl mx-auto px-8 h-20 flex justify-between items-center">
                     <div className="flex items-center gap-12">
                         <div className="flex items-center gap-3">
-                            <img src="/logo.png" alt="AXISONE" className="h-12 w-auto" />
+                            <img src="/logo.png" alt="AXISONE" className="h-36 w-auto" />
                         </div>
 
-                        <nav className="hidden md:flex items-center gap-8 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+                        <nav className="hidden md:flex items-center gap-8 text-[11px] font-bold text-gray-400 uppercase">
                             <a href="#core" className="hover:text-brand-green transition-colors">Infraestructura</a>
                             <a href="#roadmap" className="hover:text-brand-green transition-colors">Visión</a>
                         </nav>
+
                     </div>
                     <div className="flex items-center gap-8">
                         <button
                             onClick={() => setShowLoginModal(true)}
-                            className="bg-brand-green text-white px-8 py-3 rounded-industrial-sm text-[11px] font-black uppercase tracking-[0.2em] hover:bg-brand-green-bright transition-all shadow-xl shadow-brand-green/10"
+                            className="bg-brand-green text-white px-8 py-3 rounded-industrial-sm text-[11px] font-black uppercase hover:bg-brand-green-bright transition-all shadow-xl shadow-brand-green/10"
                         >
                             Validar Activo Digital
                         </button>
+
                     </div>
                 </div>
             </header>
@@ -106,9 +108,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             <main className="pt-40 pb-32 px-8">
                 <div className="max-w-6xl mx-auto text-center space-y-12">
                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[1.1] max-w-5xl mx-auto text-brand-green">
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[1.1] max-w-5xl mx-auto text-brand-green">
                             Certeza absoluta para el comercio de café de especialidad.
                         </h1>
+
                         <p className="text-lg md:text-xl text-gray-500 font-medium max-w-3xl mx-auto leading-relaxed">
                             Transformamos la trazabilidad técnica en activos digitales inmutables. <br className="hidden md:block" />
                             <span className="text-carbon font-bold">El estándar de confianza que viaja más rápido que el origen.</span>
@@ -119,16 +122,18 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-8 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
                         <button
                             onClick={() => setShowLoginModal(true)}
-                            className="w-full md:w-auto bg-brand-green text-white px-10 py-5 rounded-industrial-sm text-xs font-black uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-2xl shadow-brand-green/20"
+                            className="w-full md:w-auto bg-brand-green text-white px-10 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/20"
                         >
                             Validar Activo Digital
                         </button>
+
                         <button
                             onClick={() => setShowLoginModal(true)}
-                            className="w-full md:w-auto border-2 border-brand-green text-brand-green px-10 py-5 rounded-industrial-sm text-xs font-black uppercase tracking-[0.3em] hover:bg-brand-green/5 transition-all"
+                            className="w-full md:w-auto border-2 border-brand-green text-brand-green px-10 py-5 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-green/5 transition-all"
                         >
                             Solicitar Acceso a Infraestructura
                         </button>
+
                     </div>
                 </div>
             </main>
@@ -137,9 +142,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             <section id="core" className="py-32 bg-soft-white border-y border-brand-green-soft">
                 <div className="max-w-7xl mx-auto px-8">
                     <div className="text-center mb-24 space-y-4">
-                        <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-carbon">El Registro de Nacimiento Digital.</h2>
-                        <p className="text-gray-500 font-medium uppercase tracking-widest text-sm">Un folio único e inalterable que acompaña cada grano.</p>
+                        <h2 className="text-3xl md:text-4xl font-black uppercase text-carbon">El Registro de Nacimiento Digital.</h2>
+                        <p className="text-gray-500 font-medium uppercase text-sm">Un folio único e inalterable que acompaña cada grano.</p>
                     </div>
+
 
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
@@ -164,8 +170,9 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-brand-green-soft flex items-center justify-center text-brand-green mx-auto md:mx-0">
                                     {item.icon}
                                 </div>
-                                <h3 className="text-xl font-bold uppercase tracking-tight text-carbon">{item.title}</h3>
+                                <h3 className="text-xl font-bold uppercase text-carbon">{item.title}</h3>
                                 <p className="text-gray-500 text-sm leading-relaxed font-medium">
+
                                     {item.desc}
                                 </p>
                             </div>
@@ -175,36 +182,35 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 </div>
             </section>
 
-            {/* 4. LA ECUACIÓN DE CONFIANZA */}
-            <section className="py-40 bg-white">
-                <div className="max-w-4xl mx-auto text-center space-y-8 px-8">
-                    <div className="inline-block px-8 py-4 bg-brand-green-soft/10 rounded-full border border-brand-green-soft/30">
-                        <p className="text-2xl md:text-4xl font-black text-brand-green tracking-[0.2em]">
-                            CERTEZA = 100% = CONFIANZA
-                        </p>
-                    </div>
-
-                    <p className="text-gray-500 font-bold uppercase tracking-[0.4em] text-xs">
+            {/* 4. LA ECUACIÓN DE CONFIANZA - Impacto Total */}
+            <section className="py-24 bg-brand-green">
+                <div className="max-w-7xl mx-auto text-center px-8">
+                    <h2 className="text-xl md:text-3xl font-black text-white uppercase leading-none whitespace-nowrap">
+                        CERTEZA = 100% = CONFIANZA
+                    </h2>
+                    <p className="text-white/80 font-bold uppercase text-[10px] mt-8">
                         La infraestructura que elimina la incertidumbre en el mercado global.
                     </p>
+
                 </div>
             </section>
 
-            {/* 5. ROADMAP - Panamá */}
-            <section id="roadmap" className="py-32 bg-black text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-green/20 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
+            {/* 5. ROADMAP - Panamá - Light Gray Theme */}
+            <section id="roadmap" className="py-32 bg-soft-white text-carbon relative overflow-hidden border-b border-brand-green-soft">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-green/5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2 opacity-50"></div>
                 <div className="max-w-5xl mx-auto px-8 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
                         <div className="space-y-8">
-                            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">Visión Global.</h2>
-                            <p className="text-gray-400 text-lg leading-relaxed">
+                            <h2 className="text-4xl md:text-5xl font-black uppercase leading-none text-carbon">Visión Global.</h2>
+                            <p className="text-gray-500 text-lg leading-relaxed font-medium">
+
                                 Estamos integrando protocolos de cumplimiento internacional para la próxima generación de exportaciones. 
                                 <span className="text-brand-green font-bold block mt-4">Próximo hito: World of Coffee Panama, Octubre 2026.</span>
                             </p>
                         </div>
-                        <div className="bg-white/5 border border-brand-green-muted/30 rounded-industrial p-12 text-center">
-                            <div className="text-6xl font-black mb-4">2026</div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-green-muted">Global Expansion Phase</p>
+                        <div className="bg-white border border-brand-green-soft rounded-industrial p-12 text-center shadow-sm">
+                            <div className="text-6xl font-black mb-4 text-carbon">2026</div>
+                            <p className="text-[10px] font-black uppercase text-brand-green">Global Expansion Phase</p>
                         </div>
 
                     </div>
@@ -215,17 +221,16 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             <footer className="bg-brand-green py-20 px-8 text-white">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
                     <div className="space-y-6 text-center md:text-left">
-                        <img src="/logo.png" alt="AXISONE" className="h-12 w-auto brightness-0 invert mx-auto md:mx-0" />
-                        <p className="text-xs font-black uppercase tracking-[0.3em] opacity-80">
-                            * AXISONE COFFEE | La Fuente Única de Verdad.
-                        </p>
+                        <img src="/logo.png" alt="AXISONE" className="h-36 w-auto brightness-0 invert mx-auto md:mx-0" />
                     </div>
-                    <div className="flex flex-col md:flex-row items-center gap-12 text-[10px] font-black uppercase tracking-[0.3em]">
-                        <div className="text-center md:text-right">
-                            <p>Pereira, Risaralda, Colombia.</p>
-                            <a href="https://www.linkedin.com/in/julio-uva-b7a124163/" target="_blank" rel="noopener noreferrer" className="hover:underline mt-2 block">LinkedIn Professional Profile</a>
+
+                    <div className="flex flex-col md:flex-row items-center gap-12 text-[10px] font-black uppercase">
+                        <div className="text-center md:text-right space-y-2">
+                            <p>Pereira, Risaralda, Colombia • +57 301 397 0002</p>
+                            <a href="https://www.linkedin.com/in/julio-uva-b7a124163/" target="_blank" rel="noopener noreferrer" className="hover:underline block opacity-80">LinkedIn Professional Profile</a>
                         </div>
                     </div>
+
                 </div>
             </footer>
 
@@ -238,16 +243,19 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </button>
                         
                         <div className="mb-10 text-center">
-                            <img src="/logo.png" alt="AXISONE" className="h-12 mx-auto mb-6" />
-                            <h2 className="text-2xl font-black uppercase tracking-tighter text-carbon">Acceso a Infraestructura</h2>
+                            <img src="/logo.png" alt="AXISONE" className="h-36 mx-auto mb-6" />
+                            <h2 className="text-2xl font-black uppercase text-carbon">Acceso a Infraestructura</h2>
 
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-2">Terminal de Control Maestro</p>
+
+                            <p className="text-[10px] text-gray-500 font-bold uppercase mt-2">Terminal de Control Maestro</p>
+
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email Corporativo</label>
+                                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Email Corporativo</label>
                                 <input
+
                                     type="email"
                                     required
                                     placeholder="usuario@axisonecoffee.com"
@@ -257,8 +265,9 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Clave de Acceso</label>
+                                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Clave de Acceso</label>
                                 <input
+
                                     type="password"
                                     required
                                     placeholder="••••••••"
@@ -272,10 +281,11 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-brand-green text-white font-black py-4 rounded-industrial-sm transition-all shadow-xl shadow-brand-green/20 uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3"
+                                className="w-full bg-brand-green text-white font-black py-4 rounded-industrial-sm transition-all shadow-xl shadow-brand-green/20 uppercase text-xs flex items-center justify-center gap-3"
                             >
                                 {isLoading ? "Verificando..." : "Entrar al Sistema"}
                             </button>
+
                         </form>
                     </div>
                 </div>

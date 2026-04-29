@@ -45,7 +45,7 @@ export default function RetailModuleContainer({ user }: RetailModuleContainerPro
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-6 py-3 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest flex items-center gap-2 ${activeTab === tab
-                                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
+                                ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20'
                                 : 'text-gray-500 hover:text-white'
                                 }`}
                         >
@@ -138,7 +138,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                 <div className="bg-bg-card border border-white/10 rounded-industrial p-10">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-sm font-bold uppercase tracking-[0.2em] flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                            <span className="w-2 h-2 rounded-full bg-brand-green"></span>
                             Stock de Producto Terminado
                         </h3>
                         <button onClick={loadData} className="text-gray-500 hover:text-white transition-colors">
@@ -155,15 +155,15 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                             </div>
                         ) : (
                             inventory.map((item) => (
-                                <div key={item.id} className="p-6 bg-bg-main border border-white/5 rounded-industrial-sm flex items-center justify-between group hover:border-purple-500/30 transition-all">
+                                <div key={item.id} className="p-6 bg-bg-main border border-white/5 rounded-industrial-sm flex items-center justify-between group hover:border-brand-green/30 transition-all">
                                     <div className="flex gap-4 items-center">
-                                        <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 font-bold text-xs uppercase">
+                                        <div className="w-12 h-12 bg-brand-green/10 rounded-xl flex items-center justify-center text-brand-green-bright font-bold text-xs uppercase">
                                             {item.unit_size_grams}g
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <p className="text-xs font-bold uppercase">SKU: {item.sku}</p>
-                                                {item.metadata?.is_external && <span className="text-[7px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
+                                                {item.metadata?.is_external && <span className="text-[7px] bg-brand-green/20 text-brand-green-bright px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
                                             </div>
                                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2 mt-1">
                                                 {item.roast_batches?.coffee_purchase_inventory?.varietal || 'Variedad'} |
@@ -185,7 +185,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                 </div>
 
                 {showPackager ? (
-                    <form onSubmit={handlePackage} className="bg-gradient-to-br from-purple-900/40 to-bg-card border border-purple-500/30 rounded-industrial p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
+                    <form onSubmit={handlePackage} className="bg-gradient-to-br from-brand-green/40 to-bg-card border border-brand-green/30 rounded-industrial p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
                         <div className="flex justify-between items-center mb-4">
                             <h4 className="text-xl font-bold uppercase tracking-widest text-white">Ingreso de Producto al Retail</h4>
                             <button type="button" onClick={() => setShowPackager(false)} className="text-gray-500 hover:text-white">✕</button>
@@ -196,14 +196,14 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                             <button
                                 type="button"
                                 onClick={() => setSourceType('internal')}
-                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'internal' ? 'bg-purple-600 text-white' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'internal' ? 'bg-brand-green text-white' : 'text-gray-500 hover:text-white'}`}
                             >
                                 Producción AXIS (Interno)
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setSourceType('external')}
-                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'external' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'external' ? 'bg-brand-green text-white' : 'text-gray-500 hover:text-white'}`}
                             >
                                 Roaster Aliado (Externo)
                             </button>
@@ -218,14 +218,14 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                             required
                                             value={packData.roastBatchId}
                                             onChange={(e) => setPackData({ ...packData, roastBatchId: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 text-sm font-bold appearance-none pr-12"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green text-sm font-bold appearance-none pr-12"
                                         >
                                             <option value="">Seleccionar lote...</option>
                                             {roastBatches.map(b => (
                                                 <option key={b.id} value={b.id}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
                                             ))}
                                         </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-purple-500 transition-colors">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                         </div>
                                     </div>
@@ -240,7 +240,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                             placeholder="v.g. Café Pergamino, Amor Perfecto..."
                                             value={packData.externalRoaster}
                                             onChange={(e) => setPackData({ ...packData, externalRoaster: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold"
                                         />
                                     </div>
                                     <div>
@@ -251,7 +251,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                             placeholder="Cauca, Tolima..."
                                             value={packData.externalOrigin}
                                             onChange={(e) => setPackData({ ...packData, externalOrigin: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -260,14 +260,14 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                             <select
                                                 value={packData.externalProcess}
                                                 onChange={(e) => setPackData({ ...packData, externalProcess: e.target.value })}
-                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold appearance-none pr-12"
+                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold appearance-none pr-12"
                                             >
                                                 <option value="Lavado">Lavado</option>
                                                 <option value="Natural">Natural</option>
                                                 <option value="Honey">Honey</option>
                                                 <option value="Anaeróbico">Anaeróbico</option>
                                             </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-blue-500 transition-colors">
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                             </div>
                                         </div>
@@ -279,7 +279,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                             placeholder="Vainilla, Caramelo, Lima..."
                                             value={packData.externalNotes}
                                             onChange={(e) => setPackData({ ...packData, externalNotes: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-blue-500 font-bold font-mono text-[10px]"
+                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold font-mono text-[10px]"
                                         />
                                     </div>
                                 </>
@@ -302,22 +302,22 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                     <select
                                         value={packData.unitSizeGrams}
                                         onChange={(e) => setPackData({ ...packData, unitSizeGrams: parseInt(e.target.value) })}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-purple-500 font-bold appearance-none pr-12"
+                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold appearance-none pr-12"
                                     >
                                         <option value="250">250g</option>
                                         <option value="340">340g (12oz)</option>
                                         <option value="500">500g</option>
                                         <option value="1000">1000g</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-purple-500 transition-colors">
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="col-span-2 p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl flex justify-between items-center">
+                            <div className="col-span-2 p-4 bg-brand-green/10 border border-brand-green/30 rounded-xl flex justify-between items-center">
                                 <div>
-                                    <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Control de Masa Total (CMT)</p>
+                                    <p className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest">Control de Masa Total (CMT)</p>
                                     <p className="text-[8px] text-gray-500 uppercase mt-1">Masa neta que ingresará al inventario global</p>
                                 </div>
                                 <div className="text-right">
@@ -330,13 +330,13 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                         <button
                             type="submit"
                             disabled={isPackaging}
-                            className={`w-full py-4 rounded-industrial-sm text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-purple-600 hover:bg-purple-500 shadow-purple-900/40' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/40'}`}
+                            className={`w-full py-4 rounded-industrial-sm text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-brand-green hover:bg-brand-green shadow-brand-green/40' : 'bg-brand-green hover:bg-brand-green shadow-brand-green/40'}`}
                         >
                             {isPackaging ? 'PROCESANDO REGISTRO...' : `REGISTRAR CAFÉ ${sourceType === 'internal' ? 'PROPIO' : 'ADQUIRIDO'}`}
                         </button>
                     </form>
                 ) : (
-                    <div className="bg-gradient-to-r from-purple-900/20 to-transparent border border-purple-500/20 rounded-industrial p-8">
+                    <div className="bg-gradient-to-r from-brand-green/20 to-transparent border border-brand-green/20 rounded-industrial p-8">
                         <div className="flex justify-between items-center">
                             <div>
                                 <h4 className="text-xl font-bold uppercase tracking-widest text-white">Gestión Multi-Origen</h4>
@@ -344,7 +344,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                             </div>
                             <button
                                 onClick={() => setShowPackager(true)}
-                                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[10px] font-bold uppercase transition-all shadow-xl shadow-purple-900/20 hover:scale-105"
+                                className="px-6 py-3 bg-brand-green hover:bg-brand-green text-white rounded-xl text-[10px] font-bold uppercase transition-all shadow-xl shadow-brand-green/20 hover:scale-105"
                             >
                                 Registrar Entrada
                             </button>
@@ -355,7 +355,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
 
             {/* HISTORIAL - ALTURA SINCRONIZADA CON SECCIONES DEL FORMULARIO */}
             <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group h-[780px]">
-                <h3 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-4">Alertas de Frescura AI</h3>
+                <h3 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest border-b border-white/5 pb-4">Alertas de Frescura AI</h3>
                 <div className="space-y-6">
                     <div className="p-6 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm">
                         <p className="text-[10px] text-brand-green uppercase font-bold mb-2">✓ Calidad Óptima</p>
@@ -391,7 +391,7 @@ function LabelGenerator() {
                 <form className="space-y-6">
                     <div>
                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Lote de Tueste</label>
-                        <select className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 outline-none focus:border-purple-500">
+                        <select className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 outline-none focus:border-brand-green">
                             <option>AX-2130 - Geisha Natural</option>
                             <option>AX-1942 - Bourbon Semi-Washed</option>
                         </select>
@@ -402,7 +402,7 @@ function LabelGenerator() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <button type="button" className="py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold uppercase">Vista Previa</button>
-                        <button type="button" className="py-4 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold uppercase">Imprimir (Zebra/PDF)</button>
+                        <button type="button" className="py-4 bg-brand-green hover:bg-brand-green text-white rounded-xl text-xs font-bold uppercase">Imprimir (Zebra/PDF)</button>
                     </div>
                 </form>
             </div>
@@ -475,11 +475,11 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                     value={searchBatch}
                     onChange={(e) => setSearchBatch(e.target.value)}
                     placeholder="Buscar Lote (v.g. AX-2130)"
-                    className="flex-1 bg-bg-card border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-purple-500 text-xs font-bold uppercase"
+                    className="flex-1 bg-bg-card border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-brand-green text-xs font-bold uppercase"
                 />
                 <button
                     onClick={handleSearch}
-                    className="px-6 py-3 bg-purple-600 rounded-xl text-[10px] font-bold uppercase"
+                    className="px-6 py-3 bg-brand-green rounded-xl text-[10px] font-bold uppercase"
                 >
                     Explorar
                 </button>
@@ -524,7 +524,7 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-purple-400">Notas Catadas</h4>
+                                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green-bright">Notas Catadas</h4>
                                 <div className="flex flex-wrap gap-2 text-[9px]">
                                     {story?.notes?.map((note: string) => (
                                         <span key={note} className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">{note}</span>
@@ -537,8 +537,8 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                                 </div>
                             </div>
 
-                            <div className="p-6 bg-purple-600/10 border border-purple-500/20 text-white rounded-3xl space-y-2">
-                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Recomendación Tatama</h4>
+                            <div className="p-6 bg-brand-green/10 border border-brand-green/20 text-white rounded-3xl space-y-2">
+                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-green-bright">Recomendación Tatama</h4>
                                 <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                             </div>
 
@@ -630,7 +630,7 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                 </div>
                 <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Merma Molienda</p>
-                    <h4 className="text-3xl font-bold tracking-tighter text-orange-500">
+                    <h4 className="text-3xl font-bold tracking-tighter text-brand-green">
                         {sales.filter(s => s.delivery_type === 'molido').reduce((acc, curr) => acc + (Number(curr.grams_deducted) * 0.01), 0).toFixed(1)}g
                     </h4>
                 </div>
@@ -638,8 +638,8 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Formulario de Venta Rápida */}
-                <div className="bg-gradient-to-br from-bg-card to-purple-900/10 border border-purple-500/20 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden h-fit">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-3xl rounded-full"></div>
+                <div className="bg-gradient-to-br from-bg-card to-brand-green-dark/10 border border-brand-green/20 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden h-fit">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full"></div>
                     <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-brand-green"></span>
                         Registrar Venta (POS)
@@ -653,7 +653,7 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                                     required
                                     value={saleForm.inventoryId}
                                     onChange={(e) => setSaleForm({ ...saleForm, inventoryId: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 text-xs font-bold outline-none focus:border-purple-500 appearance-none pr-12"
+                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 text-xs font-bold outline-none focus:border-brand-green appearance-none pr-12"
                                 >
                                     <option value="">Seleccionar SKU...</option>
                                     {inventory.map(item => (
@@ -662,7 +662,7 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                                         </option>
                                     ))}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-purple-500 transition-colors">
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                 </div>
                             </div>
@@ -699,14 +699,14 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                                 <button
                                     type="button"
                                     onClick={() => setSaleForm({ ...saleForm, deliveryType: 'grano' })}
-                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'grano' ? 'bg-purple-600 border-purple-500 text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
+                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'grano' ? 'bg-brand-green border-brand-green text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
                                 >
                                     En Grano
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setSaleForm({ ...saleForm, deliveryType: 'molido' })}
-                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'molido' ? 'bg-orange-600 border-orange-500 text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
+                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'molido' ? 'bg-brand-green border-brand-green text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
                                 >
                                     Molido (+1%)
                                 </button>
@@ -733,9 +733,9 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                             <div className="py-20 text-center text-[10px] text-gray-600 font-bold uppercase tracking-widest">Sin transacciones hoy</div>
                         ) : (
                             sales.map(sale => (
-                                <div key={sale.id} className="group p-6 bg-bg-main/50 border border-white/5 hover:border-purple-500/20 rounded-2xl flex items-center justify-between transition-all">
+                                <div key={sale.id} className="group p-6 bg-bg-main/50 border border-white/5 hover:border-brand-green/20 rounded-2xl flex items-center justify-between transition-all">
                                     <div className="flex gap-5">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sale.delivery_type === 'molido' ? 'bg-orange-500/10 text-orange-400' : 'bg-brand-green/10 text-brand-green-bright'}`}>
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sale.delivery_type === 'molido' ? 'bg-brand-green/10 text-brand-green-bright' : 'bg-brand-green/10 text-brand-green-bright'}`}>
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                                             </svg>

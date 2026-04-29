@@ -207,7 +207,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                     {alert && (
                         <div className={`flex items-center gap-2 animate-pulse`}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={alert.type === 'critical' ? '#ef4444' : '#f97316'} strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" /></svg>
-                            <span className={`text-[9px] font-bold uppercase tracking-widest ${alert.type === 'critical' ? 'text-red-500' : 'text-orange-500'}`}>{alert.message}</span>
+                            <span className={`text-[9px] font-bold uppercase tracking-widest ${alert.type === 'critical' ? 'text-red-500' : 'text-brand-green'}`}>{alert.message}</span>
                         </div>
                     )}
                     <div className="border-l border-white/5 pl-6">
@@ -222,11 +222,11 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
             {/* HUD Central Premium */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-xl group">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 opacity-30"></div>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-green to-brand-green-dark opacity-30"></div>
                     <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2">Temp. Bean (BT)</p>
-                    <p className={`text-2xl font-bold tracking-tighter transition-colors ${alert?.type === 'critical' ? 'text-red-500' : alert?.type === 'warning' ? 'text-orange-500' : 'text-white'}`}>{currentTemp.toFixed(1)}°</p>
+                    <p className={`text-2xl font-bold tracking-tighter transition-colors ${alert?.type === 'critical' ? 'text-red-500' : alert?.type === 'warning' ? 'text-brand-green' : 'text-white'}`}>{currentTemp.toFixed(1)}°</p>
                     <div className="mt-3 h-1 bg-white/5 rounded-full overflow-hidden">
-                        <div className={`h-full shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all ${alert?.type === 'critical' ? 'bg-red-500' : alert?.type === 'warning' ? 'bg-orange-500' : 'bg-cyan-400'}`} style={{ width: `${(currentTemp / 250) * 100}%` }}></div>
+                        <div className={`h-full shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all ${alert?.type === 'critical' ? 'bg-red-500' : alert?.type === 'warning' ? 'bg-brand-green' : 'bg-brand-green/80'}`} style={{ width: `${(currentTemp / 250) * 100}%` }}></div>
                     </div>
                 </div>
 
@@ -240,11 +240,11 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                 </div>
 
                 <div className="bg-bg-card border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-xl">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-orange-500 opacity-30"></div>
-                    <p className="text-[8px] text-orange-500 font-bold uppercase tracking-widest mb-2">Rate of Rise (RoR)</p>
-                    <p className="text-2xl font-bold text-orange-400 tracking-tighter">{rorCurrent.toFixed(1)}</p>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-brand-green opacity-30"></div>
+                    <p className="text-[8px] text-brand-green font-bold uppercase tracking-widest mb-2">Rate of Rise (RoR)</p>
+                    <p className="text-2xl font-bold text-brand-green-bright tracking-tighter">{rorCurrent.toFixed(1)}</p>
                     <div className="flex gap-1 mt-3">
-                        {[...Array(8)].map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full ${rorCurrent > (i * 2) ? 'bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.4)]' : 'bg-white/5'}`}></div>)}
+                        {[...Array(8)].map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full ${rorCurrent > (i * 2) ? 'bg-brand-green shadow-[0_0_5px_rgba(249,115,22,0.4)]' : 'bg-white/5'}`}></div>)}
                     </div>
                 </div>
 
@@ -262,10 +262,10 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
 
             {/* AI COPILOT SPECTRAL ASSISTANT */}
             <div className={`bg-bg-card border rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-6 transition-all duration-700 shadow-2xl relative overflow-hidden border-white/5`}>
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 via-purple-500 to-red-500 opacity-40"></div>
+                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-brand-green via-purple-500 to-red-500 opacity-40"></div>
 
                 {copilotData && (
-                    <div className={`absolute top-0 right-0 px-4 py-1.5 text-[8px] font-bold uppercase tracking-widest rounded-bl-2xl ${copilotData.isSincronized ? 'bg-brand-green/10 text-brand-green border-l border-b border-brand-green/20' : 'bg-orange-500/10 text-orange-500 border-l border-b border-orange-500/20'}`}>
+                    <div className={`absolute top-0 right-0 px-4 py-1.5 text-[8px] font-bold uppercase tracking-widest rounded-bl-2xl ${copilotData.isSincronized ? 'bg-brand-green/10 text-brand-green border-l border-b border-brand-green/20' : 'bg-brand-green/10 text-brand-green border-l border-b border-brand-green/20'}`}>
                         SPECTRAL SYNC: {lastSync}
                     </div>
                 )}
@@ -299,7 +299,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                         </div>
                     ) : (
                         <div className="flex items-center gap-6 flex-1">
-                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 ${copilotData?.actionCode === 'INCREASE_GAS' ? 'bg-blue-600/20 text-blue-400 ring-2 ring-blue-500/40 animate-pulse' : copilotData?.actionCode === 'DECREASE_GAS' ? 'bg-red-600/20 text-red-400 ring-2 ring-red-500/40 animate-pulse' : 'bg-white/5 text-gray-500'}`}>
+                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 ${copilotData?.actionCode === 'INCREASE_GAS' ? 'bg-brand-green/20 text-brand-green-bright ring-2 ring-blue-500/40 animate-pulse' : copilotData?.actionCode === 'DECREASE_GAS' ? 'bg-red-600/20 text-red-400 ring-2 ring-red-500/40 animate-pulse' : 'bg-white/5 text-gray-500'}`}>
                                 {copilotData?.actionCode === 'INCREASE_GAS' ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 5v14M5 12l7-7 7 7" /></svg> :
                                     copilotData?.actionCode === 'DECREASE_GAS' ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 19V5M19 12l-7 7-7-7" /></svg> :
                                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" /></svg>}
@@ -321,13 +321,13 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                     <div className="w-full lg:w-80 space-y-5 relative z-10">
                         <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <span>Sincronía Térmica</span>
-                            <span className={copilotData.isSincronized ? 'text-brand-green-bright' : 'text-orange-500'}>
+                            <span className={copilotData.isSincronized ? 'text-brand-green-bright' : 'text-brand-green'}>
                                 {copilotData.isSincronized ? 'OPTIMAL WAVE' : `±${Math.abs(copilotData.tempDiff).toFixed(1)}°C DELTA`}
                             </span>
                         </div>
                         <div className="h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
                             <div
-                                className={`h-full rounded-full transition-all duration-1000 ${copilotData.isSincronized ? 'bg-brand-green-bright shadow-[0_0_10px_rgb(0,255,136)]' : 'bg-orange-500'}`}
+                                className={`h-full rounded-full transition-all duration-1000 ${copilotData.isSincronized ? 'bg-brand-green-bright shadow-[0_0_10px_rgb(0,255,136)]' : 'bg-brand-green'}`}
                                 style={{ width: `${Math.max(10, 100 - (Math.abs(copilotData.tempDiff) * 20))}%` }}
                             ></div>
                         </div>
@@ -338,10 +338,10 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
             {/* Panel PLC y Graficador Espectral */}
             <div className="bg-bg-card border border-white/5 rounded-3xl p-8 shadow-3xl space-y-8 relative overflow-hidden">
                 {/* Spectral Background Heatmap */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-red-500/5 pointer-events-none opacity-30"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-green/5 via-transparent to-red-500/5 pointer-events-none opacity-30"></div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 relative z-10">
-                    <div className={`space-y-4 p-5 bg-bg-main/50 rounded-2xl border transition-all duration-500 backdrop-blur-sm ${copilotData?.actionCode === 'INCREASE_GAS' ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)] bg-blue-500/5' : copilotData?.actionCode === 'DECREASE_GAS' ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)] bg-red-500/5' : 'border-white/5'}`}>
+                    <div className={`space-y-4 p-5 bg-bg-main/50 rounded-2xl border transition-all duration-500 backdrop-blur-sm ${copilotData?.actionCode === 'INCREASE_GAS' ? 'border-brand-green/50 shadow-[0_0_15px_rgba(59,130,246,0.2)] bg-brand-green/5' : copilotData?.actionCode === 'DECREASE_GAS' ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)] bg-red-500/5' : 'border-white/5'}`}>
                         <div className="flex justify-between items-center text-center">
                             <h4 className="text-[9px] font-bold uppercase text-red-500 tracking-[0.2em] flex items-center gap-2">
                                 {copilotData?.actionCode === 'DECREASE_GAS' && <svg className="animate-bounce" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 19V5M19 12l-7 7-7-7" /></svg>}
@@ -363,13 +363,13 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
 
                     <div className="space-y-4 p-5 bg-bg-main/50 rounded-2xl border border-white/5 backdrop-blur-sm">
                         <div className="flex justify-between items-center">
-                            <h4 className="text-[9px] font-bold uppercase text-blue-400 tracking-[0.2em]">Flujo de Aire PWM</h4>
+                            <h4 className="text-[9px] font-bold uppercase text-brand-green-bright tracking-[0.2em]">Flujo de Aire PWM</h4>
                             <span className="text-xl font-bold text-white tracking-tighter">{airflow}%</span>
                         </div>
                         <input
                             type="range" min="0" max="100" value={airflow}
                             onChange={(e) => setAirflow(parseInt(e.target.value))}
-                            className="w-full h-1.5 bg-blue-950/30 rounded-full appearance-none accent-blue-500 cursor-pointer border border-blue-500/10"
+                            className="w-full h-1.5 bg-gray-950/30 rounded-full appearance-none accent-blue-500 cursor-pointer border border-brand-green/10"
                         />
                         <div className="flex justify-between text-[7px] font-bold text-gray-600 uppercase tracking-widest">
                             <span>CLOSED</span>
@@ -394,7 +394,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => setFirstCrack(elapsedTime)}
-                                        className={`px-6 py-3 rounded-xl font-bold text-[9px] uppercase border transition-all ${firstCrack ? 'bg-orange-500/20 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+                                        className={`px-6 py-3 rounded-xl font-bold text-[9px] uppercase border transition-all ${firstCrack ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
                                     >
                                         {firstCrack ? 'FC REG' : 'FC'}
                                     </button>
@@ -449,8 +449,8 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                     </div>
 
                     <div className="mt-14 flex justify-between border-t border-white/5 pt-4 text-[8px] font-bold text-gray-600 uppercase tracking-[0.2em] px-4">
-                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-cyan-500 opacity-40"></div> Drying</span>
-                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-orange-500 opacity-40"></div> Maillard</span>
+                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-green opacity-40"></div> Drying</span>
+                        <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-brand-green opacity-40"></div> Maillard</span>
                         <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-500 opacity-40"></div> Development</span>
                     </div>
                 </div>
