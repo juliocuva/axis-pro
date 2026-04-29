@@ -159,11 +159,42 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         <>
             <style jsx global>{`
                 @media print {
-                    @page { size: A4; margin: 0 !important; }
-                    body { margin: 0 !important; padding: 0 !important; background: white !important; }
-                    #lot-certificate-area { width: 750px !important; margin: 0 auto !important; }
-                    .no-print { display: none !important; }
-                    .page-break { break-after: page !important; page-break-after: always !important; }
+                    /* Ocultar ABSOLUTAMENTE TODO lo que no sea el certificado */
+                    body * { visibility: hidden !important; }
+                    #lot-certificate-area, #lot-certificate-area * { visibility: visible !important; }
+                    #lot-certificate-area { 
+                        position: absolute !important; 
+                        left: 0 !important; 
+                        top: 0 !important; 
+                        width: 210mm !important; 
+                        height: auto !important;
+                        visibility: visible !important;
+                    }
+                    
+                    /* Configuración de página A4 */
+                    @page { 
+                        size: A4; 
+                        margin: 0 !important; 
+                    }
+                    
+                    /* Forzar saltos de página entre los 3 bloques */
+                    .page-break { 
+                        display: block !important;
+                        width: 210mm !important;
+                        height: 297mm !important;
+                        page-break-after: always !important; 
+                        break-after: page !important;
+                        position: relative !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        overflow: hidden !important;
+                    }
+                    
+                    /* Eliminar elementos de UI */
+                    .no-print, header, nav, aside, footer, [role="navigation"], [role="complementary"] { 
+                        display: none !important; 
+                        visibility: hidden !important; 
+                    }
                 }
             `}</style>
             
