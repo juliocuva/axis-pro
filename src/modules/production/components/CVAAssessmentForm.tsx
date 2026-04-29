@@ -249,7 +249,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
       onSave?.();
     } catch (err) {
       console.error(err);
-      alert(`Error al sincronizar CVA: ${err?.message || JSON.stringify(err)}`);
+      alert(`Error al sincronizar CVA: ${(err as any)?.message || JSON.stringify(err)}`);
     } finally {
       setIsSaving(false);
     }

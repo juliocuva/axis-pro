@@ -14,6 +14,9 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         roastedWeight: 0,
         selectedWeight: 0,
         quakersGrams: 0,
+        roastTime: '',
+        developmentTime: '',
+        developmentPct: 0,
     });
 
     const [curveFile, setCurveFile] = useState<File | null>(null);
@@ -35,6 +38,9 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             roastedWeight: demoRoasted,
             selectedWeight: 20.72,
             quakersGrams: 8,
+            roastTime: '10:45',
+            developmentTime: '2:15',
+            developmentPct: 18.5,
         });
 
         // Generar curva simulada de alta fidelidad para la demo
