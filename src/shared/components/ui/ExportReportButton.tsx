@@ -14,52 +14,127 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             const element = document.getElementById(elementId);
             if (!element) return;
 
-            // El elemento 'lot-certificate-area' contiene las 3 páginas
-            const pages = Array.from(element.children) as HTMLElement[];
-            if (pages.length === 0) return;
+            // Almacenar estilos originales y de padres críticos
+            const originalStyle = element.style.cssText;
+            const parent = element.parentElement;
+            const originalParentStyle = parent ? parent.style.cssText : '';
 
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
+            // Forzar un estado de visualización limpio para la captura
+            // 1. Desactivar transiciones para evitar frames intermedios
+            element.style.transition = 'none';
 
-            for (let i = 0; i < pages.length; i++) {
-                const page = pages[i];
-                
-                // Si no es la primera página, añadir una nueva hoja al PDF
-                if (i > 0) pdf.addPage();
+            // 2. Forzar ancho industrial (proporción A4/Carta ideal)
+            element.style.width = '816px';
+            element.style.maxWidth = 'none';
+            element.style.minWidth = '816px';
+            element.style.position = 'relative';
+            element.style.left = '0';
+            element.style.top = '0';
+            element.style.margin = '0';
+            element.style.transform = 'none';
 
-                const canvas = await html2canvas(page, {
-                    scale: 2, // Alta calidad
-                    backgroundColor: '#ffffff',
-                    useCORS: true,
-                    logging: false,
-                    width: 750,
-                    height: 1080
-                });
-
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+            // 3. Relax parent constraints to avoid clipping
+            if (parent) {
+                parent.style.overflow = 'visible';
+                parent.style.maxWidth = 'none';
+                parent.style.width = 'auto';
             }
 
-            // Descargar el PDF final
-            pdf.save(`${fileName}.pdf`);
+            // Pequeño delay para asegurar que el DOM se ajuste al nuevo ancho
+            await new Promise(r => setTimeout(r, 500));
 
-            // Guardar copia en carpeta IMP vía API para el archivo histórico
-            const fullPdfData = pdf.output('datauristring');
+            const canvas = await html2canvas(element, {
+                scale: 1.5,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                windowWidth: 816,
+                x: 0,
+                y: 0,
+                scrollX: 0,
+                scrollY: 0,
+                onclone: (clonedDoc) => {
+                    const itemsToHide = clonedDoc.querySelectorAll('.no-export');
+                    itemsToHide.forEach((el: any) => el.style.display = 'none');
+                    
+                    // Remueve explícitamente elementos que rompen html2canvas
+                    const badElements = clonedDoc.querySelectorAll('[data-html2canvas-ignore="true"]');
+                    badElements.forEach((el: any) => el.remove());
+
+                    // Force charts to have non-zero dimensions
+                    // Force charts to have non-zero dimensions
+                    const charts = clonedDoc.querySelectorAll('.recharts-responsive-container');
+                    charts.forEach((chart: any) => {
+                        chart.style.width = '800px';
+                        chart.style.height = '400px';
+                        chart.style.visibility = 'visible';
+                        chart.style.opacity = '1';
+                    });
+
+                    // Remove filters and complex SVG patterns that crash html2canvas
+                    const filters = clonedDoc.querySelectorAll('filter, mask, pattern');
+                    filters.forEach((el: any) => el.parentNode?.removeChild(el));
+
+                    // Hide elements with blur classes which often break canvas
+                    const blurElements = clonedDoc.querySelectorAll('[class*="blur-"]');
+                    blurElements.forEach((el: any) => {
+                        el.style.filter = 'none';
+                        el.style.backdropFilter = 'none';
+                    });
+                    
+                    // Remove radial gradients that can cause createPattern errors
+                    const radialElements = clonedDoc.querySelectorAll('[style*="radial-gradient"]');
+                    radialElements.forEach((el: any) => {
+                        el.style.backgroundImage = 'none';
+                    });
+
+                    // FATAL ERROR PREVENTION: Strip any element that has explicit 0 width/height avoiding createPattern error
+                    const allNodes = clonedDoc.querySelectorAll('svg, canvas, img');
+                    allNodes.forEach((node: any) => {
+                        const w = node.getAttribute('width');
+                        const h = node.getAttribute('height');
+                        const styleW = node.style.width;
+                        const styleH = node.style.height;
+                        if (w === '0' || h === '0' || styleW === '0px' || styleH === '0px' || styleW === '0' || styleH === '0') {
+                            node.remove();
+                        }
+                    });
+                }
+            });
+
+            // Restaurar estilos inmediatamente
+            element.style.cssText = originalStyle;
+            if (parent) parent.style.cssText = originalParentStyle;
+
+            // En vez de generar un PDF, lo descargamos como Imagen de Alta Calidad (solicitud del usuario)
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+            // Descargar como imagen JPG
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = `${fileName}.jpg`;
+            link.click();
+
+            // Save copy to local IMP directory via API
             try {
-                await fetch('/api/pdf/save', {
+                const response = await fetch('/api/pdf/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pdfBase64: fullPdfData, fileName: `${fileName}` })
+                    // Reutilizamos el nombre de la variable de la API pero mandamos el JPG
+                    body: JSON.stringify({ pdfBase64: imgData, fileName: `${fileName}` })
                 });
+                if (!response.ok) {
+                    console.error('Failed to save to IMP folder');
+                }
             } catch (saveErr) {
-                console.error('Error auto-archiving PDF:', saveErr);
+                console.error('Error saving to IMP folder:', saveErr);
             }
 
-            if (btn) btn.innerText = 'PDF GENERADO ✓';
+            if (btn) btn.innerText = 'IMAGEN GENERADA ✓';
             setTimeout(() => { if (btn) btn.innerText = 'DESCARGAR REPORTE INDUSTRIAL'; }, 2000);
         } catch (error) {
-            console.error('Error generating PDF:', error);
+            console.error('Error generating Image:', error);
             if (btn) btn.innerText = 'ERROR AL GENERAR';
         }
     };
