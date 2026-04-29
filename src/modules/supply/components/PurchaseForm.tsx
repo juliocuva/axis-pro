@@ -549,7 +549,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             Datos Principales de Origen
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div className="mb-8">
                             <div className="bg-white/5 border border-white/10 p-4 rounded-industrial">
                                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 block">Fecha de Recolección (Cosecha)</label>
                                 <input
@@ -560,16 +560,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-white font-bold outline-none focus:border-brand-green"
                                 />
                                 <p className="text-[8px] text-gray-500 mt-2 uppercase">Vital para determinar la edad y frescura del lote.</p>
-                            </div>
-                            <div className="bg-white/2 p-4 rounded-industrial border border-white/5 opacity-60">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 block">Fecha de Ingreso / Compra</label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={formData.purchaseDate}
-                                    onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-gray-500 font-bold outline-none"
-                                />
                             </div>
                         </div>
 

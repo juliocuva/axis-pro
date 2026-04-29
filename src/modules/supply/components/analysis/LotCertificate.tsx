@@ -41,6 +41,37 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onClose]);
 
+    const downloadQRCode = () => {
+        const svg = document.querySelector('.qr-container svg') as SVGElement;
+        if (!svg) return;
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const img = new Image();
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = () => {
+            canvas.width = 1000; // Alta resolución para imprenta
+            canvas.height = 1000;
+            if (ctx) {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 50, 50, 900, 900);
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = `QR-AXIS-${lotData?.lot_number || inventoryId}.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;
+    };
+
     const fetchFullData = async () => {
         try {
             let query = supabase
@@ -111,6 +142,15 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     getVal(sca.overall) + 30
                 );
 
+                // Sincronizar los atributos reales con los valores de certificación para el Radar
+                sca.fragrance_aroma = getVal(sca.fragrance_aroma);
+                sca.flavor = getVal(sca.flavor);
+                sca.aftertaste = getVal(sca.aftertaste);
+                sca.acidity = getVal(sca.acidity);
+                sca.body = getVal(sca.body);
+                sca.balance = getVal(sca.balance);
+                sca.overall = getVal(sca.overall);
+
                 if (cvaCalculated >= 80 || sca.is_cva_version) {
                     sca.total_score = Math.round(cvaCalculated * 100) / 100; // Redondeo a 2 decimales
                     sca.is_cva_version = true;
@@ -150,8 +190,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         { subject: 'Sabor', A: scaData.flavor || 0 },
         { subject: 'Residual', A: scaData.aftertaste || 0 },
         { subject: 'Acidez', A: scaData.acidity || 0 },
-        { subject: 'Balance', A: scaData.balance || 0 },
         { subject: 'Cuerpo', A: scaData.body || 0 },
+        { subject: 'Balance', A: scaData.balance || 0 },
         { subject: 'Global', A: scaData.overall || 0 },
     ].map(d => ({ 
         ...d, 
@@ -191,6 +231,17 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     return (
         <>
             <style jsx global>{`
+                @media (max-width: 768px) {
+                    .lot-certificate-area {
+                        transform: scale(calc(100vw / 780px));
+                        transform-origin: top left;
+                        width: 750px !important;
+                    }
+                    .no-export {
+                        width: 100% !important;
+                        flex-direction: column;
+                    }
+                }
                 @media print {
                     @page { 
                         size: A4; 
@@ -605,8 +656,14 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="absolute top-0 left-0 w-full h-[1px] bg-gray-200"></div>
 
                             <div className="bg-[#f9fafb] p-4 rounded-2xl border border-[#e5e7eb] flex items-center gap-6 flex-1 shadow-sm">
-                                <div className="bg-white p-2 border border-[#e5e7eb] rounded-xl shrink-0">
-                                    <QRCodeSVG value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axisonecoffee.com'}/verify/lot/${inventoryId}`} size={80} level="H" />
+                                <div className="bg-white p-2 border border-[#e5e7eb] rounded-xl shrink-0 qr-container">
+                                    <QRCodeSVG 
+                                        value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axisonecoffee.com'}/verify/lot/${inventoryId}`} 
+                                        size={80} 
+                                        level="H"
+                                        includeMargin={false}
+                                        fgColor="#000000"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest leading-none">Inmutable Ledger Traceability</p>
@@ -677,6 +734,9 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                                         <XAxis 
                                             dataKey="time" 
+                                            type="number"
+                                            domain={[0, 12]}
+                                            ticks={[0, 2, 4, 6, 8, 10, 12]}
                                             label={{ value: 'Tiempo (min)', position: 'insideBottomRight', offset: -10, fontSize: 10, fill: '#666' }}
                                             tick={{ fontSize: 10, fill: '#999' }}
                                             axisLine={false}
@@ -748,6 +808,17 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
             {/* Panel de Control Inferior */}
             <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-gray-100 border border-gray-200 rounded-2xl shadow-2xl print:hidden">
+                <button
+                    onClick={downloadQRCode}
+                    className="px-8 py-4 bg-brand-green hover:bg-brand-green-bright text-black rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl border border-brand-green/30"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Descargar QR Impresión
+                </button>
                 <ExportReportButton
                     elementId="lot-certificate-area"
                     fileName={`REPORT-AXIS-${lotData?.lot_number || 'LOT'}-${lotData?.farm_name || 'COFFEE'}`}

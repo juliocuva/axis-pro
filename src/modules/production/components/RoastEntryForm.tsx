@@ -155,38 +155,93 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         if (!file) return;
 
         setCurveFile(file);
-        setCurveStatus({ type: 'processing', message: 'Analizando telemetría de la curva...' });
+        setCurveStatus({ type: 'processing', message: 'Analizando telemetría y datos industriales...' });
 
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
                 const text = event.target?.result as string;
                 const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
-                
-                // Parseo simple para Artisan/CSV (Tiempo, BT, ET)
-                const points = lines.slice(1).map((line, index) => {
-                    const parts = line.split(/[;,]/);
-                    if (parts.length >= 2) {
-                        return {
-                            t: parseFloat(parts[0]) || index,
-                            bt: parseFloat(parts[1]) || 0,
-                            et: parseFloat(parts[2]) || 0
-                        };
-                    }
-                    return null;
-                }).filter(p => p !== null);
+                if (lines.length < 2) throw new Error("Archivo vacío o sin datos.");
 
-                if (points.length > 0) {
+                const header = lines[0].toLowerCase();
+                const delimiter = header.includes(';') ? ';' : ',';
+                
+                // DETECCIÓN DE TIPO DE ARCHIVO
+                const isSummary = header.includes('tiempo_total') || header.includes('maillard') || header.includes('secado');
+
+                if (isSummary) {
+                    // MODO RESUMEN: Extraer datos y reconstruir curva
+                    const dataParts = lines[1].split(delimiter);
+                    const headers = header.split(delimiter);
+                    const getVal = (key: string) => {
+                        const idx = headers.findIndex(h => h.includes(key));
+                        return idx !== -1 ? dataParts[idx]?.replace(',', '.') : null;
+                    };
+
+                    const totalTime = parseFloat(getVal('tiempo_total') || '0');
+                    const tempFinal = parseFloat(getVal('temp_final') || '205');
+                    const secado = parseFloat(getVal('secado') || '0');
+                    const maillard = parseFloat(getVal('maillard') || '0');
+                    const desarrollo = parseFloat(getVal('desarrollo') || '0');
+
+                    // Auto-llenar formulario
+                    setFormData(prev => ({
+                        ...prev,
+                        roastTime: totalTime > 0 ? `${Math.floor(totalTime)}:${Math.round((totalTime % 1) * 60).toString().padStart(2, '0')}` : prev.roastTime,
+                        developmentTime: desarrollo > 0 ? `${Math.floor(desarrollo)}:${Math.round((desarrollo % 1) * 60).toString().padStart(2, '0')}` : prev.developmentTime,
+                        developmentPct: parseFloat(getVal('dtr') || '0')
+                    }));
+
+                    // Reconstrucción matemática de la curva (Curva Sigmoide Técnica)
+                    const points = [];
+                    const steps = 60; // Generar 60 puntos para una curva suave
+                    for (let i = 0; i <= steps; i++) {
+                        const t = (i / steps) * totalTime;
+                        // Simulación de curva de tueste realista: Caída -> Secado -> Maillard -> Desarrollo
+                        let temp = 195; // Carga
+                        if (t < 1.5) temp = 195 - (t * 60); // Turning point
+                        else {
+                            const progress = (t - 1.5) / (totalTime - 1.5);
+                            temp = 90 + (tempFinal - 90) * Math.pow(progress, 0.7);
+                        }
+                        points.push({ t: t * 60, bt: temp, et: temp + 25 });
+                    }
+                    
                     setCurveData(points);
                     setCurveStatus({ 
                         type: 'success', 
-                        message: `¡Telemetría cargada! ${points.length} puntos detectados. T-Max: ${Math.max(...points.map(p => p!.bt))}°C.` 
+                        message: `¡Datos extraídos! Resumen de ${totalTime} min detectado. Curva reconstruida.` 
                     });
                 } else {
-                    throw new Error("No se detectaron puntos válidos.");
+                    // MODO TELEMETRÍA (Artisan/CSV Estándar)
+                    const points = lines.slice(1).map((line, index) => {
+                        const parts = line.split(delimiter);
+                        if (parts.length >= 2) {
+                            const tVal = parts[0].replace(',', '.');
+                            const btVal = parts[1].replace(',', '.');
+                            const etVal = parts[2]?.replace(',', '.');
+                            return {
+                                t: parseFloat(tVal) || index,
+                                bt: parseFloat(btVal) || 0,
+                                et: parseFloat(etVal) || (parseFloat(btVal) + 20)
+                            };
+                        }
+                        return null;
+                    }).filter(p => p !== null && p.bt > 0);
+
+                    if (points.length > 0) {
+                        setCurveData(points);
+                        setCurveStatus({ 
+                            type: 'success', 
+                            message: `¡Telemetría cargada! ${points.length} puntos. T-Max: ${Math.max(...points.map(p => p!.bt))}°C.` 
+                        });
+                    } else {
+                        throw new Error("No se detectaron temperaturas válidas.");
+                    }
                 }
-            } catch (err) {
-                setCurveStatus({ type: 'error', message: 'Error al parsear el log térmico.' });
+            } catch (err: any) {
+                setCurveStatus({ type: 'error', message: err.message || 'Error al procesar el archivo.' });
             }
         };
         reader.readAsText(file);
