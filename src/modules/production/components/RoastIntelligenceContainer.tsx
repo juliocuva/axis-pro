@@ -18,6 +18,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     const [view, setView] = useState<'live' | 'archive' | 'entry' | 'cupping'>('live');
     const [selectedLot, setSelectedLot] = useState<any>(null);
     const [capturedSession, setCapturedSession] = useState<any>(null);
+    const [extraLotData, setExtraLotData] = useState<{ physical: any, sca: any }>({ physical: null, sca: null });
 
     // Listen to inter-component navigation
     useEffect(() => {
@@ -126,6 +127,40 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
         }
     };
 
+    // Sincronización en tiempo real de los datos físicos y sensoriales al seleccionar
+    useEffect(() => {
+        if (selectedLot?.id) {
+            fetchLotSpecificDetails(selectedLot.id);
+        }
+    }, [selectedLot?.id]);
+
+    const fetchLotSpecificDetails = async (id: string) => {
+        try {
+            // Buscamos el análisis físico más reciente
+            const { data: physical } = await supabase
+                .from('physical_analysis')
+                .select('*')
+                .eq('inventory_id', id)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            // Buscamos el análisis sensorial más reciente
+            const { data: sca } = await supabase
+                .from('sca_cupping')
+                .select('*')
+                .eq('inventory_id', id)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            setExtraLotData({
+                physical: physical?.[0] || null,
+                sca: sca?.[0] || null
+            });
+        } catch (err) {
+            console.error("Error fetching specific lot details:", err);
+        }
+    };
+
     // DYNAMIC ROAST PREDICTION ENGINE (TRL-7)
     let dynamicChargeTemp = 195;
     let dynamicDryTime = "5:30";
@@ -136,9 +171,9 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     let dynamicRestDays = 7;
 
     if (selectedLot) {
-        const d = Number(selectedLot.physical_analysis?.[0]?.density_gl) || 710;
-        const m = Number(selectedLot.physical_analysis?.[0]?.moisture_pct) || 11.2;
-        const s = Number(selectedLot.sca_cupping?.[0]?.total_score) || 0;
+        const d = Number(extraLotData.physical?.density_gl || selectedLot.physical_analysis?.[0]?.density_gl) || 710;
+        const m = Number(extraLotData.physical?.moisture_pct || selectedLot.physical_analysis?.[0]?.moisture_pct) || 11.2;
+        const s = Number(extraLotData.sca?.total_score || selectedLot.sca_cupping?.[0]?.total_score) || 0;
         const p = (selectedLot.process || 'washed').toLowerCase();
 
         // 1. Charge Temp & Dry Time (based on density & moisture)
@@ -168,8 +203,9 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
 
     // -- HELPERS --
     const getScaScore = (lot: any) => {
-        if (!lot?.sca_cupping?.length) return '--';
-        const s = lot.sca_cupping[0];
+        const s = extraLotData.sca || (lot?.sca_cupping?.length ? lot.sca_cupping[0] : null);
+        if (!s) return '--';
+
         if (s.total_score) return s.total_score.toFixed(2);
 
         if (s.is_cva_version && s.cva_affective) {
@@ -351,9 +387,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                             <p className="text-xs text-gray-400 uppercase font-bold">Densidad</p>
                                             <div className="text-right">
                                                 <p className="text-5xl font-black text-white tracking-tighter">
-                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0)
-                                                        ? selectedLot.physical_analysis[0].density_gl
-                                                        : '--'}
+                                                    {extraLotData.physical?.density_gl || selectedLot.physical_analysis?.[0]?.density_gl || '--'}
                                                 </p>
                                                 <p className="text-[10px] text-gray-500 font-bold uppercase">g/L</p>
                                             </div>
@@ -363,15 +397,17 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                             <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                                                 <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Humedad</p>
                                                 <p className="text-2xl font-bold text-white tracking-tight">
-                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0)
-                                                        ? `${selectedLot.physical_analysis[0].moisture_pct}%`
-                                                        : '--'}
+                                                    {extraLotData.physical?.moisture_pct 
+                                                        ? `${extraLotData.physical.moisture_pct}%` 
+                                                        : selectedLot.physical_analysis?.[0]?.moisture_pct 
+                                                            ? `${selectedLot.physical_analysis[0].moisture_pct}%` 
+                                                            : '--'}
                                                 </p>
                                             </div>
                                             <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                                                 <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Actividad Agua (aW)</p>
                                                 <p className="text-2xl font-bold text-white tracking-tight">
-                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0 && selectedLot.physical_analysis[0].aw) || '0.58'}
+                                                    {extraLotData.physical?.aw || selectedLot.physical_analysis?.[0]?.aw || '0.58'}
                                                 </p>
                                             </div>
                                         </div>

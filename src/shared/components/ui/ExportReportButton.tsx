@@ -44,7 +44,7 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             await new Promise(r => setTimeout(r, 500));
 
             const canvas = await html2canvas(element, {
-                scale: 1.5,
+                scale: 2,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,

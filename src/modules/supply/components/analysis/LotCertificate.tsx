@@ -190,12 +190,13 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         { subject: 'Sabor', A: scaData.flavor || 0 },
         { subject: 'Residual', A: scaData.aftertaste || 0 },
         { subject: 'Acidez', A: scaData.acidity || 0 },
-        { subject: 'Dulzor', A: scaData.sweetness || 0 },
         { subject: 'Cuerpo', A: scaData.body || 0 },
+        { subject: 'Balance', A: scaData.balance || 0 },
+        { subject: 'Global', A: scaData.overall || 0 },
     ].map(d => ({ 
         ...d, 
         A: Number(d.A),
-        visualA: Number(d.A)
+        visualA: Math.max(Number(d.A), 2)
     })) : [];
 
     const screenData = physicalData?.screen_size_distribution ? [
@@ -254,20 +255,6 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     }
                     .no-print, .no-export { display: none !important; }
                     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                }
-
-                /* ESCALADO DINÁMICO PARA MÓVILES */
-                @media (max-width: 768px) {
-                    #lot-certificate-area {
-                        transform: scale(calc(100vw / 820));
-                        transform-origin: top center;
-                        margin-left: auto;
-                        margin-right: auto;
-                    }
-                    .lot-certificate-wrapper {
-                        overflow-x: hidden;
-                        width: 100vw;
-                    }
                 }
             `}</style>
             <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
@@ -587,29 +574,26 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     {/* Perfil Sensorial basado en estándares SCA (Elegante y Visual) */}
                     <div className="flex flex-col w-full h-[885px] justify-between">
 
-                        {/* Radar Chart CVA (Estilo Fondo Blanco para Impresión) */}
-                        <div className="w-full relative flex flex-col pt-8 items-center">
-                            {/* Title CVA */}
-                            <div className="flex flex-col items-center mb-10 text-center">
-                                <h2 className="text-[12px] font-black uppercase tracking-[0.5em] mb-4 text-[#1A1A1A]">
-                                    HUELLA ORGANOLÉPTICA ESTÁNDAR CVA
+                        {/* Radar Chart (Mucho más elegante) */}
+                        <div className="w-full relative flex flex-col pt-12 items-center">
+                            {/* Title (Normal Flow) */}
+                            <div className="flex flex-col items-center mb-6 text-center">
+                                <h2 className="text-sm font-bold uppercase tracking-[0.6em] mb-4" style={{ color: '#1A1A1A' }}>
+                                    {scaData?.is_cva_version ? 'SCA Coffee Value Assessment (CVA)' : 'Evaluación Sensorial basada en estándares de la SCA'}
                                 </h2>
+                                <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-medium">
+                                    {scaData?.is_cva_version ? 'Basado en el Protocolo Descriptivo SCA-103 + Afectivo SCA-104' : 'Análisis de Perfil Organoléptico de Especialidad'}
+                                </p>
                             </div>
 
-                            {/* Contenedor Limpio (Fondo Blanco) */}
-                            <div className="w-full h-[500px] flex justify-center items-center relative">
-                                <RadarChart width={600} height={500} cx="50%" cy="50%" outerRadius="75%" data={scaRadarData} className="relative z-10">
+
+
+                            {/* Chart & Data (Static Container) */}
+                            <div className="w-full h-[450px] relative flex justify-center items-center">
+
+                                <RadarChart width={500} height={450} cx="50%" cy="50%" outerRadius="75%" data={scaRadarData} className="relative z-10">
                                     <PolarGrid stroke="#e5e7eb" strokeWidth={1} />
-                                    <PolarAngleAxis 
-                                        dataKey="subject" 
-                                        tick={{ fill: '#1A1A1A', fontSize: 11, fontWeight: '700' }} 
-                                    />
-                                    <PolarRadiusAxis 
-                                        angle={30} 
-                                        domain={[0, 15]} 
-                                        tick={false} 
-                                        axisLine={false} 
-                                    />
+                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#1A1A1A', fontSize: 11, fontWeight: '700' }} />
                                     <Radar
                                         name="Profile"
                                         dataKey="visualA"
@@ -621,12 +605,12 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     />
                                 </RadarChart>
 
-                                {/* Valores en miniatura (Estilo Minimalista) */}
-                                <div className="absolute top-0 right-12 flex flex-col gap-2 text-right">
+                                {/* Puntos de datos destacados */}
+                                <div className="absolute top-10 right-12 space-y-2 z-20 w-40 text-right">
                                     {scaRadarData.map((d, i) => (
                                         <div key={i} className="flex items-center gap-3 justify-end border-b border-[#f3f4f6] pb-1">
                                             <span className="text-[8px] font-bold uppercase text-gray-400 tracking-widest">{d.subject}</span>
-                                            <span className="text-[12px] font-black text-[#1A1A1A]">{Number(d.A)}</span>
+                                            <span className="text-[12px] font-black text-[#1A1A1A]">{Number(d.A).toFixed(2)}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -667,11 +651,11 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             </div>
                         </div>
 
+                        {/* Footer Hoja 2: Seguridad y QR */}
                         {/* Footer Hoja 2 Simplificado */}
                         <div className="mt-auto px-12 py-8 flex justify-between items-center opacity-20 border-t border-[#e5e7eb]">
                             <p className="text-[7px] font-bold text-gray-400 uppercase tracking-widest">AXISONE Sensory Analytics Division | Quality Assessment Ver 2.4</p>
                             <p className="text-[7px] font-mono text-gray-500 uppercase tracking-widest">{inventoryId.substring(0, 8).toUpperCase()}-P2</p>
-                        </div>
                         </div>
                     </div>
                 </div>
@@ -683,8 +667,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 <div className="bg-white border relative flex flex-col print:border-none print:break-after-page shadow-2xl print:shadow-none"
                     style={{ width: '750px', minHeight: '1060px', borderColor: '#e5e7eb' }}>
 
-                    {/* Header P3 Compacto */}
-                    <div className="bg-[#f9fafb] px-12 py-6 flex justify-between items-center border-b border-[#e5e7eb]">
+                    {/* Header P3 Limpio */}
+                    <div className="bg-[#f9fafb] px-12 py-8 flex justify-between items-center border-b border-[#e5e7eb]">
                         <div className="flex items-center gap-6">
                             <img src="/logo.png" alt="AXISONE" className="h-10 w-auto object-contain" />
                             <div>
@@ -697,14 +681,14 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         </div>
                     </div>
 
-                    <div className="flex-1 p-8 flex flex-col gap-4">
+                    <div className="flex-1 p-12 flex flex-col gap-8">
                         <div className="space-y-4 text-center">
                             <h2 className="text-sm font-bold uppercase tracking-[0.6em]" style={{ color: '#1A1A1A' }}>Perfil de Tostión Dinámico</h2>
                             <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-medium">Control de Transferencia Térmica y Cinética de Reacción</p>
                         </div>
 
-                        {/* Contenedor de la Curva - Reducción Final */}
-                        <div className="bg-[#f9fafb] border border-[#e5e7eb] rounded-[32px] p-6 h-[320px] relative mt-2">
+                        {/* Contenedor de la Curva (Escalado para que quepa el footer) */}
+                        <div className="bg-[#f9fafb] border border-[#e5e7eb] rounded-[32px] p-8 h-[380px] relative mt-4">
                             <div className="absolute top-6 right-10 flex gap-6 z-20">
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-1 bg-[#006056] rounded-full"></div>
@@ -738,7 +722,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             yAxisId="temp"
                                             label={{ value: 'Temp (°C)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#666' }}
                                             tick={{ fontSize: 10, fill: '#999' }}
-                                            domain={[0, 250]}
+                                            domain={[0, 230]}
                                             axisLine={false}
                                             tickLine={false}
                                         />
@@ -790,41 +774,39 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         </div>
                     </div>
 
-                        {/* Footer Hoja 3: Seguridad y QR (LUGAR FINAL) */}
-                            {/* Footer Hoja 3: Seguridad y QR (LUGAR FINAL) */}
-                        <div className="bg-white p-12 flex justify-between items-center gap-12 relative overflow-hidden border-t border-gray-200 mt-auto">
-                            <div className="absolute top-0 left-0 w-full h-[1px] bg-gray-200"></div>
+                    {/* Footer P3 */}
+                    {/* Footer Hoja 3: Seguridad y QR (LUGAR FINAL) */}
+                    <div className="bg-white p-12 flex justify-between items-center gap-12 relative overflow-hidden border-t border-gray-200 mt-auto">
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gray-200"></div>
 
-                            <div className="bg-[#f9fafb] p-4 rounded-2xl border border-[#e5e7eb] flex items-center gap-6 flex-1 shadow-sm">
-                                <div className="flex flex-col items-center gap-3">
-                                    <div className="bg-white p-2 border border-[#e5e7eb] rounded-xl shrink-0 qr-container shadow-sm">
-                                        <QRCodeSVG 
-                                            value={`https://axisonecoffee.com/verify/lot/${inventoryId}`} 
-                                            size={85} 
-                                            level="H" 
-                                            includeMargin={false} 
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest leading-none">Inmutable Ledger Traceability</p>
-                                    <p className="text-[8px] text-gray-500 font-bold uppercase leading-relaxed tracking-wider">
-                                        Certificación técnica de origen y calidad física-sensorial protegida por el protocolo Axis Intelligence. Datos validados en el punto de trilla.
-                                    </p>
-                                </div>
+                        <div className="bg-[#f9fafb] p-4 rounded-2xl border border-[#e5e7eb] flex items-center gap-6 flex-1 shadow-sm">
+                            <div className="bg-white p-2 border border-[#e5e7eb] rounded-xl shrink-0 qr-container">
+                                <QRCodeSVG 
+                                    value={`https://axisonecoffee.com/verify/lot/${inventoryId}`} 
+                                    size={80} 
+                                    level="H"
+                                    includeMargin={false}
+                                    fgColor="#000000"
+                                />
                             </div>
+                            <div className="space-y-2">
+                                <p className="text-[10px] font-bold text-[#1A1A1A] uppercase tracking-widest leading-none">Inmutable Ledger Traceability</p>
+                                <p className="text-[8px] text-gray-500 font-bold uppercase leading-relaxed tracking-wider">
+                                    Certificación técnica de origen y calidad física-sensorial protegida por el protocolo Axis Intelligence. Datos validados en el punto de trilla.
+                                </p>
+                            </div>
+                        </div>
 
-                            <div className="text-right space-y-4">
-                                <div className="px-4 py-2 bg-gray-100 rounded-lg border border-gray-200">
-                                    <p className="text-[8px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}</p>
-                                </div>
-                                <p className="text-[7px] text-gray-400 uppercase font-bold tracking-widest leading-none">© 2026 AXISONE INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive - BAX-7370</span></p>
+                        <div className="text-right space-y-4">
+                            <div className="px-4 py-2 bg-gray-100 rounded-lg border border-gray-200">
+                                <p className="text-[8px] font-mono text-gray-500 tracking-tighter">{inventoryId.toUpperCase()}</p>
                             </div>
+                            <p className="text-[7px] text-gray-400 uppercase font-bold tracking-widest leading-none">© 2026 AXISONE INTELLIGENCE GROUP<br /><span className="mt-1 block opacity-50">Industrial Quality Archive - BAX-7370</span></p>
                         </div>
                     </div>
                 </div>
+            </div> {/* Cierra el area de impresion lot-certificate-area */}
 
-<<<<<<< Updated upstream
             {/* Panel de Control Inferior */}
             <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-gray-100 border border-gray-200 rounded-2xl shadow-2xl print:hidden">
                 <button
@@ -859,46 +841,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 >
                     Cerrar Certificado
                 </button>
-=======
-                {/* Panel de Control Inferior */}
-                <div className="w-full flex justify-end gap-4 no-export mt-10 p-10 bg-gray-100 border border-gray-200 rounded-2xl shadow-2xl print:hidden">
-                    <ExportReportButton
-                        elementId="lot-certificate-area"
-                        fileName={`REPORT-AXIS-${lotData?.lot_number || 'LOT'}-${lotData?.farm_name || 'COFFEE'}`}
-                    />
-                    <button
-                        onClick={downloadQRCode}
-                        className="px-8 py-4 bg-white hover:bg-gray-50 text-[#006056] border border-gray-200 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <rect x="7" y="7" width="3" height="3"></rect>
-                            <rect x="14" y="7" width="3" height="3"></rect>
-                            <rect x="7" y="14" width="3" height="3"></rect>
-                            <rect x="14" y="14" width="3" height="3"></rect>
-                        </svg>
-                        Descargar Código QR
-                    </button>
-                    <button
-                        onClick={() => window.print()}
-                        className="px-8 py-4 bg-black hover:bg-gray-800 text-white border border-gray-800 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                            <rect x="6" y="14" width="12" height="8"></rect>
-                        </svg>
-                        IMPRIMIR / PDF NATIVO
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="px-10 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-black rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all border border-gray-200 active:scale-95 shadow-xl"
-                    >
-                        Cerrar Certificado
-                    </button>
-                </div>
->>>>>>> Stashed changes
             </div>
+        </div>
         </>
     );
 }
