@@ -214,7 +214,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 <div id="lot-certificate-area" className="flex flex-col bg-white">
                     
                     {/* PAGINA 1 */}
-                    <div className="bg-white text-black relative flex flex-col page-break" style={{ width: '750px', height: '1080px', borderBottom: '1px solid #eee' }}>
+                    <div className="axis-report-page bg-white text-black relative flex flex-col page-break" style={{ width: '750px', height: '1080px', borderBottom: '1px solid #eee' }}>
                         <div className="bg-[#f9fafb] px-10 py-8 flex justify-between items-center border-b border-[#e5e7eb] relative">
                             <div className="absolute top-0 left-0 w-full h-1 bg-[#006056]"></div>
                             <div className="flex items-center gap-6">
@@ -267,7 +267,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     </div>
 
                     {/* PAGINA 2 */}
-                    <div className="bg-white text-black relative flex flex-col page-break" style={{ width: '750px', height: '1080px', borderBottom: '1px solid #eee' }}>
+                    <div className="axis-report-page bg-white text-black relative flex flex-col page-break" style={{ width: '750px', height: '1080px', borderBottom: '1px solid #eee' }}>
                         <div className="p-12 space-y-10 flex-1">
                             <div className="border-b-4 border-[#006056] pb-6 flex justify-between items-end">
                                 <div><p className="text-[10px] font-black text-[#006056] uppercase tracking-[0.4em] mb-2">Protocolo de Calidad / Pág 02</p><h2 className="text-5xl font-black uppercase tracking-tighter">Análisis de <span className="text-[#006056]">Tostión</span></h2></div>
@@ -302,7 +302,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     </div>
 
                     {/* PAGINA 3 */}
-                    <div className="bg-white text-black relative flex flex-col" style={{ width: '750px', height: '1080px' }}>
+                    <div className="axis-report-page bg-white text-black relative flex flex-col" style={{ width: '750px', height: '1080px' }}>
                         <div className="p-12 space-y-10 flex-1">
                             <div className="border-b-4 border-black pb-6 flex justify-between items-end">
                                 <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-2">Protocolo de Calidad / Pág 03</p><h2 className="text-5xl font-black uppercase tracking-tighter">Evaluación <span className="text-[#006056]">Sensorial</span></h2></div>

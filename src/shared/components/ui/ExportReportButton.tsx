@@ -14,8 +14,8 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             const element = document.getElementById(elementId);
             if (!element) return;
 
-            // Buscamos directamente los hijos que son las páginas reales
-            const pages = Array.from(element.children) as HTMLElement[];
+            // Buscamos explícitamente las 3 páginas marcadas con la clase
+            const pages = Array.from(element.querySelectorAll('.axis-report-page')) as HTMLElement[];
             if (pages.length === 0) return;
 
             const pdf = new jsPDF('p', 'mm', 'a4');
