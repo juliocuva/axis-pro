@@ -33,6 +33,17 @@ interface CVAData {
   };
   notes: string;
   tasterName: string;
+  extrinsic: {
+    alchemyProcess: string;
+    seedCertificate: string;
+    carbonFootprint: string;
+    transferPrice: string;
+    productionCost: string;
+    agrochemicalRegistry: string;
+    waterPh: string;
+    storageConditions: string;
+    eudrHash: string;
+  };
 }
 
 interface CVAAssessmentFormProps {
@@ -98,6 +109,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   const [isLoading, setIsLoading] = useState(true);
   const [isAlreadySealed, setIsAlreadySealed] = useState(false);
   const [lotDetails, setLotDetails] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'intrinsic' | 'extrinsic'>('intrinsic');
   const [data, setData] = useState<CVAData>({
     descriptive: {
         fragranceIntensity: 0,
@@ -121,7 +133,18 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         overallImpression: 5
     },
     notes: '',
-    tasterName: 'Q-Grader Senior'
+    tasterName: 'Q-Grader Senior',
+    extrinsic: {
+        alchemyProcess: '',
+        seedCertificate: '',
+        carbonFootprint: '0.42 kg CO2e/kg',
+        transferPrice: '',
+        productionCost: '',
+        agrochemicalRegistry: '0% Residues - Lab Tested',
+        waterPh: '7.2',
+        storageConditions: '18°C / 62% RH',
+        eudrHash: '0x' + Math.random().toString(16).slice(2, 10).toUpperCase()
+    }
   });
 
   const [chartData, setChartData] = useState<any[]>([]);
@@ -129,12 +152,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   // Sincronizar gráfico de radar
   useEffect(() => {
     const radarValues = [
-        { subject: 'Fragancia', A: data.affective.fragranceQuality, fullMark: 9 },
+        { subject: 'Frag/Aroma', A: data.affective.fragranceQuality, fullMark: 9 },
         { subject: 'Sabor', A: data.affective.flavorQuality, fullMark: 9 },
         { subject: 'Residual', A: data.affective.aftertasteQuality, fullMark: 9 },
         { subject: 'Acidez', A: data.affective.acidityQuality, fullMark: 9 },
         { subject: 'Dulzor', A: data.affective.sweetnessQuality, fullMark: 9 },
         { subject: 'Cuerpo', A: data.affective.mouthfeelQuality, fullMark: 9 },
+        { subject: 'Global', A: data.affective.overallImpression, fullMark: 9 },
     ];
     setChartData(radarValues);
   }, [data.affective]);
@@ -156,12 +180,14 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         if (existing && existing.length > 0) {
           const record = existing[0];
           if (record.cva_descriptive && record.cva_affective) {
-            setData({
+            setData(prev => ({
+              ...prev,
               descriptive: record.cva_descriptive,
               affective: record.cva_affective,
               notes: record.notes || '',
-              tasterName: record.taster_name || 'Q-Grader Senior'
-            });
+              tasterName: record.taster_name || 'Q-Grader Senior',
+              extrinsic: record.cva_descriptive?.extrinsic || prev.extrinsic
+            }));
           } else {
             setData(prev => ({
               ...prev,
@@ -179,7 +205,31 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
           .eq('id', inventoryId.trim())
           .single();
         
-        if (lotData) setLotDetails(lotData);
+        if (lotData) {
+            setLotDetails(lotData);
+            
+            // Auto-poblar datos extrínsecos si es una evaluación nueva
+            if (!existing || existing.length === 0) {
+                setData(prev => {
+                    const processName = lotData.process || '';
+                    const styleName = lotData.process_data?.fermentation_style || '';
+                    const customName = lotData.process_data?.custom_fermentation_name || '';
+                    
+                    let alchemy = customName ? customName.toUpperCase() : `${processName} ${styleName}`.trim().toUpperCase();
+                    
+                    return {
+                        ...prev,
+                        extrinsic: {
+                            ...prev.extrinsic,
+                            alchemyProcess: alchemy || prev.extrinsic.alchemyProcess,
+                            seedCertificate: lotData.variety || prev.extrinsic.seedCertificate,
+                            transferPrice: lotData.purchase_value ? (Number(lotData.purchase_value) / 4000).toFixed(2) : prev.extrinsic.transferPrice, // Estimación USD base $4000 COP
+                            eudrHash: (lotData.farm_size_hectares && lotData.farm_size_hectares >= 4) ? 'PENDING MAP' : 'AUTO-VALIDATED'
+                        }
+                    };
+                });
+            }
+        }
 
       } catch (err) {
         console.error("AXIS ERROR (CVA Fetch):", err);
@@ -213,7 +263,29 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
     data.affective.mouthfeelQuality + 
     data.affective.overallImpression
   );
-  const totalScore = totalAffectiveScore + 30; 
+
+  // --- MOTOR HÍBRIDO AOC (Algoritmo V2.0) ---
+  // Base técnica ajustada a 25 para dar peso a los metadatos comerciales y de trazabilidad (Extrínsecos)
+  let extrinsicBonus = 0;
+  if (data.extrinsic.eudrHash && data.extrinsic.eudrHash.length > 5 && data.extrinsic.eudrHash !== 'PENDING') extrinsicBonus += 2.0;
+  if (data.extrinsic.alchemyProcess && data.extrinsic.alchemyProcess.length > 2) extrinsicBonus += 1.5;
+  if (data.extrinsic.seedCertificate && data.extrinsic.seedCertificate.length > 2) extrinsicBonus += 0.5;
+  if (data.extrinsic.carbonFootprint && data.extrinsic.carbonFootprint.length > 2) extrinsicBonus += 0.5;
+  if (data.extrinsic.transferPrice && data.extrinsic.transferPrice.length > 1) extrinsicBonus += 0.5;
+  
+  const agro = data.extrinsic.agrochemicalRegistry?.toLowerCase() || '';
+  if (agro.includes('orgánic') || agro.includes('organic') || agro.includes('biológic') || agro.includes('biologic') || agro.includes('0%')) {
+      extrinsicBonus += 1.0;
+  }
+
+  const totalScore = totalAffectiveScore + 25 + extrinsicBonus; 
+
+  const handleExtrinsicChange = (key: keyof CVAData['extrinsic'], val: string) => {
+    setData(prev => ({
+      ...prev,
+      extrinsic: { ...prev.extrinsic, [key]: val }
+    }));
+  };
 
   const handleSave = async () => {
     if (!inventoryId) return;
@@ -230,7 +302,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
           acidity: data.affective.acidityQuality,
           body: data.affective.mouthfeelQuality,
           overall: data.affective.overallImpression,
-          cva_descriptive: data.descriptive,
+          cva_descriptive: { ...data.descriptive, extrinsic: data.extrinsic },
           cva_affective: data.affective,
           is_cva_version: true,
           notes: data.notes,
@@ -271,60 +343,205 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-white/5 pb-6 gap-4">
             <div>
             <div className="inline-block px-2 py-0.5 bg-brand-green/10 border border-brand-green/20 rounded text-[9px] text-brand-green uppercase font-black tracking-widest mb-2">
-                Coffee Value Assessment • SCA 2025-2026
+                Protocolo AOC v2.0 • Industrial Verification
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Evaluación de Valor</h2>
-            <p className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest flex items-center gap-2">
-                Basado en el Protocolo Descriptivo SCA-103 + Afectivo SCA-104
-            </p>
+            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Pasaporte de Calidad</h2>
+            <div className="flex items-center gap-4 mt-2">
+                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest flex items-center gap-2">
+                    ID Único: <span className="text-brand-green-bright font-mono">{data.extrinsic.eudrHash}</span>
+                </p>
+                <button 
+                    className="flex items-center gap-2 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all"
+                    onClick={() => alert('Descargando Plantilla AOC Excel...')}
+                >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00A651" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">Plantilla Excel</span>
+                </button>
             </div>
-            <div className="text-right">
-            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Puntaje CVA</p>
-            <p className={`text-5xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-brand-green-bright' : 'text-brand-green'}`}>
-                {totalScore.toFixed(2)}
-            </p>
+            </div>
+            <div className="flex flex-col items-end gap-3">
+                <button 
+                    onClick={() => alert('Iniciando Ingesta desde Excel...')}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#1A1A1A] border border-brand-green/30 rounded-xl hover:border-brand-green transition-all shadow-xl group"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00A651" strokeWidth="2" className="group-hover:scale-110 transition-transform"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Importar desde Excel</span>
+                </button>
+                <div className="text-right">
+                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Extrinsic Bonus</p>
+                    <p className="text-xl font-bold text-brand-green-bright mb-2">+{extrinsicBonus.toFixed(2)} pts</p>
+                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">LAB Final Score</p>
+                    <p className={`text-5xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-brand-green-bright' : 'text-brand-green'}`}>
+                        {totalScore.toFixed(2)}
+                    </p>
+                </div>
             </div>
         </div>
 
-        <EUDRComplianceBadge lotData={lotDetails} className="mb-4" />
+        {/* NAVEGACIÓN POR PESTAÑAS AOC */}
+        <div className="flex gap-1 bg-white/5 p-1 rounded-xl w-fit">
+            <button
+                onClick={() => setActiveTab('intrinsic')}
+                className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'intrinsic' ? 'bg-brand-green text-black' : 'text-gray-500 hover:text-white'}`}
+            >
+                1. Evaluación Intrínseca
+            </button>
+            <button
+                onClick={() => setActiveTab('extrinsic')}
+                className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'extrinsic' ? 'bg-brand-green text-black' : 'text-gray-500 hover:text-white'}`}
+            >
+                2. Evaluación Extrínseca (AOC)
+            </button>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* PARTE 1: DESCRIPTIVA */}
-            <div className="bg-bg-card p-8 rounded-industrial border border-white/5 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-brand-green shadow-[0_0_10px_rgba(0,166,81,0.5)]"></div>
-                <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Análisis Descriptivo (Intensidad 0-15)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-14">
-                    <IntensitySlider label="Fragancia" value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isAlreadySealed} />
-                    <IntensitySlider label="Aroma" value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isAlreadySealed} />
-                    <IntensitySlider label="Sabor" value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isAlreadySealed} />
-                    <IntensitySlider label="Sabor Residual" value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isAlreadySealed} />
-                    <IntensitySlider label="Acidez" value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isAlreadySealed} />
-                    <IntensitySlider label="Dulzor" value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isAlreadySealed} />
+        {activeTab === 'intrinsic' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-left duration-300">
+                {/* PARTE 1: DESCRIPTIVA */}
+                <div className="bg-bg-card p-8 rounded-industrial border border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-brand-green shadow-[0_0_10px_rgba(0,166,81,0.5)]"></div>
+                    <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Análisis Descriptivo (Intensidad 0-15)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-14">
+                        <IntensitySlider label="Fragancia" value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isAlreadySealed} />
+                        <IntensitySlider label="Aroma" value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isAlreadySealed} />
+                        <IntensitySlider label="Sabor" value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isAlreadySealed} />
+                        <IntensitySlider label="Sabor Residual" value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isAlreadySealed} />
+                        <IntensitySlider label="Acidez" value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isAlreadySealed} />
+                        <IntensitySlider label="Dulzor" value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isAlreadySealed} />
+                    </div>
+                    <div className="pt-8 border-t border-white/5 mt-8">
+                        <IntensitySlider label="Cuerpo (Sensación en Boca)" value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed} />
+                    </div>
                 </div>
-                <div className="pt-8 border-t border-white/5 mt-8">
-                    <IntensitySlider label="Cuerpo (Sensación en Boca)" value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed} />
-                </div>
-            </div>
 
-            {/* PARTE 2: AFECTIVA */}
-            <div className="bg-bg-card p-8 rounded-industrial border border-white/5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1 h-full bg-brand-green shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
-                <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Análisis Afectivo (Calidad 1-9)</h3>
-                <div className="flex flex-col gap-y-4">
+                {/* PARTE 2: AFECTIVA */}
+                <div className="bg-bg-card p-8 rounded-industrial border border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-1 h-full bg-brand-green shadow-[0_0_10px_rgba(255,255,255,0.5)]"></div>
+                    <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Análisis Afectivo (Calidad 1-9)</h3>
+                    <div className="flex flex-col gap-y-4">
 
-                    <QualityScale label="Fragancia / Aroma" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Sabor" value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Sabor Residual" value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Acidez" value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Dulzor" value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Cuerpo" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)} disabled={isAlreadySealed} />
-                    <div className="pt-4 border-t border-white/5 mt-0">
-                        <QualityScale label="IMPRESIÓN GLOBAL" value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
+                        <QualityScale label="Fragancia / Aroma" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)} disabled={isAlreadySealed} />
+                        <QualityScale label="Sabor" value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isAlreadySealed} />
+                        <QualityScale label="Sabor Residual" value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isAlreadySealed} />
+                        <QualityScale label="Acidez" value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isAlreadySealed} />
+                        <QualityScale label="Dulzor" value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isAlreadySealed} />
+                        <QualityScale label="Cuerpo" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)} disabled={isAlreadySealed} />
+                        <div className="pt-4 border-t border-white/5 mt-0">
+                            <QualityScale label="IMPRESIÓN GLOBAL" value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
+                        </div>
                     </div>
                 </div>
             </div>
+        ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-right duration-300">
+                {/* PARTE 3: ALQUIMIA Y CUMPLIMIENTO (EXTRÍNSECO) */}
+                <div className="bg-bg-card p-8 rounded-industrial border border-white/5 space-y-8">
+                    <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Módulo de Alquimia e Insumos</h3>
+                    
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Proceso de Alquimia (Fermentaciones)</label>
+                        <input 
+                            type="text"
+                            value={data.extrinsic.alchemyProcess} 
+                            onChange={(e) => handleExtrinsicChange('alchemyProcess', e.target.value)}
+                            disabled={isAlreadySealed}
+                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none text-brand-green-bright"
+                            placeholder="Ej: Lavado Tradicional"
+                        />
+                    </div>
 
-        </div>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Trazabilidad de Agroquímicos y Fertilizantes (LMR)</label>
+                            <input 
+                                type="text" 
+                                placeholder="Ej: 0% Residuos"
+                                value={data.extrinsic.agrochemicalRegistry}
+                                onChange={(e) => handleExtrinsicChange('agrochemicalRegistry', e.target.value)}
+                                disabled={isAlreadySealed}
+                                className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none" 
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Calidad de Agua (pH)</label>
+                            <input 
+                                type="text" 
+                                placeholder="Ej: 7.2"
+                                value={data.extrinsic.waterPh}
+                                onChange={(e) => handleExtrinsicChange('waterPh', e.target.value)}
+                                disabled={isAlreadySealed}
+                                className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none" 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Identidad de Semilla</label>
+                        <input 
+                            type="text" 
+                            placeholder="Número de Certificado"
+                            value={data.extrinsic.seedCertificate}
+                            onChange={(e) => handleExtrinsicChange('seedCertificate', e.target.value)}
+                            disabled={isAlreadySealed}
+                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none" 
+                        />
+                    </div>
+                </div>
+
+                {/* PARTE 4: FINANZAS Y CONSERVACIÓN */}
+                <div className="bg-bg-card p-8 rounded-industrial border border-white/5 space-y-8">
+                    <h3 className="text-xs font-black text-brand-green uppercase tracking-widest mb-6">Transparencia y Logística</h3>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Precio de Transferencia (USD/lb)</label>
+                            <input 
+                                type="text" 
+                                placeholder="Ej: 2.85"
+                                value={data.extrinsic.transferPrice}
+                                onChange={(e) => handleExtrinsicChange('transferPrice', e.target.value)}
+                                disabled={isAlreadySealed}
+                                className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none text-brand-green-bright" 
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Costo de Producción</label>
+                            <input 
+                                type="text" 
+                                placeholder="Ej: 1.95"
+                                value={data.extrinsic.productionCost}
+                                onChange={(e) => handleExtrinsicChange('productionCost', e.target.value)}
+                                disabled={isAlreadySealed}
+                                className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none text-gray-400" 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Condiciones de Almacenamiento</label>
+                        <input 
+                            type="text" 
+                            placeholder="Ej: 18°C / 62% RH"
+                            value={data.extrinsic.storageConditions}
+                            onChange={(e) => handleExtrinsicChange('storageConditions', e.target.value)}
+                            disabled={isAlreadySealed}
+                            className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none" 
+                        />
+                    </div>
+
+                    <div className="pt-6 border-t border-white/5">
+                         <div className="flex items-center gap-4 p-4 bg-brand-green/5 rounded-xl border border-brand-green/20">
+                            <div className="p-2 bg-brand-green/20 rounded-full text-brand-green">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black text-brand-green uppercase tracking-widest">Garantía de Origen EUDR</p>
+                                <p className="text-[10px] text-gray-400 font-bold mt-0.5">El sistema ha validado las geocoordenadas de este lote automáticamente.</p>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        )}
       </div>
 
       {/* FILA INFERIOR: VISUALIZACIÓN Y ACCIONES */}

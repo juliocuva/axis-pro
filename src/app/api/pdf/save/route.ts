@@ -22,8 +22,11 @@ export async function POST(request: Request) {
         // Strip the base64 prefix
         const base64Data = pdfBase64.replace(/^data:image\/[a-z]+;base64,/, "").replace(/^data:application\/pdf;base64,/, "");
 
+        // Sanitize fileName to avoid invalid characters or directory traversal
+        const sanitizedFileName = fileName.replace(/[\\/:*?"<>|]/g, '_');
+
         // Save file
-        const filePath = path.join(impDir, `${fileName}.jpg`);
+        const filePath = path.join(impDir, `${sanitizedFileName}.jpg`);
         fs.writeFileSync(filePath, base64Data, 'base64');
 
         return NextResponse.json({ success: true, filePath });

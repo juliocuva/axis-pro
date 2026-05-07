@@ -3,7 +3,9 @@
 import React from 'react';
 
 export default function ExportReportButton({ elementId, fileName }: { elementId: string, fileName: string }) {
-    const handleDownload = async () => {
+    const handleDownload = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         const btn = document.getElementById('btn-export-text');
         if (btn) btn.innerText = 'GENERANDO PDF...';
 
@@ -24,9 +26,11 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             element.style.transition = 'none';
 
             // 2. Forzar ancho industrial (proporción A4/Carta ideal)
-            element.style.width = '816px';
-            element.style.maxWidth = 'none';
-            element.style.minWidth = '816px';
+            element.style.width = '750px';
+            element.style.maxWidth = '750px';
+            element.style.minWidth = '750px';
+            element.style.marginLeft = '0';
+            element.style.marginRight = '0';
             element.style.position = 'relative';
             element.style.left = '0';
             element.style.top = '0';
@@ -35,26 +39,41 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
 
             // 3. Relax parent constraints to avoid clipping
             if (parent) {
+                parent.style.display = 'block';
                 parent.style.overflow = 'visible';
                 parent.style.maxWidth = 'none';
                 parent.style.width = 'auto';
+                parent.style.padding = '0';
+                parent.style.margin = '0';
             }
 
             // Pequeño delay para asegurar que el DOM se ajuste al nuevo ancho
             await new Promise(r => setTimeout(r, 500));
 
             const canvas = await html2canvas(element, {
-                scale: 2,
+                scale: 2.5,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
-                windowWidth: 816,
+                windowWidth: 1200,
                 x: 0,
                 y: 0,
-                scrollX: 0,
-                scrollY: 0,
-                onclone: (clonedDoc) => {
+                scrollX: -window.scrollX,
+                scrollY: -window.scrollY,
+                onclone: (clonedDoc, element) => {
+                    // Force the element to stay at 750px regardless of windowWidth
+                    element.style.width = '750px';
+                    element.style.minWidth = '750px';
+                    element.style.maxWidth = '750px';
+                    
+                    // Fix for flex-row issues in html2canvas
+                    const flexContainers = element.querySelectorAll('.flex');
+                    flexContainers.forEach((container: any) => {
+                        if (container.className.includes('md:flex-row') || container.className.includes('lg:flex-row')) {
+                            container.style.flexDirection = 'row';
+                        }
+                    });
                     const itemsToHide = clonedDoc.querySelectorAll('.no-export');
                     itemsToHide.forEach((el: any) => el.style.display = 'none');
                     
@@ -108,13 +127,19 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             if (parent) parent.style.cssText = originalParentStyle;
 
             // En vez de generar un PDF, lo descargamos como Imagen de Alta Calidad (solicitud del usuario)
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-            // Descargar como imagen JPG
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = `${fileName}.jpg`;
-            link.click();
+            const imgData = canvas.toDataURL('image/jpeg', 0.90);
+            
+            // Descargar como imagen JPG usando Blob para mayor eficiencia
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${fileName}.jpg`;
+                    link.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }
+            }, 'image/jpeg', 0.90);
 
             // Save copy to local IMP directory via API
             try {
@@ -141,6 +166,7 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
 
     return (
         <button
+            type="button"
             onClick={handleDownload}
             className="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-brand-green-bright font-bold rounded-2xl transition-all flex items-center justify-center gap-3 group shadow-xl"
         >

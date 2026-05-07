@@ -563,35 +563,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center p-8 bg-bg-main border border-white/5 rounded-industrial-sm group relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-brand-green/20"></div>
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /></svg>
-                                Identificador de Lote (Manual / Auto)
-                            </p>
-                            <div className="flex items-center gap-4 w-full max-w-2xl px-4">
-                                <input
-                                    type="text"
-                                    placeholder="FINCA-DD/MM/AA-LOTE1"
-                                    value={formData.lotNumber}
-                                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
-                                    className="bg-bg-main/40 text-xl font-bold tracking-tight text-white hover:text-brand-green-bright transition-colors uppercase outline-none text-center border border-white/5 focus:border-brand-green px-6 py-4 rounded-xl flex-1 shadow-inner"
-                                    disabled={isSubmitting}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const farm = formData.farmName.trim().toUpperCase() || 'FINCA';
-                                        const date = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' });
-                                        setFormData({ ...formData, lotNumber: `${farm.replace(/\s+/g, '-')}-${date}-LOTE1` });
-                                    }}
-                                    className="p-4 bg-brand-green/10 hover:bg-brand-green/20 rounded-xl border border-brand-green/20 text-brand-green transition-all group/gen"
-                                    title="Auto-generar nombre por Finca"
-                                >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover/gen:rotate-180 transition-transform duration-500"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
-                                </button>
-                            </div>
-                        </div>
+
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="md:col-span-3 bg-brand-green/5 border border-brand-green/20 p-6 rounded-industrial relative overflow-hidden group mb-6">
@@ -716,6 +688,18 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     value={formData.farmName}
                                     onChange={(e) => setFormData({ ...formData, farmName: e.target.value })}
                                     className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest"># Lote</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. LOTE-001"
+                                    required
+                                    value={formData.lotNumber}
+                                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
+                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-brand-green-bright font-bold uppercase"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -1051,8 +1035,50 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                             {style.label.toUpperCase()}
                                         </option>
                                     ))}
+                                    <option value="otro" className="text-brand-green font-bold">+ OTRO (NUEVO MÉTODO)</option>
                                 </select>
                             </div>
+
+                            {formData.processData?.fermentation_style === 'otro' && (
+                                <div className="col-span-1 md:col-span-2 animate-in slide-in-from-top-2 duration-300 bg-brand-green/5 border border-brand-green/20 p-6 rounded-industrial mt-2 mb-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <label className="text-xs font-bold text-brand-green-bright uppercase tracking-widest flex items-center gap-2">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20M2 12h20" /></svg>
+                                            Propuesta de Nuevo Método
+                                        </label>
+                                        <span className="text-[9px] bg-brand-green/20 text-brand-green-bright px-2 py-1 rounded font-bold uppercase tracking-widest border border-brand-green/30">Requiere Validación IA</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Nombre Técnico del Proceso</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Ej. Mossto Inoculado"
+                                                required={formData.processData?.fermentation_style === 'otro'}
+                                                value={formData.processData.custom_fermentation_name || ''}
+                                                onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, custom_fermentation_name: e.target.value } }))}
+                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-white placeholder:text-gray-700 font-bold"
+                                                disabled={isSubmitting}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Breve Descripción (Variables)</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Ej. Inoculación levadura a 18°C por 120h"
+                                                required={formData.processData?.fermentation_style === 'otro'}
+                                                value={formData.processData.custom_fermentation_description || ''}
+                                                onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, custom_fermentation_description: e.target.value } }))}
+                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-white placeholder:text-gray-700"
+                                                disabled={isSubmitting}
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className="text-[9px] text-gray-500 uppercase tracking-widest mt-4 leading-relaxed text-center">
+                                        El algoritmo de Axis procesará esta descripción para catalogar sus variables (Temp, Horas, Inoculantes). El sistema se auto-actualizará para futuros lotes si el Q-Grader lo valida.
+                                    </p>
+                                </div>
+                            )}
 
 
                             {/* 3. Método de secado */}

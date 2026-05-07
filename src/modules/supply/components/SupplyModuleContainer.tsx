@@ -79,7 +79,7 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                             { id: 'purchase', label: '01. Ingreso' },
                             { id: 'thrashing', label: '02. Trilla' },
                             { id: 'analysis', label: '03. Lab' },
-                            { id: 'cupping', label: '04. CVA' },
+                            { id: 'cupping', label: '04. CATACIÓN' },
                             { id: 'roast', label: '05. Tostión' },
                             { id: 'archive', label: '06. Archivo' }
                         ].map(tab => (

@@ -32,7 +32,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
         pasillaWeight: 0,
         ciscoWeight: 0,
         processType: 'Lavado',
-        humidity: 11.0
+        humidity: 11.0,
+        preparationProtocol: 'EP',
+        sortingMethod: 'Máquina Selectora Óptica'
     });
 
     const [yieldFactor, setYieldFactor] = useState<number | null>(null);
@@ -87,7 +89,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         pasillaWeight: Number(data.pasilla_weight) || 0,
                         ciscoWeight: Number(data.cisco_weight) || 0,
                         processType: processKey,
-                        humidity: Number(data.humidity) || 11.0
+                        humidity: Number(data.humidity) || 11.0,
+                        preparationProtocol: data.process_data?.preparation_protocol || 'EP',
+                        sortingMethod: data.process_data?.sorting_method || 'Máquina Selectora Óptica'
                     }));
 
 
@@ -181,7 +185,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 formData.ciscoWeight,
                 user?.companyId || '',
                 formData.processType,
-                formData.humidity
+                formData.humidity,
+                formData.preparationProtocol,
+                formData.sortingMethod
             );
 
             if (!result.success) {
@@ -262,6 +268,49 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'default'}
                     inputClassName="text-base"
                 />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10 mt-4 mb-6">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Input 4: Protocolo de Preparación</label>
+                    <div className="relative group/select">
+                        <select
+                            value={formData.preparationProtocol}
+                            onChange={(e) => setFormData({ ...formData, preparationProtocol: e.target.value })}
+                            disabled={isSubmitting || isAlreadyThrashed}
+                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none font-bold text-brand-green-bright transition-all appearance-none pr-12 disabled:opacity-50"
+                        >
+                            <option value="EP">European Prep (EP) - Especialidad</option>
+                            <option value="American">American Prep - Comercial Plus</option>
+                            <option value="Zero Defect">Zero Defect - Microlote Oro</option>
+                            <option value="Supremo">Supremo - Malla 17/18</option>
+                            <option value="UGQ">UGQ - Estándar FNC</option>
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-[calc(50%-2px)] pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Input 5: Método de Selección</label>
+                    <div className="relative group/select">
+                        <select
+                            value={formData.sortingMethod}
+                            onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
+                            disabled={isSubmitting || isAlreadyThrashed}
+                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none font-bold text-white transition-all appearance-none pr-12 disabled:opacity-50"
+                        >
+                            <option value="Máquina Selectora Óptica">Selectora Óptica (Electrónica)</option>
+                            <option value="Manual (Hand-Sorted)">Manual en Banda (Hand-Sorted)</option>
+                            <option value="Mixto (Óptica + Repaso Manual)">Mixto (Óptica + Repaso Manual)</option>
+                            <option value="Solo Densimétrica">Solo Densimétrica (Sin Óptica)</option>
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-[calc(50%-2px)] pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Output Automático: Proyección */}

@@ -109,12 +109,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <div className="max-w-6xl mx-auto text-center space-y-12">
                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[1.1] max-w-5xl mx-auto text-brand-green">
-                            Certeza absoluta para el comercio de café de especialidad.
+                            El primer motor de inteligencia industrial para el café de especialidad.
                         </h1>
 
                         <p className="text-lg md:text-xl text-gray-500 font-medium max-w-3xl mx-auto leading-relaxed">
-                            Transformamos la trazabilidad técnica en activos digitales inmutables. <br className="hidden md:block" />
-                            <span className="text-carbon font-bold">El estándar de confianza que viaja más rápido que el origen.</span>
+                            No solo registramos su origen. Auditamos su fermentación, predecimos su tostión, y garantizamos su calidad con datos inmutables. <br className="hidden md:block" />
+                            <span className="text-carbon font-bold">El estándar de confianza que viaja más rápido que el contenedor.</span>
                         </p>
 
                     </div>
@@ -144,27 +144,25 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             <section id="core" className="py-32 bg-soft-white border-y border-brand-green-soft">
                 <div className="max-w-7xl mx-auto px-8">
                     <div className="text-center mb-24 space-y-4">
-                        <h2 className="text-3xl md:text-4xl font-black uppercase text-carbon">El Registro de Nacimiento Digital.</h2>
-                        <p className="text-gray-500 font-medium uppercase text-sm">Un folio único e inalterable que acompaña cada grano.</p>
+                        <h2 className="text-3xl md:text-4xl font-black uppercase text-carbon">Ecosistema de Validación Automatizada.</h2>
+                        <p className="text-gray-500 font-medium uppercase text-sm">Más que un registro, un algoritmo vivo de confianza comercial.</p>
                     </div>
-
-
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
                         {[
                             {
-                                title: "Inmutabilidad Sensorial",
-                                desc: "Registro permanente de puntajes de taza y protocolos de tueste con validación técnica.",
+                                title: "Motor Híbrido AOC",
+                                desc: "Evaluación sensorial que integra automáticamente factores extrínsecos: validación EUDR, huella de carbono y transparencia financiera.",
                                 icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             },
                             {
-                                title: "Blindaje de Proceso",
-                                desc: "Captura de datos de fermentación, pH y Grados Brix mediante protocolos industriales.",
+                                title: "Alquimia Adaptativa",
+                                desc: "El sistema aprende y cataloga dinámicamente nuevas técnicas de fermentación y secado mediante validación cruzada.",
                                 icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                             },
                             {
-                                title: "Identidad de Origen",
-                                desc: "Certificación de procedencia 1:1 y cumplimiento EUDR, eliminando el beneficio de la duda.",
+                                title: "Auditoría Satelital",
+                                desc: "Mapeo in situ preventivo y generación de sellos criptográficos para lotes, asegurando cumplimiento de deforestación.",
                                 icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                             }
                         ].map((item, idx) => (
@@ -174,12 +172,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 </div>
                                 <h3 className="text-xl font-bold uppercase text-carbon">{item.title}</h3>
                                 <p className="text-gray-500 text-sm leading-relaxed font-medium">
-
                                     {item.desc}
                                 </p>
                             </div>
                         ))}
-
                     </div>
                 </div>
             </section>
@@ -188,12 +184,11 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             <section className="py-24 bg-brand-green">
                 <div className="max-w-7xl mx-auto text-center px-8">
                     <h2 className="text-xl md:text-3xl font-black text-white uppercase leading-none whitespace-nowrap">
-                        CERTEZA = 100% = CONFIANZA
+                        DATOS + TRAZABILIDAD = CONFIANZA ABSOLUTA
                     </h2>
                     <p className="text-white/80 font-bold uppercase text-[10px] mt-8">
-                        La infraestructura que elimina la incertidumbre en el mercado global.
+                        La infraestructura que elimina la incertidumbre en el mercado global de alto valor.
                     </p>
-
                 </div>
             </section>
 
@@ -203,15 +198,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <div className="max-w-5xl mx-auto px-8 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
                         <div className="space-y-8">
-                            <h2 className="text-4xl md:text-5xl font-black uppercase leading-none text-carbon">Visión Global.</h2>
+                            <h2 className="text-4xl md:text-5xl font-black uppercase leading-none text-carbon">Expansión Tecnológica.</h2>
                             <p className="text-gray-500 text-lg leading-relaxed font-medium">
-
-                                Estamos integrando protocolos de cumplimiento internacional para la próxima generación de exportaciones. 
+                                Estamos estableciendo el nuevo estándar operativo y predictivo para la próxima generación de exportaciones de café.
                             </p>
                         </div>
                         <div className="bg-white border border-brand-green-soft rounded-industrial p-12 text-center shadow-sm">
                             <div className="text-6xl font-black mb-4 text-carbon">2026</div>
-                            <p className="text-[10px] font-black uppercase text-brand-green">Global Expansion Phase</p>
+                            <p className="text-[10px] font-black uppercase text-brand-green">Fase de Despliegue Internacional</p>
                         </div>
 
                     </div>

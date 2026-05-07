@@ -15,13 +15,15 @@ export async function processThrashingAction(
     ciscoWeight: number,
     companyId: string,
     processType: string,
-    humidity: number
+    humidity: number,
+    preparationProtocol: string = 'UGQ',
+    sortingMethod: string = 'Máquina Selectora'
 ) {
     try {
         // 1. Obtener Peso Pergamino desde la fuente de verdad (DB)
         const { data: lot, error: fetchError } = await supabase
             .from('coffee_purchase_inventory')
-            .select('purchase_weight')
+            .select('purchase_weight, process_data')
             .eq('id', inventoryId)
             .eq('company_id', companyId)
             .single();
@@ -39,6 +41,12 @@ export async function processThrashingAction(
         const yieldFactor = (parchmentWeight / excelsoWeight) * 70;
 
         // 3. Persistencia Unidireccional
+        const updatedProcessData = {
+            ...(lot.process_data || {}),
+            preparation_protocol: preparationProtocol,
+            sorting_method: sortingMethod
+        };
+
         // AXIS SMART UPDATE: Intentamos actualizar todo, si las columnas no existen, retrocedemos
         const { error: updateError } = await supabase
             .from('coffee_purchase_inventory')
@@ -49,7 +57,8 @@ export async function processThrashingAction(
                 thrashing_yield: yieldFactor,
                 status: 'thrashed',
                 process: processType, // Corregimos o actualizamos el proceso
-                humidity: humidity
+                humidity: humidity,
+                process_data: updatedProcessData
             })
             .eq('id', inventoryId)
             .eq('company_id', companyId);

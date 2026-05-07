@@ -17,6 +17,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         roastTime: '',
         developmentTime: '',
         developmentPct: 0,
+        dropTemp: 0,
     });
 
     const [curveFile, setCurveFile] = useState<File | null>(null);
@@ -65,16 +66,14 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
     // Initial load from lotData
     useEffect(() => {
         if (lotData) {
-            setFormData(prev => ({
-                ...prev,
-                greenWeight: lotData.thrashed_weight || lotData.purchase_weight || 0
-            }));
-
             const d = Number(lotData.physical_analysis?.[0]?.density_gl) || 710;
             const p = (lotData.process || 'washed').toLowerCase();
+            const s = Number(lotData.sca_cupping?.[0]?.total_score) || 84;
             
             let min = 14;
             let max = 16;
+            let predDrop = 204;
+            let predDevPct = 16;
             
             if (d >= 750) { min = 15.0; max = 16.0; }
             else if (d <= 680) { min = 13.5; max = 14.5; }
@@ -83,8 +82,25 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 min -= 1.0;
                 max -= 1.0;
             }
+
+            if (s >= 87) { predDrop = 201; predDevPct = 14; }
+            else if (s < 83 && s > 0) { predDrop = 208; predDevPct = 20; }
             
-            setExpectedStats({ minLoss: min, maxLoss: max });
+            const greenW = lotData.thrashed_weight || lotData.purchase_weight || 0;
+            const avgLoss = (min + max) / 2;
+            const predRoasted = greenW > 0 ? (greenW * (1 - (avgLoss / 100))) : 0;
+
+            setFormData(prev => ({
+                ...prev,
+                greenWeight: greenW,
+                roastedWeight: prev.roastedWeight || parseFloat(predRoasted.toFixed(2)),
+                selectedWeight: prev.selectedWeight || parseFloat(predRoasted.toFixed(2)),
+                quakersGrams: prev.quakersGrams || 0,
+                dropTemp: prev.dropTemp || predDrop,
+                developmentPct: prev.developmentPct || predDevPct,
+                roastTime: prev.roastTime || '11:00',
+                developmentTime: prev.developmentTime || '1:45'
+            }));
         }
     }, [lotData]);
 
@@ -400,6 +416,49 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             disabled={isSubmitting}
                         />
                     </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10 p-6 bg-brand-green/5 rounded-xl border border-brand-green/20">
+                    <div>
+                        <label className="text-[10px] font-bold text-brand-green uppercase tracking-widest mb-3 block">Tiempo Total</label>
+                        <input
+                            type="text"
+                            value={formData.roastTime}
+                            onChange={(e) => setFormData({ ...formData, roastTime: e.target.value })}
+                            placeholder="Ej: 11:30"
+                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none transition-all font-mono text-white text-sm"
+                            disabled={isSubmitting}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-bold text-brand-green uppercase tracking-widest mb-3 block">Tiempo DTR</label>
+                        <input
+                            type="text"
+                            value={formData.developmentTime}
+                            onChange={(e) => setFormData({ ...formData, developmentTime: e.target.value })}
+                            placeholder="Ej: 1:45"
+                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none transition-all font-mono text-white text-sm"
+                            disabled={isSubmitting}
+                        />
+                    </div>
+                    <NumericInput
+                        label="DTR (%)"
+                        value={formData.developmentPct}
+                        onChange={(val) => setFormData({ ...formData, developmentPct: val })}
+                        step={0.1}
+                        unit="%"
+                        disabled={isSubmitting}
+                        variant="industrial"
+                    />
+                    <NumericInput
+                        label="Temp. Caída (°C)"
+                        value={formData.dropTemp}
+                        onChange={(val) => setFormData({ ...formData, dropTemp: val })}
+                        step={0.1}
+                        unit="°C"
+                        disabled={isSubmitting}
+                        variant="industrial"
+                    />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10 p-6 bg-white/5 rounded-xl border border-white/5">
