@@ -42,6 +42,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             roastTime: '10:45',
             developmentTime: '2:15',
             developmentPct: 18.5,
+            dropTemp: 204,
         });
 
         // Generar curva simulada de alta fidelidad para la demo

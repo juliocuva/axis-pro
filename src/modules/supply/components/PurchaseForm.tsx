@@ -189,6 +189,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 altitude: selectedLot.altitude || 1600,
                 country: selectedLot.country || 'Colombia',
                 region: selectedLot.region || '',
+                municipality: selectedLot.municipality || '',
                 variety: isBase ? selectedLot.variety : 'Otro',
                 process: (selectedLot.process as ProcessType) || 'lavado',
                 farmerPhone: selectedLot.process_data?.farmer_phone || '',

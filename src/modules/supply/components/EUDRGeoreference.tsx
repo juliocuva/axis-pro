@@ -9,6 +9,7 @@ interface EUDRGeoreferenceProps {
     initialPolygon?: string;
     userEmail?: string;
     farmName?: string;
+    lotId?: string;
 }
 
 export default function EUDRGeoreference({ onPolygonChange, initialPolygon, userEmail, farmName }: EUDRGeoreferenceProps) {

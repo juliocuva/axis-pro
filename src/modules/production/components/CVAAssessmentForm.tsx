@@ -723,17 +723,17 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     ...prev,
                                     extrinsic: {
                                         ...prev.extrinsic,
-                                        legal: { ...prev.extrinsic.legal, [item.key]: !prev.extrinsic.legal[item.key as keyof typeof prev.extrinsic.legal] }
+                                        legal: { ...prev.extrinsic.legal, [item.key]: !prev.extrinsic.legal[item.key as keyof typeof data.extrinsic.legal] }
                                     }
                                 }))}
-                                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${data.extrinsic.legal[item.key as keyof typeof prev.extrinsic.legal] ? 'bg-brand-green/10 border-brand-green/40 text-brand-green' : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20'}`}
+                                className={`flex items-center justify-between p-4 rounded-xl border transition-all ${data.extrinsic.legal[item.key as keyof typeof data.extrinsic.legal] ? 'bg-brand-green/10 border-brand-green/40 text-brand-green' : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20'}`}
                             >
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm">{item.icon}</span>
                                     <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
                                 </div>
-                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${data.extrinsic.legal[item.key as keyof typeof prev.extrinsic.legal] ? 'bg-brand-green border-brand-green' : 'border-white/20'}`}>
-                                    {data.extrinsic.legal[item.key as keyof typeof prev.extrinsic.legal] && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="5"><path d="M20 6L9 17l-5-5"/></svg>}
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${data.extrinsic.legal[item.key as keyof typeof data.extrinsic.legal] ? 'bg-brand-green border-brand-green' : 'border-white/20'}`}>
+                                    {data.extrinsic.legal[item.key as keyof typeof data.extrinsic.legal] && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="5"><path d="M20 6L9 17l-5-5"/></svg>}
                                 </div>
                             </button>
                         ))}

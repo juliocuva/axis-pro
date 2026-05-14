@@ -1,16 +1,21 @@
 import React from 'react';
 
 interface EUDRComplianceBadgeProps {
-    lotData: any;
+    lotData?: any;
+    status?: 'compliant' | 'warning' | 'error';
     className?: string;
 }
 
-export default function EUDRComplianceBadge({ lotData, className = "" }: EUDRComplianceBadgeProps) {
-    if (!lotData?.is_europe_destination) return null;
+export default function EUDRComplianceBadge({ lotData, status, className = "" }: EUDRComplianceBadgeProps) {
+    if (!lotData && !status) return null;
+    if (lotData && !lotData?.is_europe_destination && !status) return null;
 
-    const polygon = lotData.process_data?.eudr_polygon;
-    const hasPolygon = !!polygon;
-    const coords = lotData.latitude && lotData.longitude ? `${lotData.latitude.toFixed(6)}, ${lotData.longitude.toFixed(6)}` : 'Sin GPS exacto';
+    const polygon = lotData?.process_data?.eudr_polygon;
+    const hasPolygon = !!polygon || status === 'compliant';
+    const coords = lotData?.latitude && lotData?.longitude 
+        ? `${lotData.latitude.toFixed(6)}, ${lotData.longitude.toFixed(6)}` 
+        : status === 'compliant' ? 'Verified Polygon' : 'Sin GPS exacto';
+
 
     return (
         <div className={`bg-brand-green/5 border border-brand-green/30 rounded-industrial-sm p-4 flex items-center justify-between gap-4 ${className}`}>
