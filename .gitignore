@@ -31,3 +31,22 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logs and scratch
+*.txt
+*.log
+scratch/
+scripts/
+*.py
+*.sql
+*.json
+!package.json
+!tsconfig.json
+!next.config.js
+!fincas_cafe.json
+
+# images
+IMP/
+img/
+public/temp/
+

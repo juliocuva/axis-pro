@@ -11,13 +11,15 @@ import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchi
 import GreenExportForm from '@/modules/export/components/GreenExportForm';
 import MasterControlCenter from '@/modules/admin/components/MasterControlCenter';
 import RoastIntelligenceContainer from '@/modules/production/components/RoastIntelligenceContainer';
+import GratefulModule from '@/modules/supply/components/GratefulModule';
+import RadarDashboard from '@/modules/supply/components/analysis/RadarDashboard';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
 
 export default function Home() {
     const [user, setUser] = useState<{ name: string, email: string, companyId: string, role?: string } | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive' | 'master' | 'production'>('launcher');
+    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive' | 'master' | 'production' | 'grateful' | 'radar'>('launcher');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -78,10 +80,13 @@ export default function Home() {
                 console.warn("AXIS LOG: Fallo al recuperar destino.");
             }
 
-            const { data } = await supabase
-                .from('coffee_purchase_inventory')
-                .select('*')
-                .eq('company_id', user?.companyId)
+            let batchesQuery = supabase.from('coffee_purchase_inventory').select('*');
+            
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
+                batchesQuery = batchesQuery.eq('company_id', user?.companyId);
+            }
+
+            const { data } = await batchesQuery
                 .order('purchase_date', { ascending: false })
                 .limit(3);
 
@@ -125,18 +130,8 @@ export default function Home() {
                             <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
                         </div>
                         <div className="flex flex-col">
-                            <h1 className="text-4xl font-bold tracking-tighter uppercase leading-none">AXISONE <span className="text-brand-green-bright text-sm ml-1 font-bold">COFFEE</span></h1>
-
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-2">by Mouselab • Sagrado Corazón</p>
+                            <span className="text-xl font-bold text-brand-green uppercase tracking-[0.5em]">COLOMBIA</span>
                         </div>
-                    </div>
-                    <div className="h-10 w-[1px] bg-white/5 hidden md:block"></div>
-                    <div className="hidden md:flex flex-col">
-                        <div className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-none">Terminal Activa</p>
-                        </div>
-                        <p className="text-[8px] text-gray-600 font-bold uppercase tracking-tighter mt-1">ID: BAX-7370-MASTER</p>
                     </div>
                 </div>
 
@@ -152,7 +147,7 @@ export default function Home() {
                     )}
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden">
-                        {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor') && (
+                        {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
                             <button
                                 onClick={() => setView('master')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-gray-400 hover:text-white'}`}
@@ -201,14 +196,14 @@ export default function Home() {
 
             {view === 'launcher' && (
                 <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
-                    {(user?.role === 'gerente' || user?.role === 'auditor') ? (
+                    {(user?.role === 'gerente' || user?.role === 'auditor' || user?.role === 'admin') ? (
                         <section>
                             <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
                                 <span className="w-8 h-px bg-white/10"></span>
                                 Panel de Gerencia y Supervisión de Asociación
                                 <span className="w-full h-px bg-white/10"></span>
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <ModuleCard
                                     title="Mi Equipo y Roles"
                                     description="Gestión delegada de personal: Catadores, Tostadores y Operadores de tu asociación."
@@ -235,6 +230,16 @@ export default function Home() {
                                             onClick={() => setView('production')}
                                             icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
                                         />
+                                        {(user?.role === 'admin' || user?.email?.toLowerCase().includes('julio')) && (
+                                            <ModuleCard
+                                                title="Radar de Soberanía"
+                                                description="Monitoreo 'FlightRadar' de lotes en tiempo real. Vista de Alta Gerencia FNC."
+                                                status="active"
+                                                color="brand-green"
+                                                onClick={() => setView('radar')}
+                                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0C6056" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="6"/></svg>}
+                                            />
+                                        )}
                                     </>
                                 )}
                             </div>
@@ -246,7 +251,7 @@ export default function Home() {
                                 Emisión de Certificados de Calidad de Exportación
                                 <span className="w-full h-px bg-white/10"></span>
                             </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <ModuleCard
                                     title="Origen Inmutable"
                                     description="Fijación de coordenadas GIS/WGS84, polígonos EUDR y protocolos de calidad integrados (Trilla/Tostión)."
@@ -262,6 +267,14 @@ export default function Home() {
                                     color="gray-500"
                                     onClick={() => setView('export')}
                                     icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
+                                />
+                                <ModuleCard
+                                    title="Reconocimiento"
+                                    description="Grateful Ledger: El radar de excelencia que conecta al consumidor final con el Alquimista del café."
+                                    status="active"
+                                    color="brand-green"
+                                    onClick={() => setView('grateful')}
+                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}
                                 />
                             </div>
                         </section>
@@ -327,11 +340,11 @@ export default function Home() {
                                 </div>
                             </div>
                         </section>
-                    {/* SECCIÓN ESPECIAL SOLO PARA EMAIL MAESTRO / AUDITOR */}
-                    {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor') && (
+                    {/* SECCIÓN ESPECIAL SOLO PARA EMAIL MAESTRO / AUDITOR / ADMIN */}
+                    {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
                         <section className="bg-bg-card border border-brand-green/20 rounded-industrial p-20 text-center space-y-8 animate-in zoom-in duration-500 mt-20">
                              <div className="w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto border border-brand-green/20">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00FF88" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0C6056" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                              </div>
                              <div className="space-y-2">
                                 <h2 className="text-3xl font-black text-text-main uppercase tracking-tighter">Terminal de Seguridad Axis</h2>
@@ -366,6 +379,26 @@ export default function Home() {
             {view === 'production' && (
                 <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <RoastIntelligenceContainer user={user} />
+                </div>
+            )}
+
+            {view === 'grateful' && (
+                <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <GratefulModule user={user} selectedLot={null} />
+                </div>
+            )}
+
+            {view === 'radar' && (
+                <div className="fixed inset-0 z-[500] bg-black animate-in fade-in duration-700">
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1001] no-print">
+                         <button 
+                            onClick={() => setView('launcher')}
+                            className="px-6 py-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white transition-all active:scale-95"
+                         >
+                            Escapar del Radar
+                         </button>
+                    </div>
+                    <RadarDashboard user={user} />
                 </div>
             )}
 

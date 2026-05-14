@@ -3,26 +3,29 @@
 @tailwind utilities;
 
 :root {
-    --bg-main: 248, 250, 249; /* #F8FAF9 */
+    --bg-main: 248, 250, 249; /* #F8FAF9 - Industrial Off-White */
     --bg-card: 255, 255, 255;
     --bg-card-hover: 245, 245, 240;
-    --text-main: 26, 26, 26; /* #1A1A1A (Carbon) */
-    --text-offset: 74, 85, 83; /* #4A5553 (Gris Pizarra) */
-    --border-main: rgba(194, 211, 205, 0.5); /* #C2D3CD (Verde Salvia) */
-    --bg-offset: rgba(194, 211, 205, 0.1);
+    --text-main: 15, 20, 18; /* Deep Carbon */
+    --text-offset: 74, 85, 83; /* Slate Grey */
+    --border-main: 194, 211, 205; /* Sage */
+    --axis-green: 0, 96, 86; /* #0C6056 - The Signature Color */
+    --axis-green-rgb: 0, 96, 86;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
-
 
 html[data-theme='dark'],
 [data-theme='dark'],
 [data-theme='dark'] body {
-    --bg-main: 5, 7, 6;
-    --bg-card: 15, 20, 17;
-    --bg-card-hover: 22, 29, 25;
-    --text-main: 255, 255, 255;
-    --text-offset: 156, 163, 175;
-    --border-main: rgba(255, 255, 255, 0.05);
-    --bg-offset: rgba(255, 255, 255, 0.03);
+    --bg-main: 8, 10, 9; /* Deeper night */
+    --bg-card: 18, 24, 21;
+    --bg-card-hover: 24, 32, 28;
+    --text-main: 240, 245, 242;
+    --text-offset: 140, 150, 145;
+    --border-main: 45, 55, 50;
+    --axis-green: 0, 128, 115; /* Brighter for dark mode contrast */
+    --axis-green-rgb: 0, 128, 115;
 }
 
 body {

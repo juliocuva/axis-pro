@@ -65,7 +65,7 @@ export default function RoastCurveVisualizer({ data, title = "Telemetría Térmi
                         <Tooltip 
                             contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
                             itemStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }}
-                            labelStyle={{ color: '#00FF88', marginBottom: '8px', fontSize: '10px' }}
+                            labelStyle={{ color: '#0C6056', marginBottom: '8px', fontSize: '10px' }}
                         />
                         
                         <Line 

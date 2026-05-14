@@ -21,7 +21,7 @@ const productionData = [
 ];
 
 const varietalData = [
-    { name: 'Castillo', value: 45, color: '#00A651' },
+    { name: 'Castillo', value: 45, color: '#0C6056' },
     { name: 'Caturra', value: 30, color: '#00843D' },
     { name: 'Borbón', value: 15, color: '#F0D58C' },
     { name: 'Geisha', value: 10, color: '#C8A252' },
@@ -140,15 +140,15 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                                     <AreaChart data={productionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorVol" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#00A651" stopOpacity={0.4} />
-                                                <stop offset="95%" stopColor="#00A651" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#0C6056" stopOpacity={0.4} />
+                                                <stop offset="95%" stopColor="#0C6056" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
                                         <XAxis dataKey="month" stroke="#ffffff50" fontSize={10} axisLine={false} tickLine={false} dy={10} />
                                         <YAxis stroke="#ffffff50" fontSize={10} axisLine={false} tickLine={false} />
                                         <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
-                                        <Area type="monotone" dataKey="volume" stroke="#00A651" strokeWidth={3} fillOpacity={1} fill="url(#colorVol)" />
+                                        <Area type="monotone" dataKey="volume" stroke="#0C6056" strokeWidth={3} fillOpacity={1} fill="url(#colorVol)" />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>

@@ -107,8 +107,8 @@ export default function ViewMaster() {
                     overflow: hidden !important; 
                 }
                 
-                .text-brand-green { color: #00FF88; }
-                .bg-brand-green { background-color: #00FF88; }
+                .text-brand-green { color: #0C6056; }
+                .bg-brand-green { background-color: #0C6056; }
                 
                 ::-webkit-scrollbar { display: none; }
             `}</style>

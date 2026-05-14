@@ -433,7 +433,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                             />
                             <defs>
                                 <linearGradient id="spectralGlow" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#00ff88" />
+                                    <stop offset="0%" stopColor="#0C6056" />
                                     <stop offset="100%" stopColor="transparent" />
                                 </linearGradient>
                             </defs>
@@ -444,7 +444,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                             )}
 
                             {/* BT Actual with thick glow line */}
-                            <polyline fill="none" stroke="#00ff88" strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round" points={generatePoints(btHistory, 250)} className="drop-shadow-[0_0_8px_rgba(0,255,136,0.5)]" />
+                            <polyline fill="none" stroke="#0C6056" strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round" points={generatePoints(btHistory, 250)} className="drop-shadow-[0_0_8px_rgba(0,255,136,0.5)]" />
                         </svg>
                     </div>
 

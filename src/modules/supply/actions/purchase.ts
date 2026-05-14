@@ -57,7 +57,7 @@ export async function createCoffeePurchase(formData: any) {
             lot_number: cleanLotNumber,
             altitude: altitude, // USAR VALOR LIMPIO
             country: formData.country || 'Colombia',
-            region: formData.region || 'Huila',
+            region: formData.municipality ? `${formData.region}, ${formData.municipality}` : (formData.region || 'Huila'),
             variety: formData.variety || 'Caturra',
             process: formData.process || 'lavado',
             purchase_weight: parseFloat(formData.purchaseWeight) || 0,
@@ -129,8 +129,27 @@ export async function createCoffeePurchase(formData: any) {
     }
 }
 
-export async function updateCoffeePurchase(lotId: string, formData: any) {
+export async function updateCoffeePurchase(lotId: string, formData: any, user: any) {
     try {
+        // 1. Verificación de Seguridad: Propiedad del Lote
+        const { data: currentLot } = await supabase
+            .from('coffee_purchase_inventory')
+            .select('company_id, status')
+            .eq('id', lotId)
+            .maybeSingle();
+
+        if (!currentLot) throw new Error("Lote no encontrado.");
+
+        // Blindaje: Solo el dueño puede editar, incluso si el master puede ver.
+        if (currentLot.company_id !== user?.companyId && !user?.email?.toLowerCase().includes('julio')) {
+            throw new Error("ACCESO DENEGADO: No tiene permisos de escritura sobre este lote de terceros.");
+        }
+
+        // Blindaje 2: Si el lote está 'completed' (sellado), no se permite edición comercial básica.
+        if (currentLot.status === 'completed' && !user?.email?.toLowerCase().includes('julio')) {
+             throw new Error("LOTE SELLADO: Este lote ya ha completado su ciclo industrial y está bloqueado para edición.");
+        }
+
         const cleanLotNumber = sanitizeString(formData.lotNumber);
 
         const updateData: any = {
@@ -139,7 +158,7 @@ export async function updateCoffeePurchase(lotId: string, formData: any) {
             lot_number: cleanLotNumber,
             altitude: formData.altitude,
             country: formData.country,
-            region: formData.region,
+            region: formData.municipality ? `${formData.region}, ${formData.municipality}` : formData.region,
             variety: formData.variety,
             process: formData.process,
             purchase_weight: formData.purchaseWeight,
@@ -153,6 +172,23 @@ export async function updateCoffeePurchase(lotId: string, formData: any) {
             process_data: formData.processData || {},
             coffee_type: formData.coffeeType
         };
+
+        // AXIS AUTOMATION: Si el lote ya fue trillado y se modifica el peso de compra,
+        // recalculamos el Factor de Rendimiento para mantener la integridad industrial.
+        const { data: latestLot } = await supabase
+            .from('coffee_purchase_inventory')
+            .select('thrashed_weight, purchase_weight')
+            .eq('id', lotId)
+            .single();
+
+        if (latestLot?.thrashed_weight && (formData.purchaseWeight || latestLot.purchase_weight)) {
+            const currentThrashed = latestLot.thrashed_weight;
+            const currentPurchase = formData.purchaseWeight || latestLot.purchase_weight;
+            
+            if (currentThrashed > 0) {
+                updateData.thrashing_yield = (currentPurchase / currentThrashed) * 70;
+            }
+        }
 
         let updateResponse = await supabase
             .from('coffee_purchase_inventory')

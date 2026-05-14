@@ -7,7 +7,7 @@ import LotCertificate from '@/modules/supply/components/analysis/LotCertificate'
 import ShipmentSealer from './ShipmentSealer';
 import RoastCurveVisualizer from '@/modules/production/components/RoastCurveVisualizer';
 
-export default function GlobalHistoryArchive({ user }: { user: { companyId: string } | null }) {
+export default function GlobalHistoryArchive({ user }: { user: { companyId: string, email?: string, role?: string } | null }) {
     const [history, setHistory] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
@@ -28,11 +28,14 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
         setIsLoading(true);
         let allHistory: any[] = [];
         try {
-            const { data: exports } = await supabase
-                .from('green_exports')
-                .select('*')
-                .eq('company_id', user?.companyId)
-                .order('created_at', { ascending: false });
+            let exportsQuery = supabase.from('green_exports').select('*');
+            
+            // Si el usuario es Julio o Auditor, ve TODO el historial global
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
+                exportsQuery = exportsQuery.eq('company_id', user?.companyId);
+            }
+
+            const { data: exports } = await exportsQuery.order('created_at', { ascending: false });
 
             if (exports) {
                 const formatted = exports.map(exp => ({
@@ -47,18 +50,18 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
             }
 
             // También traemos los certificados de materia prima y su progreso
-            const { data: lots, error: lotsError } = await supabase
-                .from('coffee_purchase_inventory')
-                .select('*')
-                .eq('company_id', user?.companyId)
-                .order('created_at', { ascending: false });
+            let lotsQuery = supabase.from('coffee_purchase_inventory').select('*');
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
+                lotsQuery = lotsQuery.eq('company_id', user?.companyId);
+            }
+            const { data: lots, error: lotsError } = await lotsQuery.order('created_at', { ascending: false });
 
             // Traemos también los tuestes (Tostión) para cruzar datos
-            const { data: roasts } = await supabase
-                .from('roast_batches')
-                .select('*')
-                .eq('company_id', user?.companyId)
-                .order('roast_date', { ascending: false });
+            let roastsQuery = supabase.from('roast_batches').select('*');
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
+                roastsQuery = roastsQuery.eq('company_id', user?.companyId);
+            }
+            const { data: roasts } = await roastsQuery.order('roast_date', { ascending: false });
 
             if (lots) {
                 const formatted = lots.map(lot => {
@@ -69,7 +72,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     if (lot.status === 'completed') step = 4;
                     
                     // Fase 5: Tostión (Si existe un tueste asociado a este lot_id)
-                    const roasted = roasts?.some(r => r.lot_id === lot.id);
+                    const roasted = roasts?.some(r => r.inventory_id === lot.id || r.lot_id === lot.id);
                     if (roasted) step = 5;
 
                     return {
@@ -84,19 +87,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                 });
                 allHistory = [...allHistory, ...formatted];
             }
-            
-            if (roasts) {
-                const formatted = roasts.map(r => ({
-                    id: r.id,
-                    type: 'TOSTION',
-                    label: `${r.batch_id_label}`,
-                    date: r.roast_date,
-                    status: 'Tostado',
-                    step: 5,
-                    raw: r
-                }));
-                allHistory = [...allHistory, ...formatted];
-            }
+
 
             setHistory(allHistory);
         } catch (error) {
@@ -251,7 +242,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                             ))}
                         </div>
                         <div className="flex bg-bg-card border border-white/10 rounded-2xl p-1">
-                            {['ALL', 'EXPORT', 'LOTE', 'TOSTION', 'AUDIT'].map((t) => (
+                            {['ALL', 'EXPORT', 'LOTE', 'AUDIT'].map((t) => (
                                 <button
                                     key={t}
                                     onClick={() => { 
@@ -265,7 +256,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                     }}
                                     className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${filterType === t || (t === 'AUDIT' && showAuditModal) ? 'bg-brand-green text-black' : 'text-gray-500 hover:text-white'}`}
                                 >
-                                    {t === 'ALL' ? 'Todo' : t === 'EXPORT' ? 'Exports' : t === 'LOTE' ? 'Lotes' : t === 'TOSTION' ? 'Tueste' : 'Auditoría'}
+                                    {t === 'ALL' ? 'Todo' : t === 'EXPORT' ? 'Exports' : t === 'LOTE' ? 'Lotes' : 'Auditoría'}
                                 </button>
                             ))}
                         </div>
@@ -278,7 +269,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                             <tr className="bg-white/2 border-b border-white/5">
                                 <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Tipo</th>
                                 <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">ID Lote / Referencia</th>
-                                <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Fases (01-04)</th>
+                                <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Fases (01-05)</th>
                                 <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Fecha</th>
                                 <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none text-right">Acción</th>
                             </tr>

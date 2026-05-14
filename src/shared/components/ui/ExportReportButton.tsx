@@ -51,16 +51,14 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             await new Promise(r => setTimeout(r, 500));
 
             const canvas = await html2canvas(element, {
-                scale: 2.5,
+                scale: 2,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
                 windowWidth: 1200,
-                x: 0,
-                y: 0,
-                scrollX: -window.scrollX,
-                scrollY: -window.scrollY,
+                scrollX: 0,
+                scrollY: 0,
                 onclone: (clonedDoc, element) => {
                     // Force the element to stay at 750px regardless of windowWidth
                     element.style.width = '750px';

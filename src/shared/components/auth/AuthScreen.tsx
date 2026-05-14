@@ -10,7 +10,7 @@ interface AuthScreenProps {
 
 export default function AuthScreen({ onLogin }: AuthScreenProps) {
     const [isSignUp, setIsSignUp] = useState(false);
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -20,23 +20,26 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         e.preventDefault();
         setIsLoading(true);
 
-        const isTatama = email.toLowerCase().includes('tatama');
+        const isNumeric = /^\d+$/.test(identifier);
+        const email = isNumeric ? `${identifier}@cedula.axisone.pro` : identifier.toLowerCase();
+        
+        const isTatama = email.includes('tatama');
         const rawDomain = email.split('@')[1] || 'independent.com';
         
-        const publicDomains = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com'];
+        const publicDomains = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'cedula.axisone.pro'];
         const isPublicDomain = publicDomains.includes(rawDomain.toLowerCase());
         
-        const companyId = isTatama ? 'TATAMA-SANTUARIO' : (isPublicDomain ? email.toUpperCase() : rawDomain.toUpperCase());
-        const userName = isSignUp ? name : (isTatama ? 'TATAMA SANTUARIO' : email.split('@')[0].toUpperCase());
-        const isMasterAuditor = email.toLowerCase() === 'juliocuva@axisonecoffee.pro';
-        const role = isMasterAuditor ? 'auditor' : ((email.toLowerCase().includes('julio') || isTatama) ? 'gerente' : 'visitante');
+        const companyId = isTatama ? 'TATAMA-SANTUARIO' : (isPublicDomain ? identifier.toUpperCase() : rawDomain.toUpperCase());
+        const userName = isSignUp ? name : (isTatama ? 'TATAMA SANTUARIO' : identifier.split('@')[0].toUpperCase());
+        const isMasterAuditor = email === 'juliocuva@axisonecoffee.pro';
+        const role = isMasterAuditor ? 'auditor' : (isNumeric ? 'producer' : ((email.includes('julio') || isTatama) ? 'gerente' : 'visitante'));
 
         const loadAndPersistProfile = async () => {
             try {
                 const { data: existingProfile } = await supabase
                     .from('profiles')
                     .select('company_id, role, full_name')
-                    .eq('email', email.toLowerCase())
+                    .eq('email', email)
                     .single();
 
                 let finalCompanyId = companyId;
@@ -65,12 +68,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         };
 
         loadAndPersistProfile().then((finalIdentity) => {
-            onLogin({
-                email,
-                name: finalIdentity.name,
-                companyId: finalIdentity.companyId,
-                role: finalIdentity.role
-            });
+                onLogin({
+                    email,
+                    name: finalIdentity.name,
+                    companyId: finalIdentity.companyId,
+                    role: finalIdentity.role
+                });
             setIsLoading(false);
         });
     };
@@ -272,14 +275,13 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Email Corporativo</label>
+                                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Identificador (Email o Cédula)</label>
                                 <input
-
-                                    type="email"
+                                    type="text"
                                     required
-                                    placeholder="usuario@axisonecoffee.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="usuario@email.com o 12345678"
+                                    value={identifier}
+                                    onChange={(e) => setIdentifier(e.target.value)}
                                     className="w-full border-b-2 border-brand-green-soft/30 px-1 py-3 text-sm focus:border-brand-green outline-none transition-all font-bold text-carbon"
                                 />
                             </div>

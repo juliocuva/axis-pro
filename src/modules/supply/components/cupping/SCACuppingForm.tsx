@@ -305,8 +305,8 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                 <Radar
                                     name="Perfil"
                                     dataKey="A"
-                                    stroke="#00a651"
-                                    fill="#00a651"
+                                    stroke="#0C6056"
+                                    fill="#0C6056"
                                     fillOpacity={0.6}
                                 />
                             </RadarChart>

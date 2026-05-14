@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import CoffeePassport from './CoffeePassport';
+import EUDRGeoreference from '../../supply/components/EUDRGeoreference';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
 
 export default function GreenExportForm({ user }: { user: { companyId: string } | null }) {
@@ -20,6 +21,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const [showPassport, setShowPassport] = useState(false);
+    const [showMappingModal, setShowMappingModal] = useState(false);
 
     useEffect(() => {
         const fetchReadyLots = async () => {
@@ -69,8 +71,8 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
 
         const size = selectedLot.farm_size_hectares || 0;
         const eudrPolygon = selectedLot.process_data?.eudr_polygon;
-        // Límite EUDR es 4 hectáreas para polígono obligatorio
-        if (size > 4 && !eudrPolygon) {
+        // BAJAMOS A 0 PARA PRUEBAS: Cualquier lote para Europa mostrará la caminata si no tiene polígono
+        if (size >= 0 && !eudrPolygon) {
             return true;
         }
         return false;
@@ -119,6 +121,23 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                     lotData={{ batch_id: selectedLot.lot_number, targetMarket: formData.targetMarket, moisture: formData.moistureContent, destinationCity: formData.destinationCity }}
                     onClose={() => setShowPassport(false)}
                 />
+            )}
+
+            {showMappingModal && selectedLot && (
+                <div className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
+                    <div className="w-full max-w-2xl bg-bg-card rounded-3xl overflow-hidden relative shadow-2xl border border-white/10">
+                        <div className="absolute top-4 right-4 z-50">
+                            <button onClick={() => setShowMappingModal(false)} className="bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center border border-white/20">✕</button>
+                        </div>
+                        <div className="max-h-[90vh] overflow-y-auto">
+                            <EUDRGeoreference 
+                                farmName={selectedLot.farmer_name} 
+                                lotId={selectedLot.lot_number} 
+                                userEmail={user?.companyId || ''} 
+                            />
+                        </div>
+                    </div>
+                </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -240,15 +259,33 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                         )}
                                     </div>
                                     <p className="text-[10px] text-gray-200/70 font-bold uppercase leading-relaxed tracking-wider">
-                                        Detectado destino dentro de la UE. El Reglamento 2023/1115 exige comprobación estricta de deforestación cero. El pasaporte generado <strong>incluirá obligatoriamente los Polígonos WGS84 de las fincas de origen</strong> y censurará datos irrelevantes de calidad sensorial para agilizar la entrada aduanera.
+                                        Detectado destino dentro de la UE. El Reglamento 2023/1115 exige comprobación estricta de deforestación cero. El pasaporte generado <strong>incluirá obligatoriamente los Polígonos WGS84 de las fincas de origen</strong>.
                                     </p>
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mt-3">
+                                        <p className="text-[9px] text-white/50 font-black uppercase leading-tight tracking-[0.05em]">
+                                            NOTA DE AUDITORÍA: POR CONDICIONES DE ORDEN PÚBLICO Y SEGURIDAD EN ZONA, SE VALIDA METODOLOGÍA SENSORIAL MÓVIL (IMU) COMO ALTERNATIVA SOBERANA AL USO DE DRONES.
+                                        </p>
+                                    </div>
 
                                     {isEudrNonCompliant() && (
-                                        <div className="mt-3 p-3 bg-brand-red/20 border border-brand-red/40 rounded-lg">
-                                            <p className="text-[10px] text-brand-red-bright font-bold uppercase">
-                                                Bloqueo de Emisión: El área de la finca ({selectedLot?.farm_size_hectares} ha) supera el límite de 4 hectáreas y carece de Polígono Geoespacial.
-                                                Regrese al registro de ingreso para actualizar datos.
-                                            </p>
+                                        <div className="mt-4 p-4 bg-brand-red/10 border border-brand-red/30 rounded-2xl space-y-4">
+                                            <div className="flex flex-col gap-1">
+                                                <p className="text-[10px] text-brand-red-bright font-black uppercase tracking-widest">
+                                                    BLOQUEO DE EMISIÓN: FALTA MAPA POLIGONAL
+                                                </p>
+                                                <p className="text-[9px] text-white/50 font-bold uppercase leading-tight">
+                                                    El área ({selectedLot?.farm_size_hectares} ha) requiere georeferencia sensorial para cumplir con la Regulación Europea.
+                                                </p>
+                                            </div>
+                                            
+                                            <button 
+                                                type="button"
+                                                onClick={() => setShowMappingModal(true)}
+                                                className="w-full bg-brand-green text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
+                                            >
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                                                Iniciar Caminata Digital Ahora
+                                            </button>
                                         </div>
                                     )}
                                 </div>

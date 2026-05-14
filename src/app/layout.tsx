@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
+
+
 
 import Footer from '@/shared/components/layout/Footer';
 
@@ -45,7 +48,9 @@ export default function RootLayout({
                     {children}
                 </main>
                 <Footer />
+                <Analytics />
             </body>
+
         </html>
     );
 }

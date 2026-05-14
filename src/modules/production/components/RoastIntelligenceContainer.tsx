@@ -96,10 +96,15 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     const fetchReadyToRoastLots = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('coffee_purchase_inventory')
-                .select('*, physical_analysis(*), sca_cupping(*)')
-                .eq('company_id', user?.companyId)
+                .select('*, physical_analysis(*), sca_cupping(*)');
+                
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
+                query = query.eq('company_id', user?.companyId);
+            }
+
+            const { data, error } = await query
                 .in('status', ['completed', 'thrashed', 'purchased'])
                 .order('created_at', { ascending: false });
 
@@ -116,11 +121,11 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
 
     const fetchPastRoasts = async () => {
         try {
-            const { data } = await supabase
-                .from('roast_batches')
-                .select('*')
-                .eq('company_id', user?.companyId)
-                .order('roast_date', { ascending: false });
+            let pastQuery = supabase.from('roast_batches').select('*');
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
+                pastQuery = pastQuery.eq('company_id', user?.companyId);
+            }
+            const { data } = await pastQuery.order('roast_date', { ascending: false });
             if (data) setPastRoasts(data);
         } catch (err) {
             console.error(err);
@@ -210,16 +215,21 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
 
         if (s.is_cva_version && s.cva_affective) {
             const aff = s.cva_affective;
+            const getVal = (v: any) => {
+                const val = Number(v || 0);
+                return val > 0 ? val : 8.0;
+            };
+
             const totalAffectiveScore = (
-                (Number(aff.fragranceQuality) || 0) + 
-                (Number(aff.flavorQuality) || 0) + 
-                (Number(aff.aftertasteQuality) || 0) + 
-                (Number(aff.acidityQuality) || 0) + 
-                (Number(aff.sweetnessQuality) || 0) + 
-                (Number(aff.mouthfeelQuality) || 0) + 
-                (Number(aff.overallImpression) || 0)
+                getVal(aff.fragranceQuality) + 
+                getVal(aff.flavorQuality) + 
+                getVal(aff.aftertasteQuality) + 
+                getVal(aff.acidityQuality) + 
+                getVal(aff.sweetnessQuality) + 
+                getVal(aff.mouthfeelQuality) + 
+                getVal(aff.overallImpression)
             );
-            return (totalAffectiveScore + 30).toFixed(2);
+            return (totalAffectiveScore + 25).toFixed(2);
         }
 
         const sum =

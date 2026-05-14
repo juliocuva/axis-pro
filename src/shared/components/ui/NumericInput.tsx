@@ -52,11 +52,11 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     };
 
     const variantStyles = {
-        default: 'border-white/10 text-white focus:border-brand-green',
-        industrial: 'border-white/10 text-brand-green-bright focus:border-brand-green',
-        blue: 'border-brand-green/50 text-brand-green-bright focus:border-brand-green-soft',
-        red: 'border-brand-red/50 text-brand-red focus:border-brand-red',
-        orange: 'border-brand-green/50 text-brand-green-bright focus:border-brand-green'
+        default: 'border-carbon/20 bg-white text-carbon focus:border-brand-green',
+        industrial: 'border-carbon/20 bg-white text-brand-green focus:border-brand-green',
+        blue: 'border-brand-green/30 bg-white text-brand-green focus:border-brand-green',
+        red: 'border-brand-red/50 bg-white text-brand-red focus:border-brand-red',
+        orange: 'border-brand-green/50 bg-white text-brand-green focus:border-brand-green'
     };
 
     const arrowColor = {
@@ -99,13 +99,13 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         }
                         onChange(val);
                     }}
-                    className={`block w-full bg-bg-main border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-white/60 placeholder:font-normal`}
+                    className={`block w-full border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-carbon/40 placeholder:font-normal`}
                 />
                 <div
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"
                     style={{ right: '16px' }}
                 >
-                    <div className="flex flex-col border-l border-white/10 pl-3">
+                    <div className="flex flex-col border-l border-carbon/10 pl-3">
                         <button
                             type="button"
                             onClick={handleIncrement}

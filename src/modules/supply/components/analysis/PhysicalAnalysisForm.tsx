@@ -8,12 +8,18 @@ import EUDRComplianceBadge from '../EUDRComplianceBadge';
 
 interface PhysicalAnalysisFormProps {
     inventoryId: string;
-    lotDestination?: 'internal' | 'export_green' | 'export_roasted';
+    lotDestination?: string;
     onAnalysisComplete: () => void;
-    user: { companyId: string } | null;
+    user: { 
+        email?: string;
+        name?: string;
+        companyId: string;
+        role?: string;
+    } | null;
+    isReadOnly?: boolean;
 }
 
-export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'internal', onAnalysisComplete, user }: PhysicalAnalysisFormProps) {
+export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'internal', onAnalysisComplete, user, isReadOnly }: PhysicalAnalysisFormProps) {
     const [formData, setFormData] = useState({
         moisture: 11.5,
         waterActivity: 0.58,
@@ -162,242 +168,280 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
     };
 
     return (
-        <div className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-8 animate-in fade-in duration-500 relative min-h-[400px]">
+        <div className="bg-bg-card border border-white/5 p-10 rounded-[2rem] space-y-10 animate-in fade-in duration-700 relative overflow-hidden shadow-2xl">
+            {/* Background Decorative Element */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
+            
             {isLoading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-industrial">
-                    <div className="flex flex-col items-center gap-4">
-                        <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-green-bright animate-pulse">Consultando AXIS Laboratorio...</p>
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/80 backdrop-blur-md rounded-[2rem]">
+                    <div className="flex flex-col items-center gap-6">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-brand-green/20 rounded-full"></div>
+                            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                        <p className="text-[11px] font-black uppercase tracking-[0.4em] text-brand-green-bright animate-pulse">Sincronizando Laboratorio AXIS...</p>
                     </div>
                 </div>
             )}
-            <header className="flex justify-between items-start border-b border-white/5 pb-6">
-                <div>
-                    <div className="inline-block px-2 py-0.5 bg-brand-green/10 border border-brand-green/20 rounded text-[9px] text-brand-green uppercase font-black tracking-widest mb-2">
-                        Protocolo AOC v2.0 • Physical Lab
+
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-8 gap-6">
+                <div className="space-y-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green text-black rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-brand-green/20">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /></svg>
+                        AOC Standard v3.0
                     </div>
-                    <h3 className="text-2xl font-black text-white tracking-tighter uppercase">Análisis Físico Integral</h3>
-                    <div className="flex items-center gap-4 mt-2">
-                        <p className="text-[10px] text-gray-500 font-mono tracking-widest uppercase">Evaluación de Lote Ganador</p>
-                        <button 
-                            type="button"
-                            className="flex items-center gap-2 px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all"
-                            onClick={() => alert('Descargando Plantilla Física AOC...')}
-                        >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00A651" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">Plantilla Lab</span>
-                        </button>
+                    <h3 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">
+                        Módulo de <span className="text-brand-green">Análisis Físico</span>
+                    </h3>
+                    <div className="flex items-center gap-4">
+                        <p className="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase">Control Notarial de Calidad • {lotDetails?.lot_number || 'CARGANDO...'}</p>
                     </div>
                 </div>
-                <div className="flex flex-col items-end gap-3">
+                
+                <div className="flex items-center gap-4">
                     <button 
                         type="button"
-                        onClick={() => alert('Importando datos de laboratorio desde Excel...')}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#1A1A1A] border border-brand-green/30 rounded-xl hover:border-brand-green transition-all shadow-xl group"
+                        className="group flex items-center gap-3 px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all"
+                        onClick={() => alert('Importando datos de laboratorio...')}
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00A651" strokeWidth="2" className="group-hover:scale-110 transition-transform"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Importar Lab Excel</span>
+                        <div className="p-2 bg-brand-green/10 rounded-lg group-hover:bg-brand-green/20 transition-colors">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
+                        <div className="text-left">
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Importar Excel</p>
+                            <p className="text-[8px] text-gray-500 uppercase mt-1">Sincronización Masiva</p>
+                        </div>
                     </button>
                 </div>
             </header>
 
-            <EUDRComplianceBadge lotData={lotDetails} className="mb-4" />
+            <EUDRComplianceBadge lotData={lotDetails} className="mb-6" />
 
             {error && (
-                <div className="bg-brand-red/10 border border-brand-red/20 p-4 rounded-industrial-sm text-brand-red-bright text-[10px] font-bold uppercase tracking-widest">
-                    ⚠️ {error}
+                <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-red-500 text-[11px] font-black uppercase tracking-[0.1em] flex items-center gap-4 animate-in slide-in-from-top-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>ERROR CRÍTICO: {error}</span>
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
-                    <div className="md:col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-12">
+                {/* 1. Métrica Base (High Impact) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] group hover:border-brand-green/30 transition-all shadow-inner">
                         <NumericInput
-                            label={`Humedad (%) ${lotDestination.startsWith('export') ? '[NORMA]' : ''}`}
+                            label="Humedad (%)"
                             value={formData.moisture}
                             onChange={(val) => setFormData({ ...formData, moisture: val })}
                             step={0.01}
-                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-xl py-4"
+                            inputClassName="text-5xl font-black py-6 tracking-tighter"
                             unit="%"
                         />
+                        <div className="mt-4 flex items-center justify-between">
+                            <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Rango Ideal: 10.0 - 12.0%</span>
+                            <div className={`w-2 h-2 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+                        </div>
                     </div>
 
-                    <div className="md:col-span-2">
+                    <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] group hover:border-brand-green/30 transition-all shadow-inner">
                         <NumericInput
-                            label="Agua ($a_w$)"
+                            label="Actividad de Agua (aw)"
                             value={formData.waterActivity}
                             onChange={(val) => setFormData({ ...formData, waterActivity: val })}
                             step={0.001}
-                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-xl py-4"
+                            inputClassName="text-5xl font-black py-6 tracking-tighter"
                         />
+                        <div className="mt-4 flex items-center justify-between">
+                            <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Norma Export: ≤ 0.70</span>
+                            <div className={`w-2 h-2 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+                        </div>
                     </div>
 
-                    <div className="md:col-span-2">
+                    <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] group hover:border-brand-green/30 transition-all shadow-inner">
                         <NumericInput
                             label="Densidad (g/L)"
                             value={formData.density}
                             onChange={(val) => setFormData({ ...formData, density: val })}
                             step={1}
-                            disabled={isSubmitting || isAlreadyAnalyzed}
+                            disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-xl py-4"
+                            inputClassName="text-5xl font-black py-6 tracking-tighter"
                             unit="g/L"
                         />
-                    </div>
-
-                    <div className="md:col-span-4 space-y-2">
-                        <label className="text-[10px] font-medium text-gray-400 uppercase tracking-widest block">Color del Grano</label>
-                        <div className="relative group/select">
-                            <select
-                                value={formData.grainColor}
-                                disabled={isSubmitting || isAlreadyAnalyzed}
-                                className={`w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 pr-14 py-4 text-sm font-bold text-white outline-none focus:border-brand-green uppercase appearance-none transition-all ${isAlreadyAnalyzed ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
-                            >
-                                <option value="VERDE OLIVA">Verde Oliva (Estándar)</option>
-                                <option value="VERDE AZULADO">Verde Azulado (Fresco)</option>
-                                <option value="VERDE PALIDO">Verde Pálido / Blanqueado</option>
-                                <option value="AMARILLENTO">Amarillento (Envejecido)</option>
-                                <option value="MARRON">Marrón (Sobresecado / Dañado)</option>
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover:text-brand-green transition-colors">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
-                            </div>
+                        <div className="mt-4 flex items-center justify-between">
+                            <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Standard: {'>'} 680 g/L</span>
+                            <div className={`w-2 h-2 rounded-full ${formData.density > 680 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]'}`}></div>
                         </div>
-                        <p className="text-[9px] text-gray-500 uppercase font-medium opacity-70">Descriptor Visual basado en estándares SCA</p>
                     </div>
                 </div>
 
-                <section className="py-4 px-4 md:px-12 rounded-industrial space-y-4 border-y border-white/5 mt-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-[10px] font-medium text-gray-400 uppercase tracking-[0.2em]">GRANULOMETRÍA (SIEVE ANALYSIS)</h4>
-                        <div className={`px-3 py-1 rounded-full text-[9px] font-bold tracking-widest ${isScreenValid ? 'bg-brand-green/20 text-brand-green-bright border border-brand-green/30' : 'bg-brand-red/20 text-brand-red-bright border border-brand-red/30 animate-pulse'}`}>
-                            {isScreenValid ? '✓ SUMA 100%' : `⚠ DESCUADRE: ${screenSum.toFixed(1)}%`}
+                {/* 2. Granulometría (Sieve Instrument) */}
+                <section className="bg-black/20 border border-white/5 p-10 rounded-[2.5rem] space-y-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                    
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/5 pb-6">
+                        <div className="space-y-1">
+                            <h4 className="text-[10px] font-black text-brand-green-bright uppercase tracking-[0.4em]">Instrumento: Granulometría</h4>
+                            <p className="text-xl font-bold text-white tracking-tight">Sieve Distribution Profile</p>
+                        </div>
+                        <div className={`flex flex-col items-end gap-1 ${isScreenValid ? 'text-brand-green' : 'text-red-500'}`}>
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Balance de Masa</span>
+                            <span className="text-3xl font-black tracking-tighter leading-none">{screenSum.toFixed(1)}%</span>
+                            {!isScreenValid && <span className="text-[8px] font-bold uppercase animate-pulse">Ajuste Requerido (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
                         </div>
                     </div>
-                    <div className="space-y-4 md:w-4/5 mx-auto">
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[18, 17, 16, 15].map(size => (
-                                <NumericInput
-                                    key={size}
-                                    label={`Malla ${size}`}
-                                    value={(formData.screenSize as any)[`size${size}`]}
-                                    onChange={(val) => setFormData({
-                                        ...formData,
-                                        screenSize: { ...formData.screenSize, [`size${size}`]: val }
-                                    })}
-                                    step={0.1}
-                                    disabled={isSubmitting || isAlreadyAnalyzed}
-                                    variant="industrial"
-                                    inputClassName="text-base py-2"
-                                    unit="%"
-                                />
-                            ))}
-                        </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[14, 13, 12].map(size => (
-                                <NumericInput
-                                    key={size}
-                                    label={`Malla ${size}`}
-                                    value={(formData.screenSize as any)[`size${size}`]}
-                                    onChange={(val) => setFormData({
-                                        ...formData,
-                                        screenSize: { ...formData.screenSize, [`size${size}`]: val }
-                                    })}
-                                    step={0.1}
-                                    disabled={isSubmitting || isAlreadyAnalyzed}
-                                    variant="industrial"
-                                    inputClassName="text-base py-2"
-                                    unit="%"
-                                />
-                            ))}
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                        {[18, 17, 16, 15, 14, 13, 12, 'under12'].map((size, idx) => (
+                            <div key={idx} className="space-y-2">
+                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block text-center">
+                                    {size === 'under12' ? 'Fondo' : `Malla ${size}`}
+                                </label>
+                                <div className="relative group">
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        value={(formData.screenSize as any)[size === 'under12' ? 'under12' : `size${size}`]}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            screenSize: { ...formData.screenSize, [size === 'under12' ? 'under12' : `size${size}`]: parseFloat(e.target.value) || 0 }
+                                        })}
+                                        disabled={isSubmitting || isAlreadyAnalyzed}
+                                        className="w-full bg-bg-main border border-white/10 rounded-xl px-2 py-4 text-lg font-black text-white text-center outline-none focus:border-brand-green focus:bg-brand-green/5 transition-all appearance-none"
+                                    />
+                                    <span className="absolute bottom-1 right-1 text-[7px] font-black text-gray-600 uppercase">%</span>
+                                </div>
+                                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-brand-green transition-all duration-700" 
+                                        style={{ width: `${(formData.screenSize as any)[size === 'under12' ? 'under12' : `size${size}`]}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* 3. Defectos & Color (Visual Analysis) */}
+                <div className="grid grid-cols-1 md:grid-cols-10 gap-8">
+                    <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/5 border border-white/10 p-10 rounded-[2.5rem]">
+                        <div className="space-y-4">
                             <NumericInput
-                                label="Fondo (-12)"
-                                value={formData.screenSize.under12}
-                                onChange={(val) => setFormData({
-                                    ...formData,
-                                    screenSize: { ...formData.screenSize, under12: val }
-                                })}
-                                step={0.1}
+                                label="Defectos Primarios"
+                                value={formData.defects.primary}
+                                onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, primary: val } })}
+                                step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="text-base py-2"
-                                unit="%"
+                                inputClassName="text-4xl font-black py-4 text-red-500"
+                                unit="PTS"
                             />
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
+                        </div>
+                        <div className="space-y-4">
+                            <NumericInput
+                                label="Defectos Secundarios"
+                                value={formData.defects.secondary}
+                                onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, secondary: val } })}
+                                step={0.01}
+                                disabled={isSubmitting || isAlreadyAnalyzed}
+                                variant="industrial"
+                                inputClassName="text-4xl font-black py-4 text-yellow-500"
+                                unit="PTS"
+                            />
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>
                         </div>
                     </div>
-                </section>
 
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                        <NumericInput
-                            label="Defectos Primarios (%)"
-                            value={formData.defects.primary}
-                            onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, primary: val } })}
-                            step={0.01}
-                            disabled={isSubmitting || isAlreadyAnalyzed}
-                            variant="industrial"
-                            inputClassName="text-3xl font-bold py-4"
-                            unit="%"
-                            className="bg-brand-green/5 p-6 rounded-industrial border border-brand-green/10"
-                        />
-                        <p className="text-[9px] text-gray-500 uppercase font-medium leading-relaxed px-2">
-                            Granos negros, agrios, cereza seca, materia extraña (piedras/palos), daños por hongos.
-                        </p>
+                    <div className="md:col-span-4 bg-white/5 border border-white/10 p-10 rounded-[2.5rem] flex flex-col justify-center gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] block">Descriptor Visual: Color</label>
+                            <div className="relative group">
+                                <select
+                                    value={formData.grainColor}
+                                    disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
+                                    className="w-full bg-bg-main border border-white/10 rounded-2xl px-6 py-5 text-sm font-black text-white outline-none focus:border-brand-green uppercase appearance-none transition-all shadow-inner"
+                                    onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
+                                >
+                                    <option value="VERDE OLIVA">Verde Oliva (Optimum)</option>
+                                    <option value="VERDE AZULADO">Verde Azulado (High Fresh)</option>
+                                    <option value="VERDE PALIDO">Verde Pálido (Standard)</option>
+                                    <option value="AMARILLENTO">Amarillento (Aging)</option>
+                                    <option value="MARRON">Marrón (Damaged)</option>
+                                </select>
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-brand-green">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 p-4 bg-black/40 rounded-xl border border-white/5">
+                            <div className={`w-12 h-12 rounded-lg shadow-inner ${
+                                formData.grainColor === 'VERDE OLIVA' ? 'bg-[#4B5320]' : 
+                                formData.grainColor === 'VERDE AZULADO' ? 'bg-[#008080]' :
+                                formData.grainColor === 'VERDE PALIDO' ? 'bg-[#8FBC8F]' :
+                                formData.grainColor === 'AMARILLENTO' ? 'bg-[#F0E68C]' : 'bg-[#8B4513]'
+                            }`}></div>
+                            <div className="flex-1">
+                                <p className="text-[9px] font-black text-white uppercase tracking-widest">Previsualización Cromática</p>
+                                <p className="text-[8px] text-gray-500 uppercase mt-0.5">Basado en Patrones SCA Agtron</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="space-y-3">
-                        <NumericInput
-                            label="Defectos Secundarios (%)"
-                            value={formData.defects.secondary}
-                            onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, secondary: val } })}
-                            step={0.01}
-                            disabled={isSubmitting || isAlreadyAnalyzed}
-                            variant="industrial"
-                            inputClassName="text-3xl font-bold py-4"
-                            unit="%"
-                            className="bg-brand-green/5 p-6 rounded-industrial border border-brand-green/10"
-                        />
-                        <p className="text-[9px] text-gray-500 uppercase font-medium leading-relaxed px-2">
-                            Granos picados, quebrados, inmaduros, aplastados, conchas, flotadores, pergamino.
-                        </p>
-                    </div>
-                </section>
+                </div>
 
-                {/* SECCIÓN FISICOQUÍMICA OMITIDA: Los datos de pH, Brix y Fermentación ya fueron capturados en la fase de Ingreso */}
-
-                <button
-                    type={isAlreadyAnalyzed ? "button" : "submit"}
-                    disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid}
-                    className={`w-full font-black py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyAnalyzed ? 'bg-brand-green/20 text-brand-green-bright border border-brand-green/30 cursor-not-allowed opacity-100' : isScreenValid ? 'bg-brand-green hover:bg-brand-green-bright text-black disabled:opacity-30' : 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/10'}`}
-                >
-                    {isAlreadyAnalyzed ? (
-                        <>
-                            PROCESO SELLADO Y VERIFICADO
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                <path d="m9 12 2 2 4-4" />
-                            </svg>
-                        </>
-                    ) : isSubmitting ? (
-                        <>
-                            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                            SINCRONIZANDO LABORATORIO...
-                        </>
-                    ) : (
-                        <>
-                            SELLAR ANÁLISIS FÍSICO AOC
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:rotate-12 transition-transform">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                <polyline points="22 4 12 14.01 9 11.01" />
-                            </svg>
-                        </>
-                    )}
-                </button>
+                {/* Submit Action */}
+                <div className="pt-8 border-t border-white/10">
+                    <button
+                        type={isAlreadyAnalyzed || isReadOnly ? "button" : "submit"}
+                        disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid || isReadOnly}
+                        className={`w-full font-black py-8 rounded-[2rem] transition-all flex items-center justify-center gap-6 group uppercase tracking-[0.4em] text-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
+                            isAlreadyAnalyzed 
+                            ? 'bg-brand-green/10 text-brand-green border border-brand-green/30 cursor-default' 
+                            : isReadOnly 
+                            ? 'bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed' 
+                            : isScreenValid 
+                            ? 'bg-brand-green hover:bg-brand-green-bright text-black shadow-brand-green/20 hover:shadow-brand-green/40' 
+                            : 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/10 opacity-50'
+                        }`}
+                    >
+                        {isSubmitting ? (
+                            <div className="flex items-center gap-4">
+                                <div className="w-6 h-6 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                                <span>Firmando Digitalmente en AXIS Cloud...</span>
+                            </div>
+                        ) : isAlreadyAnalyzed ? (
+                            <>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
+                                <span>REGISTRO LAB INMUTABLE Y VERIFICADO</span>
+                            </>
+                        ) : !isScreenValid ? (
+                            <>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                <span>CORREGIR BALANCE DE GRANULOMETRÍA</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>SELLAR ANÁLISIS FÍSICO (AOC PROTOCOL)</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-2 transition-transform">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                            </>
+                        )}
+                    </button>
+                    <p className="text-center text-[9px] text-gray-500 uppercase font-black tracking-[0.5em] mt-8 opacity-40">
+                        AXISONE COFFEE • DATA SOVEREIGNTY • CERTIFIED HUB
+                    </p>
+                </div>
             </form>
         </div>
+
     );
 }

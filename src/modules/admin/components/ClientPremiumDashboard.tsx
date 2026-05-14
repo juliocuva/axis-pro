@@ -81,7 +81,7 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
         { name: 'Compliant', value: eudrCompliance },
         { name: 'Non-Compliant', value: 100 - eudrCompliance }
     ];
-    const pieColors = ['#00a651', '#ffffff10'];
+    const pieColors = ['#0C6056', '#ffffff10'];
 
     if (isLoading) return <div className="text-center py-20 text-brand-green-bright animate-pulse">Analizando Inteligencia de Negocio...</div>;
 
@@ -144,7 +144,7 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
                                     <PolarGrid stroke="#ffffff10" />
                                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#888', fontSize: 9, fontWeight: 'bold' }} />
                                     <Radar name="Lote Reciente" dataKey="LoteReciente" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.5} />
-                                    <Radar name="Promedio Anual" dataKey="PromedioAnual" stroke="#00a651" fill="none" strokeDasharray="3 3" strokeWidth={2} />
+                                    <Radar name="Promedio Anual" dataKey="PromedioAnual" stroke="#0C6056" fill="none" strokeDasharray="3 3" strokeWidth={2} />
                                     <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', fontSize: '10px' }} />
                                 </RadarChart>
                             </ResponsiveContainer>

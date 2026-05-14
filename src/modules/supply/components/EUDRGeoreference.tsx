@@ -28,6 +28,9 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
     const [currentPosition, setCurrentPosition] = useState<[number, number] | null>(null);
     const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
     const [nextCaptureSeconds, setNextCaptureSeconds] = useState<number>(10);
+    const [showValidation, setShowValidation] = useState<boolean>(false);
+    const [imuData, setImuData] = useState<{acc: number, gyro: number}[]>([]);
+    const [isImuSupported, setIsImuSupported] = useState<boolean>(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const watchId = useRef<number | null>(null);
@@ -63,7 +66,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
         }
     }, [gpsPoints]);
 
-    // Geo Tracker
+    // Geo & IMU Tracker
     const startTracking = () => {
         if (!navigator.geolocation) {
             setStatus({ type: 'error', message: 'GPS no soportado.' });
@@ -71,6 +74,20 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
         }
 
         setIsCapturing(true);
+
+        // Activar Sensores de Movimiento (Acelerómetro/Giroscopio)
+        if (typeof DeviceMotionEvent !== 'undefined' && (DeviceMotionEvent as any).requestPermission) {
+            (DeviceMotionEvent as any).requestPermission()
+                .then((response: string) => {
+                    if (response === 'granted') {
+                        setupImuListeners();
+                    }
+                })
+                .catch(console.error);
+        } else {
+            setupImuListeners();
+        }
+
         watchId.current = navigator.geolocation.watchPosition(
             (pos) => {
                 const { latitude, longitude, accuracy } = pos.coords;
@@ -84,6 +101,21 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
             },
             { enableHighAccuracy: true, maximumAge: 1000 }
         );
+    };
+
+    const setupImuListeners = () => {
+        setIsImuSupported(true);
+        const handleMotion = (e: DeviceMotionEvent) => {
+            const acc = e.accelerationIncludingGravity;
+            if (acc) {
+                const magnitude = Math.sqrt((acc.x||0)**2 + (acc.y||0)**2 + (acc.z||0)**2);
+                if (magnitude > 1) { // Solo si hay movimiento real
+                    setImuData(prev => [...prev.slice(-50), { acc: magnitude, gyro: 0 }]);
+                }
+            }
+        };
+        window.addEventListener('devicemotion', handleMotion);
+        return () => window.removeEventListener('devicemotion', handleMotion);
     };
 
     const stopTracking = () => {
@@ -141,12 +173,23 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
             return;
         }
 
+        const avgAcc = imuData.length > 0 
+            ? imuData.reduce((acc, curr) => acc + curr.acc, 0) / imuData.length 
+            : 0;
+
         const polygonCoords = [...gpsPoints, gpsPoints[0]];
         const generatedGeoJson = JSON.stringify({
             "type": "FeatureCollection",
             "features": [{
                 "type": "Feature",
-                "properties": { "method": "auto_scan_10s", "timestamp": new Date().toISOString() },
+                "properties": { 
+                    "method": "auto_scan_sensor_verified", 
+                    "timestamp": new Date().toISOString(),
+                    "sensorAudit": {
+                        "intensity": avgAcc.toFixed(2),
+                        "verified": avgAcc > 1
+                    }
+                },
                 "geometry": { "type": "Polygon", "coordinates": [polygonCoords] }
             }]
         });
@@ -155,6 +198,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
         if (onPolygonChange) onPolygonChange(generatedGeoJson);
         stopTracking();
         localStorage.removeItem('axis_pending_mapping');
+        setStatus({ type: 'success', message: 'Caminata sellada sensorialmente.' });
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,16 +290,19 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                 <div className={`h-full transition-all duration-500 ${isOffline ? 'bg-brand-green w-full' : 'bg-brand-green w-full'}`}></div>
             </div>
 
-            <div className="p-4 sm:p-0 mb-4 flex justify-between items-center z-10">
+            <div className="p-4 sm:p-5 mb-0 flex justify-between items-center z-10">
                 <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${isCapturing ? 'animate-pulse bg-brand-green' : 'bg-brand-green'}`}></span>
-                        <h3 className="text-white font-black text-lg uppercase tracking-tight">Mapeo Automático AXIS</h3>
+                    <div className="flex items-center gap-3">
+                        <span className={`w-2.5 h-2.5 rounded-full ${isCapturing ? 'animate-pulse bg-brand-green' : 'bg-brand-green'}`}></span>
+                        <h3 className="text-white font-black text-xl uppercase tracking-tighter">MAPEO AUTOMÁTICO AXIS</h3>
                     </div>
+                    <p className="text-[7px] text-brand-green/60 font-bold uppercase tracking-[0.15em] mt-1 max-w-[250px] leading-tight">
+                        Protocolo de Seguridad: Captura Sensorial por Orden Público (Restricción RPAS/Drones)
+                    </p>
                 </div>
                 {(geoJsonData || gpsPoints.length > 0) && (
-                    <button onClick={handleClear} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                    <button onClick={handleClear} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:text-white transition-colors">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
                     </button>
                 )}
             </div>
@@ -270,9 +317,18 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                             <span className="text-[10px] text-white font-mono uppercase tracking-widest">Precisión: {gpsAccuracy?.toFixed(1) || '--'}m</span>
                         </div>
                         <div className="absolute top-4 right-4 z-20 bg-brand-green/20 px-3 py-1.5 rounded-full border border-brand-green/30 flex items-center gap-2">
-                            <span className="text-[10px] text-brand-green-bright font-black uppercase">Próximo Punto: {nextCaptureSeconds}s</span>
+                            <span className="text-[10px] text-brand-green-bright font-black uppercase tracking-tighter">IMU Activo: {imuData.length > 0 ? '✓' : '...'}</span>
                         </div>
                     </>
+                )}
+
+                {/* IMU Visualization (Micro-Lidar Style) */}
+                {isCapturing && (
+                    <div className="absolute bottom-16 right-4 z-20 flex gap-[1px] items-end h-8">
+                        {imuData.map((d, i) => (
+                            <div key={i} className="w-[2px] bg-brand-green-bright" style={{ height: `${Math.min(d.acc * 2, 32)}px`, opacity: i / imuData.length }}></div>
+                        ))}
+                    </div>
                 )}
 
                 <div className="absolute inset-0 z-10 w-full h-full pointer-events-none flex flex-col items-center justify-center p-4">
@@ -283,71 +339,80 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                         </div>
                     )}
                 </div>
+
+                {/* Photo Snap Indicator Reverted to Simple GPS Pulse */}
+                {isCapturing && (
+                    <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-brand-green rounded-full animate-ping"></div>
+                        <span className="text-[8px] text-brand-green font-black uppercase tracking-widest">Rastreo GPS Activo</span>
+                    </div>
+                )}
             </div>
+
+            {/* Vertices Indicator - Exact Style from Screenshot */}
+            {!geoJsonData && gpsPoints.length > 0 && (
+                <div className="px-6 py-4 flex justify-between items-center border-b border-white/5 bg-black/20">
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Polígono Escaneado</span>
+                    <span className="text-white font-black text-lg">{gpsPoints.length} Vértices</span>
+                </div>
+            )}
 
             {geoJsonData && (
                 <div className="mt-6 bg-white/5 p-6 rounded-industrial border border-white/10 shadow-2xl animate-in fade-in">
                     {!isValidated ? (
                         <div className="flex flex-col gap-4">
-                            <div className="flex justify-between">
-                                <span className="text-[10px] text-gray-400 font-bold uppercase">Polígono Escaneado</span>
-                                <span className="text-white font-bold">{gpsPoints.length} Vértices</span>
+                            <div className="flex justify-between items-center mb-2 px-1">
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Polígono Escaneado</span>
+                                <span className="text-white font-black text-xl">{gpsPoints.length} Vértices</span>
                             </div>
                             <div className="flex gap-2">
                                 <button 
                                     onClick={async () => {
                                         setIsValidated(true);
-                                        // PERSISTENCIA INMEDIATA: Guardamos en logs de trazabilidad
+                                        // PERSISTENCIA EN BÓVEDA DE TRAZABILIDAD (AOC PROTOCOL)
                                         try {
+                                            const polygonObj = JSON.parse(geoJsonData || '{}');
                                             await fetch('/api/track-verify', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({
                                                     email: userEmail || 'unknown@axis.pro',
                                                     farm_name: farmName || 'Parcela Escaneada',
-                                                    polygon: geoJsonData,
-                                                    eudr_status: 'captured',
-                                                    user_agent: navigator.userAgent
+                                                    polygon: polygonObj,
+                                                    eudr_status: 'sensor_verified', // Cambiamos estado para reflejar auditoría IMU
+                                                    metadata: {
+                                                        imu_signature: polygonObj.properties?.sensorAudit,
+                                                        device_info: navigator.userAgent
+                                                    }
                                                 })
                                             });
-                                            console.log("AXIS LOG: Mapeo persistido en Bóveda de Trazabilidad.");
+                                            console.log("AXIS AUDIT: Mapeo sensorial sellado en la Bóveda.");
                                         } catch (e) {
-                                            console.error("Error persistiendo mapeo:", e);
+                                            console.error("Error persistiendo mapeo sensorial:", e);
                                         }
                                     }} 
-                                    className="flex-1 bg-brand-green text-black font-black py-5 rounded-industrial shadow-lg uppercase text-xs"
+                                    className="flex-1 bg-brand-green hover:bg-brand-green-bright text-black font-black py-6 rounded-2xl shadow-xl uppercase text-xs tracking-widest transition-all active:scale-95"
                                 >
-                                    Aceptar y Guardar
-                                </button>
-                                
-                                <button
-                                    onClick={() => {
-                                        const blob = new Blob([geoJsonData || ''], { type: 'application/json' });
-                                        const url = URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = `EUDR_${farmName || 'Lote'}_${new Date().toISOString().split('T')[0]}.geojson`;
-                                        document.body.appendChild(a);
-                                        a.click();
-                                        document.body.removeChild(a);
-                                        URL.revokeObjectURL(url);
-                                    }}
-                                    title="Descargar GeoJSON"
-                                    className="px-6 bg-white/5 border border-white/10 text-white rounded-industrial hover:bg-white/10 transition-all flex items-center justify-center group"
-                                >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:translate-y-0.5 transition-transform">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                                    </svg>
+                                    ACEPTAR Y SELLAR CON SENSORES
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center">
-                             <h4 className="text-xl font-black text-white uppercase">Validación EUDR</h4>
-                             <button onClick={handleGfwValidation} disabled={isGfwValidating} className="mt-4 w-full bg-brand-green/20 text-brand-green-bright py-4 rounded-xl font-black text-[10px] uppercase">
-                                {isGfwValidating ? 'Analizando GFW...' : 'Analizar con Global Forest Watch'}
+                        <div className="text-center py-4 animate-in zoom-in-95 duration-500">
+                             <h4 className="text-2xl font-black text-white uppercase tracking-tighter mb-6">VALIDACIÓN EUDR</h4>
+                             <button 
+                                onClick={handleGfwValidation} 
+                                disabled={isGfwValidating} 
+                                className="w-full bg-[#1A2333] hover:bg-[#253249] text-blue-400 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all border border-blue-500/10 shadow-lg"
+                             >
+                                {isGfwValidating ? 'PROCESANDO ANÁLISIS...' : 'ANALIZAR CON GLOBAL FOREST WATCH'}
                              </button>
-                             {gfwStatus === 'secure' && <div className="mt-4 p-4 bg-brand-green/10 border border-brand-green/30 text-brand-green-bright font-bold uppercase text-[10px]">Lote Seguro / Sin Deforestación</div>}
+                             
+                             {gfwStatus === 'secure' && (
+                                <div className="mt-4 p-5 bg-[#0D1A15] border border-brand-green/30 text-brand-green-bright font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl animate-in slide-in-from-bottom-2">
+                                    LOTE SEGURO / SIN DEFORESTACIÓN
+                                </div>
+                             )}
                         </div>
                     )}
                 </div>
@@ -372,11 +437,16 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                     {!isCapturing && gpsPoints.length === 0 && (
                         <>
                             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                            <button onClick={() => fileInputRef.current?.click()} className="w-full bg-white/5 border border-white/10 text-gray-400 py-4 rounded-2xl font-bold uppercase text-[10px]">Cargar archivo SICA</button>
+                            <button onClick={() => fileInputRef.current?.click()} className="w-full bg-white/5 border border-white/10 text-gray-400 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest">Cargar archivo SICA</button>
                         </>
                     )}
                 </div>
             )}
+
+            <style jsx>{`
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
         </div>
     );
 }

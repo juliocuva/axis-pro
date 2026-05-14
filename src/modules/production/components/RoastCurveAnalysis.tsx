@@ -304,7 +304,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                                 yAxisId="left"
                                 type="monotone"
                                 dataKey="temp"
-                                stroke="#00a651"
+                                stroke="#0C6056"
                                 strokeWidth={5}
                                 strokeLinecap="round"
                                 dot={(props: any) => {
@@ -312,16 +312,16 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                                     if (payload.event) {
                                         return (
                                             <g key={payload.time}>
-                                                <circle cx={cx} cy={cy} r={6} fill="#00a651" stroke="#fff" strokeWidth={2} className="animate-pulse" />
-                                                <text x={cx} y={cy - 18} textAnchor="middle" fill="#00a651" fontSize={10} fontWeight="700" className="font-mono">
+                                                <circle cx={cx} cy={cy} r={6} fill="#0C6056" stroke="#fff" strokeWidth={2} className="animate-pulse" />
+                                                <text x={cx} y={cy - 18} textAnchor="middle" fill="#0C6056" fontSize={10} fontWeight="700" className="font-mono">
                                                     {payload.event}
                                                 </text>
                                             </g>
                                         );
                                     }
-                                    return <circle cx={cx} cy={cy} r={2} fill="#00a651" opacity={0} />;
+                                    return <circle cx={cx} cy={cy} r={2} fill="#0C6056" opacity={0} />;
                                 }}
-                                activeDot={{ r: 10, fill: '#00a651', stroke: '#fff', strokeWidth: 3 }}
+                                activeDot={{ r: 10, fill: '#0C6056', stroke: '#fff', strokeWidth: 3 }}
                             />
 
                             <Line

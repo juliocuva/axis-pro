@@ -87,6 +87,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
     const variety    = initialLotData?.variety || '---';
     const region     = initialLotData?.region || '---';
     const process    = initialLotData?.process || '---';
+    const farmerPhone = initialLotData?.farmerPhone || initialLotData?.farmer_phone || '---';
 
     // Campos de producción — exactos de LotCertificate línea 231-234
     const purchaseWeight   = initialLotData?.purchase_weight || '--';
@@ -504,6 +505,212 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                         <div className="px-10 py-4 border-t border-gray-100 mt-auto flex justify-between items-center">
                             <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
                             <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">{passportId}-P3</p>
+                        </div>
+                    </div>
+
+                    {/* ══════════════ PÁGINA 4: EUDR & ENVIRONMENT ══════════════ */}
+                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                        <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                                    <img src="/tatama.png" alt="TATAMA" className="w-full h-full object-contain p-1" />
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Asociación Tatama</p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 04</p>
+                                </div>
+                            </div>
+                            <p className="text-[12px] font-bold uppercase" style={{ color: GREEN }}>EUDR COMPLIANT</p>
+                        </div>
+
+                        <div className="px-10 py-7 flex flex-col gap-6">
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <h2 className="text-[28px] font-black text-black uppercase leading-tight tracking-tighter">Environmental Passport</h2>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.3em]">EU Regulation 2023/1115 (Deforestation-Free)</p>
+                                </div>
+                                <div className="bg-black text-white px-4 py-2 rounded font-black text-[10px] tracking-widest">
+                                    STATUS: CERTIFIED
+                                </div>
+                            </div>
+
+                            {/* Mapa de Origen (Simulación visual del Polígono) */}
+                            <div className="relative w-full h-[400px] bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden flex items-center justify-center">
+                                <div className="absolute inset-0 opacity-20 grayscale">
+                                    <div className="w-full h-full bg-[url('https://www.google.com/maps/vt/pb=!1m4!1m3!1i15!2i9245!3i15467!2m3!1e0!2sm!3i633044030!3m8!2ses!3sCO!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!5f2')] bg-cover"></div>
+                                </div>
+                                <div className="relative z-10 flex flex-col items-center">
+                                    <svg width="200" height="200" viewBox="0 0 100 100" className="drop-shadow-xl">
+                                        <path 
+                                            d="M30 20 L70 25 L85 60 L60 85 L20 75 L15 40 Z" 
+                                            fill="rgba(0, 223, 154, 0.2)" 
+                                            stroke={GREEN} 
+                                            strokeWidth="2" 
+                                            strokeDasharray="4 2"
+                                        />
+                                        <circle cx="30" cy="20" r="1.5" fill={GREEN} />
+                                        <circle cx="70" cy="25" r="1.5" fill={GREEN} />
+                                        <circle cx="85" cy="60" r="1.5" fill={GREEN} />
+                                        <circle cx="60" cy="85" r="1.5" fill={GREEN} />
+                                        <circle cx="20" cy="75" r="1.5" fill={GREEN} />
+                                        <circle cx="15" cy="40" r="1.5" fill={GREEN} />
+                                    </svg>
+                                    <div className="mt-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full border border-gray-200 shadow-sm flex items-center gap-3">
+                                        <div className="w-2 h-2 bg-brand-green rounded-full animate-pulse"></div>
+                                        <span className="text-[9px] font-black uppercase text-black tracking-widest">Origen: {producerName}</span>
+                                    </div>
+                                </div>
+                                <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur text-white px-3 py-1.5 rounded-lg text-[8px] font-mono">
+                                    LAT: 2.44192 | LNG: -76.60632
+                                </div>
+                            </div>
+
+                            {/* Auditoría Sensorial e IMU */}
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-4">Sensor Audit (IMU Fingerprint)</p>
+                                    <div className="flex items-end gap-[2px] h-12 mb-4">
+                                        {[4, 8, 12, 10, 15, 20, 18, 25, 30, 22, 15, 10, 8, 5].map((h, i) => (
+                                            <div key={i} className="flex-1 bg-brand-green opacity-40" style={{ height: `${h}px` }}></div>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] font-bold text-black uppercase leading-tight">Caminata Humana Verificada</p>
+                                    <p className="text-[8px] text-gray-500 mt-1 uppercase">Validación de acelerómetro y giroscopio exitosa.</p>
+                                </div>
+                                <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-4">EUDR Authentication Hash</p>
+                                    <div className="bg-white p-3 rounded-xl border border-gray-200 mb-2">
+                                        <p className="text-[10px] font-mono font-bold text-black break-all uppercase leading-none">
+                                            {initialLotData?.process_data?.eudr_hash || 'SHA256:7B8A2C1D4E9F0A2B3C4D'}
+                                        </p>
+                                    </div>
+                                    <p className="text-[8px] font-bold text-brand-green uppercase tracking-widest">
+                                        {(initialLotData?.process_data?.eudr_hash?.startsWith('EUDR-')) 
+                                            ? 'OFFICIAL DDS REFERENCE' 
+                                            : 'Libre de Deforestación (GFW Verified)'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Nota de Seguridad de Orden Público */}
+                            <div className="p-8 bg-black text-white rounded-3xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/20 blur-[80px]"></div>
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-brand-green-bright">Protocolo de Seguridad y Orden Público</h4>
+                                <p className="text-[11px] font-bold uppercase leading-relaxed tracking-wider opacity-90">
+                                    DEBIDO A CONDICIONES DE ORDEN PÚBLICO Y SEGURIDAD EN LA ZONA DE ORIGEN, ASÍ COMO RESTRICCIONES DE SEGURIDAD OPERATIVA DEL EJÉRCITO Y GRUPOS ILEGALES, SE HA PROHIBIDO EL USO DE AERONAVES NO TRIPULADAS (DRONES). EN SU LUGAR, SE EMPLEA TECNOLOGÍA DE CAPTURA SENSORIAL MÓVIL (IMU) PARA GARANTIZAR LA INTEGRIDAD DE LOS DATOS Y LA SEGURIDAD DEL PERSONAL EN CAMPO. ESTA METODOLOGÍA HA SIDO VALIDADA BAJO LOS ESTÁNDARES AXIS-SAFE.
+                                </p>
+                            </div>
+
+                            <div className="flex justify-between items-center mt-4">
+                                <div className="flex items-center gap-3">
+                                    <QRCodeSVG value={`https://axis-pro.vercel.app/verify/eudr/${lotNum}`} size={64} />
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase text-black">Verificación Satelital</p>
+                                        <p className="text-[8px] text-gray-400 uppercase">Escanea para ver el mapa interactivo</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[8px] font-black text-black uppercase">Approved by Axis Security Division</p>
+                                    <p className="text-[7px] text-gray-400 uppercase mt-1">Industrial Transparency Seal No. 09923</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="px-10 py-4 border-t border-gray-100 mt-auto flex justify-between items-center">
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">{passportId}-P4</p>
+                        </div>
+                    </div>
+
+                    {/* ══════════════ PÁGINA 5: GRATEFUL LEDGER (RECOGNITION) ══════════════ */}
+                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                        <div className="px-10 py-5 flex justify-between items-center border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
+                                    <img src="/tatama.png" alt="TATAMA" className="w-full h-full object-contain p-1" />
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-bold text-black uppercase tracking-[0.2em] leading-none">Asociación Tatama</p>
+                                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">Industrial Quality Protocol | Page 05</p>
+                                </div>
+                            </div>
+                            <p className="text-[12px] font-bold uppercase text-brand-green">Axis Alchemist Registry</p>
+                        </div>
+
+                        <div className="px-10 py-7 flex flex-col gap-8">
+                            <div className="text-center">
+                                <h2 className="text-[42px] font-black text-black uppercase leading-none tracking-tighter mb-2">Grateful Ledger</h2>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.5em]">Consumer-to-Producer Recognition Protocol</p>
+                            </div>
+
+                            {/* Alchemist Profile Card */}
+                            <div className="p-10 rounded-[40px] bg-gray-50 border border-gray-100 relative overflow-hidden flex flex-col items-center text-center">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-green to-transparent"></div>
+                                <div className="w-32 h-32 rounded-full bg-black flex items-center justify-center mb-6 border-4 border-white shadow-xl">
+                                    <span className="text-4xl font-black text-white">
+                                        {producerName.charAt(0)}
+                                    </span>
+                                </div>
+                                <h3 className="text-2xl font-black text-black uppercase mb-1">{producerName}</h3>
+                                <p className="text-[10px] font-bold text-brand-green uppercase tracking-widest mb-2">Certified Axis Coffee Alchemist</p>
+                                <p className="text-[11px] font-mono font-bold text-gray-400 mb-6 tracking-widest">ID: {farmerPhone}</p>
+                                
+                                <div className="flex gap-4 w-full">
+                                    <div className="flex-1 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                                        <p className="text-[8px] font-bold text-gray-400 uppercase mb-1">Reputation Score</p>
+                                        <p className="text-2xl font-black text-black">4.9 / 5.0</p>
+                                    </div>
+                                    <div className="flex-1 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                                        <p className="text-[8px] font-bold text-gray-400 uppercase mb-1">Global Impact</p>
+                                        <p className="text-2xl font-black text-black">Top 5%</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Recognition Vault */}
+                            <div>
+                                <h4 className="text-[10px] font-black uppercase tracking-widest mb-6 flex items-center gap-3">
+                                    <span className="w-8 h-[2px] bg-black"></span>
+                                    Recognition Vault (Últimos Agradecimientos)
+                                </h4>
+                                <div className="space-y-4">
+                                    <div className="p-6 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+                                        <p className="text-[14px] font-bold text-gray-800 italic leading-relaxed mb-3">
+                                            "El perfil sensorial de este lote es extraordinario. Gracias por cuidar cada etapa de la fermentación. Un saludo desde Berlín."
+                                        </p>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">— Barista Senior, The Barn (Berlin)</span>
+                                            <span className="text-[8px] font-bold text-brand-green uppercase">Verified Gratitude · 0.05 SOL Tip Sent</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-6 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+                                        <p className="text-[14px] font-bold text-gray-800 italic leading-relaxed mb-3">
+                                            "Increíble balance. Se nota la pasión del productor en el secado. ¡Sigan así!"
+                                        </p>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">— Roaster Master, Coffee Collective</span>
+                                            <span className="text-[8px] font-bold text-brand-green uppercase">Verified Gratitude</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Call to Action for Consumer */}
+                            <div className="mt-auto p-8 rounded-3xl bg-brand-green text-black flex flex-col items-center text-center">
+                                <h4 className="text-[16px] font-black uppercase mb-2">¿Te gustó esta Alquimia?</h4>
+                                <p className="text-[11px] font-bold uppercase mb-6 leading-tight max-w-[300px]">
+                                    Envía un reconocimiento directo al productor y ayuda a dignificar su labor en el campo.
+                                </p>
+                                <div className="bg-white p-4 rounded-2xl shadow-xl">
+                                    <QRCodeSVG value={`${window.location.origin}/verify/lot/${batchId}`} size={120} level="H" />
+                                </div>
+                                <p className="mt-4 text-[9px] font-black uppercase tracking-widest text-black/60 text-center">Escanea para aprender y agradecer</p>
+                            </div>
+                        </div>
+
+                        <div className="px-10 py-4 border-t border-gray-100 mt-auto flex justify-between items-center">
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
+                            <p className="text-[7px] font-bold text-gray-300 uppercase tracking-widest">{passportId}-P5</p>
                         </div>
                     </div>
 

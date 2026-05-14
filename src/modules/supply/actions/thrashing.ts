@@ -17,7 +17,8 @@ export async function processThrashingAction(
     processType: string,
     humidity: number,
     preparationProtocol: string = 'UGQ',
-    sortingMethod: string = 'Máquina Selectora'
+    sortingMethod: string = 'Máquina Selectora',
+    processData: any = {}
 ) {
     try {
         // 1. Obtener Peso Pergamino desde la fuente de verdad (DB)
@@ -43,6 +44,7 @@ export async function processThrashingAction(
         // 3. Persistencia Unidireccional
         const updatedProcessData = {
             ...(lot.process_data || {}),
+            ...processData,
             preparation_protocol: preparationProtocol,
             sorting_method: sortingMethod
         };

@@ -555,7 +555,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full sm:w-auto bg-brand-green text-black px-12 py-5 rounded-industrial-sm font-black uppercase tracking-[0.2em] text-xs hover:bg-brand-green-bright transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-2xl"
+                        className="w-full sm:w-auto bg-brand-green text-white px-12 py-5 rounded-industrial-sm font-black uppercase tracking-[0.2em] text-xs hover:bg-opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-4 shadow-2xl"
                     >
                         {isSubmitting ? (
                             <>
@@ -564,10 +564,11 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             </>
                         ) : (
                             <>
-                                SELLAR PROCESO Y VERIFICAR
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                    <path d="m9 12 2 2 4-4" />
+                                GUARDAR DATOS
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                    <polyline points="7 3 7 8 15 8" />
                                 </svg>
                             </>
                         )}

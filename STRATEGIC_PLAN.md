@@ -5,9 +5,9 @@ Este documento detalla la hoja de ruta estratégica para la consolidación de AX
 ---
 
 ## 1. Módulo 1: Supply & Quality (Consolidación)
-- [ ] **Finalización de Trilla:** Implementar el cálculo automático del Factor de Rendimiento en el backend (Server Actions) para evitar manipulaciones de datos.
-- [ ] **Protocolo SCA:** Garantizar la vinculación permanente y segura de los datos de catación al ID del lote.
-- **Estado Actual:** TRL 6 -> **Objetivo:** TRL 7 (Listo para demostración operativa).
+- [x] **Finalización de Trilla:** Implementar el cálculo automático del Factor de Rendimiento en el backend (Server Actions) para evitar manipulaciones de datos.
+- [x] **Protocolo SCA:** Garantizar la vinculación permanente y segura de los datos de catación al ID del lote.
+- **Estado Actual:** TRL 7 (Consolidado e Industrializado).
 
 ## 2. Módulo 2: Roast Intelligence (Prioridad Inversionista)
 - [x] **Capa de Comparación (Ghost Profile):** Funcionalidad para superponer curvas maestras sobre tuestes en vivo.

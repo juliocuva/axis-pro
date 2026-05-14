@@ -24,13 +24,21 @@ const FERMENTATION_STYLES = [
     { id: 'honey_yellow', label: 'Yellow Honey' },
     { id: 'honey_red', label: 'Red Honey' },
     { id: 'honey_black', label: 'Black Honey' },
-    { id: 'semi_lavado', label: 'Semi-Lavado / Gilling Basah' }
+    { id: 'semi_lavado', label: 'Semi-Lavado / Gilling Basah' },
+    { id: 'otro', label: '+ OTRO (ESPECIFICAR)' }
 ];
 
 const COLOMBIAN_REGIONS = [
     'Huila', 'Antioquia', 'Tolima', 'Cauca', 'Caldas', 'Santander',
     'Valle del Cauca', 'Risaralda', 'Nariño', 'Quindío', 'Cundinamarca',
-    'Sierra Nevada', 'Cesar', 'Boyacá', 'Casanare', 'Meta', 'Caquetá'
+    'Sierra Nevada', 'Cesar', 'Boyacá', 'Casanare', 'Meta', 'Caquetá', 'Otro'
+];
+
+const COMMON_MUNICIPALITIES = [
+    'Pitalito', 'Acevedo', 'Garzón', 'Gigante', 'San Agustín', 'Andes', 
+    'Fredonia', 'Salgar', 'Ciudad Bolívar', 'Planadas', 'Ibagué', 'Ataco', 'Chaparral',
+    'Popayán', 'Inzá', 'Páez', 'Timbío', 'Manizales', 'Chinchiná', 'Palestina', 
+    'Pasto', 'Buesaco', 'La Unión', 'Otro'
 ];
 
 const COUNTRIES = [
@@ -41,9 +49,10 @@ interface PurchaseFormProps {
     onPurchaseComplete?: (lot: any) => void;
     selectedLot?: any;
     user: { email: string, name: string, companyId: string, role?: string } | null;
+    isReadOnly?: boolean;
 }
 
-export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: PurchaseFormProps) {
+export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, isReadOnly }: PurchaseFormProps) {
     const [dynamicVarieties, setDynamicVarieties] = useState<string[]>(COFFEE_VARIETIES_BASE);
     const [customVariety, setCustomVariety] = useState('');
 
@@ -55,8 +64,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
         altitude: 1600,
         country: 'Colombia',
         region: '',
+        municipality: '',
         variety: '' as CoffeeVariety | string,
         process: 'lavado' as ProcessType,
+        farmerPhone: '',
         purchaseWeight: 0,
         purchaseValue: 0,
         purchaseDate: new Date().toISOString().split('T')[0],
@@ -79,7 +90,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             recipiente_fermentacion: '',
             tipo_secado: '',
             duracion_secado: '',
-            agente_infusion: ''
+            agente_infusion: '',
+            fermentation_notes: ''
         } as any
 
     };
@@ -179,6 +191,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 region: selectedLot.region || '',
                 variety: isBase ? selectedLot.variety : 'Otro',
                 process: (selectedLot.process as ProcessType) || 'lavado',
+                farmerPhone: selectedLot.process_data?.farmer_phone || '',
                 purchaseWeight: Number(selectedLot.purchase_weight) || 0,
                 purchaseValue: Number(selectedLot.purchase_value) || 0,
                 purchaseDate: selectedLot.purchase_date || new Date().toISOString().split('T')[0],
@@ -308,7 +321,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                         farmSizeHectares: found.area_total_ha || prev.farmSizeHectares,
                         altitude: found.altitud_promedio_msnm || prev.altitude,
                         country: 'Colombia', // Por defecto para FNC/SICA
-                        region: found.departamento ? `${found.departamento}, ${found.municipio}` : prev.region,
+                        region: found.departamento || prev.region,
+                        municipality: found.municipio || prev.municipality,
                         processData: { ...prev.processData, eudr_polygon: found.poligono_geojson || '' }
                     }));
 
@@ -341,6 +355,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             altitude: farmer.altitude,
             country: farmer.country,
             region: farmer.region,
+            municipality: farmer.municipality || '',
             latitude: farmer.latitude,
             longitude: farmer.longitude,
             sicaId: farmer.sicaId || prev.sicaId
@@ -394,14 +409,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                 result = await updateCoffeePurchase(selectedLot.id, {
                     ...formData,
                     variety: finalVariety,
-                    processData: { ...formData.processData, sica_id: formData.sicaId }
-                });
+                    processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone }
+                }, user);
             } else {
                 // Modo Creación
                 result = await createCoffeePurchase({
                     ...formData,
                     variety: finalVariety,
-                    processData: { ...formData.processData, sica_id: formData.sicaId },
+                    processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone },
                     companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
                 });
             }
@@ -462,15 +477,15 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-bg-card border border-brand-green/30 p-10 rounded-industrial max-w-md w-full text-center space-y-6 shadow-2xl shadow-brand-green/20">
+                    <div className="bg-soft-white border border-brand-green/30 p-10 rounded-industrial max-w-md w-full text-center space-y-6 shadow-2xl shadow-brand-green/20">
                         <div className="w-20 h-20 bg-brand-green/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-brand-green/30">
                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="3" className="animate-bounce">
                                 <path d="M20 6L9 17l-5-5" />
                             </svg>
                         </div>
-                        <h3 className="text-2xl font-bold text-white uppercase tracking-tighter">Lote Registrado</h3>
-                        <p className="text-gray-400 leading-relaxed text-sm">
-                            Identificador <span className="text-brand-green-bright font-mono font-bold">{formData.lotNumber}</span> ha sido persistido exitosamente en el Core de <span className="text-white font-bold">Axis Coffee Pro</span>.
+                        <h3 className="text-2xl font-bold text-carbon uppercase tracking-tighter">Lote Registrado</h3>
+                        <p className="text-gray-700 leading-relaxed text-sm">
+                            Identificador <span className="text-brand-green font-mono font-bold">{formData.lotNumber}</span> ha sido persistido exitosamente en el Core de <span className="text-carbon font-bold">Axis Coffee Pro</span>.
                         </p>
                         <div className="flex flex-col gap-3">
                             <button
@@ -478,7 +493,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                 onClick={() => {
                                     handleNewLot();
                                 }}
-                                className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-5 rounded-industrial-sm transition-all uppercase tracking-widest text-sm shadow-lg shadow-brand-green/20"
+                                className="w-full bg-brand-green hover:bg-brand-green text-carbon font-bold py-5 rounded-industrial-sm transition-all uppercase tracking-widest text-sm shadow-lg shadow-brand-green/20"
                             >
                                 Nuevo Lote (Limpiar Todo)
                             </button>
@@ -506,7 +521,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     setCurrentStep(1);
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
-                                className="w-full bg-white/5 hover:bg-white/10 text-brand-green-bright font-bold py-4 rounded-industrial-sm transition-all border border-brand-green/20 uppercase tracking-widest text-[10px]"
+                                className="w-full bg-carbon/5 hover:bg-carbon/10 text-brand-green font-bold py-4 rounded-industrial-sm transition-all border border-brand-green/20 uppercase tracking-widest text-[10px]"
                             >
                                 Conservar Productor (Mantener a {formData.farmerName.split(' ')[0] || 'Elena'})
                             </button>
@@ -516,52 +531,38 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             )}
 
             {status && (
-                <div className={`p-4 rounded-industrial-sm text-sm font-bold border ${status.type === 'success' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright' : 'bg-brand-red/10 border-brand-red/30 text-brand-red-bright'}`}>
+                <div className={`p-4 rounded-industrial-sm text-sm font-bold border ${status.type === 'success' ? 'bg-brand-green/10 border-brand-green/30 text-brand-green' : 'bg-brand-red/10 border-brand-red/30 text-brand-red-bright'}`}>
                     {status.message}
                 </div>
             )}
 
             {/* Stepper Wizard Header */}
             <div className="flex justify-between items-center mb-8 relative px-4">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] h-0.5 bg-white/5 z-0 mx-4">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] h-0.5 bg-carbon/5 z-0 mx-4">
                     <div className="h-full bg-brand-green/50 transition-all duration-500" style={{ width: `${(currentStep - 1) * 50}%` }}></div>
                 </div>
 
                 <button type="button" onClick={() => setCurrentStep(1)} className="relative z-10 flex flex-col items-center gap-2 group">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-bg-main border-2 transition-all duration-500 ${currentStep >= 1 ? 'border-brand-green shadow-[0_0_20px_rgba(255,255,255,0.4)] text-brand-green' : 'border-white/20 text-gray-600'}`}>1</div>
-                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-bg-main px-3 transition-colors ${currentStep === 1 ? 'text-brand-green-bright' : (currentStep > 1 ? 'text-brand-green/70' : 'text-gray-500')}`}>Origen y Productor</span>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-white border-2 transition-all duration-500 ${currentStep >= 1 ? 'border-brand-green shadow-[0_0_20px_rgba(255,255,255,0.4)] text-brand-green' : 'border-carbon/30 text-gray-600'}`}>1</div>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-white px-3 transition-colors ${currentStep === 1 ? 'text-brand-green' : (currentStep > 1 ? 'text-brand-green/70' : 'text-gray-600')}`}>Origen y Productor</span>
                 </button>
                 <button type="button" onClick={() => setCurrentStep(2)} className="relative z-10 flex flex-col items-center gap-2 group">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-bg-main border-2 transition-all duration-500 ${currentStep >= 2 ? 'border-brand-green shadow-[0_0_20px_rgba(255,255,255,0.4)] text-brand-green' : 'border-white/20 text-gray-600'}`}>2</div>
-                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-bg-main px-3 transition-colors ${currentStep === 2 ? 'text-brand-green-bright' : (currentStep > 2 ? 'text-brand-green/70' : 'text-gray-500')}`}>Comercialización</span>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-white border-2 transition-all duration-500 ${currentStep >= 2 ? 'border-brand-green shadow-[0_0_20px_rgba(255,255,255,0.4)] text-brand-green' : 'border-carbon/30 text-gray-600'}`}>2</div>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-white px-3 transition-colors ${currentStep === 2 ? 'text-brand-green' : (currentStep > 2 ? 'text-brand-green/70' : 'text-gray-600')}`}>Comercialización</span>
                 </button>
                 <button type="button" onClick={() => setCurrentStep(3)} className="relative z-10 flex flex-col items-center gap-2 group">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-bg-main border-2 transition-all duration-500 ${currentStep >= 3 ? 'border-brand-green shadow-[0_0_20px_rgba(255,255,255,0.4)] text-brand-green' : 'border-white/20 text-gray-600'}`}>3</div>
-                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-bg-main px-3 transition-colors ${currentStep === 3 ? 'text-brand-green-bright' : 'text-gray-500'}`}>Beneficio (Productor)</span>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-white border-2 transition-all duration-500 ${currentStep >= 3 ? 'border-brand-green shadow-[0_0_20px_rgba(255,255,255,0.4)] text-brand-green' : 'border-carbon/30 text-gray-600'}`}>3</div>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest bg-white px-3 transition-colors ${currentStep === 3 ? 'text-brand-green' : 'text-gray-600'}`}>Beneficio (Productor)</span>
                 </button>
             </div>
 
-            <fieldset disabled={isSubmitting} className="border-none p-0 m-0 min-h-[450px] relative transition-all">
+            <fieldset disabled={isSubmitting || isReadOnly} className="border-none p-0 m-0 min-h-[450px] relative transition-all">
                 {currentStep === 1 && (
-                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
-                        <h3 className="text-brand-green-bright font-bold flex items-center gap-2 mb-6">
+                    <section className="bg-soft-white border border-carbon/10 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
+                        <h3 className="text-brand-green font-bold flex items-center gap-2 mb-6">
                             <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
                             Datos Principales de Origen
                         </h3>
-
-                        <div className="mb-8">
-                            <div className="bg-white/5 border border-white/10 p-4 rounded-industrial">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2 block">Fecha de Recolección (Cosecha)</label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={formData.harvestDate}
-                                    onChange={(e) => setFormData({ ...formData, harvestDate: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-white font-bold outline-none focus:border-brand-green"
-                                />
-                                <p className="text-[8px] text-gray-500 mt-2 uppercase">Vital para determinar la edad y frescura del lote.</p>
-                            </div>
-                        </div>
 
 
 
@@ -584,14 +585,15 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                                 handleSicaSearch();
                                             }
                                         }}
-                                        className="flex-1 bg-bg-main border border-brand-green/30 rounded-full px-6 py-4 focus:border-brand-green outline-none font-mono text-brand-green-bright text-lg shadow-inner"
+                                        className="flex-1 bg-white border border-brand-green/30 rounded-full px-6 py-4 focus:border-brand-green outline-none font-mono text-brand-green text-lg shadow-inner"
                                         disabled={isSubmitting}
+                                        onBlur={handleSicaSearch}
                                     />
                                     <button
                                         type="button"
                                         onClick={handleSicaSearch}
                                         disabled={isSearchingSica || !formData.sicaId}
-                                        className="bg-brand-green hover:bg-brand-green-bright disabled:opacity-50 text-bg-main px-8 py-4 rounded-full font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,223,154,0.3)] hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
+                                        className="bg-brand-green hover:bg-brand-green disabled:opacity-50 text-bg-main px-8 py-4 rounded-full font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,223,154,0.3)] hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
                                         title="Autocompletar"
                                     >
                                         {isSearchingSica ? (
@@ -614,7 +616,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
 
                             {availableLots.length > 0 && (
                                 <div className="md:col-span-3 bg-brand-green/5 border border-brand-green/20 p-6 rounded-industrial animate-in zoom-in-95 duration-500 mb-6">
-                                    <label className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest flex items-center gap-2 mb-3">
+                                    <label className="text-[10px] font-bold text-brand-green uppercase tracking-widest flex items-center gap-2 mb-3">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                                         Selección de Lote Específico (Cruce de Mapa)
                                     </label>
@@ -624,21 +626,21 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                                 key={lot.id}
                                                 type="button"
                                                 onClick={() => handleLotSelect(lot.id)}
-                                                className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-brand-green/20 border-brand-green text-brand-green-bright shadow-lg shadow-brand-green/20' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/20'}`}
+                                                className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-brand-green/20 border-brand-green text-brand-green shadow-lg shadow-brand-green/20' : 'bg-white border-carbon/10 text-gray-600 hover:border-carbon/30'}`}
                                             >
                                                 <span className="text-[10px] font-bold uppercase tracking-tight">{lot.id}</span>
                                                 <span className="text-[8px] font-mono opacity-60">{lot.area_ha} HA</span>
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="text-[9px] text-brand-green-bright/60 uppercase tracking-widest mt-4 font-medium">
+                                    <p className="text-[9px] text-brand-green/60 uppercase tracking-widest mt-4 font-medium">
                                         * Al seleccionar un lote, se cruzarán los datos con Global Forest Watch para validación EUDR.
                                     </p>
                                 </div>
                             )}
 
-                            <div className="md:col-span-3 my-4 border-t border-white/5 pt-10 relative">
-                                <div className="absolute left-1/2 -translate-x-1/2 -top-3 bg-bg-card px-4 flex items-center gap-3">
+                            <div className="md:col-span-3 my-4 border-t border-carbon/10 pt-10 relative">
+                                <div className="absolute left-1/2 -translate-x-1/2 -top-3 bg-soft-white px-4 flex items-center gap-3">
                                     <span className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em]">Directorio de Confianza (Modo Concierge)</span>
                                 </div>
                                 
@@ -648,13 +650,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                             key={i}
                                             type="button"
                                             onClick={() => handleFarmerSelect(f)}
-                                            className="flex-shrink-0 bg-white/5 border border-white/10 hover:border-brand-green/40 hover:bg-brand-green/5 p-4 rounded-industrial-sm transition-all text-left min-w-[200px]"
+                                            className="flex-shrink-0 bg-carbon/5 border border-carbon/20 hover:border-brand-green/40 hover:bg-brand-green/5 p-4 rounded-industrial-sm transition-all text-left min-w-[200px]"
                                         >
                                             <div className="flex justify-between items-start">
-                                                <p className="text-[10px] font-black text-white uppercase truncate">{f.farmer_name}</p>
+                                                <p className="text-[10px] font-black text-carbon uppercase truncate">{f.farmer_name}</p>
                                                 <span className="text-[8px] bg-brand-green/10 text-brand-green px-1.5 py-0.5 rounded font-mono font-bold">LOTE {f.lot_number?.split('-').pop() || '01'}</span>
                                             </div>
-                                            <p className="text-[9px] text-gray-500 uppercase tracking-tighter mt-1 truncate">{f.farm_name} • {f.region}</p>
+                                            <p className="text-[9px] text-gray-600 uppercase tracking-tighter mt-1 truncate">{f.farm_name} • {f.region}</p>
                                         </button>
                                     )) : (
                                         <div className="w-full text-center py-4 text-[9px] text-gray-700 uppercase tracking-widest">Inicia tu primer registro para construir tu directorio</div>
@@ -663,49 +665,47 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             </div>
                             
                             <div className="md:col-span-3 my-2 relative py-4">
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">
                                     Identificación Individual de Lote
                                 </span>
                             </div>
-                            <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Caficultor</label>
+                            <div className="md:col-span-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">Caficultor</label>
                                 <input
                                     type="text"
                                     placeholder="Ej. Alejandra Pérez"
                                     required
                                     value={formData.farmerName}
                                     onChange={(e) => setFormData({ ...formData, farmerName: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
                                     disabled={isSubmitting}
                                 />
                             </div>
+                            <div className="md:col-span-1">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">Celular del Productor</label>
+                                <input
+                                    type="tel"
+                                    placeholder="Ej. +57 301 000 0000"
+                                    value={formData.farmerPhone}
+                                    onChange={(e) => setFormData({ ...formData, farmerPhone: e.target.value })}
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-brand-green font-bold"
+                                    disabled={isSubmitting}
+                                />
+                                <p className="text-[8px] text-gray-600 mt-2 uppercase tracking-widest">Esencial para el programa Grateful Ledger.</p>
+                            </div>
+
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Nombre de la Finca</label>
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">Nombre de la Finca</label>
                                 <input
                                     type="text"
                                     placeholder="Ej. Alejandría"
                                     required
                                     value={formData.farmName}
                                     onChange={(e) => setFormData({ ...formData, farmName: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none"
                                     disabled={isSubmitting}
                                 />
                             </div>
-                            <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest"># Lote</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej. LOTE-001"
-                                    required
-                                    value={formData.lotNumber}
-                                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-brand-green-bright font-bold uppercase"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <NumericInput
                                     label="Altura (msnm)"
@@ -718,49 +718,39 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     inputClassName="font-bold"
                                     unit="M"
                                 />
-                                <p className="text-[10px] mt-2 text-gray-500 uppercase">Rango: 800 - 2500 msnm</p>
+                                <p className="text-[10px] mt-2 text-gray-600 uppercase">Rango: 800 - 2500 msnm</p>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Fecha de Compra</label>
-                                <div className="relative group/date">
-                                    <input
-                                        type="date"
-                                        required
-                                        value={formData.purchaseDate}
-                                        onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                                        className={`w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-brand-green-bright font-bold scheme-dark pr-12 cursor-pointer
-                                            [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
-                                        disabled={isSubmitting}
-                                    />
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-green-bright group-focus-within/date:opacity-100 opacity-60 transition-opacity">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                            <line x1="16" y1="2" x2="16" y2="6" />
-                                            <line x1="8" y1="2" x2="8" y2="6" />
-                                            <line x1="3" y1="10" x2="21" y2="10" />
-                                        </svg>
-                                    </div>
-                                </div>
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest"># Lote</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. LOTE-001"
+                                    required
+                                    value={formData.lotNumber}
+                                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-brand-green font-bold uppercase"
+                                    disabled={isSubmitting}
+                                />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                            <div className="bg-bg-main/50 border border-white/5 rounded-industrial-sm p-4 h-full flex flex-col justify-center">
-                                <label className="text-xs font-bold text-brand-green uppercase tracking-widest block mb-2">Tamaño de la Finca (Hectáreas) *</label>
+                            <div className="bg-brand-green/5 border border-brand-green/20 p-4 rounded-industrial-sm h-full flex flex-col justify-center">
+                                <label className="text-[10px] font-bold text-brand-green uppercase tracking-widest block mb-2">Tamaño de la Finca (Hectáreas) *</label>
                                 <input
                                     type="number"
                                     step="0.1"
                                     placeholder="Ej. 4.5"
                                     value={formData.farmSizeHectares || ''}
                                     onChange={(e) => setFormData({ ...formData, farmSizeHectares: parseFloat(e.target.value) || undefined })}
-                                    className="w-full bg-bg-main border border-brand-green/30 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none text-brand-green-bright font-bold text-lg"
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none text-carbon font-bold text-lg"
                                     disabled={isSubmitting}
                                 />
-                                <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-tight">Utilizado para requerimiento EUDR (≥ 4 He).</p>
+                                <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tight">Utilizado para requerimiento EUDR (≥ 4 He).</p>
                             </div>
 
                             <div className="bg-brand-green/5 border border-brand-green/20 p-4 rounded-industrial-sm h-full flex flex-col justify-center">
-                                <label className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest flex items-center gap-2 mb-2">
+                                <label className="text-[10px] font-bold text-brand-green uppercase tracking-widest flex items-center gap-2 mb-2">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
                                     Vínculo de Ubicación Smart (Maps)
                                 </label>
@@ -768,7 +758,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     <input
                                         type="text"
                                         placeholder="Pegue aquí el enlace..."
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none text-xs text-gray-300"
+                                        className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none text-xs text-carbon"
                                         value={smartLinkText}
                                         onChange={(e) => setSmartLinkText(e.target.value)}
                                         disabled={isSubmitting}
@@ -795,7 +785,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                             });
                                             if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
                                         }}
-                                        className="bg-brand-green/20 hover:bg-brand-green text-brand-green-bright hover:text-black border border-brand-green/50 transition-colors px-4 py-3 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-brand-green/20 hover:bg-brand-green text-brand-green hover:text-black border border-brand-green/50 transition-colors px-4 py-3 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Extraer GPS"
                                     >
                                         Extraer GPS
@@ -806,16 +796,16 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
 
                         {(formData.farmSizeHectares ?? 0) >= 4 && (
                             <div className="bg-brand-green/10 border border-brand-green/30 rounded-industrial-sm p-4 mb-6 flex items-start gap-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2" className="mt-0.5 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c6056" strokeWidth="2" className="mt-0.5 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                                 <div>
-                                    <h4 className="text-sm font-bold text-brand-green-bright uppercase tracking-widest">Requisito EUDR Detectado</h4>
-                                    <p className="text-[10px] text-brand-green-soft mt-1 uppercase">Debido al tamaño de la finca (≥ 4 hectáreas), este lote requerirá georreferenciación EUDR para su exportación. El polígono se asignará directamente en el Módulo Aduanero.</p>
+                                    <h4 className="text-sm font-bold text-brand-green uppercase tracking-widest">Requisito EUDR Detectado</h4>
+                                    <p className="text-[10px] text-brand-green mt-1 uppercase">Debido al tamaño de la finca (≥ 4 hectáreas), este lote requerirá georreferenciación EUDR para su exportación. El polígono se asignará directamente en el Módulo Aduanero.</p>
                                 </div>
                             </div>
                         )}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
                                     Latitud
                                 </label>
                                 <input
@@ -824,12 +814,12 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     placeholder="Ej. 4.570868"
                                     value={formData.latitude || ''}
                                     onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none font-mono text-sm"
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none font-mono text-sm"
                                     disabled={isSubmitting}
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
                                     Longitud
                                 </label>
                                 <input
@@ -838,7 +828,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     placeholder="Ej. -74.297333"
                                     value={formData.longitude || ''}
                                     onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none font-mono text-sm"
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none font-mono text-sm"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -846,299 +836,330 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Región / Departamento</label>
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">Región / Departamento</label>
                                 <select
                                     required
                                     value={formData.region}
                                     onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-carbon"
                                     disabled={isSubmitting}
                                 >
                                     <option value="">Seleccionar</option>
-                                    {COLOMBIAN_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                                    {COLOMBIAN_REGIONS.map(r => (
+                                        <option key={r} value={r} className={r === 'Otro' ? 'text-brand-green font-bold' : ''}>
+                                            {r === 'Otro' ? '+ OTRO (ESPECIFICAR)' : r}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">País</label>
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">Municipio</label>
                                 <select
                                     required
-                                    value={formData.country}
-                                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                                    value={formData.municipality}
+                                    onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
+                                    className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-carbon"
                                     disabled={isSubmitting}
                                 >
                                     <option value="">Seleccionar</option>
-                                    {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                    {COMMON_MUNICIPALITIES.map((m, idx) => (
+                                        <option key={`${m}-${idx}`} value={m} className={m === 'Otro' ? 'text-brand-green font-bold' : ''}>
+                                            {m === 'Otro' ? '+ OTRO (ESPECIFICAR)' : m}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
+                        </div>
+
+                        <div className="flex justify-end mt-10">
+                            <button
+                                type="button"
+                                onClick={nextStep}
+                                className="bg-brand-green/10 hover:bg-brand-green/20 text-brand-green border border-brand-green/30 px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-all group"
+                            >
+                                Siguiente: Comercialización
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-1 transition-transform">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </button>
                         </div>
                     </section>
                 )}
 
                 {currentStep === 2 && (
-                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
-                        <h3 className="text-brand-green-bright font-bold flex items-center gap-2 mb-6">
+                    <section className="bg-soft-white border border-carbon/10 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
+                        <h3 className="text-brand-green font-bold flex items-center gap-2 mb-6">
                             <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
                             Negocio, Destino y Tipo de Grano
                         </h3>
 
+
+
+
                         <div className="grid grid-cols-1 gap-6">
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Estado del Café al Ingreso</label>
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest block mb-3">Estado del Café al Ingreso</label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'pergamino' })}
-                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green/10 border-brand-green text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/10'}`}
+                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green border-brand-green text-white shadow-lg shadow-brand-green/20' : 'bg-white border-carbon/10 text-gray-600 hover:border-carbon/20'}`}
                                     >
                                         <span className="text-[11px] font-bold uppercase tracking-widest">CAFÉ PERGAMINO</span>
-                                        <span className="text-[8px] opacity-60 font-bold uppercase">(Requiere Trilla)</span>
+                                        <span className={`text-[8px] opacity-60 font-bold uppercase ${formData.coffeeType === 'pergamino' ? 'text-white' : 'text-gray-500'}`}>(Requiere Trilla)</span>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'excelso' })}
-                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-brand-green/10 border-brand-green text-brand-green-bright shadow-lg shadow-brand-green/5' : 'bg-bg-main border-white/5 text-gray-500 hover:border-white/10'}`}
+                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-brand-green border-brand-green text-white shadow-lg shadow-brand-green/20' : 'bg-white border-carbon/10 text-gray-600 hover:border-carbon/20'}`}
                                     >
                                         <span className="text-xs font-bold uppercase tracking-widest">CAFÉ VERDE / ORO</span>
-                                        <span className="text-[10px] opacity-60 font-bold uppercase">(Salto a Calidad)</span>
+                                        <span className={`text-[10px] opacity-60 font-bold uppercase ${formData.coffeeType === 'excelso' ? 'text-white' : 'text-gray-500'}`}>(Salto a Calidad)</span>
                                     </button>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Destino Exclusivo del Lote</label>
-                                <div className="w-full py-4 px-4 rounded-industrial-sm flex items-center justify-between border bg-brand-green/10 border-brand-green/30 text-brand-green-bright shadow-inner">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest block mb-2">Destino Exclusivo del Lote</label>
+                                <div className="w-full py-4 px-4 rounded-industrial-sm flex items-center justify-between border bg-brand-green/10 border-brand-green/30 text-brand-green shadow-inner">
                                     <span className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
                                         EXPORTACIÓN VERDE
                                     </span>
-                                    <span className="text-[10px] text-brand-green-bright/60 uppercase font-bold">(Ruta Única)</span>
+                                    <span className="text-[10px] text-brand-green/60 uppercase font-bold">(Ruta Única)</span>
                                 </div>
                             </div>
 
-                            <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                                <label className="text-xs font-bold text-brand-green-bright uppercase tracking-widest flex justify-between">
-                                    Certificado / Lote de Exportación Internacional
-                                    <span className="text-gray-500 font-normal">(Opcional)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej. SNT-2026-X001"
-                                    value={formData.exportCertificate}
-                                    onChange={(e) => setFormData({ ...formData, exportCertificate: e.target.value })}
-                                    className="w-full bg-bg-main border border-brand-green/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green-soft outline-none text-white font-mono shadow-inner shadow-brand-green/5 placeholder:text-gray-700"
-                                    disabled={isSubmitting}
-                                />
+                            {/* INJECTED IDENTITY FIELDS (Moved from Step 3) */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-carbon/10">
+                                {/* Fecha de Recolección */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-brand-green uppercase tracking-[0.2em]">Fecha de Recolección</label>
+                                    <div className="relative group/date">
+                                        <input
+                                            type="date"
+                                            required
+                                            value={formData.harvestDate}
+                                            onChange={(e) => setFormData({ ...formData, harvestDate: e.target.value })}
+                                            className={`w-full bg-white border border-brand-green/30 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none text-carbon font-bold scheme-light pr-12 cursor-pointer text-xs shadow-lg shadow-brand-green/5
+                                                [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                                            disabled={isSubmitting}
+                                        />
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-green group-focus-within/date:opacity-100 opacity-60 transition-opacity">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                                <line x1="16" y1="2" x2="16" y2="6" />
+                                                <line x1="8" y1="2" x2="8" y2="6" />
+                                                <line x1="3" y1="10" x2="21" y2="10" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Variedad */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-brand-green uppercase tracking-[0.2em]">Variedad del Café</label>
+                                    <select
+                                        required
+                                        value={formData.variety}
+                                        onChange={(e) => setFormData({ ...formData, variety: e.target.value })}
+                                        className="w-full bg-white border border-brand-green/30 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-carbon shadow-lg shadow-brand-green/5"
+                                        disabled={isSubmitting}
+                                    >
+                                        <option value="">Seleccionar</option>
+                                        {dynamicVarieties.map(v => <option key={v} value={v}>{v}</option>)}
+                                        <option value="Otro" className="text-brand-green font-bold">+ OTRO (INGRESAR NUEVO)</option>
+                                    </select>
+                                </div>
+
+                                {/* Proceso */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-brand-green uppercase tracking-[0.2em]">Proceso Base</label>
+                                    <select
+                                        value={formData.process}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, process: e.target.value as ProcessType }))}
+                                        className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-green transition-all"
+                                    >
+                                        <option value="lavado">Lavado</option>
+                                        <option value="honey">Honey</option>
+                                        <option value="natural">Natural</option>
+                                    </select>
+                                </div>
                             </div>
+
+
                         </div>
 
-                        <div className="space-y-4">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                Cantidad Pack de Compra
-                            </label>
-                            <div className="relative group w-full">
-                                <input
-                                    type="text"
-                                    inputMode="decimal"
-                                    required
-                                    value={displayWeight}
-                                    onChange={handleWeightChange}
-                                    placeholder="0"
-                                    disabled={isSubmitting}
-                                    className="block w-full bg-bg-main border rounded-industrial-sm px-6 py-5 text-4xl outline-none font-bold transition-all pr-16 border-white/10 text-brand-green-bright focus:border-brand-green placeholder:text-white/60 placeholder:font-normal"
-                                />
-                                <div className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2 right-6">
-                                    <span className="text-gray-500 font-bold opacity-60 text-[10px] tracking-widest text-center">KG</span>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-carbon/10">
+                            {/* Fecha de Compra */}
+                            <div className="bg-carbon/5 border border-carbon/20 p-4 rounded-industrial flex flex-col justify-center">
+                                <label className="text-[10px] font-bold text-gray-700 uppercase tracking-[0.2em] mb-2 block">Fecha de Compra</label>
+                                <div className="relative group/date">
+                                    <input
+                                        type="date"
+                                        required
+                                        value={formData.purchaseDate}
+                                        onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+                                        className={`w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none text-brand-green font-bold scheme-light pr-12 cursor-pointer text-xs
+                                            [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                                        disabled={isSubmitting}
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-green group-focus-within/date:opacity-100 opacity-60 transition-opacity">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                            <line x1="16" y1="2" x2="16" y2="6" />
+                                            <line x1="8" y1="2" x2="8" y2="6" />
+                                            <line x1="3" y1="10" x2="21" y2="10" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Cantidad */}
+                            <div className="bg-carbon/5 border border-carbon/20 p-4 rounded-industrial flex flex-col justify-center">
+                                <label className="text-[10px] font-bold text-gray-700 uppercase tracking-widest block mb-2">Cantidad Pack de Compra</label>
+                                <div className="relative group w-full">
+                                    <input
+                                        type="text"
+                                        inputMode="decimal"
+                                        required
+                                        value={displayWeight}
+                                        onChange={handleWeightChange}
+                                        placeholder="0"
+                                        disabled={isSubmitting}
+                                        className="block w-full bg-white border rounded-industrial-sm px-4 py-3 text-xl outline-none font-bold transition-all pr-12 border-carbon/20 text-brand-green focus:border-brand-green placeholder:text-carbon/60 placeholder:font-normal"
+                                    />
+                                    <div className="absolute top-1/2 -translate-y-1/2 right-4">
+                                        <span className="text-gray-600 font-bold opacity-60 text-[9px] tracking-widest">KG</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Valor */}
+                            <div className="bg-carbon/5 border border-carbon/20 p-4 rounded-industrial flex flex-col justify-center">
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="text-[10px] font-bold text-carbon uppercase tracking-widest block">Valor Total Pagado</label>
+                                    <span className="text-[7px] bg-brand-green/20 text-brand-green px-1.5 py-0.5 rounded font-bold uppercase border border-brand-green/30">Fair Trade</span>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={displayValue}
+                                        onChange={handleValueChange}
+                                        className="w-full bg-white border border-carbon/20 rounded-industrial-sm px-4 py-3 text-xl font-bold tracking-tighter outline-none transition-all pr-12 text-carbon focus:border-brand-green"
+                                        placeholder="0"
+                                        disabled={isSubmitting}
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] text-gray-700 font-bold tracking-widest opacity-60">COP</span>
                                 </div>
                             </div>
                         </div>
+                        <p className="text-[9px] text-gray-500 mt-2 uppercase text-right tracking-widest">Auditoría Financiera Industrial • Manejando COP</p>
 
-                        <div className="space-y-4 pt-4 border-t border-white/5">
-                            <div className="flex justify-between items-end">
-                                <label className="text-xs font-bold text-white uppercase tracking-widest block border-l-2 border-brand-green pl-3">Valor Total Pagado al Productor</label>
-                                <span className="text-[10px] bg-brand-green/20 text-brand-green-bright px-2 py-1 rounded font-bold uppercase tracking-widest border border-brand-green/30">Auditoría Fair Trade</span>
-                            </div>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={displayValue}
-                                    onChange={handleValueChange}
-                                    className={`w-full bg-bg-main border rounded-industrial-sm px-6 py-5 text-4xl font-bold tracking-tighter outline-none transition-all pr-32 border-white/10 text-white focus:border-brand-green`}
-                                    placeholder="0"
-                                    disabled={isSubmitting}
-                                />
-                                <span className="absolute right-12 top-6 text-xs text-gray-400 font-bold tracking-widest opacity-60">COP</span>
-                            </div>
+                        <div className="flex justify-between items-center mt-10">
+                            <button
+                                type="button"
+                                onClick={prevStep}
+                                className="text-gray-600 hover:text-carbon text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                                Volver a Origen
+                            </button>
+                            <button
+                                type="button"
+                                onClick={nextStep}
+                                className="bg-brand-green/10 hover:bg-brand-green/20 text-brand-green border border-brand-green/30 px-10 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-4 transition-all group"
+                            >
+                                Siguiente: Datos del Beneficio
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-1 transition-transform">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </button>
                         </div>
-                        <p className="text-[10px] text-gray-500 mt-1 uppercase">Manejando Pesos Colombianos (COP)</p>
                     </section>
                 )}
 
                 {currentStep === 3 && (
-                    <section className="bg-bg-card border border-white/5 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
+                    <section className="bg-soft-white border border-carbon/10 p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-brand-green-bright font-bold flex items-center gap-2">
+                            <h3 className="text-brand-green font-bold flex items-center gap-2">
                                 <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
                                 Beneficio: Datos Básicos del Productor
                             </h3>
                             <span className="px-3 py-1 bg-brand-green/10 text-brand-green text-[10px] font-bold uppercase tracking-widest rounded-full border border-brand-green/20">Campo Mínimo</span>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* 1. Variedad del Café */}
-                            <div>
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Variedad del Café</label>
-                                <select
-                                    required
-                                    value={formData.variety}
-                                    onChange={(e) => setFormData({ ...formData, variety: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 mt-1 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
-                                    disabled={isSubmitting}
-                                >
-                                    <option value="">Seleccionar</option>
-                                    {dynamicVarieties.map(v => <option key={v} value={v}>{v}</option>)}
-                                    <option value="Otro" className="text-brand-green font-bold">+ OTRO (INGRESAR NUEVO)</option>
-                                </select>
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                             {/* 1. Variedad del Café (Heredada) */}
+                             <div>
+                                 <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] flex items-center gap-2 mb-1">
+                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                     Variedad Detectada (Origen)
+                                 </label>
+                                 <div className="w-full bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm px-5 py-3 text-sm font-bold text-brand-green flex items-center justify-between shadow-inner">
+                                     <span>{formData.variety || '---'}</span>
+                                     <span className="text-[8px] opacity-60 uppercase font-black">Identidad Confirmada</span>
+                                 </div>
+                             </div>
 
-                            {/* 2. Tipo de proceso */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Proceso Base</label>
-                                <select
-                                    value={formData.process}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, process: e.target.value as ProcessType }))}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 focus:border-brand-green outline-none uppercase appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-white"
-                                    disabled={isSubmitting}
-                                >
-                                    {PROCESS_TYPES.map(p => (
-                                        <option key={p} value={p}>
-                                            {p.toUpperCase()}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                             {/* 2. Tipo de proceso (Heredado) */}
+                             <div>
+                                 <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] flex items-center gap-2 mb-1">
+                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                     Proceso Base Detectado
+                                 </label>
+                                 <div className="w-full bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm px-5 py-3 text-sm font-bold text-brand-green flex items-center justify-between shadow-inner">
+                                     <span className="uppercase">{formData.process || '---'}</span>
+                                     <span className="text-[8px] opacity-60 uppercase font-black">Flujo Standard</span>
+                                 </div>
+                             </div>
 
-                            {/* 2.1 Estilo de fermentación */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-xs font-bold text-brand-green-bright uppercase tracking-widest">Estilo de Fermentación / Variación</label>
+                            <div className="flex flex-col gap-2 md:col-span-3">
+                                <label className="text-xs font-bold text-brand-green uppercase tracking-widest">Estilo de Fermentación / Variación</label>
                                 <select
                                     value={formData.processData?.fermentation_style || 'estandar'}
                                     onChange={(e) => setFormData(prev => ({ 
                                         ...prev, 
                                         processData: { ...prev.processData, fermentation_style: e.target.value } 
                                     }))}
-                                    className="w-full bg-bg-main border border-brand-green/30 rounded-industrial-sm px-5 py-3 focus:border-brand-green-soft outline-none uppercase appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-gray-300"
-                                    disabled={isSubmitting}
+                                    className="w-full bg-white border border-brand-green/30 rounded-industrial-sm px-5 py-4 focus:border-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-green shadow-lg shadow-brand-green/5"
                                 >
                                     {FERMENTATION_STYLES.map(style => (
-                                        <option key={style.id} value={style.id}>
-                                            {style.label.toUpperCase()}
+                                        <option key={style.id} value={style.id} className={style.id === 'otro' ? 'font-bold text-brand-green' : ''}>
+                                            {style.label}
                                         </option>
                                     ))}
-                                    <option value="otro" className="text-brand-green font-bold">+ OTRO (NUEVO MÉTODO)</option>
                                 </select>
-                            </div>
 
-                            {formData.processData?.fermentation_style === 'otro' && (
-                                <div className="col-span-1 md:col-span-2 animate-in slide-in-from-top-2 duration-300 bg-brand-green/5 border border-brand-green/20 p-6 rounded-industrial mt-2 mb-4">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <label className="text-xs font-bold text-brand-green-bright uppercase tracking-widest flex items-center gap-2">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20M2 12h20" /></svg>
-                                            Propuesta de Nuevo Método
-                                        </label>
-                                        <span className="text-[9px] bg-brand-green/20 text-brand-green-bright px-2 py-1 rounded font-bold uppercase tracking-widest border border-brand-green/30">Requiere Validación IA</span>
+                                {formData.processData?.fermentation_style === 'otro' && (
+                                    <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
+                                        <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] block mb-2">Descripción del Proceso Personalizado</label>
+                                        <textarea
+                                            placeholder="Describa aquí el protocolo de fermentación, microorganismos utilizados o variaciones específicas del caficultor..."
+                                            value={formData.processData?.fermentation_notes || ''}
+                                            onChange={(e) => setFormData(prev => ({ 
+                                                ...prev, 
+                                                processData: { ...prev.processData, fermentation_notes: e.target.value } 
+                                            }))}
+                                            className="w-full bg-white border border-brand-green border-dashed rounded-industrial-sm px-5 py-4 text-sm font-bold text-carbon outline-none focus:border-brand-green h-32 resize-none shadow-inner"
+                                        />
+                                        <p className="text-[8px] text-gray-500 mt-2 uppercase tracking-widest">Este detalle técnico será incluido en el certificado final de exportación.</p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Nombre Técnico del Proceso</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Ej. Mossto Inoculado"
-                                                required={formData.processData?.fermentation_style === 'otro'}
-                                                value={formData.processData.custom_fermentation_name || ''}
-                                                onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, custom_fermentation_name: e.target.value } }))}
-                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-white placeholder:text-gray-700 font-bold"
-                                                disabled={isSubmitting}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Breve Descripción (Variables)</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Ej. Inoculación levadura a 18°C por 120h"
-                                                required={formData.processData?.fermentation_style === 'otro'}
-                                                value={formData.processData.custom_fermentation_description || ''}
-                                                onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, custom_fermentation_description: e.target.value } }))}
-                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-white placeholder:text-gray-700"
-                                                disabled={isSubmitting}
-                                            />
-                                        </div>
-                                    </div>
-                                    <p className="text-[9px] text-gray-500 uppercase tracking-widest mt-4 leading-relaxed text-center">
-                                        El algoritmo de Axis procesará esta descripción para catalogar sus variables (Temp, Horas, Inoculantes). El sistema se auto-actualizará para futuros lotes si el Q-Grader lo valida.
-                                    </p>
-                                </div>
-                            )}
-
-
-                            {/* 3. Método de secado */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Método de Secado</label>
-                                <select
-                                    value={formData.processData.tipo_secado || ''}
-                                    onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, tipo_secado: e.target.value } }))}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-3 focus:border-brand-green outline-none text-[12px] font-bold text-white appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%2300a651%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
-                                    disabled={isSubmitting}
-                                >
-                                    <option value="" className="text-gray-400 font-normal">Seleccionar</option>
-                                    <option value="Camas Africanas">Camas Africanas</option>
-                                    <option value="Marquesina Parabólica">Marquesina / Parabólica</option>
-                                    <option value="Silo Mecánico">Secadora Mecánica (Silo)</option>
-                                    <option value="Patio al Sol">Patio de Cemento al Sol</option>
-                                    <option value="Secado Mixto">Mixto (Sol y Máquina)</option>
-                                </select>
-                            </div>
-
-                            {/* 4. Tiempo de secado */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Tiempo de Secado (Días/Horas)</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej. 15 días o 32 horas"
-                                    value={formData.processData.duracion_secado || ''}
-                                    onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, duracion_secado: e.target.value } }))}
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 focus:border-brand-green outline-none text-brand-green-bright font-bold"
-                                    disabled={isSubmitting}
-                                />
+                                )}
                             </div>
                         </div>
 
-                        {formData.variety === 'Otro' && (
-                            <div className="animate-in slide-in-from-top-2 duration-300 max-w-md">
-                                <label className="text-xs font-bold text-brand-green uppercase tracking-widest">Nombre Variedad Especial</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej. Sidra Salvaje"
-                                    required
-                                    value={customVariety}
-                                    onChange={(e) => setCustomVariety(e.target.value)}
-                                    className="w-full bg-bg-main border border-brand-green/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-white placeholder:text-gray-700"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                        )}
-
                         {/* SECCIÓN DE ALQUIMIA (FISICOQUÍMICA) */}
-                        <div className="pt-8 border-t border-white/5 space-y-6">
+                        <div className="pt-8 border-t border-carbon/10 space-y-6">
                             <div className="flex items-center justify-between">
-                                <h4 className="text-[10px] font-black text-brand-green-bright uppercase tracking-[0.4em] flex items-center gap-2">
+                                <h4 className="text-[10px] font-black text-brand-green uppercase tracking-[0.4em] flex items-center gap-2">
                                     <span className="w-2 h-2 bg-brand-green rounded-full animate-pulse"></span>
                                     Alquimia de Fermentación (Fisicoquímica)
                                 </h4>
-                                <span className="text-[9px] text-gray-500 font-mono uppercase">Control de Variables Críticas</span>
+                                <span className="text-[9px] text-gray-600 font-mono uppercase">Control de Variables Críticas</span>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                 <NumericInput
                                     label="pH Inicial"
                                     value={formData.processData?.ph_inicial || ''}
@@ -1148,7 +1169,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     }))}
                                     step={0.1}
                                     variant="blue"
-                                    inputClassName="text-sm"
+                                    inputClassName="text-sm !text-gray-400 !font-medium !h-[58px]"
                                 />
                                 <NumericInput
                                     label="pH Final"
@@ -1159,7 +1180,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     }))}
                                     step={0.1}
                                     variant="blue"
-                                    inputClassName="text-sm"
+                                    inputClassName="text-sm !text-gray-400 !font-medium !h-[58px]"
                                 />
                                 <NumericInput
                                     label="Grados Brix"
@@ -1171,7 +1192,20 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     step={0.1}
                                     unit="°Bx"
                                     variant="blue"
-                                    inputClassName="text-sm"
+                                    inputClassName="text-sm !text-gray-400 !font-medium !h-[58px]"
+                                />
+                                <NumericInput
+                                    label="Actividad Agua (Aw)"
+                                    value={formData.processData?.actividad_agua_aw || ''}
+                                    onChange={(val) => setFormData(prev => ({ 
+                                        ...prev, 
+                                        processData: { ...prev.processData, actividad_agua_aw: val } 
+                                    }))}
+                                    step={0.01}
+                                    unit="Aw"
+                                    placeholder="0.55"
+                                    variant="industrial"
+                                    inputClassName="text-sm !text-gray-400 !font-medium !h-[58px]"
                                 />
                                 <NumericInput
                                     label="Temp. Máx (°C)"
@@ -1183,26 +1217,25 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     step={0.5}
                                     unit="°C"
                                     variant="industrial"
-                                    inputClassName="text-sm"
+                                    inputClassName="text-sm !text-gray-400 !font-medium !h-[58px]"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Recipiente</label>
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Recipiente</label>
                                     <select
                                         value={formData.processData?.recipiente_fermentacion || ''}
                                         onChange={(e) => setFormData(prev => ({ 
                                             ...prev, 
                                             processData: { ...prev.processData, recipiente_fermentacion: e.target.value } 
                                         }))}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-xs font-bold text-white outline-none focus:border-brand-green uppercase appearance-none transition-all"
+                                        className="w-full h-[58px] bg-white border border-carbon/20 rounded-industrial-sm px-4 text-xs font-bold text-carbon outline-none focus:border-brand-green appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.1rem_1.1rem] bg-[position:right_1rem_center] bg-no-repeat transition-all"
                                     >
-                                        <option value="">Seleccionar</option>
-                                        <option value="Bioreactor Inoxidable">Bioreactor Inoxidable</option>
-                                        <option value="Tanque Plástico">Tanque Plástico</option>
-                                        <option value="Bolsa GrainPro">Bolsa GrainPro</option>
-                                        <option value="Tanque Cemento">Tanque Cemento</option>
+                                        <option value="">Seleccionar Recipiente</option>
+                                        {['Bioreactor Inoxidable', 'Tanque Plástico', 'Bolsa GrainPro', 'Tanque Cemento'].map(r => (
+                                            <option key={r} value={r}>{r}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <NumericInput
@@ -1214,10 +1247,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                     }))}
                                     unit="Hrs"
                                     variant="industrial"
-                                    inputClassName="text-sm"
+                                    inputClassName="text-sm !text-gray-400 !font-medium !h-[58px]"
                                 />
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Agente de Infusión</label>
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Agente de Infusión</label>
                                     <input
                                         type="text"
                                         placeholder="Ej. Frutas, Levaduras, Canela..."
@@ -1226,11 +1259,60 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                                             ...prev, 
                                             processData: { ...prev.processData, agente_infusion: e.target.value } 
                                         }))}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 text-xs font-bold text-white outline-none focus:border-brand-green uppercase transition-all"
+                                        className="w-full h-[58px] bg-white border border-carbon/20 rounded-industrial-sm px-4 text-xs font-bold text-carbon outline-none focus:border-brand-green uppercase transition-all shadow-inner"
                                     />
                                 </div>
                             </div>
                         </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-carbon/10">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">Método de Secado</label>
+                                <select
+                                    value={formData.processData?.tipo_secado || ''}
+                                    onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, tipo_secado: e.target.value } }))}
+                                    className="w-full h-[58px] bg-white border border-carbon/20 rounded-industrial-sm px-5 text-xs font-bold text-brand-green outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat transition-all"
+                                >
+                                    <option value="">Seleccionar Método</option>
+                                    {[
+                                        { id: 'Camas Africanas', label: 'Camas Africanas' },
+                                        { id: 'Marquesina Parabólica', label: 'Marquesina Parabólica' },
+                                        { id: 'Silo Mecánico', label: 'Silo Mecánico' },
+                                        { id: 'Patio al Sol', label: 'Patio al Sol' },
+                                        { id: 'Secado Mixto', label: 'Secado Mixto (Sol/Máquina)' }
+                                    ].map(m => (
+                                        <option key={m.id} value={m.id}>{m.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-xs font-bold text-gray-700 uppercase tracking-widest">Tiempo de Secado (Días/Horas)</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. 15 días o 32 horas"
+                                    value={formData.processData?.duracion_secado || ''}
+                                    onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, duracion_secado: e.target.value } }))}
+                                    className="w-full h-[58px] bg-white border border-carbon/20 rounded-industrial-sm px-5 text-sm font-bold text-carbon outline-none focus:border-brand-green placeholder:text-gray-400 placeholder:font-normal"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                        </div>
+
+                        {formData.variety === 'Otro' && (
+                            <div className="animate-in slide-in-from-top-2 duration-300 max-w-md pt-6 border-t border-carbon/10">
+                                <label className="text-xs font-bold text-brand-green uppercase tracking-widest">Nombre Variedad Especial</label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. Sidra Salvaje"
+                                    required
+                                    value={customVariety}
+                                    onChange={(e) => setCustomVariety(e.target.value)}
+                                    className="w-full bg-white border border-brand-green/30 rounded-industrial-sm px-4 py-3 mt-1 focus:border-brand-green outline-none text-carbon placeholder:text-gray-700"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                        )}
 
 
                     </section>
@@ -1239,23 +1321,23 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
             </fieldset>
 
             {/* Navigational Buttons */}
-            <div className="flex justify-between items-center mt-6 pt-6 border-t border-white/5 relative z-20">
+            <div className="flex justify-between items-center mt-6 pt-6 border-t border-carbon/10 relative z-20">
                 {currentStep > 1 ? (
-                    <button type="button" onClick={prevStep} disabled={isSubmitting} className="px-6 py-3 border border-white/10 text-white rounded-industrial-sm font-bold uppercase tracking-widest text-[10px] hover:bg-white/5 transition-colors disabled:opacity-50">
+                    <button type="button" onClick={prevStep} disabled={isSubmitting} className="px-6 py-3 border border-carbon/20 text-carbon rounded-industrial-sm font-bold uppercase tracking-widest text-[10px] hover:bg-carbon/5 transition-colors disabled:opacity-50">
                         &larr; Volver Atrás
                     </button>
                 ) : <div></div>}
 
                 {currentStep < 3 ? (
-                    <button type="button" onClick={nextStep} className="px-10 py-4 bg-brand-green/10 text-brand-green-bright border border-brand-green/30 rounded-industrial-sm font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-brand-green hover:text-black transition-colors shadow-[0_0_15px_rgba(0,255,136,0.1)]">
+                    <button type="button" onClick={nextStep} className="px-10 py-4 bg-brand-green/10 text-brand-green border border-brand-green/30 rounded-industrial-sm font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-brand-green hover:text-black transition-colors shadow-[0_0_15px_rgba(0,255,136,0.1)]">
                         Siguiente Paso &rarr;
                     </button>
                 ) : (
                     <div className="flex-1 ml-4 animate-in fade-in zoom-in-95 duration-500">
                         <button
                             type="submit"
-                            disabled={isSubmitting}
-                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadyRegistered ? 'bg-brand-green hover:bg-brand-green text-white border border-brand-green/30' : 'bg-brand-green hover:bg-brand-green-bright text-black disabled:opacity-30'}`}
+                            disabled={isSubmitting || isReadOnly}
+                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50`}
                         >
                             {isSubmitting ? (
                                 <>
@@ -1267,22 +1349,23 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user }: 
                             ) : (selectedLot?.status === 'completed' || selectedLot?.status === 'sealed') ? (
                                 <>
                                     PROCESO SELLADO Y VERIFICADO
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                        <path d="m9 12 2 2 4-4" />
-                                    </svg>
-                                </>
-                            ) : selectedLot?.id ? (
-                                <>
-                                    SELLAR PROCESO Y VERIFICAR
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:rotate-12 transition-transform">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                         <polyline points="22 4 12 14.01 9 11.01" />
                                     </svg>
                                 </>
+                            ) : selectedLot?.id ? (
+                                <>
+                                    GUARDAR DATOS
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                        <polyline points="17 21 17 13 7 13 7 21" />
+                                        <polyline points="7 3 7 8 15 8" />
+                                    </svg>
+                                </>
                             ) : (
                                 <>
-                                    REGISTRAR INGRESO AL SISTEMA AXIS
+                                    REGISTRAR ORIGEN AL SISTEMA AXIS
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
