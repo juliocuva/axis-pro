@@ -552,7 +552,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     <img src="/logo.png" alt="AXISONE" className="h-64 opacity-100" />
                     <div className="flex flex-col items-center gap-6">
                         <a 
-                            href="https://wa.me/573013970002" 
+                            href="https://wa.me/573013970002?text=Hola,%20me%20interesa%20mas%20información%20de%20AxisOne%20Coffee" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-xl font-bold text-black hover:text-brand-green transition-colors flex items-center gap-3"
