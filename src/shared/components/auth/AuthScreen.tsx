@@ -443,11 +443,11 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         {/* GLOBAL MAP LEFT */}
                         <div className="relative group aspect-square max-w-md mx-auto">
                             <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
-                            <div className="relative w-full h-full rounded-full overflow-hidden border border-black/5 bg-white shadow-2xl">
+                            <div className="relative w-full h-full rounded-full overflow-hidden border border-black/5 bg-[#f4f4f0] shadow-2xl">
                                 <img 
                                     src="/mapa-mundi.png" 
                                     alt="Global Ecosystem Map" 
-                                    className="w-full h-full object-contain p-8 grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-100 group-hover:scale-115" 
+                                    className="w-full h-full object-contain p-4 grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-100 group-hover:scale-110" 
                                 />
                             </div>
                             <div className="absolute inset-0 bg-gradient-to-r from-soft-white via-transparent to-soft-white pointer-events-none opacity-10"></div>
