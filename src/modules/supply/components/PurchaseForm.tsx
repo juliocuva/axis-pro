@@ -597,7 +597,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         type="button"
                                         onClick={handleSicaSearch}
                                         disabled={isSearchingSica || !formData.sicaId}
-                                        className="bg-black hover:bg-black/90 disabled:opacity-50 text-white px-8 py-4 rounded-full font-bold uppercase  transition-all shadow-lg hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
+                                        className="bg-brand-green hover:bg-brand-green/90 disabled:opacity-50 text-black px-8 py-4 rounded-full font-bold uppercase  transition-all shadow-lg hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
                                         title="Autocompletar"
                                     >
                                         {isSearchingSica ? (
@@ -630,7 +630,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 key={lot.id}
                                                 type="button"
                                                 onClick={() => handleLotSelect(lot.id)}
-                                                className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-black/20 border-black text-black shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-black hover:border-gray-400 shadow-sm'}`}
+                                                className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-brand-green border-brand-green text-black shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-black hover:border-gray-400 shadow-sm'}`}
                                             >
                                                 <span className="text-[11px] font-bold uppercase ">{lot.id}</span>
                                                 <span className="text-[9px] font-mono opacity-60">{lot.area_ha} HA</span>
@@ -804,7 +804,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             });
                                             if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
                                         }}
-                                        className="bg-black/20 hover:bg-black text-black hover:text-black border border-gray-400 shadow-sm transition-colors px-4 py-3 rounded-industrial-sm text-[11px] font-bold uppercase  whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-brand-green hover:bg-brand-green/90 text-black border border-brand-green shadow-sm transition-colors px-4 py-3 rounded-industrial-sm text-[11px] font-bold uppercase  whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Extraer GPS"
                                     >
                                         Extraer GPS
@@ -933,7 +933,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'pergamino' })}
-                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-black border-black text-black shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-black hover:border-gray-400 shadow-sm'}`}
+                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green border-brand-green text-black shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-black hover:border-gray-400 shadow-sm'}`}
                                     >
                                         <span className="text-[11px] font-bold uppercase ">CAFÉ PERGAMINO</span>
                                         <span className={`text-[9px] opacity-60 font-bold uppercase ${formData.coffeeType === 'pergamino' ? 'text-black' : 'text-black'}`}>(Requiere Trilla)</span>
@@ -941,7 +941,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'excelso' })}
-                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-black border-black text-black shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-black hover:border-gray-400 shadow-sm'}`}
+                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-brand-green border-brand-green text-black shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-black hover:border-gray-400 shadow-sm'}`}
                                     >
                                         <span className="text-xs font-bold uppercase ">CAFÉ VERDE / ORO</span>
                                         <span className={`text-[11px] opacity-60 font-bold uppercase ${formData.coffeeType === 'excelso' ? 'text-black' : 'text-black'}`}>(Salto a Calidad)</span>

@@ -49,8 +49,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             m15: 0,
             caracol: 0,
             menores: 0
-        },
-        density: 0
+        }
     });
 
     const [yieldFactor, setYieldFactor] = useState<number | null>(null);
@@ -108,8 +107,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         humidity: Number(data.humidity) || 11.0,
                         preparationProtocol: data.process_data?.preparation_protocol || 'EP',
                         sortingMethod: data.process_data?.sorting_method || 'Máquina Selectora Óptica',
-                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 0, m17: 0, m16: 0, m15: 0, caracol: 0, menores: 0 },
-                        density: data.process_data?.density || 0
+                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 0, m17: 0, m16: 0, m15: 0, caracol: 0, menores: 0 }
                     }));
 
 
@@ -208,8 +206,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 formData.sortingMethod,
                 {
                     ...lotDetails?.process_data,
-                    sieve_analysis: formData.sieveAnalysis,
-                    density: formData.density
+                    sieve_analysis: formData.sieveAnalysis
                 } as any
             );
 
@@ -284,16 +281,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10 mt-2">
-                <NumericInput
-                    label="Densidad (g/L)"
-                    value={formData.density}
-                    onChange={(val) => setFormData({ ...formData, density: val })}
-                    placeholder="Ej. 720"
-                    disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                    variant="industrial"
-                    inputClassName="text-sm !h-[58px] font-bold"
-                />
-                <div className="space-y-2 col-span-2">
+                <div className="space-y-2 col-span-3">
                     <label className="text-[11px] font-bold text-black uppercase  block">4. Protocolo de Preparación</label>
                     <div className="relative group/select">
                         <select
