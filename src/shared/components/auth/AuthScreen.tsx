@@ -355,11 +355,13 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     {/* DIGITAL GRAINS IMAGE */}
                     <div className="relative py-4 group mb-12 max-w-sm mx-auto aspect-square">
                         <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
-                        <img 
-                            src="/granos-digital.png" 
-                            alt="Digital Coffee DNA" 
-                            className="relative z-10 w-full h-full object-cover rounded-full drop-shadow-2xl animate-in zoom-in duration-1000 scale-105 group-hover:scale-115 transition-transform" 
-                        />
+                        <div className="relative w-full h-full rounded-full overflow-hidden border border-black/5 shadow-2xl">
+                            <img 
+                                src="/granos-digital.png" 
+                                alt="Digital Coffee DNA" 
+                                className="w-full h-full object-cover transition-transform duration-700 ease-out scale-100 group-hover:scale-125" 
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-24">
@@ -439,14 +441,16 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
                         {/* GLOBAL MAP LEFT */}
-                        <div className="relative group overflow-hidden aspect-square max-w-md mx-auto">
+                        <div className="relative group aspect-square max-w-md mx-auto">
                             <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
-                            <img 
-                                src="/mapa-mundi.png" 
-                                alt="Global Ecosystem Map" 
-                                className="relative z-10 w-full h-full object-cover rounded-full drop-shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-125" 
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-r from-soft-white via-transparent to-soft-white pointer-events-none opacity-20"></div>
+                            <div className="relative w-full h-full rounded-full overflow-hidden border border-black/5 bg-white shadow-2xl">
+                                <img 
+                                    src="/mapa-mundi.png" 
+                                    alt="Global Ecosystem Map" 
+                                    className="w-full h-full object-contain p-8 grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-100 group-hover:scale-115" 
+                                />
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-soft-white via-transparent to-soft-white pointer-events-none opacity-10"></div>
                         </div>
 
                         {/* CLIENT PROFILES RIGHT */}
