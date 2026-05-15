@@ -319,7 +319,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
                         <div className="relative group aspect-square max-w-md mx-auto">
                             <div className="absolute -inset-4 bg-brand-green/5 rounded-full blur-2xl group-hover:bg-brand-green/10 transition-all duration-1000"></div>
-                            <div className="relative aspect-square bg-white border border-black/5 rounded-full shadow-2xl shadow-black/5 overflow-hidden">
+                            <div className="relative aspect-square bg-white border-2 border-brand-green rounded-full shadow-2xl shadow-black/5 overflow-hidden">
                                 <img 
                                     src="/caos-document.png" 
                                     alt="Knowledge Chaos" 
@@ -355,7 +355,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     {/* DIGITAL GRAINS IMAGE */}
                     <div className="relative py-4 group mb-12 max-w-sm mx-auto aspect-square">
                         <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
-                        <div className="relative w-full h-full rounded-full overflow-hidden border border-black/5 shadow-2xl">
+                        <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand-green shadow-2xl">
                             <img 
                                 src="/granos-digital.png" 
                                 alt="Digital Coffee DNA" 
@@ -443,7 +443,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         {/* GLOBAL MAP LEFT */}
                         <div className="relative group aspect-square max-w-md mx-auto">
                             <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
-                            <div className="relative w-full h-full rounded-full overflow-hidden border border-black/5 bg-[#f4f4f0] shadow-2xl">
+                            <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand-green bg-[#f4f4f0] shadow-2xl">
                                 <img 
                                     src="/mapa-mundi.png" 
                                     alt="Global Ecosystem Map" 
