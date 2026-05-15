@@ -158,32 +158,32 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     <div className="w-full max-w-4xl animate-in zoom-in-95 duration-500">
                         <header className="flex justify-between items-center mb-8 px-4">
                             <div>
-                                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Perfil de Tueste</h3>
-                                <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.3em] mt-1">{selectedItem.label} • Telemetría Auditable</p>
+                                <h3 className="text-3xl font-black text-black uppercase er">Perfil de Tueste</h3>
+                                <p className="text-[11px] text-black font-bold uppercase  mt-1">{selectedItem.label} • Telemetría Auditable</p>
                             </div>
-                            <button onClick={() => { setSelectedItem(null); setViewMode(null); }} className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
+                            <button onClick={() => { setSelectedItem(null); setViewMode(null); }} className="p-3 bg-white rounded-full hover:bg-white transition-colors">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </header>
                         <RoastCurveVisualizer data={selectedItem.raw.roast_curve || []} title={`Historial Térmico: ${selectedItem.label}`} />
                         <footer className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
-                             <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Carga Verde</p>
-                                <p className="text-lg font-bold text-white">{selectedItem.raw.green_weight} KG</p>
+                             <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
+                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Carga Verde</p>
+                                <p className="text-lg font-bold text-black">{selectedItem.raw.green_weight} KG</p>
                              </div>
-                             <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Café Tostado</p>
-                                <p className="text-lg font-bold text-white">{selectedItem.raw.roasted_weight} KG</p>
+                             <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
+                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Café Tostado</p>
+                                <p className="text-lg font-bold text-black">{selectedItem.raw.roasted_weight} KG</p>
                              </div>
-                             <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Merma</p>
-                                <p className="text-lg font-bold text-brand-green">
+                             <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
+                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Merma</p>
+                                <p className="text-lg font-bold text-black">
                                     {(((selectedItem.raw.green_weight - selectedItem.raw.roasted_weight)/selectedItem.raw.green_weight)*100).toFixed(2)}%
                                 </p>
                              </div>
-                             <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                                <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Fecha</p>
-                                <p className="text-lg font-bold text-brand-green-bright">{selectedItem.raw.roast_date}</p>
+                             <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
+                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Fecha</p>
+                                <p className="text-lg font-bold text-black-bright">{selectedItem.raw.roast_date}</p>
                              </div>
                         </footer>
                     </div>
@@ -205,43 +205,34 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
 
             <div className="space-y-8 animate-in fade-in duration-700">
 
-                <header className="space-y-6">
-                    <div className="flex justify-between items-end">
-                        <div>
-                            <h3 className="text-2xl font-bold text-white uppercase tracking-tighter">Archivo de Nube AXIS</h3>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-1">Visualización de historial verificado in-situ</p>
-                        </div>
-                        <button onClick={fetchGlobalHistory} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
-                        </button>
-                    </div>
+                
 
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-brand-green transition-colors">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900 group-focus-within:text-black transition-colors">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                             </div>
                             <input 
                                 type="text" 
                                 placeholder="Buscar por Nombre del Caficultor o Lote (Ej: Londoño)..." 
-                                className="w-full bg-bg-card border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-white uppercase outline-none focus:border-brand-green transition-all"
+                                className="w-full bg-bg-card border border-gray-400 shadow-sm rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-black uppercase outline-none focus:border-black transition-all"
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                             />
                         </div>
-                        <div className="flex items-center gap-4 bg-bg-card border border-white/10 rounded-2xl p-1 px-4">
-                            <span className="text-[9px] font-bold text-gray-500 uppercase">Ver:</span>
+                        <div className="flex items-center gap-4 bg-bg-card border border-gray-400 shadow-sm rounded-2xl p-1 px-4">
+                            <span className="text-[9px] font-bold text-gray-900 uppercase">Ver:</span>
                             {[10, 25, 50, 100].map((n) => (
                                 <button
                                     key={n}
                                     onClick={() => { setItemsPerPage(n); setCurrentPage(1); }}
-                                    className={`px-3 py-2 rounded-lg text-[9px] font-black transition-all ${itemsPerPage === n ? 'bg-white/10 text-brand-green-bright' : 'text-gray-600 hover:text-white'}`}
+                                    className={`px-3 py-2 rounded-lg text-[9px] font-bold transition-all ${itemsPerPage === n ? 'bg-white text-black-bright' : 'text-gray-600 hover:text-black'}`}
                                 >
                                     {n}
                                 </button>
                             ))}
                         </div>
-                        <div className="flex bg-bg-card border border-white/10 rounded-2xl p-1">
+                        <div className="flex bg-bg-card border border-gray-400 shadow-sm rounded-2xl p-1">
                             {['ALL', 'EXPORT', 'LOTE', 'AUDIT'].map((t) => (
                                 <button
                                     key={t}
@@ -254,24 +245,24 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                             setCurrentPage(1); 
                                         }
                                     }}
-                                    className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${filterType === t || (t === 'AUDIT' && showAuditModal) ? 'bg-brand-green text-black' : 'text-gray-500 hover:text-white'}`}
+                                    className={`px-6 py-2 rounded-xl text-[9px] font-bold uppercase  transition-all ${filterType === t || (t === 'AUDIT' && showAuditModal) ? 'bg-brand-green text-black' : 'text-gray-900 hover:text-black'}`}
                                 >
                                     {t === 'ALL' ? 'Todo' : t === 'EXPORT' ? 'Exports' : t === 'LOTE' ? 'Lotes' : 'Auditoría'}
                                 </button>
                             ))}
                         </div>
                     </div>
-                </header>
 
-                <div className="bg-bg-card border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+
+                <div className="bg-transparent overflow-hidden">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-white/2 border-b border-white/5">
-                                <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Tipo</th>
-                                <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">ID Lote / Referencia</th>
-                                <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Fases (01-05)</th>
-                                <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none">Fecha</th>
-                                <th className="px-8 py-5 text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-none text-right">Acción</th>
+                            <tr className="bg-white/2 border-b border-gray-400 shadow-sm">
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">Tipo</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">ID Lote / Referencia</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">Fases (01-05)</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">Fecha</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none text-right">Acción</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -279,8 +270,8 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                 <tr>
                                     <td colSpan={5} className="px-8 py-20 text-center">
                                         <div className="flex flex-col items-center gap-4">
-                                            <div className="w-8 h-8 border-2 border-brand-green border-t-transparent rounded-full animate-spin"></div>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Sincronizando con AXIS CLOUD...</p>
+                                            <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Sincronizando con AXIS CLOUD...</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -295,14 +286,14 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                     <tr key={item.id} className="hover:bg-white/2 transition-colors group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-brand-green/10 flex items-center justify-center text-brand-green-bright">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black-bright">
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                                                 </div>
-                                                <span className="text-xs font-bold text-white">{item.type}</span>
+                                                <span className="text-xs font-bold text-black">{item.type}</span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className="text-sm font-mono text-gray-400 group-hover:text-white transition-colors uppercase">{item.label}</span>
+                                            <span className="text-sm font-mono text-black group-hover:text-black transition-colors uppercase">{item.label}</span>
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-1.5">
@@ -310,26 +301,26 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                     <div
                                                         key={s}
                                                         className={`w-3 h-3 rounded-full border ${item.type === 'EXPORT'
-                                                            ? 'bg-brand-green border-brand-green'
-                                                            : (item.step >= s ? 'bg-brand-green border-brand-green' : 'border-white/10 bg-white/5')
+                                                            ? 'bg-brand-green border-black'
+                                                            : (item.step >= s ? 'bg-brand-green border-black' : 'border-gray-400 shadow-sm bg-white')
                                                             } transition-all duration-500`}
                                                         title={`Paso ${s}: ${s === 1 ? 'Ingreso' : s === 2 ? 'Trilla' : s === 3 ? 'Laboratorio' : s === 4 ? 'Catación' : 'Tostión'}`}
                                                     ></div>
                                                 ))}
                                                 {item.type !== 'EXPORT' && (
-                                                    <span className="ml-2 text-[9px] font-bold text-gray-500 uppercase">
+                                                    <span className="ml-2 text-[9px] font-bold text-gray-900 uppercase">
                                                         {item.step}/5
                                                     </span>
                                                 )}
                                                 {item.type === 'EXPORT' && (
-                                                    <span className="ml-2 text-[9px] font-bold text-brand-green-bright uppercase">Export</span>
+                                                    <span className="ml-2 text-[9px] font-bold text-black-bright uppercase">Export</span>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className="text-xs font-bold text-gray-500">{item.date}</span>
+                                            <span className="text-xs font-bold text-gray-900">{item.date}</span>
                                             {item.type === 'EXPORT' && (
-                                              <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-brand-green/20 text-brand-green border border-brand-green/30' : 'bg-brand-green/20 text-brand-green-bright border border-brand-green/30'}`}>
+                                              <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-white border border-gray-400 shadow-sm text-black border border-gray-400 shadow-sm' : 'bg-white border border-gray-400 shadow-sm text-black-bright border border-gray-400 shadow-sm'}`}>
                                                   {item.raw.status === 'FINALIZADA' ? 'Inmutable' : 'Borrador'}
                                               </span>
                                             )}
@@ -339,7 +330,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                 {item.type === 'EXPORT' && item.raw.status !== 'FINALIZADA' ? (
                                                     <button
                                                         onClick={() => setSealerItem(item)}
-                                                        className="px-6 py-2 bg-brand-green/10 text-brand-green-bright hover:bg-brand-green hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest border border-brand-green/20 transition-all"
+                                                        className="px-6 py-2 bg-white text-black-bright hover:bg-brand-green hover:text-black rounded-xl text-[11px] font-bold uppercase  border border-gray-400 shadow-sm transition-all"
                                                     >
                                                         Sellar Embarque
                                                     </button>
@@ -353,7 +344,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                             openReport(item);
                                                         }
                                                     }}
-                                                    className={`px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all disabled:opacity-30 ${item.type === 'EXPORT' && item.raw.status === 'FINALIZADA' ? 'bg-brand-green text-black hover:bg-brand-green-bright border-brand-green' : 'bg-white/5 hover:bg-brand-green hover:text-white border-white/5'}`}
+                                                    className={`px-6 py-2 rounded-xl text-[11px] font-bold uppercase  border transition-all disabled:opacity-30 ${item.type === 'EXPORT' && item.raw.status === 'FINALIZADA' ? 'bg-brand-green text-black hover:bg-brand-green-bright border-black' : 'bg-white hover:bg-brand-green hover:text-black border-gray-400 shadow-sm'}`}
                                                     disabled={item.step < 4 && item.raw.status !== 'Tostado' && item.type !== 'EXPORT'}
                                                 >
                                                     {item.type === 'EXPORT' || item.type === 'TOSTION' || item.step === 4 ? 'Visualizar' : 'En Proceso'}
@@ -366,21 +357,21 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         </tbody>
                     </table>
                     
-                    <div className="bg-white/2 border-t border-white/5 p-6 flex justify-between items-center bg-black/20">
+                    <div className="bg-white/2 border-t border-gray-400 shadow-sm p-6 flex justify-between items-center bg-black/20">
                         <div className="space-y-1">
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                Mostrando <span className="text-white">{indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredHistory.length)}</span> de <span className="text-brand-green-bright">{filteredHistory.length}</span> registros
+                            <p className="text-[11px] text-black font-bold uppercase ">
+                                Mostrando <span className="text-black">{indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredHistory.length)}</span> de <span className="text-black-bright">{filteredHistory.length}</span> registros
                             </p>
                             {searchTerm && <p className="text-[9px] text-gray-600 uppercase">Filtro activo: "{searchTerm}"</p>}
                         </div>
                         
                         <div className="flex items-center gap-4">
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Página {currentPage} / {totalPages || 1}</p>
+                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Página {currentPage} / {totalPages || 1}</p>
                             <div className="flex gap-2">
                                 <button 
                                     disabled={currentPage === 1}
                                     onClick={() => setCurrentPage(prev => prev - 1)}
-                                    className="px-5 py-2.5 border border-white/10 rounded-xl text-[9px] font-black uppercase disabled:opacity-10 hover:bg-white/5 hover:border-white/30 transition-all flex items-center gap-2"
+                                    className="px-5 py-2.5 border border-gray-400 shadow-sm rounded-xl text-[9px] font-bold uppercase disabled:opacity-10 hover:bg-white hover:border-gray-400 shadow-sm transition-all flex items-center gap-2"
                                 >
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="15 18 9 12 15 6"/></svg>
                                     Anterior
@@ -388,7 +379,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                 <button 
                                     disabled={currentPage === totalPages || totalPages === 0}
                                     onClick={() => setCurrentPage(prev => prev + 1)}
-                                    className="px-5 py-2.5 border border-white/10 rounded-xl text-[9px] font-black uppercase disabled:opacity-10 hover:bg-white/5 hover:border-white/30 transition-all flex items-center gap-2"
+                                    className="px-5 py-2.5 border border-gray-400 shadow-sm rounded-xl text-[9px] font-bold uppercase disabled:opacity-10 hover:bg-white hover:border-gray-400 shadow-sm transition-all flex items-center gap-2"
                                 >
                                     Siguiente
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="9 18 15 12 9 6"/></svg>
@@ -399,27 +390,27 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="p-8 bg-bg-card border border-white/5 rounded-3xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full group-hover:bg-brand-green/10 transition-all"></div>
+                    <div className="p-8 bg-bg-card border border-gray-400 shadow-sm rounded-3xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl rounded-full group-hover:bg-white transition-all"></div>
                         <div className="relative z-10 flex flex-col h-full justify-between">
                             <div className="space-y-4">
-                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.4em]">Analytics Export</h4>
-                                <p className="text-xl font-bold text-white tracking-tight">Reporte Consolidado Mensual</p>
-                                <p className="text-xs text-gray-500 leading-relaxed uppercase font-bold tracking-wider">Genera un PDF con todos los movimientos del mes, puntajes basados en estándares de la SCA promedio y yield de trilla acumulado.</p>
+                                <h4 className="text-[11px] font-bold text-gray-900 uppercase ">Analytics Export</h4>
+                                <p className="text-xl font-bold text-black ">Reporte Consolidado Mensual</p>
+                                <p className="text-xs text-gray-900 leading-relaxed uppercase font-bold ">Genera un PDF con todos los movimientos del mes, puntajes basados en estándares de la SCA promedio y yield de trilla acumulado.</p>
                             </div>
-                            <button className="mt-8 w-full py-4 border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all">Sincronizar Reporte Completo</button>
+                            <button className="mt-8 w-full py-4 border border-gray-400 shadow-sm rounded-2xl text-[11px] font-bold uppercase  hover:bg-white transition-all">Sincronizar Reporte Completo</button>
                         </div>
                     </div>
 
-                    <div className="p-8 bg-brand-green/5 border border-brand-green/10 rounded-3xl relative overflow-hidden group">
-                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-green/10 blur-3xl rounded-full"></div>
+                    <div className="p-8 bg-white border border-gray-400 shadow-sm rounded-3xl relative overflow-hidden group">
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white blur-3xl rounded-full"></div>
                         <div className="relative z-10 flex h-full items-center justify-between">
                             <div className="space-y-2">
-                                <h4 className="text-[10px] font-bold text-brand-green uppercase tracking-[0.4em]">Ready for Print</h4>
-                                <p className="text-xl font-bold text-white tracking-tight">Vista de Impresión Unificada</p>
-                                <p className="text-xs text-brand-green/70 uppercase font-bold tracking-wider leading-relaxed">Configurado para papel certificado 250g.</p>
+                                <h4 className="text-[11px] font-bold text-black uppercase ">Ready for Print</h4>
+                                <p className="text-xl font-bold text-black ">Vista de Impresión Unificada</p>
+                                <p className="text-xs text-black/70 uppercase font-bold  leading-relaxed">Configurado para papel certificado 250g.</p>
                             </div>
-                            <div className="w-16 h-16 bg-brand-green text-white rounded-2xl flex items-center justify-center shadow-xl shadow-brand-green/20 group-hover:scale-110 transition-transform">
+                            <div className="w-16 h-16 bg-brand-green text-black rounded-2xl flex items-center justify-center shadow-xl shadow-brand-green/20 group-hover:scale-110 transition-transform">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z" /></svg>
                             </div>
                         </div>
@@ -431,30 +422,30 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
             {showAuditModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-500">
                     <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowAuditModal(false)}></div>
-                    <div className="w-full max-w-4xl bg-bg-card border border-white/10 rounded-industrial shadow-3xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]">
-                        <header className="p-8 border-b border-white/5 flex justify-between items-center bg-white/2">
+                    <div className="w-full max-w-4xl bg-bg-card border border-gray-400 shadow-sm rounded-industrial shadow-3xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]">
+                        <header className="p-8 border-b border-gray-400 shadow-sm flex justify-between items-center bg-white/2">
                             <div>
-                                <h3 className="text-xl font-bold text-white uppercase tracking-tighter">Bóveda de Trazabilidad In-Situ</h3>
-                                <p className="text-[10px] text-brand-green font-bold uppercase tracking-widest mt-1">Registros de validación y georreferenciación en tiempo real</p>
+                                <h3 className="text-xl font-bold text-black uppercase er">Bóveda de Trazabilidad In-Situ</h3>
+                                <p className="text-[11px] text-black font-bold uppercase  mt-1">Registros de validación y georreferenciación en tiempo real</p>
                             </div>
-                            <button onClick={() => setShowAuditModal(false)} className="text-gray-500 hover:text-white transition-colors">
+                            <button onClick={() => setShowAuditModal(false)} className="text-gray-900 hover:text-black transition-colors">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </header>
                         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                             <div className="space-y-4">
                                 {auditLogs.length === 0 ? (
-                                    <div className="text-center py-20 text-gray-700 uppercase font-bold text-xs tracking-widest">No hay registros de auditoría recientes</div>
+                                    <div className="text-center py-20 text-gray-700 uppercase font-bold text-xs ">No hay registros de auditoría recientes</div>
                                 ) : (
                                     auditLogs.slice().reverse().map((log) => (
-                                        <div key={log.id} className="p-5 bg-white/2 border border-white/5 rounded-2xl flex justify-between items-center group hover:bg-white/5 transition-all">
+                                        <div key={log.id} className="p-5 bg-white/2 border border-gray-400 shadow-sm rounded-2xl flex justify-between items-center group hover:bg-white transition-all">
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-3">
-                                                    <span className="px-2 py-0.5 bg-brand-green/10 text-brand-green-bright text-[9px] font-black rounded uppercase border border-brand-green/20">{log.eudr_status || 'CAPTURED'}</span>
-                                                    <span className="text-sm font-bold text-white uppercase">{log.farm_name}</span>
+                                                    <span className="px-2 py-0.5 bg-white text-black-bright text-[9px] font-bold rounded uppercase border border-gray-400 shadow-sm">{log.eudr_status || 'CAPTURED'}</span>
+                                                    <span className="text-sm font-bold text-black uppercase">{log.farm_name}</span>
                                                 </div>
-                                                <div className="flex items-center gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                                                    <span className="text-brand-green-bright">{log.email}</span>
+                                                <div className="flex items-center gap-4 text-[11px] text-gray-900 font-bold uppercase ">
+                                                    <span className="text-black-bright">{log.email}</span>
                                                     <span>•</span>
                                                     <span>{new Date(log.verified_at).toLocaleString()}</span>
                                                 </div>
@@ -477,7 +468,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                                 document.body.removeChild(a);
                                                                 URL.revokeObjectURL(url);
                                                             }}
-                                                            className="text-[9px] bg-brand-green/10 text-brand-green hover:bg-brand-green hover:text-black px-2 py-0.5 rounded transition-all font-bold uppercase"
+                                                            className="text-[9px] bg-white text-black hover:bg-brand-green hover:text-black px-2 py-0.5 rounded transition-all font-bold uppercase"
                                                         >
                                                             Descargar GeoJSON
                                                         </button>
@@ -485,10 +476,10 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                 )}
                                             </div>
                                             <div className="flex flex-col items-end gap-2">
-                                                <span className="text-[9px] font-mono text-gray-700 bg-white/5 px-2 py-1 rounded">{log.id}</span>
+                                                <span className="text-[9px] font-mono text-gray-700 bg-white px-2 py-1 rounded">{log.id}</span>
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-1.5 h-1.5 bg-brand-green rounded-full"></div>
-                                                    <span className="text-[9px] font-bold text-gray-500 uppercase">Sincronizado</span>
+                                                    <span className="text-[9px] font-bold text-gray-900 uppercase">Sincronizado</span>
                                                 </div>
                                             </div>
                                         </div>

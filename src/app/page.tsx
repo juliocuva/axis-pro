@@ -123,14 +123,14 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-bg-main p-8 transition-colors duration-400">
-            <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-white/5 pb-8">
+            <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-gray-200 shadow-sm pb-8">
                 <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-green/30 transition-all">
+                        <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-gray-200 shadow-sm transition-all">
                             <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xl font-bold text-brand-green uppercase tracking-[0.5em]">COLOMBIA</span>
+                            <span className="text-xl font-bold text-black uppercase ">COLOMBIA</span>
                         </div>
                     </div>
                 </div>
@@ -139,7 +139,7 @@ export default function Home() {
                     {view !== 'launcher' && (
                         <button
                             onClick={() => setView('launcher')}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-bg-offset hover:bg-white/10 rounded-industrial-sm text-[10px] font-bold transition-all border border-border-main uppercase tracking-widest text-gray-400 hover:text-white"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-bg-offset hover:bg-white rounded-industrial-sm text-[11px] font-bold transition-all border border-border-main uppercase  text-black hover:text-black"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                             Volver al Panel
@@ -150,7 +150,7 @@ export default function Home() {
                         {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
                             <button
                                 onClick={() => setView('master')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase tracking-widest transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-gray-400 hover:text-white'}`}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase  transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-black hover:text-black'}`}
                                 title="Panel de Gobernanza Global"
                             >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -159,7 +159,7 @@ export default function Home() {
                         )}
                         <button
                             onClick={() => setShowCloudVault(true)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-brand-green/10 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest transition-all"
+                            className="flex items-center gap-2 px-4 py-2 hover:bg-white text-black-bright text-[9px] font-bold uppercase  transition-all"
                             title="Bóveda de Documentos"
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
@@ -171,15 +171,15 @@ export default function Home() {
 
                     <button
                         onClick={toggleTheme}
-                        className="w-11 h-11 rounded-industrial-sm bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white/10 transition-all group"
+                        className="w-11 h-11 rounded-industrial-sm bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white transition-all group"
                         title={theme === 'dark' ? 'Modo Luz' : 'Modo Oscuro'}
                     >
                         {theme === 'dark' ? (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white group-hover:rotate-12 transition-transform">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black group-hover:rotate-12 transition-transform">
                                 <circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                             </svg>
                         ) : (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green group-hover:-rotate-12 transition-transform">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black group-hover:-rotate-12 transition-transform">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                             </svg>
                         )}
@@ -198,10 +198,10 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
                     {(user?.role === 'gerente' || user?.role === 'auditor' || user?.role === 'admin') ? (
                         <section>
-                            <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
-                                <span className="w-8 h-px bg-white/10"></span>
+                            <h2 className="text-[11px] font-bold text-black-bright uppercase  mb-10 flex items-center gap-4">
+                                <span className="w-8 h-px bg-white"></span>
                                 Panel de Gerencia y Supervisión de Asociación
-                                <span className="w-full h-px bg-white/10"></span>
+                                <span className="w-full h-px bg-white"></span>
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <ModuleCard
@@ -246,10 +246,10 @@ export default function Home() {
                         </section>
                     ) : (
                         <section>
-                            <h2 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-[0.4em] mb-10 flex items-center gap-4">
-                                <span className="w-8 h-px bg-white/10"></span>
+                            <h2 className="text-[11px] font-bold text-black-bright uppercase  mb-10 flex items-center gap-4">
+                                <span className="w-8 h-px bg-white"></span>
                                 Emisión de Certificados de Calidad de Exportación
-                                <span className="w-full h-px bg-white/10"></span>
+                                <span className="w-full h-px bg-white"></span>
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <ModuleCard
@@ -282,80 +282,80 @@ export default function Home() {
 
                     {/* Acceso Universal al Monitor Comercial para todos los usuarios */}
                     <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2 bg-bg-card border border-white/5 rounded-industrial p-8">
-                                <h3 className="text-sm font-bold uppercase tracking-widest mb-8 flex items-center gap-3">
+                            <div className="lg:col-span-2 bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-8">
+                                <h3 className="text-sm font-bold uppercase  mb-8 flex items-center gap-3">
                                     <span className="w-2 h-2 rounded-full bg-brand-green-bright"></span>
                                     Monitor Comercial Lotes Verdes
                                 </h3>
                                 <div className="space-y-4">
                                     {batches.map((batch, index) => {
                                         return (
-                                            <div key={`${batch.id}-${index}`} className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-white/5 group hover:border-brand-green/30 transition-all">
+                                            <div key={`${batch.id}-${index}`} className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-gray-200 shadow-sm group hover:border-gray-200 shadow-sm transition-all">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-industrial-sm bg-white/5 flex items-center justify-center font-bold text-[10px] uppercase tracking-tighter">
+                                                    <div className="w-10 h-10 rounded-industrial-sm bg-white flex items-center justify-center font-bold text-[11px] uppercase er">
                                                         {batch.process.substring(0, 3)}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2">
-                                                            <p className="text-xs font-bold uppercase text-white tracking-widest">Lote: {batch.id}</p>
+                                                            <p className="text-xs font-bold uppercase text-black ">Lote: {batch.id}</p>
                                                         </div>
                                                         <div className="flex items-center gap-2 mt-1">
-                                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{batch.process} • {batch.greenWeight}kg</p>
+                                                            <p className="text-[11px] text-gray-900 font-bold uppercase ">{batch.process} • {batch.greenWeight}kg</p>
                                                             {batch.isDemo && (
-                                                                <span className="text-[8px] bg-brand-green/20 text-brand-green-bright px-2 py-0.5 rounded-md font-bold border border-brand-green/30 uppercase tracking-widest">Demo WGS84</span>
+                                                                <span className="text-[9px] bg-white border border-gray-200 shadow-sm text-black-bright px-2 py-0.5 rounded-md font-bold border border-gray-200 shadow-sm uppercase ">Demo WGS84</span>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className={`text-[10px] font-bold uppercase tracking-widest text-brand-green-bright`}>
+                                                    <p className={`text-[11px] font-bold uppercase  text-black-bright`}>
                                                         LISTO PARA EXPORTAR
                                                     </p>
-                                                    <p className="text-[8px] text-gray-400 font-bold uppercase mt-1 tracking-widest">SICA / EUDR Asignado</p>
+                                                    <p className="text-[9px] text-black font-bold uppercase mt-1 ">SICA / EUDR Asignado</p>
                                                 </div>
                                             </div>
                                         );
                                     })}
-                                    {batches.length === 0 && <div className="p-8 text-center text-gray-600 font-mono text-xs border border-dashed border-white/5 rounded-2xl">SIN REGISTROS EN ESTE TURNO</div>}
+                                    {batches.length === 0 && <div className="p-8 text-center text-gray-600 font-mono text-xs border border-dashed border-gray-200 shadow-sm rounded-2xl">SIN REGISTROS EN ESTE TURNO</div>}
                                 </div>
                             </div>
 
-                            <div className="bg-bg-card border border-white/5 rounded-industrial p-8 relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-brand-green/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-8 border-b border-white/5 pb-4">Estado del Sistema</h3>
+                            <div className="bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-8 relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <h3 className="text-[11px] font-bold text-gray-900 uppercase  mb-8 border-b border-gray-200 shadow-sm pb-4">Estado del Sistema</h3>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Sincronización Aduanera</span>
-                                        <span className="text-brand-green-bright font-bold">OPERATIVO</span>
+                                        <span className="text-black font-bold uppercase  text-[9px]">Sincronización Aduanera</span>
+                                        <span className="text-black-bright font-bold">OPERATIVO</span>
                                     </div>
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Scanner WGS84 / GIS</span>
-                                        <span className="text-brand-green-bright font-bold">ACTIVO</span>
+                                        <span className="text-black font-bold uppercase  text-[9px]">Scanner WGS84 / GIS</span>
+                                        <span className="text-black-bright font-bold">ACTIVO</span>
                                     </div>
-                                    <div className="h-px bg-white/5 my-4"></div>
-                                    <div className="text-center p-6 bg-white/2 border border-white/5 rounded-industrial-sm">
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Total Auditado (Mes)</p>
-                                        <p className="text-4xl font-bold text-white tracking-tighter">18,450 <span className="text-[10px] text-brand-green-bright font-bold">KG</span></p>
+                                    <div className="h-px bg-white my-4"></div>
+                                    <div className="text-center p-6 bg-white/2 border border-gray-200 shadow-sm rounded-industrial-sm">
+                                        <p className="text-[11px] text-gray-900 font-bold uppercase  mb-3">Total Auditado (Mes)</p>
+                                        <p className="text-4xl font-bold text-black er">18,450 <span className="text-[11px] text-black-bright font-bold">KG</span></p>
                                     </div>
                                 </div>
                             </div>
                         </section>
                     {/* SECCIÓN ESPECIAL SOLO PARA EMAIL MAESTRO / AUDITOR / ADMIN */}
                     {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
-                        <section className="bg-bg-card border border-brand-green/20 rounded-industrial p-20 text-center space-y-8 animate-in zoom-in duration-500 mt-20">
-                             <div className="w-24 h-24 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto border border-brand-green/20">
+                        <section className="bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-20 text-center space-y-8 animate-in zoom-in duration-500 mt-20">
+                             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto border border-gray-200 shadow-sm">
                                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0C6056" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                              </div>
                              <div className="space-y-2">
-                                <h2 className="text-3xl font-black text-text-main uppercase tracking-tighter">Terminal de Seguridad Axis</h2>
-                                <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.4em]">Control de Acceso y Gobernanza Global</p>
+                                <h2 className="text-3xl font-black text-text-main uppercase er">Terminal de Seguridad Axis</h2>
+                                <p className="text-xs text-gray-900 font-bold uppercase ">Control de Acceso y Gobernanza Global</p>
                              </div>
                              <p className="max-w-md mx-auto text-sm text-text-offset leading-relaxed font-medium">
                                 Has ingresado con privilegios de nivel maestro. Tu terminal está optimizada para la auditoría de red, gestión de roles y cumplimiento normativo EUDR.
                              </p>
                              <button 
                                 onClick={() => setView('master')}
-                                className="px-10 py-4 bg-brand-green text-black text-xs font-black uppercase tracking-widest rounded-industrial-sm hover:bg-brand-green-bright transition-all shadow-2xl shadow-brand-green/30"
+                                className="px-10 py-4 bg-brand-green text-black text-xs font-black uppercase  rounded-industrial-sm hover:bg-brand-green-bright transition-all shadow-2xl shadow-brand-green/30"
                              >
                                 Entrar a la Bóveda de Control
                              </button>
@@ -393,7 +393,7 @@ export default function Home() {
                     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1001] no-print">
                          <button 
                             onClick={() => setView('launcher')}
-                            className="px-6 py-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-white transition-all active:scale-95"
+                            className="px-6 py-2 bg-white hover:bg-white backdrop-blur-md border border-gray-200 shadow-sm rounded-full text-[9px] font-black uppercase  text-black transition-all active:scale-95"
                          >
                             Escapar del Radar
                          </button>
@@ -407,25 +407,25 @@ export default function Home() {
             {/* MODAL DE ACTUALIZACIONES / MENSAJES DEL SISTEMA */}
             {showUpdates && (
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/90 backdrop-blur-3xl animate-in fade-in duration-500">
-                    <div className="bg-bg-card border border-white/10 w-full max-w-xl rounded-industrial p-10 shadow-3xl relative overflow-hidden">
+                    <div className="bg-bg-card border border-gray-200 shadow-sm w-full max-w-xl rounded-industrial p-10 shadow-3xl relative overflow-hidden">
                         <div className="flex justify-between items-center mb-10">
-                            <h3 className="text-2xl font-bold text-white uppercase tracking-tighter">Centro de Mensajes</h3>
-                            <button onClick={() => setShowUpdates(false)} className="text-gray-500 hover:text-white transition-all">
+                            <h3 className="text-2xl font-bold text-black uppercase er">Centro de Mensajes</h3>
+                            <button onClick={() => setShowUpdates(false)} className="text-gray-900 hover:text-black transition-all">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
 
                         <div className="space-y-6">
-                            <div className="p-6 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm relative overflow-hidden">
-                                <div className="absolute top-0 right-0 bg-brand-green text-black px-3 py-1 text-[8px] font-bold uppercase rounded-bl-xl">Nuevo</div>
-                                <h4 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest mb-2">Nueva Versión Core V2.0.4</h4>
-                                <p className="text-xs text-gray-400 leading-relaxed">
-                                    Hemos optimizado el motor de predicción de desgasificación para granos Honey y Natural. La precisión ha aumentado en un <span className="text-white">12.4%</span>.
+                            <div className="p-6 bg-white border border-gray-200 shadow-sm rounded-industrial-sm relative overflow-hidden">
+                                <div className="absolute top-0 right-0 bg-brand-green text-black px-3 py-1 text-[9px] font-bold uppercase rounded-bl-xl">Nuevo</div>
+                                <h4 className="text-[11px] font-bold text-black-bright uppercase  mb-2">Nueva Versión Core V2.0.4</h4>
+                                <p className="text-xs text-black leading-relaxed">
+                                    Hemos optimizado el motor de predicción de desgasificación para granos Honey y Natural. La precisión ha aumentado en un <span className="text-black">12.4%</span>.
                                 </p>
                             </div>
 
-                            <div className="p-6 bg-white/2 border border-white/5 rounded-industrial-sm opacity-60">
-                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Mantenimiento Programado</h4>
+                            <div className="p-6 bg-white/2 border border-gray-200 shadow-sm rounded-industrial-sm opacity-60">
+                                <h4 className="text-[11px] font-bold text-gray-900 uppercase  mb-2">Mantenimiento Programado</h4>
                                 <p className="text-xs text-gray-700 leading-relaxed">
                                     El próximo domingo a las 02:00 AM (COT) se realizará una actualización de los servidores AXIS. El sistema estará fuera de línea por 15 minutos.
                                 </p>
@@ -434,7 +434,7 @@ export default function Home() {
 
                         <button
                             onClick={() => setShowUpdates(false)}
-                            className="w-full mt-10 bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-xl transition-all uppercase tracking-widest text-[9px] border border-white/10"
+                            className="w-full mt-10 bg-white hover:bg-white text-black font-bold py-4 rounded-xl transition-all uppercase  text-[9px] border border-gray-200 shadow-sm"
                         >
                             ENTENDIDO, VOLVER Al CORE
                         </button>
@@ -445,16 +445,16 @@ export default function Home() {
             {(view === 'export' || view === 'archive') && (
                 <div className="max-w-7xl mx-auto space-y-8">
                     <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
-                        <div className="flex bg-bg-card p-1 rounded-industrial-sm border border-white/5 shadow-xl">
+                        <div className="flex bg-bg-card p-1 rounded-industrial-sm border border-gray-200 shadow-sm shadow-xl">
                             <button
                                 onClick={() => setView('export')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'export' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`px-6 py-2.5 rounded-industrial-sm text-[11px] font-bold transition-all uppercase  ${view === 'export' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-900 hover:text-black'}`}
                             >
                                 Emisión de Pasaportes
                             </button>
                             <button
                                 onClick={() => setView('archive')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[10px] font-bold transition-all uppercase tracking-widest ${view === 'archive' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-500 hover:text-white'}`}
+                                className={`px-6 py-2.5 rounded-industrial-sm text-[11px] font-bold transition-all uppercase  ${view === 'archive' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-900 hover:text-black'}`}
                             >
                                 Archivo Confidencial Nube
                             </button>
@@ -482,22 +482,22 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto">
                         <div className="flex justify-between items-center mb-12">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white/5 rounded-industrial-sm flex items-center justify-center text-brand-green-bright">
+                                <div className="w-12 h-12 bg-white rounded-industrial-sm flex items-center justify-center text-black-bright">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
                                 </div>
                                 <div>
-                                    <h2 className="text-4xl font-bold uppercase tracking-tighter">Portal en la Nube AXIS</h2>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] mt-1">Acceso Centralizado a Archivos de Confianza</p>
+                                    <h2 className="text-4xl font-bold uppercase er">Portal en la Nube AXIS</h2>
+                                    <p className="text-[11px] text-gray-900 font-bold uppercase  mt-1">Acceso Centralizado a Archivos de Confianza</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setShowCloudVault(false)}
-                                className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-all border border-white/10"
+                                className="w-14 h-14 bg-white hover:bg-white rounded-full flex items-center justify-center text-black transition-all border border-gray-200 shadow-sm"
                             >
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
-                        <div className="bg-bg-card border border-white/5 rounded-industrial p-12">
+                        <div className="bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-12">
                             <GlobalHistoryArchive user={user} />
                         </div>
                     </div>
@@ -510,48 +510,48 @@ export default function Home() {
                     <div className="max-w-4xl mx-auto space-y-12">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-brand-green/10 rounded-industrial-sm flex items-center justify-center text-brand-green-bright">
+                                <div className="w-12 h-12 bg-white rounded-industrial-sm flex items-center justify-center text-black-bright">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                                 </div>
-                                <h2 className="text-4xl font-bold uppercase tracking-tighter text-white">Manual de Ingeniería Pro</h2>
+                                <h2 className="text-4xl font-bold uppercase er text-black">Manual de Ingeniería Pro</h2>
                             </div>
                             <button
                                 onClick={() => setShowFunctionalDocs(false)}
-                                className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-all"
+                                className="w-14 h-14 bg-white hover:bg-white rounded-full flex items-center justify-center text-black transition-all"
                             >
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
 
-                        <div className="bg-white/2 border border-white/5 rounded-industrial p-16 space-y-12 shadow-inner text-gray-300">
+                        <div className="bg-white/2 border border-gray-200 shadow-sm rounded-industrial p-16 space-y-12 shadow-inner text-gray-300">
                             <section className="space-y-4">
-                                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Estatus Tecnológico: Sistema Operativo</h3>
+                                <h3 className="text-2xl font-bold text-black uppercase ">Estatus Tecnológico: Sistema Operativo</h3>
                                 <p className="text-sm leading-relaxed">AXISONE COFFEE es una solución industrial operativa demostrada en entornos reales. El sistema centraliza la trazabilidad desde la recepción en finca hasta el retail transfronterizo.</p>
 
                             </section>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-brand-green-bright uppercase">Acopio y Calidad</h4>
+                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
+                                    <h4 className="text-sm font-bold text-black-bright uppercase">Acopio y Calidad</h4>
                                     <p className="text-xs leading-relaxed">Control de trilla, factor de rendimiento y protocolos basados en estándares de la SCA ciegos con firma digital.</p>
                                 </div>
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-white uppercase">Inteligencia de Tostión</h4>
+                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
+                                    <h4 className="text-sm font-bold text-black uppercase">Inteligencia de Tostión</h4>
                                     <p className="text-xs leading-relaxed">Monitoreo espectral en vivo, Perfiles Espejo y asistente IA para control de variables físicas.</p>
                                 </div>
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-white uppercase">Comercio Global</h4>
+                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
+                                    <h4 className="text-sm font-bold text-black uppercase">Comercio Global</h4>
                                     <p className="text-xs leading-relaxed">Pasaportes digitales QR y motores dinámicos de desgasificación para logística segura.</p>
                                 </div>
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-white/5 space-y-3">
-                                    <h4 className="text-sm font-bold text-white uppercase">Sello Inmutable</h4>
+                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
+                                    <h4 className="text-sm font-bold text-black uppercase">Sello Inmutable</h4>
                                     <p className="text-xs leading-relaxed">Generación de Hashes y QR dinámicos que prueban criptográficamente la autenticidad del café ante cualquier puerto.</p>
                                 </div>
                             </div>
 
-                            <div className="p-10 bg-brand-green/10 border border-brand-green/20 rounded-industrial-sm shadow-[0_0_30px_rgba(0,255,136,0.1)]">
-                                <h4 className="text-brand-green-bright text-[10px] font-bold uppercase tracking-widest mb-3">La Llave Maestra (Propuesta de Valor)</h4>
-                                <p className="text-sm text-white leading-relaxed font-bold">"AXIS es el emisor de Certificados Digitales de Autenticidad para café verde de exportación. Garantizamos que el contenedor que subes al barco cumple instantáneamente con las normativas EUDR, FDA y auditorías globales de calidad. Lo que dices que va en el saco, está matemáticamente probado para cruzar fronteras sin fricción."</p>
+                            <div className="p-10 bg-white border border-gray-200 shadow-sm rounded-industrial-sm shadow-[0_0_30px_rgba(0,255,136,0.1)]">
+                                <h4 className="text-black-bright text-[11px] font-bold uppercase  mb-3">La Llave Maestra (Propuesta de Valor)</h4>
+                                <p className="text-sm text-black leading-relaxed font-bold">"AXIS es el emisor de Certificados Digitales de Autenticidad para café verde de exportación. Garantizamos que el contenedor que subes al barco cumple instantáneamente con las normativas EUDR, FDA y auditorías globales de calidad. Lo que dices que va en el saco, está matemáticamente probado para cruzar fronteras sin fricción."</p>
                             </div>
                         </div>
                     </div>

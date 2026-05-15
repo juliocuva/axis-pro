@@ -71,21 +71,21 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* ENCABEZADO */}
-            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 pb-6 border-b border-white/5">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 pb-6 border-b border-gray-400 shadow-sm">
                 <div>
-                    <h2 className="text-3xl font-black uppercase tracking-tighter text-white">Planta & Trilla</h2>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">Control de Mermas y Rendimiento</p>
+                    <h2 className="text-3xl font-black uppercase er text-black">Planta & Trilla</h2>
+                    <p className="text-[11px] text-gray-900 font-bold uppercase  mt-1">Control de Mermas y Rendimiento</p>
                 </div>
 
                 {/* SELECTOR DE LOTE */}
                 <div className="w-full sm:w-auto min-w-[300px]">
-                    <label className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1.5 block">Lote en Línea de Proceso</label>
+                    <label className="text-[9px] text-black font-bold uppercase  mb-1.5 block">Lote en Línea de Proceso</label>
                     <div className="relative group/select">
                         <select
                             value={selectedLotId}
                             onChange={handleLotChange}
                             disabled={isLoading}
-                            className="w-full bg-white/5 border border-white/10 text-white text-xs py-3.5 px-4 rounded-industrial appearance-none focus:outline-none focus:border-brand-green cursor-pointer font-bold uppercase tracking-wider transition-all hover:bg-white/10"
+                            className="w-full bg-white border border-gray-400 shadow-sm text-black text-xs py-3.5 px-4 rounded-industrial appearance-none focus:outline-none focus:border-black cursor-pointer font-bold uppercase  transition-all hover:bg-white"
                         >
                             {isLoading ? (
                                 <option>Cargando Lotes...</option>
@@ -95,14 +95,14 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
                                 availableLots.map(lot => {
                                     const isThrashed = lot.status === 'thrashed' || lot.status === 'completed' || lot.coffee_type === 'excelso';
                                     return (
-                                        <option key={lot.id} value={lot.id} className="bg-bg-card text-white" disabled={isThrashed}>
+                                        <option key={lot.id} value={lot.id} className="bg-bg-card text-black" disabled={isThrashed}>
                                             {isThrashed ? '[YA TRILLADO / VERDE] ' : '[PERGAMINO PENDIENTE] '} - {lot.lot_number || 'LOTE'} ({lot.purchase_weight}kg)
                                         </option>
                                     );
                                 })
                             )}
                         </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-white transition-colors">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
                         </div>
                     </div>
@@ -111,11 +111,11 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
 
             {selectedLotId ? (
                 availableLots.find(l => l.id === selectedLotId)?.coffee_type === 'excelso' ? (
-                    <div className="h-64 bg-brand-green/5 border border-brand-green/20 rounded-industrial flex flex-col items-center justify-center gap-4 text-brand-green p-6 text-center">
+                    <div className="h-64 bg-white border border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-4 text-black p-6 text-center">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>
                         <div>
-                            <p className="text-xl uppercase font-bold tracking-widest text-brand-green-bright mb-2">Ingreso Finalizado (Café Oro)</p>
-                            <p className="text-[10px] text-brand-green/70 font-bold uppercase tracking-widest max-w-md">Este lote fue registrado originalmente como Café Excelso (Oro). No requiere pasar por el proceso industrial de trilla ni cálculo de mermas.</p>
+                            <p className="text-xl uppercase font-bold  text-black-bright mb-2">Ingreso Finalizado (Café Oro)</p>
+                            <p className="text-[11px] text-black/70 font-bold uppercase  max-w-md">Este lote fue registrado originalmente como Café Excelso (Oro). No requiere pasar por el proceso industrial de trilla ni cálculo de mermas.</p>
                         </div>
                     </div>
                 ) : (
@@ -127,9 +127,9 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
                     />
                 )
             ) : (
-                <div className="h-64 border border-dashed border-white/10 rounded-industrial flex flex-col items-center justify-center gap-4 text-gray-500">
+                <div className="h-64 border border-dashed border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-4 text-gray-900">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                    <p className="text-xs uppercase font-bold tracking-widest">Selecciona un lote para iniciar la trilla</p>
+                    <p className="text-xs uppercase font-bold ">Selecciona un lote para iniciar la trilla</p>
                 </div>
             )}
         </div>

@@ -10,6 +10,7 @@ import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchi
 import TeamManagement from '@/shared/components/admin/TeamManagement';
 import RoastIntelligenceContainer from '@/modules/production/components/RoastIntelligenceContainer';
 import { supabase } from '@/shared/lib/supabase';
+import ModuleHeader from '@/shared/components/ui/ModuleHeader';
 
 interface SupplyModuleContainerProps {
     user: { email: string, name: string, companyId: string, role?: string } | null;
@@ -68,21 +69,30 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
             <div className="flex flex-col gap-8 animate-in fade-in duration-700">
                 {/* COLUMNA PRINCIPAL */}
                 <div className="flex-1 space-y-8">
-                    <header className="space-y-2">
-                        <h2 className="text-3xl font-black text-carbon uppercase tracking-tighter">
-                            {activeTab === 'purchase' ? 'Registro de Origen' :
-                             activeTab === 'thrashing' ? 'Trilla Industrial' :
-                             activeTab === 'analysis' ? 'Laboratorio Físico' :
-                             activeTab === 'cupping' ? 'Catación' : 
-                             activeTab === 'roast' ? 'Tostión Inteligente' : 'Archivo'}
-                        </h2>
-                        <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.3em]">
-                            AXISONE COFFEE COLOMBIA • Sistema de Trazabilidad Industrial
+                    <ModuleHeader 
+                        title={
+                            activeTab === 'purchase' ? 'Registro de Origen' :
+                            activeTab === 'thrashing' ? 'Trilla Industrial' :
+                            activeTab === 'analysis' ? 'Laboratorio Físico' :
+                            activeTab === 'cupping' ? 'Catación' : 
+                            activeTab === 'roast' ? 'Tostión Inteligente' : 'Archivo'
+                        }
+                        subtitle="AXISONE COFFEE COLOMBIA • SISTEMA DE TRAZABILIDAD INDUSTRIAL"
+                    >
+                        {selectedLot && activeTab !== 'archive' && (
+                            <div className="flex items-center gap-4 bg-white border border-gray-400 shadow-sm px-6 py-3 rounded-industrial animate-in fade-in slide-in-from-right-4 duration-500">
+                                <span className="text-[11px] font-black text-black uppercase">{selectedLot.farmer_name} | {selectedLot.lot_number}</span>
+                                <button 
+                                    onClick={() => setShowCertificate(true)} 
+                                    className="text-[11px] font-bold text-white bg-black px-4 py-1.5 rounded-full hover:bg-gray-900 transition-all shadow-sm"
+                                >
+                                    CERTIFICADO
+                                </button>
+                            </div>
+                        )}
+                    </ModuleHeader>
 
-                        </p>
-                    </header>
-
-                    <nav className="flex flex-wrap bg-soft-white p-1 rounded-industrial border border-carbon/10 shadow-xl">
+                    <nav className="flex flex-wrap bg-transparent p-0 mb-8">
                         {[
                             { id: 'purchase', label: '01. Origen' },
                             { id: 'thrashing', label: '02. Trilla' },
@@ -94,35 +104,29 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex-1 min-w-[80px] py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-brand-green text-white shadow-lg' : 'text-gray-600 hover:text-carbon'}`}
+                                className={`flex-1 min-w-[80px] py-3 rounded-lg text-[11px] font-bold uppercase  transition-all ${activeTab === tab.id ? 'bg-brand-green border-transparent text-black' : 'bg-white border-gray-400 text-black hover:border-black'}`}
                             >
                                 {tab.label}
                             </button>
                         ))}
                     </nav>
 
-                    <div className="bg-soft-white/50 rounded-industrial border border-carbon/10 p-4 lg:p-8 min-h-[500px]">
-                        {selectedLot && activeTab !== 'archive' && (
-                             <div className="mb-8 p-4 bg-brand-green/5 border border-brand-green/20 rounded-xl flex justify-between items-center">
-                                <span className="text-xs font-bold text-carbon uppercase">{selectedLot.farmer_name} | {selectedLot.lot_number}</span>
-                                <button onClick={() => setShowCertificate(true)} className="text-[10px] font-bold text-brand-green border border-brand-green/30 px-3 py-1 rounded-full hover:bg-brand-green/10">CERTIFICADO</button>
-                             </div>
-                        )}
+                    <div className="bg-soft-white/50 rounded-industrial border border-gray-400 shadow-sm p-4 lg:p-8 min-h-[500px]">
 
                         {!selectedLot && activeTab !== 'purchase' && activeTab !== 'archive' && (
                             <div className="h-[400px] flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in duration-500">
-                                <div className="w-20 h-20 rounded-full bg-carbon/5 border border-carbon/20 flex items-center justify-center text-gray-600">
+                                <div className="w-20 h-20 rounded-full bg-carbon/5 border border-gray-400 shadow-sm flex items-center justify-center text-gray-600">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v20M2 12h20M12 2l10 10-10 10M12 2L2 12l10 10"/></svg>
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-carbon uppercase tracking-widest">Requiere Selección de Lote</h3>
-                                    <p className="text-xs text-gray-600 max-w-xs mx-auto uppercase tracking-widest leading-relaxed">
-                                        Por favor, selecciona un lote del <span className="text-brand-green font-black">Historial de Flujo</span> en la parte inferior para cargar los datos técnicos.
+                                    <h3 className="text-lg font-bold text-carbon uppercase ">Requiere Selección de Lote</h3>
+                                    <p className="text-xs text-gray-600 max-w-xs mx-auto uppercase  leading-relaxed">
+                                        Por favor, selecciona un lote del <span className="text-black font-black">Historial de Flujo</span> en la parte inferior para cargar los datos técnicos.
                                     </p>
                                 </div>
                                 <button 
                                     onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-                                    className="px-6 py-3 bg-brand-green/10 border border-brand-green/30 rounded-full text-[10px] font-black text-brand-green uppercase tracking-[0.2em] hover:bg-brand-green/20 transition-all"
+                                    className="px-6 py-3 bg-white border border-gray-400 shadow-sm rounded-full text-[11px] font-black text-black uppercase  hover:bg-white border border-gray-400 shadow-sm transition-all"
                                 >
                                     Ir a Sincronización Viva
                                 </button>
@@ -147,11 +151,11 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                 </div>
                 
                 {/* NUEVA SECCIÓN INFERIOR TÉCNICA */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-12 border-t border-carbon/10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-12 border-t border-gray-400 shadow-sm">
                     <div className="lg:col-span-1">
                          <button 
                             onClick={() => { setSelectedLot(null); setActiveTab('purchase'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                            className="w-full py-8 bg-white text-black font-black uppercase text-xs tracking-[0.3em] rounded-2xl hover:bg-brand-green transition-all shadow-[0_20px_50px_rgba(0,0,0,0.3)] group"
+                            className="w-full py-8 bg-white text-black font-black uppercase text-xs  rounded-2xl hover:bg-brand-green transition-all shadow-[0_20px_50px_rgba(0,0,0,0.3)] group"
                         >
                             <span className="flex items-center justify-center gap-3">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -161,12 +165,12 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                     </div>
 
                     <div className="lg:col-span-2">
-                        <div className="bg-soft-white border border-carbon/10 p-8 rounded-industrial">
-                            <div className="flex justify-between items-center mb-8 pb-4 border-b border-carbon/10">
-                                <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.4em]">Sincronización Viva • Historial de Flujo</h4>
+                        <div className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial">
+                            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-400 shadow-sm">
+                                <h4 className="text-[11px] font-black text-gray-600 uppercase ">Sincronización Viva • Historial de Flujo</h4>
                                 <div className="flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                                    <span className="text-[9px] font-bold text-brand-green uppercase tracking-widest">Conectado a AXIS Cloud</span>
+                                    <span className="text-[9px] font-bold text-black uppercase ">Conectado a AXIS Cloud</span>
                                 </div>
                             </div>
 
@@ -179,10 +183,10 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                                     if (lot.roast_batches && lot.roast_batches.length > 0) step = 5;
 
                                     return (
-                                        <div key={lot.id} onClick={() => { handleLotSelect(lot); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedLot?.id === lot.id ? 'bg-brand-green/10 border-brand-green/30' : 'bg-white/2 border-carbon/10 hover:border-carbon/20'}`}>
+                                        <div key={lot.id} onClick={() => { handleLotSelect(lot); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedLot?.id === lot.id ? 'bg-white border-gray-400 shadow-sm' : 'bg-white/2 border-gray-400 shadow-sm hover:border-gray-400 shadow-sm'}`}>
                                             <div className="flex justify-between items-start mb-3">
                                                 <div className="space-y-1">
-                                                    <p className="text-[10px] font-black text-carbon uppercase truncate max-w-[120px]">{lot.farmer_name}</p>
+                                                    <p className="text-[11px] font-black text-carbon uppercase truncate max-w-[120px]">{lot.farmer_name}</p>
                                                     <p className="text-[9px] font-mono text-gray-600">{lot.lot_number}</p>
                                                 </div>
                                                 <div className="flex gap-1 bg-black/20 p-1.5 rounded-lg">
@@ -191,8 +195,8 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                                                     ))}
                                                 </div>
                                             </div>
-                                            <div className="pt-2 border-t border-carbon/10 flex justify-between items-center">
-                                                <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Fase {step}/5</span>
+                                            <div className="pt-2 border-t border-gray-400 shadow-sm flex justify-between items-center">
+                                                <span className="text-[9px] font-bold text-gray-600 uppercase ">Fase {step}/5</span>
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-700"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                             </div>
                                         </div>

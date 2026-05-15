@@ -76,23 +76,23 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            <header className="flex justify-between items-end bg-white/2 border border-white/5 p-8 rounded-industrial">
+            <header className="flex justify-between items-end bg-white/2 border border-gray-400 shadow-sm p-8 rounded-industrial">
                 <div>
-                    <h3 className="text-2xl font-black text-text-main uppercase tracking-tighter">Gestión de Equipo: {companyName}</h3>
-                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.4em] mt-1">Administración Delegada de Asociación</p>
+                    <h3 className="text-2xl font-black text-text-main uppercase er">Gestión de Equipo: {companyName}</h3>
+                    <p className="text-[11px] text-black font-bold uppercase  mt-1">Administración Delegada de Asociación</p>
                 </div>
                 <button 
                     onClick={() => setShowRegisterModal(true)}
-                    className="px-8 py-4 bg-brand-green text-black rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest hover:bg-brand-green-bright transition-all shadow-lg shadow-brand-green/20"
+                    className="px-8 py-4 bg-brand-green text-black rounded-industrial-sm text-[11px] font-bold uppercase  hover:bg-brand-green-bright transition-all shadow-lg shadow-brand-green/20"
                 >
                     Registrar Nuevo Miembro
                 </button>
             </header>
 
-            <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden">
+            <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial overflow-hidden">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-white/5 border-b border-white/10 uppercase text-[9px] font-bold text-gray-500 tracking-widest">
+                        <tr className="bg-white border-b border-gray-400 shadow-sm uppercase text-[9px] font-bold text-gray-900 ">
                             <th className="p-6">Miembro / Email</th>
                             <th className="p-6">Rol Especializado</th>
                             <th className="p-6">Último Acceso</th>
@@ -101,31 +101,31 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                     </thead>
                     <tbody className="divide-y divide-white/5">
                         {isLoading ? (
-                            <tr><td colSpan={4} className="p-20 text-center text-xs text-gray-500 uppercase tracking-widest">Sincronizando Nómina...</td></tr>
+                            <tr><td colSpan={4} className="p-20 text-center text-xs text-gray-900 uppercase ">Sincronizando Nómina...</td></tr>
                         ) : members.length === 0 ? (
-                            <tr><td colSpan={4} className="p-20 text-center text-xs text-gray-500 uppercase tracking-widest">No hay miembros registrados en esta asociación</td></tr>
+                            <tr><td colSpan={4} className="p-20 text-center text-xs text-gray-900 uppercase ">No hay miembros registrados en esta asociación</td></tr>
                         ) : members.map(m => (
                             <tr key={m.id} className="hover:bg-white/2 transition-colors">
                                 <td className="p-6">
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-white uppercase">{m.full_name}</span>
-                                        <span className="text-[10px] text-gray-500 font-mono">{m.email}</span>
+                                        <span className="text-sm font-bold text-black uppercase">{m.full_name}</span>
+                                        <span className="text-[11px] text-gray-900 font-mono">{m.email}</span>
                                     </div>
                                 </td>
                                 <td className="p-6">
-                                    <span className="text-[10px] font-bold text-brand-green-bright border border-brand-green/30 bg-brand-green/5 px-3 py-1 rounded-full uppercase tracking-widest">
+                                    <span className="text-[11px] font-bold text-black-bright border border-gray-400 shadow-sm bg-white px-3 py-1 rounded-full uppercase ">
                                         {m.role}
                                     </span>
                                 </td>
                                 <td className="p-6">
-                                    <span className="text-[10px] text-gray-400 font-mono">
+                                    <span className="text-[11px] text-black font-mono">
                                         {m.last_active ? new Date(m.last_active).toLocaleString() : 'NUNCA'}
                                     </span>
                                 </td>
                                 <td className="p-6 text-right">
                                     <div className="flex items-center justify-end gap-2">
                                         <div className="w-1.5 h-1.5 bg-brand-green rounded-full shadow-[0_0_8px_rgba(0,255,136,0.6)]"></div>
-                                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Activo</span>
+                                        <span className="text-[9px] font-bold text-gray-900 uppercase ">Activo</span>
                                     </div>
                                 </td>
                             </tr>
@@ -136,38 +136,38 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
 
             {showRegisterModal && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="w-full max-w-md bg-bg-card border border-white/10 p-10 rounded-industrial shadow-3xl">
+                    <div className="w-full max-w-md bg-bg-card border border-gray-400 shadow-sm p-10 rounded-industrial shadow-3xl">
                         <header className="mb-8 text-center">
-                            <h4 className="text-xl font-bold text-white uppercase tracking-tighter">Alta de Miembro Corporativo</h4>
-                            <p className="text-[10px] text-brand-green-bright font-bold uppercase tracking-widest mt-1">{companyName}</p>
+                            <h4 className="text-xl font-bold text-black uppercase er">Alta de Miembro Corporativo</h4>
+                            <p className="text-[11px] text-black-bright font-bold uppercase  mt-1">{companyName}</p>
                         </header>
                         <form onSubmit={handleRegister} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Nombre Completo</label>
+                                <label className="text-[11px] font-bold text-gray-900 uppercase ">Nombre Completo</label>
                                 <input 
                                     required
                                     type="text" 
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 text-sm text-white focus:border-brand-green outline-none"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 text-sm text-black focus:border-black outline-none"
                                     value={newMember.name}
                                     onChange={e => setNewMember({...newMember, name: e.target.value})}
                                     placeholder="EJ: MARÍA TATAMÁ"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Email Corporativo</label>
+                                <label className="text-[11px] font-bold text-gray-900 uppercase ">Email Corporativo</label>
                                 <input 
                                     required
                                     type="email" 
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 text-sm text-white focus:border-brand-green outline-none"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 text-sm text-black focus:border-black outline-none"
                                     value={newMember.email}
                                     onChange={e => setNewMember({...newMember, email: e.target.value})}
                                     placeholder="miembro@asociacion.com"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rol en la Operación</label>
+                                <label className="text-[11px] font-bold text-gray-900 uppercase ">Rol en la Operación</label>
                                 <select 
-                                    className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-5 py-4 text-sm text-white focus:border-brand-green outline-none appearance-none"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 text-sm text-black focus:border-black outline-none appearance-none"
                                     value={newMember.role}
                                     onChange={e => setNewMember({...newMember, role: e.target.value})}
                                 >
@@ -175,8 +175,8 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                                 </select>
                             </div>
                             <div className="flex gap-4 pt-4">
-                                <button type="button" onClick={() => setShowRegisterModal(false)} className="flex-1 px-4 py-4 border border-white/10 rounded-industrial-sm text-[10px] font-bold text-gray-500 uppercase">Cancelar</button>
-                                <button type="submit" className="flex-1 px-4 py-4 bg-brand-green text-black rounded-industrial-sm text-[10px] font-bold uppercase hover:bg-brand-green-bright">Registrar</button>
+                                <button type="button" onClick={() => setShowRegisterModal(false)} className="flex-1 px-4 py-4 border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold text-gray-900 uppercase">Cancelar</button>
+                                <button type="submit" className="flex-1 px-4 py-4 bg-brand-green text-black rounded-industrial-sm text-[11px] font-bold uppercase hover:bg-brand-green-bright">Registrar</button>
                             </div>
                         </form>
                     </div>

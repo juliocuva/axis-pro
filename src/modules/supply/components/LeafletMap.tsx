@@ -16,7 +16,7 @@ if (typeof window !== 'undefined') {
 
 const vertexIcon = typeof window !== 'undefined' ? L.divIcon({
     className: 'custom-div-icon',
-    html: "<div style='background-color:#00df9a; width:10px; height:10px; border-radius:50%; border:2px solid white; box-shadow: 0 0 10px rgba(0,255,154,0.6);'></div>",
+    html: "<div style='background-color:#000000; width:10px; height:10px; border-radius:50%; border:2px solid white; box-shadow: 0 0 10px rgba(0,255,154,0.6);'></div>",
     iconSize: [10, 10],
     iconAnchor: [5, 5]
 }) : null;
@@ -71,8 +71,8 @@ export default function LeafletMap({ center, polygonCoords, markers, currentLoca
                 <Polygon
                     positions={polygonCoords}
                     pathOptions={{ 
-                        color: '#00df9a', 
-                        fillColor: '#00df9a', 
+                        color: '#000000', 
+                        fillColor: '#000000', 
                         fillOpacity: 0.25, 
                         weight: 4,
                         dashArray: '10, 10',

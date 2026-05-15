@@ -27,7 +27,7 @@ export default function TraceabilityStoryPage() {
 
     if (loading) return (
         <div className="min-h-screen bg-bg-main flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-green"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-black"></div>
         </div>
     );
 
@@ -38,16 +38,16 @@ export default function TraceabilityStoryPage() {
                     <img src="/tatama.png" alt="Asociación Tatama" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center text-white">
+                    <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center text-black">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                     </div>
-                    <h1 className="text-xl font-bold text-white tracking-widest uppercase">AXISONE <span className="text-brand-green-bright">VERIFY</span></h1>
+                    <h1 className="text-xl font-bold text-black  uppercase">AXISONE <span className="text-black-bright">VERIFY</span></h1>
                 </div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-[0.4em] font-bold">Archivo generado para la Asociación Tatama</p>
+                <p className="text-[11px] text-black uppercase  font-bold">Archivo generado para la Asociación Tatama</p>
             </header>
 
-            <div className="max-w-md w-full bg-bg-main border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white/5 rounded-full flex items-center justify-center text-[8px] font-mono text-gray-500 uppercase z-20">Secure Token Verifier</div>
+            <div className="max-w-md w-full bg-bg-main border border-gray-200 shadow-sm rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white rounded-full flex items-center justify-center text-[9px] font-mono text-gray-900 uppercase z-20">Secure Token Verifier</div>
 
                 <div className="h-64 relative overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=3540&auto=format&fit=crop" className="w-full h-full object-cover grayscale" alt="Farm" />
@@ -57,51 +57,51 @@ export default function TraceabilityStoryPage() {
                 <div className="p-8 -mt-12 bg-bg-main rounded-t-[3rem] relative space-y-8">
                     <header>
                         <div className="flex justify-between items-start">
-                            <h3 className="text-3xl font-bold uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
-                            <span className="bg-brand-green/20 text-brand-green text-[10px] font-bold px-3 py-1 rounded-full uppercase border border-brand-green/20">Lote {story?.roast?.batch_id_label || id}</span>
+                            <h3 className="text-3xl font-bold uppercase er leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
+                            <span className="bg-white border border-gray-200 shadow-sm text-black text-[11px] font-bold px-3 py-1 rounded-full uppercase border border-gray-200 shadow-sm">Lote {story?.roast?.batch_id_label || id}</span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-6 leading-relaxed font-medium">
+                        <p className="text-xs text-black mt-6 leading-relaxed font-medium">
                             Este café fue cultivado en la finca <strong>{story?.farm || 'Alejandría'}</strong> a {story?.height || '1.850 msnm'}.
                         </p>
                     </header>
 
-                    <div className="grid grid-cols-3 gap-4 py-6 border-y border-white/5">
+                    <div className="grid grid-cols-3 gap-4 py-6 border-y border-gray-200 shadow-sm">
                         <div className="text-center">
-                            <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Proceso</p>
-                            <p className="text-xs font-bold uppercase text-white">{story?.process || 'Natural'}</p>
+                            <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Proceso</p>
+                            <p className="text-xs font-bold uppercase text-black">{story?.process || 'Natural'}</p>
                         </div>
-                        <div className="text-center border-x border-white/10">
-                            <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Puntaje</p>
-                            <p className="text-xs font-bold text-brand-green-bright">{story?.sensoryScore || 87.5} pts (Basado en estándares SCA)</p>
+                        <div className="text-center border-x border-gray-200 shadow-sm">
+                            <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Puntaje</p>
+                            <p className="text-xs font-bold text-black-bright">{story?.sensoryScore || 87.5} pts (Basado en estándares SCA)</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Tueste</p>
-                            <p className="text-xs font-bold uppercase text-white">Perfil Oro</p>
+                            <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Tueste</p>
+                            <p className="text-xs font-bold uppercase text-black">Perfil Oro</p>
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green-bright">Notas Catadas</h4>
+                        <h4 className="text-[11px] font-bold uppercase  text-black-bright">Notas Catadas</h4>
                         <div className="flex flex-wrap gap-2 text-[9px]">
                             {story?.notes?.map((note: string) => (
-                                <span key={note} className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">{note}</span>
+                                <span key={note} className="px-3 py-1 bg-white rounded-full border border-gray-200 shadow-sm font-bold uppercase">{note}</span>
                             )) || (
                                     <>
-                                        <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">Chocolate</span>
-                                        <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">Frutos Rojos</span>
+                                        <span className="px-3 py-1 bg-white rounded-full border border-gray-200 shadow-sm font-bold uppercase">Chocolate</span>
+                                        <span className="px-3 py-1 bg-white rounded-full border border-gray-200 shadow-sm font-bold uppercase">Frutos Rojos</span>
                                     </>
                                 )}
                         </div>
                     </div>
 
-                    <div className="p-6 bg-brand-green/10 border border-brand-green/20 text-white rounded-3xl space-y-2">
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-green-bright">Recomendación Tatama</h4>
-                        <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
+                    <div className="p-6 bg-white border border-gray-200 shadow-sm text-black rounded-3xl space-y-2">
+                        <h4 className="text-[11px] font-bold uppercase  text-black-bright">Recomendación Tatama</h4>
+                        <p className="text-[11px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                     </div>
 
                     <button
                         onClick={() => window.location.href = '/'}
-                        className="w-full py-4 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all"
+                        className="w-full py-4 bg-white hover:bg-white text-black hover:text-black border border-gray-200 shadow-sm rounded-2xl text-[11px] font-bold uppercase  transition-all"
                     >
                         Ver Más Productos
                     </button>
@@ -109,7 +109,7 @@ export default function TraceabilityStoryPage() {
             </div>
 
             <footer className="mt-12 text-center pb-8 opacity-50">
-                <p className="text-[8px] text-gray-600 uppercase tracking-widest">© {new Date().getFullYear()} AXISONE COFFEE | Consumer Experience</p>
+                <p className="text-[9px] text-gray-600 uppercase ">© {new Date().getFullYear()} AXISONE COFFEE | Consumer Experience</p>
             </footer>
         </div>
     );

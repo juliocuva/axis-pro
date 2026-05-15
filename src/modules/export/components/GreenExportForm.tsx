@@ -125,9 +125,9 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
 
             {showMappingModal && selectedLot && (
                 <div className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
-                    <div className="w-full max-w-2xl bg-bg-card rounded-3xl overflow-hidden relative shadow-2xl border border-white/10">
+                    <div className="w-full max-w-2xl bg-bg-card rounded-3xl overflow-hidden relative shadow-2xl border border-gray-400 shadow-sm">
                         <div className="absolute top-4 right-4 z-50">
-                            <button onClick={() => setShowMappingModal(false)} className="bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center border border-white/20">✕</button>
+                            <button onClick={() => setShowMappingModal(false)} className="bg-black/50 text-black w-10 h-10 rounded-full flex items-center justify-center border border-gray-400 shadow-sm">✕</button>
                         </div>
                         <div className="max-h-[90vh] overflow-y-auto">
                             <EUDRGeoreference 
@@ -142,13 +142,13 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
 
             <form onSubmit={handleSubmit} className="space-y-8">
                 {status && (
-                    <div className={`p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 border ${status.type === 'success' ? 'bg-brand-green/5 border-brand-green/20 text-brand-green-bright' : 'bg-brand-red/5 border-brand-red/20 text-brand-red-bright'}`}>
-                        <div className="font-bold uppercase text-[10px] tracking-widest">{status.message}</div>
+                    <div className={`p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 border ${status.type === 'success' ? 'bg-white border-gray-400 shadow-sm text-black-bright' : 'bg-brand-red/5 border-brand-red/20 text-brand-red-bright'}`}>
+                        <div className="font-bold uppercase text-[11px] ">{status.message}</div>
                         {status.type === 'success' && (
                             <button
                                 type="button"
                                 onClick={() => setShowPassport(true)}
-                                className="bg-brand-green text-white px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-brand-green-bright transition-all"
+                                className="bg-brand-green text-black px-6 py-2 rounded-xl text-[11px] font-bold uppercase  hover:bg-brand-green-bright transition-all"
                             >
                                 Ver Pasaporte Digital
                             </button>
@@ -157,17 +157,17 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <section className="bg-bg-card border border-white/5 p-8 rounded-3xl">
-                        <h3 className="text-brand-green-bright text-[10px] font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <section className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
+                        <h3 className="text-black-bright text-[11px] font-bold uppercase  mb-6 flex items-center gap-2">
                             <span className="w-1 h-4 bg-brand-green rounded-full"></span>
                             Control de Calidad (Verde)
                         </h3>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Lote a Exportar</label>
+                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Lote a Exportar</label>
                                 <select
-                                    className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all text-sm font-bold uppercase"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 focus:border-black outline-none transition-all text-sm font-bold uppercase"
                                     value={selectedLotId}
                                     onChange={(e) => setSelectedLotId(e.target.value)}
                                     disabled={isLoadingLots}
@@ -187,9 +187,9 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             </div>
 
                             <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Mercado Destino (Continente)</label>
+                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Mercado Destino (Continente)</label>
                                 <select
-                                    className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all text-sm font-bold uppercase"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 focus:border-black outline-none transition-all text-sm font-bold uppercase"
                                     value={formData.targetMarket}
                                     onChange={(e) => setFormData({ ...formData, targetMarket: e.target.value as any })}
                                 >
@@ -201,13 +201,13 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             </div>
 
                             <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Puerto / Ciudad Destino</label>
+                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Puerto / Ciudad Destino</label>
                                 <input
                                     type="text"
                                     required
                                     value={formData.destinationCity}
                                     onChange={(e) => setFormData({ ...formData, destinationCity: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all text-sm font-bold uppercase"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 focus:border-black outline-none transition-all text-sm font-bold uppercase"
                                     placeholder="Ej: ROTTERDAM"
                                     disabled={isSubmitting}
                                 />
@@ -225,44 +225,44 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             />
 
                             <div>
-                                <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest pl-1">Fecha Programada de Exportación</label>
+                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Fecha Programada de Exportación</label>
                                 <input
                                     type="date"
                                     required
                                     value={formData.exportDate}
                                     onChange={(e) => setFormData({ ...formData, exportDate: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/5 rounded-xl px-4 py-3 mt-1 focus:border-brand-green outline-none transition-all text-sm font-bold"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 focus:border-black outline-none transition-all text-sm font-bold"
                                     disabled={isSubmitting}
                                 />
                             </div>
                         </div>
                     </section>
 
-                    <section className="bg-bg-card border border-white/5 p-8 rounded-3xl relative overflow-hidden flex flex-col justify-start">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-[80px] rounded-full"></div>
+                    <section className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl relative overflow-hidden flex flex-col justify-start">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-[80px] rounded-full"></div>
                         <div>
-                            <h3 className="text-brand-green-bright text-[10px] font-bold uppercase tracking-widest mb-6 border-b border-brand-green/20 pb-2">Asistente Aduanero Inmutable</h3>
+                            <h3 className="text-black-bright text-[11px] font-bold uppercase  mb-6 border-b border-gray-400 shadow-sm pb-2">Asistente Aduanero Inmutable</h3>
 
                             {formData.targetMarket === 'europa' && (
-                                <div className="p-5 rounded-2xl bg-brand-green/10 border border-brand-green/30 space-y-3 animate-in fade-in zoom-in duration-300">
+                                <div className="p-5 rounded-2xl bg-white border border-gray-400 shadow-sm space-y-3 animate-in fade-in zoom-in duration-300">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-brand-green/20 flex items-center justify-center">
+                                            <div className="w-8 h-8 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center">
                                                 <span className="w-2.5 h-2.5 rounded-full bg-brand-green animate-pulse"></span>
                                             </div>
-                                            <span className="text-sm font-bold text-brand-green-bright uppercase tracking-tighter">ALERTA LEGAL: EUROPA (EUDR)</span>
+                                            <span className="text-sm font-bold text-black-bright uppercase er">ALERTA LEGAL: EUROPA (EUDR)</span>
                                         </div>
                                         {isEudrNonCompliant() && (
-                                            <span className="bg-brand-red text-white text-[9px] font-bold px-2 py-1 rounded-md animate-pulse uppercase">
+                                            <span className="bg-brand-red text-black text-[9px] font-bold px-2 py-1 rounded-md animate-pulse uppercase">
                                                 RECHAZO ADUANA
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-[10px] text-gray-200/70 font-bold uppercase leading-relaxed tracking-wider">
+                                    <p className="text-[11px] text-gray-200/70 font-bold uppercase leading-relaxed ">
                                         Detectado destino dentro de la UE. El Reglamento 2023/1115 exige comprobación estricta de deforestación cero. El pasaporte generado <strong>incluirá obligatoriamente los Polígonos WGS84 de las fincas de origen</strong>.
                                     </p>
-                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mt-3">
-                                        <p className="text-[9px] text-white/50 font-black uppercase leading-tight tracking-[0.05em]">
+                                    <div className="p-4 bg-white rounded-2xl border border-gray-400 shadow-sm mt-3">
+                                        <p className="text-[9px] text-black/50 font-black uppercase leading-tight ">
                                             NOTA DE AUDITORÍA: POR CONDICIONES DE ORDEN PÚBLICO Y SEGURIDAD EN ZONA, SE VALIDA METODOLOGÍA SENSORIAL MÓVIL (IMU) COMO ALTERNATIVA SOBERANA AL USO DE DRONES.
                                         </p>
                                     </div>
@@ -270,10 +270,10 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                     {isEudrNonCompliant() && (
                                         <div className="mt-4 p-4 bg-brand-red/10 border border-brand-red/30 rounded-2xl space-y-4">
                                             <div className="flex flex-col gap-1">
-                                                <p className="text-[10px] text-brand-red-bright font-black uppercase tracking-widest">
+                                                <p className="text-[11px] text-brand-red-bright font-black uppercase ">
                                                     BLOQUEO DE EMISIÓN: FALTA MAPA POLIGONAL
                                                 </p>
-                                                <p className="text-[9px] text-white/50 font-bold uppercase leading-tight">
+                                                <p className="text-[9px] text-black/50 font-bold uppercase leading-tight">
                                                     El área ({selectedLot?.farm_size_hectares} ha) requiere georeferencia sensorial para cumplir con la Regulación Europea.
                                                 </p>
                                             </div>
@@ -281,7 +281,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                             <button 
                                                 type="button"
                                                 onClick={() => setShowMappingModal(true)}
-                                                className="w-full bg-brand-green text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
+                                                className="w-full bg-brand-green text-black py-4 rounded-xl font-black uppercase text-[11px]  shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
                                                 Iniciar Caminata Digital Ahora
@@ -292,38 +292,38 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             )}
 
                             {formData.targetMarket === 'usa' && (
-                                <div className="p-5 rounded-2xl bg-brand-green/10 border border-brand-green/30 space-y-3 animate-in fade-in zoom-in duration-300">
+                                <div className="p-5 rounded-2xl bg-white border border-gray-400 shadow-sm space-y-3 animate-in fade-in zoom-in duration-300">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-brand-green/20 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center">
                                             <span className="w-2.5 h-2.5 rounded-full bg-brand-green/80 animate-pulse"></span>
                                         </div>
-                                        <span className="text-sm font-bold text-brand-green-bright uppercase tracking-tighter">NORMATIVA FDA / FSMA</span>
+                                        <span className="text-sm font-bold text-black-bright uppercase er">NORMATIVA FDA / FSMA</span>
                                     </div>
-                                    <p className="text-[10px] text-gray-200/70 font-bold uppercase leading-relaxed tracking-wider">
+                                    <p className="text-[11px] text-gray-200/70 font-bold uppercase leading-relaxed ">
                                         Destino Norteamérica. El pasaporte priorizará el registro inmutable de Eventos de Custodia y los controles de bioseguridad (humedad) para evitar retenciones de la FDA por riesgo biológico o Bioterrorismo.
                                     </p>
                                 </div>
                             )}
 
                             {(formData.targetMarket === 'asia' || formData.targetMarket === 'otros') && (
-                                <div className="p-5 rounded-2xl bg-brand-green/10 border border-brand-green/30 space-y-3 animate-in fade-in zoom-in duration-300">
+                                <div className="p-5 rounded-2xl bg-white border border-gray-400 shadow-sm space-y-3 animate-in fade-in zoom-in duration-300">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-brand-green/20 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center">
                                             <span className="w-2.5 h-2.5 rounded-full bg-brand-green-bright"></span>
                                         </div>
-                                        <span className="text-sm font-bold text-brand-green-bright uppercase tracking-tighter">PROTOCOLO ESTÁNDAR GLOBAL</span>
+                                        <span className="text-sm font-bold text-black-bright uppercase er">PROTOCOLO ESTÁNDAR GLOBAL</span>
                                     </div>
-                                    <p className="text-[10px] text-brand-green/70 font-bold uppercase leading-relaxed tracking-wider">
+                                    <p className="text-[11px] text-black/70 font-bold uppercase leading-relaxed ">
                                         Destino con regulaciones mixtas. El pasaporte emitirá el certificado base inmutable garantizando autenticidad de origen WGS84 y trazabilidad física unificada.
                                     </p>
                                 </div>
                             )}
 
-                            <div className="mt-6 p-4 rounded-xl bg-black/40 border border-white/5">
-                                <span className="text-[9px] text-gray-500 uppercase font-bold tracking-widest block mb-2">Bioseguridad del Lote</span>
+                            <div className="mt-6 p-4 rounded-xl bg-black/40 border border-gray-400 shadow-sm">
+                                <span className="text-[9px] text-gray-900 uppercase font-bold  block mb-2">Bioseguridad del Lote</span>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold text-white uppercase">{formData.moistureContent}% Humedad</span>
-                                    <span className={`text-[8px] font-bold uppercase px-2 py-1 rounded-md ${formData.moistureContent > 12.5 ? 'bg-brand-red border-brand-red text-white' : 'bg-brand-green/10 text-brand-green border border-brand-green/30'}`}>
+                                    <span className="text-[11px] font-bold text-black uppercase">{formData.moistureContent}% Humedad</span>
+                                    <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-md ${formData.moistureContent > 12.5 ? 'bg-brand-red border-brand-red text-black' : 'bg-white text-black border border-gray-400 shadow-sm'}`}>
                                         {formData.moistureContent > 12.5 ? 'Riesgo Biológico Aduana' : 'Límite Seguro (Transporte Marítimo)'}
                                     </span>
                                 </div>
@@ -331,13 +331,13 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                         </div>
 
                         <div className="mt-8 flex gap-4">
-                            <div className="flex-1 p-3 bg-white/2 rounded-xl border border-white/5 text-center">
-                                <p className="text-[8px] text-gray-600 uppercase font-bold">Transporte</p>
-                                <p className="text-[10px] text-white font-bold uppercase">{formData.transportType}</p>
+                            <div className="flex-1 p-3 bg-white/2 rounded-xl border border-gray-400 shadow-sm text-center">
+                                <p className="text-[9px] text-gray-600 uppercase font-bold">Transporte</p>
+                                <p className="text-[11px] text-black font-bold uppercase">{formData.transportType}</p>
                             </div>
-                            <div className="flex-1 p-3 bg-white/2 rounded-xl border border-white/5 text-center">
-                                <p className="text-[8px] text-gray-600 uppercase font-bold">Certificado</p>
-                                <p className="text-[10px] text-brand-green font-bold uppercase">Axis A-1</p>
+                            <div className="flex-1 p-3 bg-white/2 rounded-xl border border-gray-400 shadow-sm text-center">
+                                <p className="text-[9px] text-gray-600 uppercase font-bold">Certificado</p>
+                                <p className="text-[11px] text-black font-bold uppercase">Axis A-1</p>
                             </div>
                         </div>
                     </section>
@@ -346,7 +346,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                 <button
                     type="submit"
                     disabled={isSubmitting || isEudrNonCompliant() || !selectedLotId}
-                    className="w-full bg-brand-green hover:bg-brand-green-bright text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-brand-green/20 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:bg-gray-700 disabled:shadow-none text-[10px] uppercase tracking-widest"
+                    className="w-full bg-brand-green hover:bg-brand-green-bright text-black font-bold py-4 rounded-2xl transition-all shadow-xl shadow-brand-green/20 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:bg-gray-700 disabled:shadow-none text-[11px] uppercase "
                 >
                     {isSubmitting ? 'GENERANDO EN LA NUBE...' :
                         isEudrNonCompliant() ? 'REVISIÓN EUDR OBLIGATORIA' :

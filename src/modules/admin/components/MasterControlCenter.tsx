@@ -277,22 +277,22 @@ export default function MasterControlCenter() {
 
     return (
         <div className="space-y-10 animate-in fade-in duration-700 max-w-7xl mx-auto px-4 pb-20">
-            <header className="flex justify-between items-end border-b border-white/10 pb-6 mt-10">
+            <header className="flex justify-between items-end border-b border-gray-400 shadow-sm pb-6 mt-10">
                 <div>
-                    <h2 className="text-4xl font-black text-text-main uppercase tracking-tighter">Centro de Gobernanza</h2>
-                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.4em] mt-1">Super Admin • Ecosistema Axis</p>
+                    <h2 className="text-4xl font-black text-text-main uppercase er">Centro de Gobernanza</h2>
+                    <p className="text-[11px] text-black font-bold uppercase  mt-1">Super Admin • Ecosistema Axis</p>
                 </div>
                 <div className="flex gap-4">
                     <button
                         onClick={() => setShowAddUserModal(true)}
-                        className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest border border-white/10 transition-all flex items-center gap-3"
+                        className="px-6 py-3 bg-white hover:bg-white text-black rounded-industrial-sm text-[11px] font-bold uppercase  border border-gray-400 shadow-sm transition-all flex items-center gap-3"
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
                         Nuevo Operador
                     </button>
                     <button
                         onClick={fetchMasterStats}
-                        className="px-6 py-3 bg-brand-green text-black rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest border border-brand-green hover:bg-brand-green-bright transition-all flex items-center gap-3 shadow-lg shadow-brand-green/20"
+                        className="px-6 py-3 bg-brand-green text-black rounded-industrial-sm text-[11px] font-bold uppercase  border border-black hover:bg-brand-green-bright transition-all flex items-center gap-3 shadow-lg shadow-brand-green/20"
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
                         Refrescar Red
@@ -301,20 +301,20 @@ export default function MasterControlCenter() {
             </header>
             
             {/* PANEL DE DIAGNÓSTICO RÁPIDO */}
-            <section className="bg-bg-card border border-brand-green/20 p-6 rounded-industrial">
+            <section className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em]">Estado de la Red Axis</h3>
+                        <h3 className="text-[11px] font-black text-black uppercase ">Estado de la Red Axis</h3>
                         <p className="text-xs text-text-offset mt-1">Conexión con la Bóveda Central (Supabase)</p>
                     </div>
                     <div className="flex gap-8">
                         <div className="text-center">
-                            <p className="text-[9px] text-gray-500 font-bold uppercase">Perfiles en Red</p>
+                            <p className="text-[9px] text-gray-900 font-bold uppercase">Perfiles en Red</p>
                             <p className="text-xl font-black text-text-main">{users.length}</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-[9px] text-gray-500 font-bold uppercase">Estado de Tabla</p>
-                            <p className={`text-[10px] font-bold uppercase ${dbError ? 'text-brand-red' : 'text-brand-green'}`}>
+                            <p className="text-[9px] text-gray-900 font-bold uppercase">Estado de Tabla</p>
+                            <p className={`text-[11px] font-bold uppercase ${dbError ? 'text-brand-red' : 'text-black'}`}>
                                 {dbError ? 'ERROR DE ESQUEMA' : 'ACTIVA'}
                             </p>
                         </div>
@@ -327,23 +327,23 @@ export default function MasterControlCenter() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Lotes Generados en la Red Axis</h3>
+                        <h3 className="text-xs font-bold text-black uppercase ">Lotes Generados en la Red Axis</h3>
                     </div>
-                    <span className="text-[10px] font-bold text-brand-green-bright bg-brand-green/10 px-3 py-1 rounded-full uppercase tracking-widest">
+                    <span className="text-[11px] font-bold text-black-bright bg-white px-3 py-1 rounded-full uppercase ">
                         {allLots.length} Registros Totales
                     </span>
                 </div>
                 
-                <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden shadow-2xl">
+                <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial overflow-hidden shadow-2xl">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/5 border-b border-white/10">
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">No. Lote</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Origen / Caficultor</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Asociación</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Estado EUDR</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">Peso (Kg) / Acción</th>
+                                <tr className="bg-white border-b border-gray-400 shadow-sm">
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">No. Lote</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Origen / Caficultor</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Asociación</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Estado EUDR</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-right">Peso (Kg) / Acción</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5 font-medium">
@@ -353,16 +353,16 @@ export default function MasterControlCenter() {
                                         <td className="p-5 text-xs">
                                             <div className="flex flex-col">
                                                 <span className="text-text-main uppercase font-bold">{lot.farmer_name}</span>
-                                                <span className="text-[9px] text-gray-500 uppercase tracking-tighter">{lot.farm_name} • {lot.region}</span>
+                                                <span className="text-[9px] text-gray-900 uppercase er">{lot.farm_name} • {lot.region}</span>
                                             </div>
                                         </td>
-                                        <td className="p-5 text-[10px] font-bold text-gray-400 uppercase">
+                                        <td className="p-5 text-[11px] font-bold text-black uppercase">
                                             {stats.find(s => s.id === lot.company_id)?.name || 'INCOGNITO'}
                                         </td>
                                         <td className="p-5">
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${lot.status === 'completed' ? 'bg-brand-green' : 'bg-brand-green'}`}></div>
-                                                <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                                                <span className="text-[9px] font-bold uppercase  text-black">
                                                     {lot.status === 'completed' ? 'Verificado Satélite' : 'En Sincronización'}
                                                 </span>
                                             </div>
@@ -372,7 +372,7 @@ export default function MasterControlCenter() {
                                             {currentUser?.email === 'juliocuva@gmail.com' && (
                                                 <button 
                                                     onClick={() => handleDeleteLot(lot.id, lot.lot_number)}
-                                                    className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[8px] font-bold px-3 py-1.5 rounded border border-red-500/20 transition-all uppercase tracking-widest"
+                                                    className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-[9px] font-bold px-3 py-1.5 rounded border border-red-500/20 transition-all uppercase "
                                                 >
                                                     Eliminar
                                                 </button>
@@ -390,27 +390,27 @@ export default function MasterControlCenter() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-brand-green rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Salud y Adopción del Sistema</h3>
+                    <h3 className="text-xs font-bold text-black uppercase ">Salud y Adopción del Sistema</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="bg-bg-card border border-white/5 p-6 rounded-industrial relative overflow-hidden">
-                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2">Asociaciones Activas</p>
-                        <p className="text-4xl font-black text-white tracking-tighter">{activeCompanies}</p>
+                    <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden">
+                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2">Asociaciones Activas</p>
+                        <p className="text-4xl font-black text-black er">{activeCompanies}</p>
                     </div>
-                    <div className="bg-bg-card border border-white/5 p-6 rounded-industrial relative overflow-hidden">
-                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-2">Volumen Estimado (Kg)</p>
-                        <p className="text-4xl font-black text-text-main tracking-tighter">{totalVolume.toLocaleString()}</p>
+                    <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden">
+                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2">Volumen Estimado (Kg)</p>
+                        <p className="text-4xl font-black text-text-main er">{totalVolume.toLocaleString()}</p>
                     </div>
-                    <div className="bg-bg-card border border-brand-green/20 p-6 rounded-industrial relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-16 h-16 bg-brand-green/10 blur-xl rounded-full"></div>
-                        <p className="text-[9px] text-brand-green font-bold uppercase tracking-widest mb-2">Usuarios Activos Hoy</p>
-                        <p className="text-4xl font-black text-text-main tracking-tighter">
+                    <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-white blur-xl rounded-full"></div>
+                        <p className="text-[9px] text-black font-bold uppercase  mb-2">Usuarios Activos Hoy</p>
+                        <p className="text-4xl font-black text-text-main er">
                             {users.filter(u => u.last_active && new Date(u.last_active).toDateString() === new Date().toDateString()).length}
                         </p>
                     </div>
-                    <div className="bg-bg-card border border-brand-green/20 p-6 rounded-industrial relative overflow-hidden">
-                        <p className="text-[9px] text-brand-green-bright font-bold uppercase tracking-widest mb-2">Verificaciones Externas</p>
-                        <p className="text-4xl font-black text-white tracking-tighter">{verificationLogs.length}</p>
+                    <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden">
+                        <p className="text-[9px] text-black-bright font-bold uppercase  mb-2">Verificaciones Externas</p>
+                        <p className="text-4xl font-black text-black er">{verificationLogs.length}</p>
                     </div>
                 </div>
             </section>
@@ -419,42 +419,42 @@ export default function MasterControlCenter() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Cartera de Asociaciones y Clientes</h3>
+                    <h3 className="text-xs font-bold text-black uppercase ">Cartera de Asociaciones y Clientes</h3>
                 </div>
                 
                 <div className="grid grid-cols-1 gap-4">
-                    <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden shadow-2xl">
+                    <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial overflow-hidden shadow-2xl">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/5 border-b border-white/10">
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Organización</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Usuarios</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Lotes</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Laboratorio</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-center">Catación</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">Herramientas</th>
+                                <tr className="bg-white border-b border-gray-400 shadow-sm">
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Organización</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Usuarios</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Lotes</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Laboratorio</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Catación</th>
+                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-right">Herramientas</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {stats.length === 0 ? (
-                                    <tr><td colSpan={6} className="p-10 text-center text-gray-500 text-[10px] font-bold uppercase tracking-widest">No hay organizaciones detectadas</td></tr>
+                                    <tr><td colSpan={6} className="p-10 text-center text-gray-900 text-[11px] font-bold uppercase ">No hay organizaciones detectadas</td></tr>
                                 ) : stats.map((company) => (
                                     <tr key={company.id} className="hover:bg-white/[0.02] transition-colors">
                                         <td className="p-5">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded bg-bg-main border border-white/10 flex items-center justify-center">
-                                                    <span className="text-[10px] font-black text-brand-green">{company.name?.substring(0, 2)}</span>
+                                                <div className="w-8 h-8 rounded bg-bg-main border border-gray-400 shadow-sm flex items-center justify-center">
+                                                    <span className="text-[11px] font-black text-black">{company.name?.substring(0, 2)}</span>
                                                 </div>
-                                                <span className="text-xs font-black text-text-main uppercase tracking-tight">{company.name}</span>
+                                                <span className="text-xs font-black text-text-main uppercase ">{company.name}</span>
                                             </div>
                                         </td>
-                                        <td className="p-5 text-center text-xs font-bold text-brand-green-bright">{company.users || 0}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-black-bright">{company.users || 0}</td>
                                         <td className="p-5 text-center text-xs font-bold text-text-main">{company.lots}</td>
-                                        <td className="p-5 text-center text-xs font-bold text-gray-400">{company.physical}</td>
-                                        <td className="p-5 text-center text-xs font-bold text-brand-green-bright">{company.cupping}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-black">{company.physical}</td>
+                                        <td className="p-5 text-center text-xs font-bold text-black-bright">{company.cupping}</td>
                                         <td className="p-5 text-right flex justify-end gap-2">
-                                            <button onClick={() => setReportCompany(company)} className="text-[8px] font-bold bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded uppercase tracking-widest border border-white/10 transition-all">Reporte</button>
-                                            <button onClick={() => setShowLotsCompany(company)} className="text-[8px] font-bold bg-brand-green/10 hover:bg-brand-green/20 text-brand-green px-3 py-1.5 rounded uppercase tracking-widest border border-brand-green/20 transition-all">Lotes</button>
+                                            <button onClick={() => setReportCompany(company)} className="text-[9px] font-bold bg-white hover:bg-white text-black px-3 py-1.5 rounded uppercase  border border-gray-400 shadow-sm transition-all">Reporte</button>
+                                            <button onClick={() => setShowLotsCompany(company)} className="text-[9px] font-bold bg-white hover:bg-white border border-gray-400 shadow-sm text-black px-3 py-1.5 rounded uppercase  border border-gray-400 shadow-sm transition-all">Lotes</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -468,36 +468,36 @@ export default function MasterControlCenter() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(0,223,154,0.6)]"></div>
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Auditoría de Usuarios y Accesos</h3>
+                    <h3 className="text-xs font-bold text-black uppercase ">Auditoría de Usuarios y Accesos</h3>
                 </div>
                 
-                <div className="bg-bg-card border border-white/5 rounded-industrial overflow-hidden shadow-2xl">
+                <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial overflow-hidden shadow-2xl">
                     {dbError && (
                         <div className="p-8 bg-brand-red/10 border-b border-brand-red/20 space-y-4">
                             <div className="flex items-center gap-3 text-brand-red">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                <span className="text-[10px] font-black uppercase tracking-widest">Error de Sincronización en la Bóveda</span>
+                                <span className="text-[11px] font-black uppercase ">Error de Sincronización en la Bóveda</span>
                             </div>
-                            <p className="text-xs text-gray-400">El servidor reporta: <code className="text-brand-red bg-black/40 px-2 py-1 rounded">{dbError}</code></p>
-                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Esto ocurre usualmente si la tabla 'profiles' no ha sido creada. ¿Quieres que te muestre el código SQL necesario?</p>
+                            <p className="text-xs text-black">El servidor reporta: <code className="text-brand-red bg-black/40 px-2 py-1 rounded">{dbError}</code></p>
+                            <p className="text-[11px] text-gray-900 uppercase font-bold ">Esto ocurre usualmente si la tabla 'profiles' no ha sido creada. ¿Quieres que te muestre el código SQL necesario?</p>
                         </div>
                     )}
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-white/5 border-b border-white/10">
-                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Usuario / Email</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Asociación</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Rol</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">Actividad</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-500 uppercase tracking-widest text-right">Acción</th>
+                            <tr className="bg-white border-b border-gray-400 shadow-sm">
+                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Usuario / Email</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Asociación</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Rol</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Actividad</th>
+                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-right">Acción</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {users.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="p-20 text-center">
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em]">No hay operadores registrados en la red</p>
-                                        <button onClick={() => setShowAddUserModal(true)} className="mt-4 text-brand-green text-[9px] font-bold uppercase underline">Registrar Primer Operador</button>
+                                        <p className="text-[11px] text-gray-900 font-bold uppercase ">No hay operadores registrados en la red</p>
+                                        <button onClick={() => setShowAddUserModal(true)} className="mt-4 text-black text-[9px] font-bold uppercase underline">Registrar Primer Operador</button>
                                     </td>
                                 </tr>
                             ) : users.map((user) => {
@@ -508,22 +508,22 @@ export default function MasterControlCenter() {
                                             <div className="flex items-center gap-3">
                                                 {isActiveToday && <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse shadow-[0_0_8px_rgba(0,255,136,0.6)]"></div>}
                                                 <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-white uppercase tracking-tight">{user.full_name || 'Sin Nombre'}</span>
-                                                    <span className="text-[10px] text-gray-500 font-mono mt-1">{user.email}</span>
+                                                    <span className="text-xs font-bold text-black uppercase ">{user.full_name || 'Sin Nombre'}</span>
+                                                    <span className="text-[11px] text-gray-900 font-mono mt-1">{user.email}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="p-5">
-                                            <span className="text-[10px] font-bold text-white bg-white/10 px-3 py-1.5 rounded uppercase tracking-widest border border-white/5">
+                                            <span className="text-[11px] font-bold text-black bg-white px-3 py-1.5 rounded uppercase  border border-gray-400 shadow-sm">
                                                 {stats.find(s => s.id === user.company_id)?.name || 'Empresa'}
                                             </span>
                                         </td>
                                         <td className="p-5">
-                                            <span className="text-[10px] text-brand-green font-bold uppercase tracking-widest">{user.role}</span>
+                                            <span className="text-[11px] text-black font-bold uppercase ">{user.role}</span>
                                         </td>
                                         <td className="p-5">
                                             <div className="flex flex-col">
-                                                <span className={`text-[10px] font-bold uppercase ${isActiveToday ? 'text-white' : 'text-gray-600'}`}>
+                                                <span className={`text-[11px] font-bold uppercase ${isActiveToday ? 'text-black' : 'text-gray-600'}`}>
                                                     {isActiveToday ? 'Activo Ahora' : 'Fuera de Línea'}
                                                 </span>
                                                 <span className="text-[9px] text-gray-700 font-mono mt-1">
@@ -534,22 +534,22 @@ export default function MasterControlCenter() {
                                         <td className="p-5 text-right flex justify-end gap-2 relative">
                                             <button
                                                 onClick={() => setActiveManagementId(activeManagementId === user.id ? null : user.id)}
-                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${activeManagementId === user.id ? 'bg-brand-green border-brand-green text-white' : 'border-brand-green/30 text-brand-green-bright hover:bg-brand-green/10'}`}
+                                                className={`text-[9px] font-bold uppercase  border px-4 py-2 rounded transition-all ${activeManagementId === user.id ? 'bg-brand-green border-black text-black' : 'border-gray-400 shadow-sm text-black-bright hover:bg-white'}`}
                                             >
                                                 {activeManagementId === user.id ? 'Cerrar' : 'Gestionar'}
                                             </button>
 
                                             {/* DROPDOWN DE GESTIÓN INDUSTRIAL */}
                                             {activeManagementId === user.id && (
-                                                <div className="absolute right-0 top-full mt-2 w-64 bg-bg-card border border-white/10 rounded-industrial shadow-3xl z-[100] p-4 text-left animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <div className="absolute right-0 top-full mt-2 w-64 bg-bg-card border border-gray-400 shadow-sm rounded-industrial shadow-3xl z-[100] p-4 text-left animate-in fade-in slide-in-from-top-2 duration-300">
                                                     <div className="mb-4">
-                                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2 px-1">Asignar Rol</p>
+                                                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2 px-1">Asignar Rol</p>
                                                         <div className="grid grid-cols-2 gap-1.5">
                                                             {['operador', 'gerente', 'catador', 'barista', 'tostador'].map(role => (
                                                                 <button
                                                                     key={role}
                                                                     onClick={() => handleUpdateUser(user.id, { role })}
-                                                                    className={`text-[9px] font-bold uppercase p-2 rounded border transition-all ${user.role === role ? 'bg-brand-green/20 border-brand-green/40 text-brand-green-bright' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white hover:bg-white/10'}`}
+                                                                    className={`text-[9px] font-bold uppercase p-2 rounded border transition-all ${user.role === role ? 'bg-white border border-gray-400 shadow-sm border-gray-400 shadow-sm text-black-bright' : 'bg-white border-gray-400 shadow-sm text-black hover:text-black hover:bg-white'}`}
                                                                 >
                                                                     {role}
                                                                 </button>
@@ -557,12 +557,12 @@ export default function MasterControlCenter() {
                                                         </div>
                                                     </div>
 
-                                                    <div className="pt-4 border-t border-white/5">
-                                                        <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-2 px-1">Cambiar Asociación</p>
+                                                    <div className="pt-4 border-t border-gray-400 shadow-sm">
+                                                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2 px-1">Cambiar Asociación</p>
                                                         <select
                                                             value={user.company_id}
                                                             onChange={(e) => handleUpdateUser(user.id, { company_id: e.target.value.toUpperCase() })}
-                                                            className="w-full bg-bg-main border border-white/10 rounded p-2 text-[9px] text-white font-bold uppercase outline-none focus:border-brand-green/50"
+                                                            className="w-full bg-bg-main border border-gray-400 shadow-sm rounded p-2 text-[9px] text-black font-bold uppercase outline-none focus:border-gray-400 shadow-sm"
                                                         >
                                                             {stats.filter(s => s.id !== 'unassigned').map(s => (
                                                                 <option key={s.id} value={s.id.toUpperCase()}>{s.name || 'EMPRESA'}</option>
@@ -573,7 +573,7 @@ export default function MasterControlCenter() {
                                             )}
                                             <button
                                                 onClick={() => handleBlockUser(user.id, user.status)}
-                                                className={`text-[9px] font-bold uppercase tracking-widest border px-4 py-2 rounded transition-all ${user.status === 'blocked' ? 'border-brand-green text-brand-green' : 'border-border-main text-text-offset hover:text-text-main hover:bg-brand-red/10'}`}
+                                                className={`text-[9px] font-bold uppercase  border px-4 py-2 rounded transition-all ${user.status === 'blocked' ? 'border-black text-black' : 'border-border-main text-text-offset hover:text-text-main hover:bg-brand-red/10'}`}
                                             >
                                                 {user.status === 'blocked' ? 'Activar' : 'Anular'}
                                             </button>
@@ -590,21 +590,21 @@ export default function MasterControlCenter() {
             <section className="space-y-4">
                 <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-brand-green rounded-full shadow-[0_0_8px_rgba(249,115,22,0.6)]"></div>
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Matriz de Roles y Permisos</h3>
+                    <h3 className="text-xs font-bold text-black uppercase ">Matriz de Roles y Permisos</h3>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {roleDefinitions.map((role, idx) => (
-                        <div key={idx} className="bg-bg-card border border-white/5 p-6 rounded-industrial shadow-lg flex flex-col justify-between">
+                        <div key={idx} className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial shadow-lg flex flex-col justify-between">
                             <div>
                                 <div className="flex justify-between items-start mb-4">
-                                    <span className="text-xs font-black text-white uppercase tracking-tight">{role.name}</span>
+                                    <span className="text-xs font-black text-black uppercase ">{role.name}</span>
                                 </div>
-                                <p className="text-[10px] text-brand-green-bright font-bold uppercase tracking-widest mb-1">Permisos Activos:</p>
-                                <p className="text-[10px] text-gray-400 mb-6">{role.permissions}</p>
+                                <p className="text-[11px] text-black-bright font-bold uppercase  mb-1">Permisos Activos:</p>
+                                <p className="text-[11px] text-black mb-6">{role.permissions}</p>
                             </div>
-                            <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                                <p className="text-[9px] text-gray-500 font-mono">
+                            <div className="flex justify-between items-center border-t border-gray-400 shadow-sm pt-4">
+                                <p className="text-[9px] text-gray-900 font-mono">
                                     {users.filter(u => u.role?.toLowerCase() === role.name.toLowerCase()).length} USUARIOS
                                 </p>
                             </div>
@@ -617,45 +617,45 @@ export default function MasterControlCenter() {
             {showAddUserModal && (
                 <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
                         <div className="bg-bg-card border border-border-main p-10 rounded-industrial shadow-3xl">
-                            <h2 className="text-2xl font-black text-text-main tracking-tighter uppercase mb-6 text-center">Nuevo Operador</h2>
+                            <h2 className="text-2xl font-black text-text-main er uppercase mb-6 text-center">Nuevo Operador</h2>
                             <form onSubmit={handleCreateUser} className="space-y-4">
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Email</label>
+                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Email</label>
                                     <input
                                         type="email"
                                         required
                                         value={newUser.email}
                                         onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                                        className="w-full bg-bg-main border border-border-main rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-text-main placeholder:text-text-offset"
+                                        className="w-full bg-bg-main border border-border-main rounded-industrial-sm px-4 py-3 text-sm focus:border-black outline-none text-text-main placeholder:text-text-offset"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Nombre</label>
+                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Nombre</label>
                                     <input
                                         type="text"
                                         required
                                         value={newUser.name}
                                         onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                                        className="w-full bg-bg-main border border-border-main rounded-industrial-sm px-4 py-3 text-sm focus:border-brand-green outline-none text-text-main placeholder:text-text-offset"
+                                        className="w-full bg-bg-main border border-border-main rounded-industrial-sm px-4 py-3 text-sm focus:border-black outline-none text-text-main placeholder:text-text-offset"
                                     />
                                 </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Rol</label>
+                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Rol</label>
                                     <select
                                         value={newUser.role}
                                         onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm p-3 text-sm text-white"
+                                        className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm p-3 text-sm text-black"
                                     >
                                         {roleDefinitions.map(r => <option key={r.name} value={r.name.toLowerCase()}>{r.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Empresa</label>
+                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Empresa</label>
                                     <select
                                         value={newUser.companyId}
                                         onChange={(e) => setNewUser({...newUser, companyId: e.target.value})}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm p-3 text-sm text-white"
+                                        className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm p-3 text-sm text-black"
                                     >
                                         <option value="">Seleccionar...</option>
                                         {stats.filter(s => s.id !== 'unassigned').map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -663,8 +663,8 @@ export default function MasterControlCenter() {
                                 </div>
                             </div>
                             <div className="flex gap-4 pt-4">
-                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 px-4 py-3 border border-white/10 rounded text-[10px] font-bold text-gray-500">CANCELAR</button>
-                                <button type="submit" className="flex-1 px-4 py-3 bg-brand-green text-black rounded text-[10px] font-bold">REGISTRAR</button>
+                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 px-4 py-3 border border-gray-400 shadow-sm rounded text-[11px] font-bold text-gray-900">CANCELAR</button>
+                                <button type="submit" className="flex-1 px-4 py-3 bg-brand-green text-black rounded text-[11px] font-bold">REGISTRAR</button>
                             </div>
                         </form>
                     </div>
@@ -672,23 +672,23 @@ export default function MasterControlCenter() {
             )}
 
             {/* MIGRATION UI */}
-            <div className="mt-20 border-t border-white/5 pt-10">
-                <h3 className="text-brand-red text-[10px] font-bold uppercase tracking-widest mb-6">Zona de Rescate de Datos (Legacy)</h3>
+            <div className="mt-20 border-t border-gray-400 shadow-sm pt-10">
+                <h3 className="text-brand-red text-[11px] font-bold uppercase  mb-6">Zona de Rescate de Datos (Legacy)</h3>
                 <div className="bg-brand-red/5 p-6 rounded-industrial border border-brand-red/20 flex items-center justify-between">
                     <div>
                         <p className="text-text-main text-xs font-black uppercase">Registros Huérfanos Detectados: {stats.find(s => s.id === 'unassigned')?.lots || 0}</p>
-                        <p className="text-gray-500 text-[9px] uppercase mt-1">Vincular registros sin empresa a un nuevo perfil</p>
+                        <p className="text-gray-900 text-[9px] uppercase mt-1">Vincular registros sin empresa a un nuevo perfil</p>
                     </div>
                     <div className="flex gap-4">
                         <select
                             value={selectedTargetId}
                             onChange={(e) => setSelectedTargetId(e.target.value)}
-                            className="bg-bg-main border border-white/10 p-2 text-[9px] text-white"
+                            className="bg-bg-main border border-gray-400 shadow-sm p-2 text-[9px] text-black"
                         >
                             <option value="">ASIGNAR A...</option>
                             {stats.filter(s => s.id !== 'unassigned').map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
-                        <button onClick={handleMigration} disabled={isMigrating} className="bg-brand-red text-white text-[9px] font-bold px-6 py-2 rounded">EJECUTAR</button>
+                        <button onClick={handleMigration} disabled={isMigrating} className="bg-brand-red text-black text-[9px] font-bold px-6 py-2 rounded">EJECUTAR</button>
                     </div>
                 </div>
             </div>

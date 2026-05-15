@@ -286,7 +286,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
     })();
 
     return (
-        <div className="bg-bg-main sm:bg-bg-card border-y sm:border border-white/5 sm:rounded-industrial max-w-2xl mx-auto sm:p-6 w-full flex flex-col shadow-2xl pb-8 sm:pb-6 relative overflow-hidden">
+        <div className="bg-bg-main sm:bg-bg-card border-y sm:border border-gray-400 shadow-sm sm:rounded-industrial max-w-2xl mx-auto sm:p-6 w-full flex flex-col shadow-2xl pb-8 sm:pb-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 flex">
                 <div className={`h-full transition-all duration-500 ${isOffline ? 'bg-brand-green w-full' : 'bg-brand-green w-full'}`}></div>
             </div>
@@ -294,31 +294,33 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
             <div className="p-4 sm:p-5 mb-0 flex justify-between items-center z-10">
                 <div className="flex flex-col">
                     <div className="flex items-center gap-3">
-                        <span className={`w-2.5 h-2.5 rounded-full ${isCapturing ? 'animate-pulse bg-brand-green' : 'bg-brand-green'}`}></span>
-                        <h3 className="text-white font-black text-xl uppercase tracking-tighter">MAPEO AUTOMÁTICO AXIS</h3>
+                        <h3 className="text-black font-bold flex items-center gap-2">
+                            <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
+                            Módulo de Mapeo Satelital
+                        </h3>
                     </div>
-                    <p className="text-[7px] text-brand-green/60 font-bold uppercase tracking-[0.15em] mt-1 max-w-[250px] leading-tight">
+                    <p className="text-[7px] text-gray-900 font-bold uppercase  mt-1 max-w-[250px] leading-tight">
                         Protocolo de Seguridad: Captura Sensorial por Orden Público (Restricción RPAS/Drones)
                     </p>
                 </div>
                 {(geoJsonData || gpsPoints.length > 0) && (
-                    <button onClick={handleClear} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:text-white transition-colors">
+                    <button onClick={handleClear} className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-gray-900 hover:text-black transition-colors">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
                     </button>
                 )}
             </div>
 
-            <div className="relative h-[350px] shrink-0 w-full bg-slate-900 sm:rounded-industrial-sm overflow-hidden border-white/10 shadow-inner">
+            <div className="relative h-[350px] shrink-0 w-full bg-slate-900 sm:rounded-industrial-sm overflow-hidden border-gray-400 shadow-sm shadow-inner">
                 <DynamicLeafletMap center={centerCoords} polygonCoords={polygonCoords} markers={markersCoords} currentLocation={currentPosition} />
                 
                 {isCapturing && (
                     <>
-                        <div className="absolute top-4 left-4 z-20 bg-black/60 px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
+                        <div className="absolute top-4 left-4 z-20 bg-black/60 px-3 py-1.5 rounded-full border border-gray-400 shadow-sm flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${gpsAccuracy && gpsAccuracy < 15 ? 'bg-brand-green' : 'bg-red-500'}`}></div>
-                            <span className="text-[10px] text-white font-mono uppercase tracking-widest">Precisión: {gpsAccuracy?.toFixed(1) || '--'}m</span>
+                            <span className="text-[11px] text-black font-mono uppercase ">Precisión: {gpsAccuracy?.toFixed(1) || '--'}m</span>
                         </div>
-                        <div className="absolute top-4 right-4 z-20 bg-brand-green/20 px-3 py-1.5 rounded-full border border-brand-green/30 flex items-center gap-2">
-                            <span className="text-[10px] text-brand-green-bright font-black uppercase tracking-tighter">IMU Activo: {imuData.length > 0 ? '✓' : '...'}</span>
+                        <div className="absolute top-4 right-4 z-20 bg-white border border-gray-400 shadow-sm px-3 py-1.5 rounded-full border border-gray-400 shadow-sm flex items-center gap-2">
+                            <span className="text-[11px] text-black-bright font-black uppercase er">IMU Activo: {imuData.length > 0 ? '✓' : '...'}</span>
                         </div>
                     </>
                 )}
@@ -335,8 +337,8 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                 <div className="absolute inset-0 z-10 w-full h-full pointer-events-none flex flex-col items-center justify-center p-4">
                     {!geoJsonData && gpsPoints.length > 0 && (
                         <div className="text-center">
-                            <p className="text-7xl font-black text-white drop-shadow-2xl">{gpsPoints.length}</p>
-                            <p className="text-[10px] text-brand-green-bright uppercase font-black bg-black/40 px-3 py-1 rounded-full">Vértices</p>
+                            <p className="text-7xl font-black text-black drop-shadow-2xl">{gpsPoints.length}</p>
+                            <p className="text-[11px] text-black-bright uppercase font-black bg-black/40 px-3 py-1 rounded-full">Vértices</p>
                         </div>
                     )}
                 </div>
@@ -345,32 +347,32 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                 {isCapturing && (
                     <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2">
                         <div className="w-2 h-2 bg-brand-green rounded-full animate-ping"></div>
-                        <span className="text-[8px] text-brand-green font-black uppercase tracking-widest">Rastreo GPS Activo</span>
+                        <span className="text-[9px] text-black font-black uppercase ">Rastreo GPS Activo</span>
                     </div>
                 )}
             </div>
 
             {/* Vertices Indicator - Exact Style from Screenshot */}
             {!geoJsonData && gpsPoints.length > 0 && (
-                <div className="px-6 py-4 flex justify-between items-center border-b border-white/5 bg-black/20">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Polígono Escaneado</span>
-                    <span className="text-white font-black text-lg">{gpsPoints.length} Vértices</span>
+                <div className="px-6 py-4 flex justify-between items-center border-b border-gray-400 shadow-sm bg-black/20">
+                    <span className="text-[11px] text-black font-bold uppercase ">Polígono Escaneado</span>
+                    <span className="text-black font-black text-lg">{gpsPoints.length} Vértices</span>
                 </div>
             )}
 
             {geoJsonData && (
-                <div className="mt-6 bg-white/5 p-6 rounded-industrial border border-white/10 shadow-2xl animate-in fade-in">
+                <div className="mt-6 bg-white p-6 rounded-industrial border border-gray-400 shadow-sm shadow-2xl animate-in fade-in">
                     {!isValidated ? (
                         <div className="flex flex-col gap-4">
                             <div className="flex justify-between items-center mb-2 px-1">
-                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Polígono Escaneado</span>
-                                <span className="text-white font-black text-xl">{gpsPoints.length} Vértices</span>
+                                <span className="text-[11px] text-black font-bold uppercase ">Polígono Escaneado</span>
+                                <span className="text-black font-black text-xl">{gpsPoints.length} Vértices</span>
                             </div>
                             <div className="flex gap-2">
                                 <button 
                                     onClick={async () => {
                                         setIsValidated(true);
-                                        // PERSISTENCIA EN BÓVEDA DE TRAZABILIDAD (AOC PROTOCOL)
+                                        // PERSISTENCIA EN BÓVEDA DE TRAZABILIDAD (INDUSTRIAL PROTOCOL)
                                         try {
                                             const polygonObj = JSON.parse(geoJsonData || '{}');
                                             await fetch('/api/track-verify', {
@@ -392,7 +394,7 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                                             console.error("Error persistiendo mapeo sensorial:", e);
                                         }
                                     }} 
-                                    className="flex-1 bg-brand-green hover:bg-brand-green-bright text-black font-black py-6 rounded-2xl shadow-xl uppercase text-xs tracking-widest transition-all active:scale-95"
+                                    className="flex-1 bg-brand-green hover:bg-brand-green-bright text-black font-black py-6 rounded-2xl shadow-xl uppercase text-xs  transition-all active:scale-95"
                                 >
                                     ACEPTAR Y SELLAR CON SENSORES
                                 </button>
@@ -400,17 +402,17 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                         </div>
                     ) : (
                         <div className="text-center py-4 animate-in zoom-in-95 duration-500">
-                             <h4 className="text-2xl font-black text-white uppercase tracking-tighter mb-6">VALIDACIÓN EUDR</h4>
+                             <h4 className="text-2xl font-black text-black uppercase er mb-6">VALIDACIÓN EUDR</h4>
                              <button 
                                 onClick={handleGfwValidation} 
                                 disabled={isGfwValidating} 
-                                className="w-full bg-[#1A2333] hover:bg-[#253249] text-blue-400 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all border border-blue-500/10 shadow-lg"
+                                className="w-full bg-[#1A2333] hover:bg-[#253249] text-blue-400 py-5 rounded-2xl font-black text-[11px] uppercase  transition-all border border-blue-500/10 shadow-lg"
                              >
                                 {isGfwValidating ? 'PROCESANDO ANÁLISIS...' : 'ANALIZAR CON GLOBAL FOREST WATCH'}
                              </button>
                              
                              {gfwStatus === 'secure' && (
-                                <div className="mt-4 p-5 bg-[#0D1A15] border border-brand-green/30 text-brand-green-bright font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl animate-in slide-in-from-bottom-2">
+                                <div className="mt-4 p-5 bg-[#0D1A15] border border-gray-400 shadow-sm text-black-bright font-black uppercase text-[11px]  rounded-2xl animate-in slide-in-from-bottom-2">
                                     LOTE SEGURO / SIN DEFORESTACIÓN
                                 </div>
                              )}
@@ -428,17 +430,17 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                         </button>
                     ) : (
                         <div className="flex flex-col gap-3">
-                            <button onClick={handleFinishMapping} disabled={gpsPoints.length < 3} className="w-full bg-brand-green text-white py-7 rounded-full font-black uppercase text-sm shadow-lg active:scale-95 disabled:opacity-50">
+                            <button onClick={handleFinishMapping} disabled={gpsPoints.length < 3} className="w-full bg-brand-green text-black py-7 rounded-full font-black uppercase text-sm shadow-lg active:scale-95 disabled:opacity-50">
                                 FINALIZAR Y CERRAR LOTE
                             </button>
-                            <button onClick={stopTracking} className="bg-white/5 border border-white/10 text-white py-4 rounded-2xl font-black uppercase text-[10px]">Pausar Rastreo</button>
+                            <button onClick={stopTracking} className="bg-white border border-gray-400 shadow-sm text-black py-4 rounded-2xl font-black uppercase text-[11px]">Pausar Rastreo</button>
                         </div>
                     )}
                     
                     {!isCapturing && gpsPoints.length === 0 && (
                         <>
                             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                            <button onClick={() => fileInputRef.current?.click()} className="w-full bg-white/5 border border-white/10 text-gray-400 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest">Cargar archivo SICA</button>
+                            <button onClick={() => fileInputRef.current?.click()} className="w-full bg-white border border-gray-400 shadow-sm text-black py-5 rounded-2xl font-black uppercase text-[11px] ">Cargar archivo SICA</button>
                         </>
                     )}
                 </div>

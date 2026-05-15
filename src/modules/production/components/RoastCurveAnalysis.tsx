@@ -38,8 +38,8 @@ import { supabase } from '@/shared/lib/supabase';
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-bg-card border border-white/10 p-4 rounded-industrial-sm shadow-2xl backdrop-blur-md min-w-[180px]">
-                <p className="text-xs font-mono text-gray-500 mb-3 flex justify-between">
+            <div className="bg-bg-card border border-gray-400 shadow-sm p-4 rounded-industrial-sm shadow-2xl backdrop-blur-md min-w-[180px]">
+                <p className="text-xs font-mono text-gray-900 mb-3 flex justify-between">
                     <span>TIEMPO</span>
                     <span>{label}</span>
                 </p>
@@ -47,17 +47,17 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                     {payload.map((entry: any, index: number) => {
                         if (!entry.value) return null;
                         const labelMap: any = {
-                            temp: { name: 'BT', color: 'text-brand-green-bright', unit: '°C' },
-                            et: { name: 'ET', color: 'text-gray-400', unit: '°C' },
-                            ror: { name: 'RoR', color: 'text-brand-green-bright', unit: 'Δ' },
-                            gas: { name: 'GAS', color: 'text-brand-green', unit: '%' },
-                            pressure: { name: 'PRES', color: 'text-brand-green-bright', unit: 'WC' }
+                            temp: { name: 'BT', color: 'text-black-bright', unit: '°C' },
+                            et: { name: 'ET', color: 'text-black', unit: '°C' },
+                            ror: { name: 'RoR', color: 'text-black-bright', unit: 'Δ' },
+                            gas: { name: 'GAS', color: 'text-black', unit: '%' },
+                            pressure: { name: 'PRES', color: 'text-black-bright', unit: 'WC' }
                         };
-                        const meta = labelMap[entry.dataKey] || { name: entry.name, color: 'text-white', unit: '' };
+                        const meta = labelMap[entry.dataKey] || { name: entry.name, color: 'text-black', unit: '' };
 
                         return (
                             <p key={index} className={`text-sm font-bold ${meta.color} flex justify-between gap-4`}>
-                                {meta.name}: <span className="text-white font-mono">{entry.value}{meta.unit}</span>
+                                {meta.name}: <span className="text-black font-mono">{entry.value}{meta.unit}</span>
                             </p>
                         );
                     })}
@@ -140,11 +140,11 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                 <div className="space-y-1">
                     <div className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-brand-green'}`}></div>
-                        <h3 className="text-3xl font-bold uppercase tracking-tighter text-white">
+                        <h3 className="text-3xl font-bold uppercase er text-black">
                             Análisis Espectral de Tostión
                         </h3>
                     </div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em] ml-5">
+                    <p className="text-[11px] text-gray-900 font-bold uppercase  ml-5">
                         {isLive ? 'Monitoreo de Termografía Infrarroja en Vivo' : 'Análisis Post-Proceso de Curva de Calor'}
                     </p>
                 </div>
@@ -152,7 +152,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                 <div className="flex gap-3">
                     <select
                         onChange={(e) => handleBatchSelect(e.target.value)}
-                        className="bg-bg-card border border-white/10 rounded-industrial-sm px-4 py-2 text-[10px] font-bold text-gray-400 outline-none focus:border-brand-green uppercase tracking-widest min-w-[200px]"
+                        className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-2 text-[11px] font-bold text-black outline-none focus:border-black uppercase  min-w-[200px]"
                     >
                         <option value="">-- Seleccionar Lote --</option>
                         {pastRoasts.map(r => (
@@ -160,30 +160,30 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                         ))}
                     </select>
 
-                    <div className="bg-bg-card border border-white/5 px-6 py-3 rounded-industrial-sm flex flex-col items-center">
-                        <p className="text-[8px] text-gray-500 uppercase font-bold tracking-widest mb-1">Carga Sensorial</p>
-                        <p className="text-xl font-bold text-white leading-none">{selectedRoast?.sca_score || '88.5'}</p>
+                    <div className="bg-bg-card border border-gray-400 shadow-sm px-6 py-3 rounded-industrial-sm flex flex-col items-center">
+                        <p className="text-[9px] text-gray-900 uppercase font-bold  mb-1">Carga Sensorial</p>
+                        <p className="text-xl font-bold text-black leading-none">{selectedRoast?.sca_score || '88.5'}</p>
                     </div>
-                    <div className="bg-brand-green/10 border border-brand-green/20 px-6 py-3 rounded-industrial-sm flex flex-col items-center">
-                        <p className="text-[8px] text-brand-green font-bold tracking-widest mb-1">Consistencia</p>
-                        <p className="text-xl font-bold text-brand-green-bright leading-none">{selectedRoast ? '98.4%' : '99%'}</p>
+                    <div className="bg-white border border-gray-400 shadow-sm px-6 py-3 rounded-industrial-sm flex flex-col items-center">
+                        <p className="text-[9px] text-black font-bold  mb-1">Consistencia</p>
+                        <p className="text-xl font-bold text-black-bright leading-none">{selectedRoast ? '98.4%' : '99%'}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-bg-card border border-white/5 rounded-industrial p-10 relative overflow-hidden shadow-2xl">
+            <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial p-10 relative overflow-hidden shadow-2xl">
                 {/* Background Spectral Gradient */}
                 <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-green via-purple-500 via-red-500 via-orange-500 to-brand-green-dark opacity-50"></div>
 
                 {/* Simulated Heat Signature Overlay */}
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-brand-green/5 blur-[120px] rounded-full animate-pulse-slow"></div>
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-brand-green/5 blur-[120px] rounded-full"></div>
+                <div className="absolute -top-24 -right-24 w-96 h-96 bg-white blur-[120px] rounded-full animate-pulse-slow"></div>
+                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white blur-[120px] rounded-full"></div>
 
                 <div className="flex flex-wrap justify-between gap-8 mb-10 relative z-10">
                     <div className="flex gap-12">
                         <div className="space-y-1">
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Tiempo de Tueste</p>
-                            <p className="text-4xl font-bold text-white tracking-tighter">
+                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Tiempo de Tueste</p>
+                            <p className="text-4xl font-bold text-black er">
                                 {(() => {
                                     const duration = selectedRoast?.duration_seconds || (chartData.length > 0 ? (() => {
                                         const parseTime = (t: string) => {
@@ -199,21 +199,21 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                                     })() : 552);
                                     return `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`;
                                 })()}
-                                <span className="text-xs text-gray-500 ml-2">min</span>
+                                <span className="text-xs text-gray-900 ml-2">min</span>
                             </p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Temp. Final</p>
-                            <p className="text-4xl font-bold text-brand-green-bright tracking-tighter">
+                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Temp. Final</p>
+                            <p className="text-4xl font-bold text-black-bright er">
                                 {selectedRoast?.final_temp || (chartData.length > 0 ? chartData[chartData.length - 1].temp : '202.4')}
-                                <span className="text-xs text-gray-500 ml-2">°C</span>
+                                <span className="text-xs text-gray-900 ml-2">°C</span>
                             </p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Masa Resultante</p>
-                            <p className="text-4xl font-bold text-brand-green tracking-tighter">
+                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Masa Resultante</p>
+                            <p className="text-4xl font-bold text-black er">
                                 {selectedRoast ? selectedRoast.roasted_weight : '29.8'}
-                                <span className="text-xs text-gray-500 ml-2">KG</span>
+                                <span className="text-xs text-gray-900 ml-2">KG</span>
                             </p>
                         </div>
                     </div>
@@ -340,7 +340,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
 
                 {/* Live Scanning Line Simulation */}
                 {isLive && (
-                    <div className="absolute bottom-8 right-10 flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-brand-green-bright animate-pulse">
+                    <div className="absolute bottom-8 right-10 flex items-center gap-4 text-[9px] font-bold uppercase  text-black-bright animate-pulse">
                         <div className="flex gap-1 items-end h-4">
                             {[...Array(5)].map((_, i) => (
                                 <div key={i} className="w-1 bg-brand-green-bright animate-bounce" style={{ animationDelay: `${i * 0.1}s`, height: `${40 + Math.random() * 60}%` }}></div>
@@ -352,25 +352,25 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm relative overflow-hidden group">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial-sm relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green/80 opacity-50"></div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Punto de Giro (TP)</p>
-                    <p className="text-2xl font-bold text-white tracking-tight">01:00 <span className="text-xs text-gray-500 ml-1">95°C</span></p>
+                    <p className="text-[11px] text-gray-900 font-bold uppercase  mb-2">Punto de Giro (TP)</p>
+                    <p className="text-2xl font-bold text-black ">01:00 <span className="text-xs text-gray-900 ml-1">95°C</span></p>
                 </div>
-                <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm relative overflow-hidden">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-50"></div>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">Primer Crack (FC)</p>
-                    <p className="text-2xl font-bold text-brand-green-bright tracking-tight">09:00 <span className="text-xs text-gray-500 ml-1">202°C</span></p>
+                    <p className="text-[11px] text-gray-900 font-bold uppercase  mb-2">Primer Crack (FC)</p>
+                    <p className="text-2xl font-bold text-black-bright ">09:00 <span className="text-xs text-gray-900 ml-1">202°C</span></p>
                 </div>
-                <div className="bg-bg-card border border-white/5 p-6 rounded-industrial-sm relative overflow-hidden">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-50"></div>
-                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.2em] mb-2">Energy Stability</p>
-                    <p className="text-2xl font-bold text-white tracking-tight">98.2<span className="text-xs text-gray-500 ml-1">%</span></p>
+                    <p className="text-[11px] text-black font-bold uppercase  mb-2">Energy Stability</p>
+                    <p className="text-2xl font-bold text-black ">98.2<span className="text-xs text-gray-900 ml-1">%</span></p>
                 </div>
                 <div className="bg-brand-red/5 border border-brand-red/10 p-6 rounded-industrial-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-red opacity-50"></div>
-                    <p className="text-[10px] text-brand-red font-bold uppercase tracking-[0.2em] mb-2">Development</p>
-                    <p className="text-2xl font-bold text-white tracking-tight">18.5<span className="text-xs text-gray-500 ml-1">%</span></p>
+                    <p className="text-[11px] text-brand-red font-bold uppercase  mb-2">Development</p>
+                    <p className="text-2xl font-bold text-black ">18.5<span className="text-xs text-gray-900 ml-1">%</span></p>
                 </div>
             </div>
         </div>

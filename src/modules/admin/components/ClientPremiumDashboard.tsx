@@ -83,19 +83,19 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
     ];
     const pieColors = ['#0C6056', '#ffffff10'];
 
-    if (isLoading) return <div className="text-center py-20 text-brand-green-bright animate-pulse">Analizando Inteligencia de Negocio...</div>;
+    if (isLoading) return <div className="text-center py-20 text-black-bright animate-pulse">Analizando Inteligencia de Negocio...</div>;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
-            <header className="flex justify-between items-end border-b border-white/5 pb-6">
+            <header className="flex justify-between items-end border-b border-gray-400 shadow-sm pb-6">
                 <div>
-                    <h2 className="text-3xl font-black text-white outline-none uppercase tracking-tighter flex items-center gap-3">
+                    <h2 className="text-3xl font-black text-black outline-none uppercase er flex items-center gap-3">
                         <span className="w-2 h-8 bg-brand-green rounded-full"></span>
-                        Dashboard Ejecutivo <span className="text-brand-green">Premium</span>
+                        Dashboard Ejecutivo <span className="text-black">Premium</span>
                     </h2>
-                    <p className="text-[10px] text-gray-500 mt-2 font-bold uppercase tracking-[0.3em]">Client Reporting Dashboard - Inteligencia de Quinta Ola</p>
+                    <p className="text-[11px] text-gray-900 mt-2 font-bold uppercase ">Client Reporting Dashboard - Inteligencia de Quinta Ola</p>
                 </div>
-                <button className="bg-brand-green text-black px-6 py-3 rounded-industrial-sm font-bold uppercase tracking-widest text-xs hover:bg-brand-green/80 transition-all flex items-center gap-2 shadow-lg shadow-brand-green/20">
+                <button className="bg-brand-green text-black px-6 py-3 rounded-industrial-sm font-bold uppercase  text-xs hover:bg-brand-green/80 transition-all flex items-center gap-2 shadow-lg shadow-brand-green/20">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
                     Generar Reporte Mensual (PDF)
                 </button>
@@ -104,11 +104,11 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* KPI 1: EUDR */}
-                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-brand-green/30 transition-all">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl pointer-events-none group-hover:bg-brand-green/10 transition-colors"></div>
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-gray-400 shadow-sm transition-all">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl pointer-events-none group-hover:bg-white transition-colors"></div>
                     <div className="relative z-10 flex-1">
-                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Indicador Legal y Logístico</h4>
-                        <p className="text-lg font-bold text-white uppercase tracking-tight mb-6">Índice EUDR (Semáforo Export)</p>
+                        <h4 className="text-[11px] font-bold text-black uppercase  mb-1">Indicador Legal y Logístico</h4>
+                        <p className="text-lg font-bold text-black uppercase  mb-6">Índice EUDR (Semáforo Export)</p>
 
                         <div className="h-48 w-full relative">
                             <ResponsiveContainer width="100%" height="100%">
@@ -121,22 +121,22 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
                                 </PieChart>
                             </ResponsiveContainer>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-4xl font-black text-brand-green-bright">{eudrCompliance}%</span>
-                                <span className="text-[8px] uppercase font-bold text-gray-500">Listo para Europa</span>
+                                <span className="text-4xl font-black text-black-bright">{eudrCompliance}%</span>
+                                <span className="text-[9px] uppercase font-bold text-gray-900">Listo para Europa</span>
                             </div>
                         </div>
-                        <p className="text-[9px] text-gray-400 leading-relaxed mt-4 bg-white/5 p-3 rounded-md border border-white/5">
+                        <p className="text-[9px] text-black leading-relaxed mt-4 bg-white p-3 rounded-md border border-gray-400 shadow-sm">
                             Porcentaje de lotes con geolocalización completa de polígonos, fecha de cosecha verificada y cruce con mapas satelitales de cobertura forestal post-2020.
                         </p>
                     </div>
                 </div>
 
                 {/* KPI 2: SCA Consistency */}
-                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-brand-green/30 transition-all">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl pointer-events-none group-hover:bg-brand-green/10 transition-colors"></div>
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-gray-400 shadow-sm transition-all">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl pointer-events-none group-hover:bg-white transition-colors"></div>
                     <div className="relative z-10 flex-1">
-                        <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Previsibilidad de Perfil</h4>
-                        <p className="text-lg font-bold text-white uppercase tracking-tight mb-2">Consistencia Sensorial (Q-Score)</p>
+                        <h4 className="text-[11px] font-bold text-black uppercase  mb-1">Previsibilidad de Perfil</h4>
+                        <p className="text-lg font-bold text-black uppercase  mb-2">Consistencia Sensorial (Q-Score)</p>
 
                         <div className="h-56 w-full -mt-2">
                             <ResponsiveContainer width="100%" height="100%">
@@ -149,30 +149,30 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
                                 </RadarChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="flex justify-center gap-4 text-[9px] font-bold uppercase tracking-widest mt-2">
-                            <span className="flex items-center gap-1 text-brand-green-bright"><span className="w-2 h-2 bg-brand-green rounded-full"></span> Último Lote</span>
-                            <span className="flex items-center gap-1 text-brand-green-bright"><span className="w-2 h-2 border-2 border-brand-green-bright border-dashed rounded-full"></span> Promedio Anual</span>
+                        <div className="flex justify-center gap-4 text-[9px] font-bold uppercase  mt-2">
+                            <span className="flex items-center gap-1 text-black-bright"><span className="w-2 h-2 bg-brand-green rounded-full"></span> Último Lote</span>
+                            <span className="flex items-center gap-1 text-black-bright"><span className="w-2 h-2 border-2 border-black-bright border-dashed rounded-full"></span> Promedio Anual</span>
                         </div>
                     </div>
                 </div>
 
                 {/* KPI 3: Premium Value */}
-                <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-brand-green/30 transition-all">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl pointer-events-none group-hover:bg-brand-green/10 transition-colors"></div>
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-industrial flex flex-col relative overflow-hidden group hover:border-gray-400 shadow-sm transition-all">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl pointer-events-none group-hover:bg-white transition-colors"></div>
                     <div className="relative z-10 flex flex-col h-full justify-between">
                         <div>
-                            <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Retorno de Inversión</h4>
-                            <p className="text-lg font-bold text-white uppercase tracking-tight mb-2">Prima de Valor de Origen</p>
+                            <h4 className="text-[11px] font-bold text-black uppercase  mb-1">Retorno de Inversión</h4>
+                            <p className="text-lg font-bold text-black uppercase  mb-2">Prima de Valor de Origen</p>
                         </div>
 
-                        <div className="bg-bg-main p-6 rounded border border-white/5 text-center my-6 flex-1 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-brand-green/20 transition-all">
+                        <div className="bg-bg-main p-6 rounded border border-gray-400 shadow-sm text-center my-6 flex-1 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-gray-400 shadow-sm transition-all">
                             <div className="absolute inset-0 bg-gradient-to-b from-brand-green/0 to-brand-green-dark/5"></div>
-                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 relative z-10">Premium Logrado (vs Bolsa NY)</span>
-                            <span className="text-5xl font-black text-brand-green-bright tracking-tighter relative z-10">+${premiumValue.toFixed(2)} <span className="text-lg text-gray-400">USD/lb</span></span>
+                            <span className="text-[11px] font-bold text-gray-900 uppercase  mb-2 relative z-10">Premium Logrado (vs Bolsa NY)</span>
+                            <span className="text-5xl font-black text-black-bright er relative z-10">+${premiumValue.toFixed(2)} <span className="text-lg text-black">USD/lb</span></span>
                         </div>
 
-                        <p className="text-[9px] text-gray-400 leading-relaxed bg-white/5 p-3 rounded-md border border-white/5">
-                            Diferencia entre el precio de commodity y el precio de especialidad validado mediante el <span className="text-white font-bold">Registro de Trazabilidad AXIS</span>.
+                        <p className="text-[9px] text-black leading-relaxed bg-white p-3 rounded-md border border-gray-400 shadow-sm">
+                            Diferencia entre el precio de commodity y el precio de especialidad validado mediante el <span className="text-black font-bold">Registro de Trazabilidad AXIS</span>.
                         </p>
                     </div>
                 </div>

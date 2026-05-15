@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import ModuleHeader from '@/shared/components/ui/ModuleHeader';
 import { supabase } from '@/shared/lib/supabase';
 import { processThrashingAction } from '../../actions/thrashing';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
@@ -226,36 +227,30 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     };
 
     return (
-        <div className="bg-soft-white border border-carbon/10 p-8 rounded-industrial space-y-6 relative overflow-hidden min-h-[300px]">
+        <div className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial space-y-6 relative overflow-hidden min-h-[300px]">
             {isLoading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-industrial">
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white backdrop-blur-sm rounded-industrial">
                     <div className="flex flex-col items-center gap-4">
-                        <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-green animate-pulse">Recuperando datos de trilla...</p>
+                        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[11px] font-bold uppercase  text-black animate-pulse">Recuperando datos de trilla...</p>
                     </div>
                 </div>
             )}
             
-            <header className="relative z-10">
-                <h3 className="text-brand-green font-bold flex items-center gap-2">
-                    <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
-                    Módulo de Gestión de Trilla
-                </h3>
-                <p className="text-[9px] text-gray-600 mt-1 uppercase font-mono tracking-[0.2em]">Validación de Eficiencia Industrial y Preparación de Almendra</p>
-            </header>
+            
 
             <EUDRComplianceBadge lotData={lotDetails} className="mb-2" />
 
             {/* Configuración Inicial de Parámetros */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] block">1. Tipo de Proceso</label>
+                    <label className="text-[11px] font-bold text-black uppercase  block">1. Tipo de Proceso</label>
                     <div className="relative group/select">
                         <select
                             value={formData.processType}
                             onChange={(e) => setFormData({ ...formData, processType: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[58px] bg-white border border-carbon/20 rounded-industrial-sm px-5 focus:border-brand-green outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
                         >
                             <option value="Lavado">LAVADO (18-20%)</option>
                             <option value="Semi Lavado">SEMI LAVADO (19-21%)</option>
@@ -271,10 +266,10 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] block">2. Peso Inicial (KG)</label>
-                    <div className="w-full h-[58px] bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm px-5 font-bold text-brand-green flex justify-between items-center shadow-inner transition-all">
+                    <label className="text-[11px] font-bold text-black uppercase  block">2. Peso Inicial (KG)</label>
+                    <div className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 font-bold text-black flex justify-between items-center shadow-inner transition-all">
                         <span>{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-                        <span className="text-[9px] opacity-60 uppercase font-black tracking-widest">Parchment</span>
+                        <span className="text-[9px] opacity-60 uppercase font-black ">Parchment</span>
                     </div>
                 </div>
                 <NumericInput
@@ -299,13 +294,13 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     inputClassName="text-sm !h-[58px] font-bold"
                 />
                 <div className="space-y-2 col-span-2">
-                    <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] block">4. Protocolo de Preparación</label>
+                    <label className="text-[11px] font-bold text-black uppercase  block">4. Protocolo de Preparación</label>
                     <div className="relative group/select">
                         <select
                             value={formData.preparationProtocol}
                             onChange={(e) => setFormData({ ...formData, preparationProtocol: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[58px] bg-white border border-carbon/20 rounded-industrial-sm px-5 focus:border-brand-green outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
                         >
                             <option value="EP">European Prep (EP) - Especialidad</option>
                             <option value="American">American Prep - Comercial Plus</option>
@@ -318,13 +313,13 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             </div>
 
             <div className="space-y-2 relative z-10 mt-4">
-                <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] block">5. Método de Selección</label>
+                <label className="text-[11px] font-bold text-black uppercase  block">5. Método de Selección</label>
                 <div className="relative group/select">
                     <select
                         value={formData.sortingMethod}
                         onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
                         disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                        className="w-full h-[58px] bg-white border border-carbon/20 rounded-industrial-sm px-5 focus:border-brand-green outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat shadow-sm"
+                        className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat shadow-sm"
                     >
                         <option value="Máquina Selectora Óptica">Selectora Óptica (Electrónica)</option>
                         <option value="Manual (Hand-Sorted)">Manual en Banda (Hand-Sorted)</option>
@@ -335,13 +330,13 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             </div>
 
             {/* SECCIÓN DE MALLAS (GRANULOMETRÍA) */}
-            <div className="pt-6 border-t border-carbon/10 space-y-4 relative z-10">
+            <div className="pt-6 border-t border-gray-400 shadow-sm space-y-4 relative z-10">
                 <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] flex items-center gap-2">
+                    <h4 className="text-[11px] font-bold text-black uppercase  flex items-center gap-2">
                         <span className="w-2 h-2 bg-brand-green rounded-full"></span>
                         Análisis de Granulometría (Mallas)
                     </h4>
-                    <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Distribución de Almendra (%)</span>
+                    <span className="text-[9px] text-gray-900 font-bold uppercase ">Distribución de Almendra (%)</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                     {[
@@ -353,7 +348,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         { id: 'menores', label: 'Menores' }
                     ].map(m => (
                         <div key={m.id} className="space-y-1">
-                            <label className="text-[8px] font-bold text-gray-500 uppercase block text-center tracking-widest">{m.label}</label>
+                            <label className="text-[9px] font-bold text-gray-900 uppercase block text-center ">{m.label}</label>
                             <NumericInput
                                 label=""
                                 value={formData.sieveAnalysis[m.id as keyof typeof formData.sieveAnalysis]}
@@ -373,27 +368,27 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             </div>
 
             {/* Output Automático: Proyección */}
-            <div className="p-4 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">
+            <div className="p-4 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest">Projection de Almendra Esperada:</span>
-                    <span className="text-[8px] text-gray-500 uppercase">(Basado en coeficientes de conversión: {PROCESS_PARAMS[formData.processType]?.conversion})</span>
+                    <span className="text-[11px] font-bold text-black-bright uppercase ">Projection de Almendra Esperada:</span>
+                    <span className="text-[9px] text-gray-900 uppercase">(Basado en coeficientes de conversión: {PROCESS_PARAMS[formData.processType]?.conversion})</span>
                 </div>
-                <span className="text-2xl font-bold text-brand-green-bright font-mono animate-pulse">
+                <span className="text-2xl font-bold text-black-bright font-mono animate-pulse">
                     ≈ {stats.theoreticalAlmond.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
                 </span>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 relative z-10 border-t border-white/5 pt-6">
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10 border-t border-gray-400 shadow-sm pt-6">
                 {error && (
-                    <div className="p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl text-brand-red-bright text-[10px] font-bold uppercase">
+                    <div className="p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl text-brand-red-bright text-[11px] font-bold uppercase">
                         {error}
                     </div>
                 )}
 
                 {warning && (
-                    <div className={`p-4 border rounded-xl text-[10px] font-bold uppercase animate-bounce-subtle ${warning.type === 'optimal'
-                        ? 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright'
-                        : 'bg-brand-green/10 border-brand-green/30 text-brand-green-bright'
+                    <div className={`p-4 border rounded-xl text-[11px] font-bold uppercase animate-bounce-subtle ${warning.type === 'optimal'
+                        ? 'bg-white border-gray-400 shadow-sm text-black-bright'
+                        : 'bg-white border-gray-400 shadow-sm text-black-bright'
                         }`}>
                         {warning.type !== 'optimal' ? 'ℹ️' : '✅'} {warning.message}
                     </div>
@@ -438,63 +433,63 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
                 {stats.yieldFactor > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green/10 border-brand-green shadow-[0_0_30px_rgba(0,223,154,0.15)]' : 'bg-white/5 border-white/10'}`}>
+                        <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-white border-black shadow-[0_0_30px_rgba(0,223,154,0.15)]' : 'bg-white border-gray-400 shadow-sm'}`}>
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`text-[10px] font-bold uppercase tracking-[0.4em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green/70' : 'text-gray-400'}`}>Factor de Rendimiento ($FR$)</span>
+                                <span className={`text-[11px] font-bold uppercase  ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-black/70' : 'text-black'}`}>Factor de Rendimiento ($FR$)</span>
                             </div>
-                            <span className={`text-7xl font-bold font-mono tracking-tighter ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-green-bright' : 'text-brand-green-bright'}`}>
+                            <span className={`text-7xl font-bold font-mono er ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-black-bright' : 'text-black-bright'}`}>
                                 {stats.yieldFactor.toFixed(2)}
                             </span>
                             <div className="mt-4 flex items-center gap-3">
                                 <div className={`w-2.5 h-2.5 rounded-full ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green-bright animate-pulse' : 'bg-brand-green/80'}`}></div>
-                                <p className={`text-[11px] uppercase font-bold tracking-[0.2em] ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-white' : 'text-gray-400'}`}>
+                                <p className={`text-[11px] uppercase font-bold  ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-black' : 'text-black'}`}>
                                     Meta {formData.processType}: {PROCESS_PARAMS[formData.processType]?.frMin}-{PROCESS_PARAMS[formData.processType]?.frMax}
                                 </p>
                             </div>
-                            <div className="mt-6 text-[10px] text-gray-400 leading-relaxed text-center px-4">
+                            <div className="mt-6 text-[11px] text-black leading-relaxed text-center px-4">
                                 {stats.yieldFactor < (PROCESS_PARAMS[formData.processType]?.frMin || 88) ? (
-                                    <span className="text-brand-green-bright font-bold tracking-widest block mb-1">¡ALTA CALIDAD (Bonificable)!</span>
+                                    <span className="text-black-bright font-bold  block mb-1">¡ALTA CALIDAD (Bonificable)!</span>
                                 ) : stats.yieldFactor > (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? (
-                                    <span className="text-red-400 font-bold tracking-widest block mb-1">BAJA CALIDAD (Posible Descuento)</span>
+                                    <span className="text-red-400 font-bold  block mb-1">BAJA CALIDAD (Posible Descuento)</span>
                                 ) : (
-                                    <span className="text-brand-green font-bold tracking-widest block mb-1">CALIDAD ESTÁNDAR DENTRO DE META</span>
+                                    <span className="text-black font-bold  block mb-1">CALIDAD ESTÁNDAR DENTRO DE META</span>
                                 )}
-                                Un factor menor indica que se requiere <strong className="text-white">menos</strong> materia prima para obtener 70kg de excelso, lo que representa mayor rentabilidad.
+                                Un factor menor indica que se requiere <strong className="text-black">menos</strong> materia prima para obtener 70kg de excelso, lo que representa mayor rentabilidad.
                             </div>
                         </div>
 
                         {/* Reporte de Eficiencia */}
-                        <div className="bg-bg-main border border-white/5 p-6 rounded-industrial space-y-4 relative group overflow-hidden">
-                            <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial space-y-4 relative group overflow-hidden">
+                            <h4 className="text-[11px] font-bold text-gray-900 uppercase  flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
                                 Reporte de Eficiencia de Trilla
                             </h4>
                             <div className="space-y-3">
-                                <div className="flex justify-between items-center text-[10px] uppercase">
-                                    <span className="text-gray-400">Masa Ingresada:</span>
-                                    <span className="text-white font-mono">{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG</span>
+                                <div className="flex justify-between items-center text-[11px] uppercase">
+                                    <span className="text-black">Masa Ingresada:</span>
+                                    <span className="text-black font-mono">{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG</span>
                                 </div>
-                                <div className="flex justify-between items-center text-[10px] uppercase">
-                                    <span className="text-gray-400">Masa Obtenida (Verde):</span>
-                                    <span className={`font-mono font-bold ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-brand-green-bright' : 'text-brand-green-bright'}`}>
+                                <div className="flex justify-between items-center text-[11px] uppercase">
+                                    <span className="text-black">Masa Obtenida (Verde):</span>
+                                    <span className={`font-mono font-bold ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-black-bright' : 'text-black-bright'}`}>
                                         {stats.almondWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center text-[10px] uppercase border-t border-white/5 pt-2">
-                                    <span className="text-gray-400">Merma Real:</span>
-                                    <span className={`font-mono font-bold ${warning ? 'text-brand-green-bright' : 'text-white'}`}>
+                                <div className="flex justify-between items-center text-[11px] uppercase border-t border-gray-400 shadow-sm pt-2">
+                                    <span className="text-black">Merma Real:</span>
+                                    <span className={`font-mono font-bold ${warning ? 'text-black-bright' : 'text-black'}`}>
                                         {stats.lossPct.toFixed(1)}%
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center text-[10px] uppercase">
-                                    <span className="text-gray-400">Merma Teórica:</span>
-                                    <span className="text-gray-500 font-mono">
+                                <div className="flex justify-between items-center text-[11px] uppercase">
+                                    <span className="text-black">Merma Teórica:</span>
+                                    <span className="text-gray-900 font-mono">
                                         {PROCESS_PARAMS[formData.processType]?.shrinkageMin}-{PROCESS_PARAMS[formData.processType]?.shrinkageMax}%
                                     </span>
                                 </div>
 
                                 <div className="pt-2">
-                                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
+                                    <div className="w-full bg-white h-1.5 rounded-full overflow-hidden border border-gray-400 shadow-sm">
                                         <div
                                             className={`h-full rounded-full transition-all duration-1000 ${warning ? 'bg-brand-green/80' : 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]'}`}
                                             style={{ width: `${Math.min(100, (stats.lossPct / stats.theoreticalLossPct) * 100)}%` }}
@@ -505,16 +500,16 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         </div>
                     </div>
                 ) : (
-                    <div className="h-48 border border-dashed border-white/5 rounded-industrial flex flex-col items-center justify-center gap-3 opacity-30">
+                    <div className="h-48 border border-dashed border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-3 opacity-30">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M12 20V10M18 20V4M6 20v-4" /></svg>
-                        <p className="text-[10px] uppercase font-bold tracking-widest text-center">Esperando entrada de salida real<br />para generar Reporte de Eficiencia...</p>
+                        <p className="text-[11px] uppercase font-bold  text-center">Esperando entrada de salida real<br />para generar Reporte de Eficiencia...</p>
                     </div>
                 )}
 
                 <button
                     type="submit"
                     disabled={isSubmitting || !formData.excelsoWeight || isAlreadyThrashed || isReadOnly}
-                    className="w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50"
+                    className="w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl bg-brand-green text-black hover:bg-opacity-90 disabled:opacity-50"
                 >
                     {isSubmitting ? (
                         <div className="flex items-center gap-3">

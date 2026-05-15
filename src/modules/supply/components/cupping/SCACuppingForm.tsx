@@ -150,28 +150,28 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
             {isLoading && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-industrial">
                     <div className="flex flex-col items-center gap-4">
-                        <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-green-bright animate-pulse">Sincronizando con AXIS Cloud...</p>
+                        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-[11px] font-bold uppercase  text-black-bright animate-pulse">Sincronizando con AXIS Cloud...</p>
                     </div>
                 </div>
             )}
-            <div className="lg:col-span-2 bg-bg-card border border-white/5 p-8 rounded-industrial space-y-8 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 blur-3xl rounded-full"></div>
+            <div className="lg:col-span-2 bg-bg-card border border-gray-400 shadow-sm p-8 rounded-industrial space-y-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white blur-3xl rounded-full"></div>
 
-                <header className="flex justify-between items-end border-b border-white/5 pb-6 relative z-10">
+                <header className="flex justify-between items-end border-b border-gray-400 shadow-sm pb-6 relative z-10">
                     <div>
                         <h3 className="text-xl font-bold flex items-center gap-3">
                             <span className="w-1.5 h-6 bg-brand-green-bright rounded-full"></span>
                             Protocolo basado en estándares de la SCA V2.0
                         </h3>
-                        <p className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest flex items-center gap-2">
+                        <p className="text-[11px] text-gray-900 mt-1 uppercase font-bold  flex items-center gap-2">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                             Certificación de Especialidad Q-Grader
                         </p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Calificación Final</p>
-                        <p className={`text-6xl font-bold tracking-tighter ${totalScore >= 84 ? 'text-brand-green-bright' : totalScore >= 80 ? 'text-brand-green-bright' : 'text-brand-green'}`}>
+                        <p className="text-[11px] text-gray-900 uppercase font-bold  mb-1">Calificación Final</p>
+                        <p className={`text-6xl font-bold er ${totalScore >= 84 ? 'text-black-bright' : totalScore >= 80 ? 'text-black-bright' : 'text-black'}`}>
                             {totalScore.toFixed(2)}
                         </p>
                     </div>
@@ -179,22 +179,22 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
 
                 <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
                     {error && (
-                        <div className="p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl text-brand-red-bright text-[10px] font-bold uppercase">
+                        <div className="p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl text-brand-red-bright text-[11px] font-bold uppercase">
                             {error}
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {CATEGORIES.map(cat => (
-                            <div key={cat.id} className="bg-bg-main/50 p-5 rounded-industrial-sm border border-white/5 flex flex-col gap-4 group hover:border-brand-green/30 transition-all">
+                            <div key={cat.id} className="bg-bg-main/50 p-5 rounded-industrial-sm border border-gray-400 shadow-sm flex flex-col gap-4 group hover:border-gray-400 shadow-sm transition-all">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{cat.label}</label>
-                                    <span className="text-brand-green-bright font-mono text-lg font-bold">{(scores[cat.id] || 0).toFixed(2)}</span>
+                                    <label className="text-[11px] font-bold text-black uppercase ">{cat.label}</label>
+                                    <span className="text-black-bright font-mono text-lg font-bold">{(scores[cat.id] || 0).toFixed(2)}</span>
                                 </div>
                                 <input
                                     type="range" min="6" max="10" step="0.25" value={scores[cat.id] || 7.5}
                                     disabled={isSubmitting || isAlreadySealed}
-                                    className={`w-full accent-brand-green-bright bg-white/5 h-1.5 rounded-full appearance-none outline-none ${isAlreadySealed ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                                    className={`w-full accent-black-bright bg-white h-1.5 rounded-full appearance-none outline-none ${isAlreadySealed ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                                     onChange={(e) => setScores({ ...scores, [cat.id]: parseFloat(e.target.value) })}
                                 />
                             </div>
@@ -202,7 +202,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
 
                         <div className="bg-brand-red/5 p-5 rounded-industrial-sm border border-brand-red/10 flex flex-col gap-4">
                             <div className="flex justify-between items-center">
-                                <label className="text-[10px] font-bold text-brand-red-bright uppercase tracking-widest">Tazas con Defectos</label>
+                                <label className="text-[11px] font-bold text-brand-red-bright uppercase ">Tazas con Defectos</label>
                                 <span className="text-brand-red-bright font-mono text-lg font-bold">-{(scores.defects_score || 0) * 2} pts</span>
                             </div>
                             <div className="flex gap-2">
@@ -212,7 +212,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                         type="button"
                                         disabled={isSubmitting || isAlreadySealed}
                                         onClick={() => setScores({ ...scores, defects_score: num })}
-                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-white' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'}`}
+                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-black' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'}`}
                                     >
                                         {num}
                                     </button>
@@ -223,7 +223,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     type="button"
                                     disabled={isSubmitting || isAlreadySealed}
                                     onClick={() => setScores({ ...scores, defects_intensity: 2 })}
-                                    className={`flex-1 py-1 px-2 rounded text-[8px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-brand-green border-brand-green text-white' : 'border-white/10 text-gray-500'}`}
+                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-brand-green border-black text-black' : 'border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     TAINT (MANCHA -2)
                                 </button>
@@ -231,7 +231,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     type="button"
                                     disabled={isSubmitting || isAlreadySealed}
                                     onClick={() => setScores({ ...scores, defects_intensity: 4 })}
-                                    className={`flex-1 py-1 px-2 rounded text-[8px] font-bold transition-all border ${scores.defects_intensity === 4 ? 'bg-brand-red border-brand-red text-white' : 'border-white/10 text-gray-500'}`}
+                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 4 ? 'bg-brand-red border-brand-red text-black' : 'border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     FAULT (DEFECTO -4)
                                 </button>
@@ -240,24 +240,24 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
 
                         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Catador / Q-Grader</label>
+                                <label className="text-[11px] font-bold text-gray-900 uppercase  block">Catador / Q-Grader</label>
                                 <input
                                     type="text"
                                     value={tasterName}
                                     disabled={isSubmitting || isAlreadySealed}
                                     onChange={(e) => setTasterName(e.target.value)}
-                                    className={`w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none ${isAlreadySealed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold focus:border-black outline-none ${isAlreadySealed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Notas de Cata</label>
+                                <label className="text-[11px] font-bold text-gray-900 uppercase  block">Notas de Cata</label>
                                 <input
                                     type="text"
                                     value={notes}
                                     disabled={isSubmitting || isAlreadySealed}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder="Descriptores, cuerpo, post-gusto..."
-                                    className={`w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 text-xs font-bold focus:border-brand-green outline-none ${isAlreadySealed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold focus:border-black outline-none ${isAlreadySealed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 />
                             </div>
                         </div>
@@ -266,7 +266,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                     <button
                         type={isAlreadySealed ? "button" : "submit"}
                         disabled={isSubmitting || isAlreadySealed}
-                        className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-xs shadow-2xl ${isAlreadySealed ? 'bg-brand-green/20 text-brand-green border border-brand-green/30 cursor-not-allowed opacity-100' : 'bg-white hover:bg-brand-green-bright text-black hover:text-white disabled:opacity-30'}`}
+                        className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl ${isAlreadySealed ? 'bg-white border border-gray-400 shadow-sm text-black border border-gray-400 shadow-sm cursor-not-allowed opacity-100' : 'bg-white hover:bg-brand-green-bright text-black hover:text-black disabled:opacity-30'}`}
                     >
                         {isAlreadySealed ? (
                             <>
@@ -291,9 +291,9 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
             </div>
 
             <div className="space-y-6">
-                <div className="bg-bg-card border border-white/5 p-6 rounded-industrial flex flex-col items-center space-y-4 relative overflow-hidden shadow-2xl">
-                    <div className="absolute inset-0 bg-brand-green/5 blur-3xl opacity-50"></div>
-                    <h4 className="text-[14px] font-bold text-gray-300 uppercase tracking-[0.4em] text-center leading-relaxed relative z-10 px-4 pt-2">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial flex flex-col items-center space-y-4 relative overflow-hidden shadow-2xl">
+                    <div className="absolute inset-0 bg-white blur-3xl opacity-50"></div>
+                    <h4 className="text-[14px] font-bold text-gray-300 uppercase  text-center leading-relaxed relative z-10 px-4 pt-2">
                         Huella Organoléptica<br />Industrial
                     </h4>
                     <div className="w-full h-[280px] min-h-[280px] relative z-10">
@@ -313,11 +313,11 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                         </ResponsiveContainer>
                     </div>
                     <div className="pb-4 text-center space-y-3 relative z-10">
-                        <span className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border shadow-xl ${totalScore >= 85 ? 'bg-brand-green/20 text-brand-green-bright border-brand-green/30' : 'bg-brand-green/20 text-brand-green-bright border-brand-green/30'}`}>
+                        <span className={`px-6 py-2 rounded-full text-[11px] font-bold uppercase  border shadow-xl ${totalScore >= 85 ? 'bg-white border border-gray-400 shadow-sm text-black-bright border-gray-400 shadow-sm' : 'bg-white border border-gray-400 shadow-sm text-black-bright border-gray-400 shadow-sm'}`}>
                             {totalScore >= 85 ? '✓ SPECIALTY COFFEE' : '✓ PREMIUM GRADE'}
                         </span>
-                        <div className="pt-4 border-t border-white/5 w-full">
-                            <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                        <div className="pt-4 border-t border-gray-400 shadow-sm w-full">
+                            <p className="text-[9px] text-gray-600 font-bold uppercase  flex items-center justify-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-brand-green-bright animate-pulse"></span>
                                 Secure IP: Algorithm Protected
                             </p>

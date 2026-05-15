@@ -168,57 +168,28 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
     };
 
     return (
-        <div className="bg-bg-card border border-white/5 p-10 rounded-[2rem] space-y-10 animate-in fade-in duration-700 relative overflow-hidden shadow-2xl">
+        <div className="bg-transparent p-0 space-y-10 animate-in fade-in duration-700 relative overflow-hidden">
             {/* Background Decorative Element */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
             
             {isLoading && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/80 backdrop-blur-md rounded-[2rem]">
                     <div className="flex flex-col items-center gap-6">
                         <div className="relative">
-                            <div className="w-16 h-16 border-4 border-brand-green/20 rounded-full"></div>
-                            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-16 h-16 border-4 border-gray-400 shadow-sm rounded-full"></div>
+                            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.4em] text-brand-green-bright animate-pulse">Sincronizando Laboratorio AXIS...</p>
+                        <p className="text-[11px] font-bold uppercase  text-black-bright animate-pulse">Sincronizando Laboratorio AXIS...</p>
                     </div>
                 </div>
             )}
 
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-8 gap-6">
-                <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-green text-black rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-brand-green/20">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /></svg>
-                        AOC Standard v3.0
-                    </div>
-                    <h3 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">
-                        Módulo de <span className="text-brand-green">Análisis Físico</span>
-                    </h3>
-                    <div className="flex items-center gap-4">
-                        <p className="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase">Control Notarial de Calidad • {lotDetails?.lot_number || 'CARGANDO...'}</p>
-                    </div>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                    <button 
-                        type="button"
-                        className="group flex items-center gap-3 px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all"
-                        onClick={() => alert('Importando datos de laboratorio...')}
-                    >
-                        <div className="p-2 bg-brand-green/10 rounded-lg group-hover:bg-brand-green/20 transition-colors">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00df9a" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        </div>
-                        <div className="text-left">
-                            <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Importar Excel</p>
-                            <p className="text-[8px] text-gray-500 uppercase mt-1">Sincronización Masiva</p>
-                        </div>
-                    </button>
-                </div>
-            </header>
+            
 
             <EUDRComplianceBadge lotData={lotDetails} className="mb-6" />
 
             {error && (
-                <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-red-500 text-[11px] font-black uppercase tracking-[0.1em] flex items-center gap-4 animate-in slide-in-from-top-4">
+                <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-red-500 text-[11px] font-bold uppercase  flex items-center gap-4 animate-in slide-in-from-top-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                     <span>ERROR CRÍTICO: {error}</span>
                 </div>
@@ -227,7 +198,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
             <form onSubmit={handleSubmit} className="space-y-12">
                 {/* 1. Métrica Base (High Impact) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] group hover:border-brand-green/30 transition-all shadow-inner">
+                    <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
                         <NumericInput
                             label="Humedad (%)"
                             value={formData.moisture}
@@ -235,16 +206,16 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={0.01}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-5xl font-black py-6 tracking-tighter"
+                            inputClassName="text-5xl font-black py-6 er"
                             unit="%"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Rango Ideal: 10.0 - 12.0%</span>
+                            <span className="text-[9px] font-bold uppercase text-gray-900 ">Rango Ideal: 10.0 - 12.0%</span>
                             <div className={`w-2 h-2 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
                         </div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] group hover:border-brand-green/30 transition-all shadow-inner">
+                    <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
                         <NumericInput
                             label="Actividad de Agua (aw)"
                             value={formData.waterActivity}
@@ -252,15 +223,15 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={0.001}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-5xl font-black py-6 tracking-tighter"
+                            inputClassName="text-5xl font-black py-6 er"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Norma Export: ≤ 0.70</span>
+                            <span className="text-[9px] font-bold uppercase text-gray-900 ">Norma Export: ≤ 0.70</span>
                             <div className={`w-2 h-2 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
                         </div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] group hover:border-brand-green/30 transition-all shadow-inner">
+                    <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
                         <NumericInput
                             label="Densidad (g/L)"
                             value={formData.density}
@@ -268,36 +239,36 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={1}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-5xl font-black py-6 tracking-tighter"
+                            inputClassName="text-5xl font-black py-6 er"
                             unit="g/L"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Standard: {'>'} 680 g/L</span>
+                            <span className="text-[9px] font-bold uppercase text-gray-900 ">Standard: {'>'} 680 g/L</span>
                             <div className={`w-2 h-2 rounded-full ${formData.density > 680 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]'}`}></div>
                         </div>
                     </div>
                 </div>
 
                 {/* 2. Granulometría (Sieve Instrument) */}
-                <section className="bg-black/20 border border-white/5 p-10 rounded-[2.5rem] space-y-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <section className="bg-black/20 border border-gray-400 shadow-sm p-10 rounded-[2.5rem] space-y-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl -mr-16 -mt-16"></div>
                     
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/5 pb-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-gray-400 shadow-sm pb-6">
                         <div className="space-y-1">
-                            <h4 className="text-[10px] font-black text-brand-green-bright uppercase tracking-[0.4em]">Instrumento: Granulometría</h4>
-                            <p className="text-xl font-bold text-white tracking-tight">Sieve Distribution Profile</p>
+                            <h4 className="text-[11px] font-bold text-black-bright uppercase ">Instrumento: Granulometría</h4>
+                            <p className="text-xl font-bold text-black ">Sieve Distribution Profile</p>
                         </div>
-                        <div className={`flex flex-col items-end gap-1 ${isScreenValid ? 'text-brand-green' : 'text-red-500'}`}>
-                            <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Balance de Masa</span>
-                            <span className="text-3xl font-black tracking-tighter leading-none">{screenSum.toFixed(1)}%</span>
-                            {!isScreenValid && <span className="text-[8px] font-bold uppercase animate-pulse">Ajuste Requerido (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
+                        <div className={`flex flex-col items-end gap-1 ${isScreenValid ? 'text-black' : 'text-red-500'}`}>
+                            <span className="text-[9px] font-bold uppercase  opacity-60">Balance de Masa</span>
+                            <span className="text-3xl font-black er leading-none">{screenSum.toFixed(1)}%</span>
+                            {!isScreenValid && <span className="text-[9px] font-bold uppercase animate-pulse">Ajuste Requerido (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                         {[18, 17, 16, 15, 14, 13, 12, 'under12'].map((size, idx) => (
                             <div key={idx} className="space-y-2">
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block text-center">
+                                <label className="text-[9px] font-bold text-gray-900 uppercase  block text-center">
                                     {size === 'under12' ? 'Fondo' : `Malla ${size}`}
                                 </label>
                                 <div className="relative group">
@@ -310,11 +281,11 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                             screenSize: { ...formData.screenSize, [size === 'under12' ? 'under12' : `size${size}`]: parseFloat(e.target.value) || 0 }
                                         })}
                                         disabled={isSubmitting || isAlreadyAnalyzed}
-                                        className="w-full bg-bg-main border border-white/10 rounded-xl px-2 py-4 text-lg font-black text-white text-center outline-none focus:border-brand-green focus:bg-brand-green/5 transition-all appearance-none"
+                                        className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-2 py-4 text-lg font-black text-carbon text-center outline-none focus:border-black focus:bg-white transition-all appearance-none"
                                     />
                                     <span className="absolute bottom-1 right-1 text-[7px] font-black text-gray-600 uppercase">%</span>
                                 </div>
-                                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-1 bg-white rounded-full overflow-hidden">
                                     <div 
                                         className="h-full bg-brand-green transition-all duration-700" 
                                         style={{ width: `${(formData.screenSize as any)[size === 'under12' ? 'under12' : `size${size}`]}%` }}
@@ -327,7 +298,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
 
                 {/* 3. Defectos & Color (Visual Analysis) */}
                 <div className="grid grid-cols-1 md:grid-cols-10 gap-8">
-                    <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/5 border border-white/10 p-10 rounded-[2.5rem]">
+                    <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white border border-gray-400 shadow-sm p-10 rounded-[2.5rem]">
                         <div className="space-y-4">
                             <NumericInput
                                 label="Defectos Primarios"
@@ -339,7 +310,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 inputClassName="text-4xl font-black py-4 text-red-500"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
+                            <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
                         </div>
                         <div className="space-y-4">
                             <NumericInput
@@ -352,18 +323,18 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 inputClassName="text-4xl font-black py-4 text-yellow-500"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>
+                            <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>
                         </div>
                     </div>
 
-                    <div className="md:col-span-4 bg-white/5 border border-white/10 p-10 rounded-[2.5rem] flex flex-col justify-center gap-6">
+                    <div className="md:col-span-4 bg-white border border-gray-400 shadow-sm p-10 rounded-[2.5rem] flex flex-col justify-center gap-6">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-brand-green uppercase tracking-[0.3em] block">Descriptor Visual: Color</label>
+                            <label className="text-[11px] font-bold text-black uppercase  block">Descriptor Visual: Color</label>
                             <div className="relative group">
                                 <select
                                     value={formData.grainColor}
                                     disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
-                                    className="w-full bg-bg-main border border-white/10 rounded-2xl px-6 py-5 text-sm font-black text-white outline-none focus:border-brand-green uppercase appearance-none transition-all shadow-inner"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-2xl px-6 py-5 text-sm font-black text-carbon outline-none focus:border-black uppercase appearance-none transition-all shadow-inner"
                                     onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
                                 >
                                     <option value="VERDE OLIVA">Verde Oliva (Optimum)</option>
@@ -372,12 +343,12 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                     <option value="AMARILLENTO">Amarillento (Aging)</option>
                                     <option value="MARRON">Marrón (Damaged)</option>
                                 </select>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-brand-green">
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-black">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 bg-black/40 rounded-xl border border-white/5">
+                        <div className="flex items-center gap-4 p-4 bg-black/40 rounded-xl border border-gray-400 shadow-sm">
                             <div className={`w-12 h-12 rounded-lg shadow-inner ${
                                 formData.grainColor === 'VERDE OLIVA' ? 'bg-[#4B5320]' : 
                                 formData.grainColor === 'VERDE AZULADO' ? 'bg-[#008080]' :
@@ -385,26 +356,26 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 formData.grainColor === 'AMARILLENTO' ? 'bg-[#F0E68C]' : 'bg-[#8B4513]'
                             }`}></div>
                             <div className="flex-1">
-                                <p className="text-[9px] font-black text-white uppercase tracking-widest">Previsualización Cromática</p>
-                                <p className="text-[8px] text-gray-500 uppercase mt-0.5">Basado en Patrones SCA Agtron</p>
+                                <p className="text-[9px] font-bold text-black uppercase ">Previsualización Cromática</p>
+                                <p className="text-[9px] text-gray-900 uppercase mt-0.5">Basado en Patrones SCA Agtron</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Submit Action */}
-                <div className="pt-8 border-t border-white/10">
+                <div className="pt-8 border-t border-gray-400 shadow-sm">
                     <button
                         type={isAlreadyAnalyzed || isReadOnly ? "button" : "submit"}
                         disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid || isReadOnly}
-                        className={`w-full font-black py-8 rounded-[2rem] transition-all flex items-center justify-center gap-6 group uppercase tracking-[0.4em] text-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
+                        className={`w-full font-black py-8 rounded-[2rem] transition-all flex items-center justify-center gap-6 group uppercase  text-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
                             isAlreadyAnalyzed 
-                            ? 'bg-brand-green/10 text-brand-green border border-brand-green/30 cursor-default' 
+                            ? 'bg-white text-black border border-gray-400 shadow-sm cursor-default' 
                             : isReadOnly 
-                            ? 'bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed' 
+                            ? 'bg-white text-gray-900 border border-gray-400 shadow-sm cursor-not-allowed' 
                             : isScreenValid 
                             ? 'bg-brand-green hover:bg-brand-green-bright text-black shadow-brand-green/20 hover:shadow-brand-green/40' 
-                            : 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/10 opacity-50'
+                            : 'bg-white text-gray-900 cursor-not-allowed border border-gray-400 shadow-sm opacity-50'
                         }`}
                     >
                         {isSubmitting ? (
@@ -429,14 +400,14 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             </>
                         ) : (
                             <>
-                                <span>SELLAR ANÁLISIS FÍSICO (AOC PROTOCOL)</span>
+                                <span>SELLAR ANÁLISIS FÍSICO</span>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-2 transition-transform">
                                     <path d="M5 12h14M12 5l7 7-7 7" />
                                 </svg>
                             </>
                         )}
                     </button>
-                    <p className="text-center text-[9px] text-gray-500 uppercase font-black tracking-[0.5em] mt-8 opacity-40">
+                    <p className="text-center text-[9px] text-gray-900 uppercase font-black  mt-8 opacity-40">
                         AXISONE COFFEE • DATA SOVEREIGNTY • CERTIFIED HUB
                     </p>
                 </div>

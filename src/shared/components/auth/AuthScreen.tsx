@@ -2,19 +2,144 @@
 
 import React, { useState } from 'react';
 import { supabase } from '@/shared/lib/supabase';
-import ThemeToggle from '@/shared/components/layout/ThemeToggle';
 
 interface AuthScreenProps {
     onLogin: (userData: { email: string, name: string, companyId: string, role?: string }) => void;
 }
 
 export default function AuthScreen({ onLogin }: AuthScreenProps) {
-    const [isSignUp, setIsSignUp] = useState(false);
+    const [language, setLanguage] = useState<'en' | 'es'>('en');
     const [identifier, setIdentifier] = useState('');
-    const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+
+    const content = {
+        en: {
+            nav: { infra: "Infrastructure", vision: "Vision", login: "Validate Asset" },
+            hero: {
+                tag: "AOC v3.0 DIGITAL WALK PROTOCOL",
+                headline: "The Operating System for Coffee DNA.",
+                subheadline: "AxisOne Coffee centralizes the technical knowledge behind every coffee lot — manual logs, cupping notes, lab data and operational history — into one structured system driven by precise data entry.",
+                cta: "Request Early Access"
+            },
+            problem: {
+                headline: "Most coffee knowledge disappears after harvest.",
+                intro: "Specialty coffee operations generate extraordinary technical knowledge every season.",
+                outro: "But most of it remains lost in fragmented formats:",
+                list: ["spreadsheets", "scattered PDFs", "handwritten notebooks", "WhatsApp chats", "disconnected files", "human memory"],
+                conclusion: "AxisOne replaces these fragmented sources with a single point of structured manual entry."
+            },
+            concept: {
+                headline: "Every coffee lot has a technical DNA.",
+                list: ["Fermentation variables.", "Drying behavior.", "Water activity.", "Cupping notes.", "Lab reports."],
+                conclusion: "AxisOne Coffee structures that intelligence through precise, manual data logging."
+            },
+            features: {
+                headline: "One structured memory system for specialty coffee.",
+                items: [
+                    { title: "Technical Lot Profiles", desc: "Build a complete digital identity for every coffee lot through structured data entry." },
+                    { title: "Protocol Digitization", desc: "Map your fermentation and drying processes directly into our high-precision fields." },
+                    { title: "Lab & Cupping Records", desc: "Convert sensory and laboratory findings into structured, searchable digital data." },
+                    { title: "Keyboard-Driven Logging", desc: "Eliminate external spreadsheets by capturing all technical parameters directly into the system." },
+                    { title: "Historical Traceability", desc: "Access years of operational memory built from your manual logs across harvests." }
+                ]
+            },
+            target: {
+                headline: "Built for quality-driven coffee operations.",
+                list: ["Specialty farms", "Coffee labs", "Premium exporters", "Experimental processing operations", "Roasters focused on traceability", "Competition coffee producers"]
+            },
+            pricing: {
+                headline: "Early Adopter Program",
+                tiers: [
+                    { name: "Starter", price: "USD 29/month", desc: "For small specialty farms and microlots.", features: ["Up to 25 lot profiles", "Structured data logging", "Real-time technical vaults", "Mobile data entry"] },
+                    { name: "Professional", price: "USD 99/month", desc: "For exporters, labs and advanced operations.", features: ["Unlimited lot profiles", "Multi-user access", "Technical dashboards", "Historical analytics", "Advanced data architecture"] },
+                    { name: "Enterprise", price: "Custom Pricing", desc: "For premium exporters and multi-farm operations.", features: ["API integrations", "Infrastructure customization", "Dedicated onboarding", "Advanced workflows"] }
+                ]
+            },
+            vision: {
+                headline: "The future of specialty coffee will depend on structured intelligence.",
+                copy1: "The industry already produces exceptional coffee.",
+                copy2: "The next step is capturing and preserving the technical knowledge behind it.",
+                copy3: "AxisOne Coffee is the infrastructure where that manual intelligence lives."
+            },
+            footer: {
+                headline: "Technical coffee knowledge should not die inside spreadsheets.",
+                cta: "Become an Early Adopter"
+            },
+            login: {
+                title: "Infrastructure Access",
+                subtitle: "Master Control Terminal",
+                labelId: "Identifier (Email or ID)",
+                labelPass: "Access Key",
+                button: "Enter System",
+                verifying: "Verifying..."
+            }
+        },
+        es: {
+            nav: { infra: "Infraestructura", vision: "Visión", login: "Validar Activo" },
+            hero: {
+                tag: "PROTOCOLO DIGITAL WALK AOC v3.0",
+                headline: "El Sistema Operativo para el ADN del Café.",
+                subheadline: "AxisOne Coffee centraliza el conocimiento técnico detrás de cada lote — registros manuales, notas de cata, datos de laboratorio e historial operativo — en un solo sistema estructurado basado en entrada de datos precisa.",
+                cta: "Solicitar Acceso"
+            },
+            problem: {
+                headline: "La mayoría del conocimiento del café desaparece tras la cosecha.",
+                intro: "Las operaciones de café de especialidad generan un conocimiento técnico extraordinario cada temporada.",
+                outro: "Pero la mayor parte permanece perdida en formatos fragmentados:",
+                list: ["hojas de cálculo", "PDFs dispersos", "cuadernos escritos a mano", "chats de WhatsApp", "archivos desconectados", "memoria humana"],
+                conclusion: "AxisOne reemplaza estas fuentes fragmentadas con un punto único de entrada manual estructurada."
+            },
+            concept: {
+                headline: "Cada lote de café tiene un ADN técnico.",
+                list: ["Variables de fermentación.", "Comportamiento de secado.", "Actividad de agua.", "Notas de cata.", "Reportes de laboratorio."],
+                conclusion: "AxisOne Coffee estructura esa inteligencia mediante el registro manual preciso de datos."
+            },
+            features: {
+                headline: "Un sistema de memoria estructurado para café de especialidad.",
+                items: [
+                    { title: "Perfiles Técnicos de Lote", desc: "Construye una identidad digital completa para cada lote mediante entrada de datos estructurada." },
+                    { title: "Digitalización de Protocolos", desc: "Mapea tus procesos de fermentación y secado directamente en nuestros campos de alta precisión." },
+                    { title: "Registros de Lab y Cata", desc: "Convierte hallazgos sensoriales y de laboratorio en datos digitales estructurados." },
+                    { title: "Registro por Teclado", desc: "Elimina Excels externos capturando todos los parámetros técnicos directamente en el sistema." },
+                    { title: "Trazabilidad Histórica", desc: "Accede a años de memoria operativa construida desde tus registros manuales." }
+                ]
+            },
+            target: {
+                headline: "Construido para operaciones enfocadas en la calidad.",
+                list: ["Fincas de especialidad", "Laboratorios de café", "Exportadores premium", "Procesamiento experimental", "Tostadores con foco en trazabilidad", "Productores de competencia"]
+            },
+            pricing: {
+                headline: "Programa de Adoptantes Tempranos",
+                tiers: [
+                    { name: "Starter", price: "USD 29/mes", desc: "Para fincas de especialidad pequeñas y microlotes.", features: ["Hasta 25 perfiles de lote", "Registro de datos estructurado", "Bóvedas técnicas en tiempo real", "Entrada de datos móvil"] },
+                    { name: "Professional", price: "USD 99/mes", desc: "Para exportadores, laboratorios y operaciones avanzadas.", features: ["Lotes ilimitados", "Acceso multi-usuario", "Dashboards técnicos", "Analítica histórica", "Arquitectura de datos avanzada"] },
+                    { name: "Enterprise", price: "Precio Personalizado", desc: "Para exportadores premium y operaciones multi-finca.", features: ["Integraciones API", "Personalización de infraestructura", "Onboarding dedicado", "Flujos de trabajo avanzados"] }
+                ]
+            },
+            vision: {
+                headline: "El futuro del café de especialidad dependerá de la inteligencia estructurada.",
+                copy1: "La industria ya produce café excepcional.",
+                copy2: "El siguiente paso es capturar y preservar el conocimiento técnico detrás de él.",
+                copy3: "AxisOne Coffee es la infraestructura donde vive esa inteligencia manual."
+            },
+            footer: {
+                headline: "El conocimiento técnico no debería morir en hojas de cálculo.",
+                cta: "Sé un Adoptante Temprano"
+            },
+            login: {
+                title: "Acceso a Infraestructura",
+                subtitle: "Terminal de Control Maestro",
+                labelId: "Identificador (Email o Cédula)",
+                labelPass: "Clave de Acceso",
+                button: "Entrar al Sistema",
+                verifying: "Verificando..."
+            }
+        }
+    };
+
+    const t = content[language];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,45 +147,25 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
         const isNumeric = /^\d+$/.test(identifier);
         const email = isNumeric ? `${identifier}@cedula.axisone.pro` : identifier.toLowerCase();
-        
         const isTatama = email.includes('tatama');
         const rawDomain = email.split('@')[1] || 'independent.com';
-        
         const publicDomains = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'cedula.axisone.pro'];
         const isPublicDomain = publicDomains.includes(rawDomain.toLowerCase());
-        
         const companyId = isTatama ? 'TATAMA-SANTUARIO' : (isPublicDomain ? identifier.toUpperCase() : rawDomain.toUpperCase());
-        const userName = isSignUp ? name : (isTatama ? 'TATAMA SANTUARIO' : identifier.split('@')[0].toUpperCase());
+        const userName = identifier.split('@')[0].toUpperCase();
         const isMasterAuditor = email === 'juliocuva@axisonecoffee.pro';
         const role = isMasterAuditor ? 'auditor' : (isNumeric ? 'producer' : ((email.includes('julio') || isTatama) ? 'gerente' : 'visitante'));
 
         const loadAndPersistProfile = async () => {
             try {
-                const { data: existingProfile } = await supabase
-                    .from('profiles')
-                    .select('company_id, role, full_name')
-                    .eq('email', email)
-                    .single();
-
-                let finalCompanyId = companyId;
-                let finalRole = role;
-                let finalName = userName;
-
+                const { data: existingProfile } = await supabase.from('profiles').select('company_id, role, full_name').eq('email', email).single();
+                let finalCompanyId = companyId, finalRole = role, finalName = userName;
                 if (existingProfile) {
                     finalCompanyId = existingProfile.company_id || companyId;
                     finalRole = existingProfile.role || role;
                     finalName = existingProfile.full_name || userName;
                 }
-
-                await supabase.from('profiles').upsert({
-                    email: email.toLowerCase(),
-                    full_name: finalName,
-                    company_id: finalCompanyId,
-                    role: finalRole,
-                    last_active: new Date().toISOString(),
-                    status: 'active'
-                }, { onConflict: 'email' });
-
+                await supabase.from('profiles').upsert({ email: email.toLowerCase(), full_name: finalName, company_id: finalCompanyId, role: finalRole, last_active: new Date().toISOString(), status: 'active' }, { onConflict: 'email' });
                 return { companyId: finalCompanyId, role: finalRole, name: finalName };
             } catch (e) {
                 return { companyId, role, name: userName };
@@ -68,245 +173,387 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         };
 
         loadAndPersistProfile().then((finalIdentity) => {
-                onLogin({
-                    email,
-                    name: finalIdentity.name,
-                    companyId: finalIdentity.companyId,
-                    role: finalIdentity.role
-                });
+            onLogin({ email, name: finalIdentity.name, companyId: finalIdentity.companyId, role: finalIdentity.role });
             setIsLoading(false);
         });
     };
 
-    return (
-        <div className="min-h-screen bg-soft-white text-carbon selection:bg-brand-green selection:text-white font-sans">
-            {/* 1. HEADER - Minimalista High Ticket */}
-            <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-brand-green-soft">
+    const [activeStep, setActiveStep] = useState(1);
 
-                <div className="max-w-7xl mx-auto px-8 py-2 flex justify-between items-center">
+    const steps = [
+        { id: 'step-01', label: '01', title: language === 'en' ? 'The Leak' : 'La Fuga' },
+        { id: 'step-02', label: '02', title: language === 'en' ? 'Technical DNA' : 'ADN Técnico' },
+        { id: 'step-03', label: '03', title: language === 'en' ? 'The Engine' : 'El Motor' },
+        { id: 'step-04', label: '04', title: language === 'en' ? 'Ecosystem' : 'Ecosistema' },
+        { id: 'step-05', label: '05', title: language === 'en' ? 'Commitment' : 'Compromiso' },
+        { id: 'step-06', label: '06', title: language === 'en' ? 'Vision' : 'Visión' },
+        { id: 'step-07', label: '07', title: language === 'en' ? 'Join' : 'Unirse' },
+    ];
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            const scrollPosition = window.scrollY + window.innerHeight / 2;
+            steps.forEach((step, index) => {
+                const element = document.getElementById(step.id);
+                if (element) {
+                    const { offsetTop, offsetHeight } = element;
+                    if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                        setActiveStep(index + 1);
+                    }
+                }
+            });
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [language]);
+
+    return (
+        <div className="min-h-screen bg-soft-white text-carbon selection:bg-brand-green selection:text-white font-sans font-medium">
+            {/* INTELLIGENT SCROLL NAVIGATOR */}
+            <nav className="fixed right-8 top-1/2 -translate-y-1/2 z-[100] hidden xl:flex flex-col gap-6 items-end group">
+                {steps.map((step, i) => (
+                    <button
+                        key={step.id}
+                        onClick={() => document.getElementById(step.id)?.scrollIntoView({ behavior: 'smooth' })}
+                        className="flex items-center gap-4 group/item"
+                    >
+                        <span className={`text-[10px] font-semibold uppercase tracking-widest transition-all duration-500 opacity-0 group-hover:opacity-100 ${activeStep === i + 1 ? 'text-brand-green translate-x-0' : 'text-black/20 translate-x-4'}`}>
+                            {step.title}
+                        </span>
+                        <div className={`w-1 h-8 transition-all duration-500 ${activeStep === i + 1 ? 'bg-brand-green scale-y-125' : 'bg-black/10 group-hover/item:bg-black/20'}`}></div>
+                        <span className={`text-[10px] font-semibold transition-all duration-500 ${activeStep === i + 1 ? 'text-brand-green' : 'text-black/20'}`}>
+                            {step.label}
+                        </span>
+                    </button>
+                ))}
+            </nav>
+            {/* 1. HEADER */}
+            <header className="fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-xl border-b border-black/5">
+                <div className="max-w-7xl mx-auto px-8 py-6 flex justify-between items-center">
                     <div className="flex items-center gap-12">
-                        <div className="flex items-center gap-3">
-                            <img src="/logo.png" alt="AXISONE" className="h-36 w-auto" />
+                        <div className="flex items-center gap-6 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                            <img src="/logo.png" alt="AXISONE" className="h-20 w-auto transition-transform group-hover:scale-105" />
+                            <div className="h-10 w-px bg-black/10 hidden md:block"></div>
+                            <span className="text-xl font-black tracking-widest text-brand-green uppercase">COLOMBIA</span>
                         </div>
- 
-                        <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-gray-400 uppercase tracking-widest">
-                            <a href="#core" className="hover:text-brand-green transition-colors">Infraestructura</a>
-                            <a href="#roadmap" className="hover:text-brand-green transition-colors">Visión</a>
-                        </nav>
- 
                     </div>
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+                            className="flex items-center gap-2 px-3 py-2 bg-white border border-black/5 rounded-industrial-sm hover:border-brand-green transition-all shadow-sm"
+                        >
+                            <span className="text-xs font-black uppercase tracking-widest">{language === 'en' ? 'ES' : 'EN'}</span>
+                        </button>
                         <button
                             onClick={() => setShowLoginModal(true)}
-                            className="bg-brand-green text-white px-8 py-4 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-green-bright transition-all shadow-xl shadow-brand-green/10"
+                            className="bg-brand-green text-white px-6 py-3 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-green/90 transition-all shadow-xl shadow-brand-green/10"
                         >
-                            Validar Activo Digital
+                            {t.nav.login}
                         </button>
-
                     </div>
                 </div>
             </header>
 
-            {/* 2. HERO SECTION - Impacto Inmediato */}
-            <main className="pt-64 pb-32 px-8">
-                <div className="max-w-6xl mx-auto text-center space-y-12">
-                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[1.1] max-w-5xl mx-auto text-brand-green">
-                            El primer motor de inteligencia industrial para el café de especialidad.
+            {/* 2. HERO SECTION */}
+            <main className="relative pt-32 pb-16 px-8 overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <img src="/hero-bg.png" alt="Background" className="w-full h-full object-cover opacity-10 grayscale" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-soft-white via-transparent to-soft-white"></div>
+                    <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+                </div>
+                <div className="max-w-6xl mx-auto text-center space-y-8 relative z-10">
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                        <img src="/logo.png" alt="AXISONE" className="h-48 mx-auto mb-4" />
+                        <h1 className="text-6xl lg:text-7xl font-black leading-[0.95] max-w-4xl mx-auto text-black tracking-tighter uppercase">
+                            {t.hero.headline.split(' ').map((word, i) => i === t.hero.headline.split(' ').length - 1 ? <span key={i} className="text-brand-green">{word}</span> : word + ' ')}
                         </h1>
-
-                        <p className="text-lg md:text-xl text-gray-500 font-medium max-w-3xl mx-auto leading-relaxed">
-                            No solo registramos su origen. Auditamos su fermentación, predecimos su tostión, y garantizamos su calidad con datos inmutables. <br className="hidden md:block" />
-                            <span className="text-carbon font-bold">El estándar de confianza que viaja más rápido que el contenedor.</span>
+                        <p className="text-base text-gray-900 font-medium max-w-3xl mx-auto leading-relaxed">
+                            {t.hero.subheadline}
                         </p>
-
                     </div>
-
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-8 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-                        <button
-                            onClick={() => setShowLoginModal(true)}
-                            className="w-full md:w-auto bg-brand-green text-white px-10 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/20"
-                        >
-                            Validar Activo Digital
-                        </button>
-
-                        <a 
-                            href="https://wa.me/573013970002?text=Hola%20Julio,%20quiero%20solicitar%20acceso%20a%20la%20infraestructura%20de%20AxisOne%20Coffee"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full md:w-auto border-2 border-brand-green text-brand-green px-10 py-5 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-green/5 transition-all text-center flex items-center justify-center"
-                        >
-                            Solicitar Acceso a Infraestructura
-                        </a>
-
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
+                        <button onClick={() => setShowLoginModal(true)} className="w-full md:w-auto bg-brand-green text-white px-12 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/30">{t.hero.cta}</button>
                     </div>
                 </div>
             </main>
 
-            {/* 3. THE CORE - El Registro de Nacimiento */}
-            <section id="core" className="py-32 bg-soft-white border-y border-brand-green-soft">
-                <div className="max-w-7xl mx-auto px-8">
-                    <div className="text-center mb-24 space-y-4">
-                        <h2 className="text-3xl md:text-4xl font-black uppercase text-carbon">Ecosistema de Validación Automatizada.</h2>
-                        <p className="text-gray-500 font-medium uppercase text-sm">Más que un registro, un algoritmo vivo de confianza comercial.</p>
+            {/* 3. EL PROBLEMA - START OF THE GUIDED JOURNEY */}
+            <section id="step-01" className="relative py-32 my-12 bg-white border-y border-black/5 overflow-hidden">
+                {/* Visual Connector Line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
+                
+                <div className="max-w-7xl mx-auto px-8 relative z-10">
+                    <div className="mb-20 space-y-4 text-center max-w-4xl mx-auto">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
+                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">01</span>
+                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">{language === 'en' ? 'The Leak' : 'La Fuga'}</span>
+                        </div>
+                        <h2 className="text-[50px] font-black uppercase text-black tracking-tighter leading-none">
+                            {t.problem.headline}
+                        </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-                        {[
-                            {
-                                title: "Motor Híbrido AOC",
-                                desc: "Evaluación sensorial que integra automáticamente factores extrínsecos: validación EUDR, huella de carbono y transparencia financiera.",
-                                icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            },
-                            {
-                                title: "Alquimia Adaptativa",
-                                desc: "El sistema aprende y cataloga dinámicamente nuevas técnicas de fermentación y secado mediante validación cruzada.",
-                                icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                            },
-                            {
-                                title: "Auditoría Satelital",
-                                desc: "Mapeo in situ preventivo y generación de sellos criptográficos para lotes, asegurando cumplimiento de deforestación.",
-                                icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                            }
-                        ].map((item, idx) => (
-                            <div key={idx} className="space-y-6 text-center md:text-left">
-                                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-brand-green-soft flex items-center justify-center text-brand-green mx-auto md:mx-0">
-                                    {item.icon}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
+                        <div className="space-y-12">
+                            <div className="space-y-8">
+                                <p className="text-base font-bold text-gray-900 leading-relaxed uppercase tracking-tight">{t.problem.intro}</p>
+                                <p className="text-xs text-gray-500 font-medium uppercase tracking-widest leading-loose">{t.problem.outro}</p>
+                                <div className="flex flex-col gap-4">
+                                    {t.problem.list.map((item, i) => (
+                                        <div key={i} className="flex items-center gap-6 group">
+                                            <div className="w-2 h-px bg-black/20 group-hover:w-8 group-hover:bg-brand-green transition-all duration-500"></div>
+                                            <span className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-black/30 group-hover:text-black transition-colors duration-500">{item}</span>
+                                        </div>
+                                    ))}
                                 </div>
-                                <h3 className="text-xl font-bold uppercase text-carbon">{item.title}</h3>
-                                <p className="text-gray-500 text-sm leading-relaxed font-medium">
-                                    {item.desc}
-                                </p>
+                            </div>
+                        </div>
+
+                        <div className="relative group">
+                            <div className="absolute -inset-4 bg-brand-green/5 rounded-industrial blur-2xl group-hover:bg-brand-green/10 transition-all duration-1000"></div>
+                            <div className="relative p-2 bg-white border border-black/5 rounded-industrial shadow-2xl shadow-black/5 overflow-hidden">
+                                <img src="/caos-document.png" alt="Knowledge Chaos" className="w-full h-auto grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                            </div>
+                            <div className="absolute -bottom-6 -right-6 w-32 h-32 border-b-2 border-r-2 border-brand-green/20 rounded-br-industrial hidden lg:block"></div>
+                        </div>
+                    </div>
+
+                    {/* SOLUTION PHRASE - CENTERED BOTTOM */}
+                    <div className="mt-32 pt-16 border-t border-black/5 text-center">
+                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                            {t.problem.conclusion}
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* 4. EL CONCEPTO */}
+            <section id="step-02" className="relative py-32 my-12 bg-soft-white overflow-hidden">
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
+                
+                <div className="max-w-7xl mx-auto px-8 text-center relative z-10">
+                    <div className="flex flex-col items-center gap-2 mb-20">
+                        <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
+                        <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">02</span>
+                        <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">The Solution</span>
+                    </div>
+                    <h2 className="text-[50px] font-black uppercase text-black tracking-tighter mb-12 leading-none">{t.concept.headline}</h2>
+                    
+                    {/* DIGITAL GRAINS IMAGE */}
+                    <div className="relative py-4 group mb-12 max-w-sm mx-auto">
+                        <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-75 group-hover:scale-90 transition-transform duration-1000"></div>
+                        <img 
+                            src="/granos-digital.png" 
+                            alt="Digital Coffee DNA" 
+                            className="relative z-10 w-full h-auto drop-shadow-2xl animate-in zoom-in duration-1000" 
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-24">
+                        {t.concept.list.map((item, i) => (
+                            <div key={i} className="group p-10 bg-white border border-black/5 rounded-industrial-sm flex flex-col items-center justify-center text-center hover:border-brand-green/30 transition-all hover:shadow-xl hover:shadow-brand-green/5 space-y-6">
+                                <div className="text-brand-green group-hover:scale-110 transition-transform duration-500">
+                                    {i === 0 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 3v12a2 2 0 002 2h8a2 2 0 002-2V3M9 7h6M9 11h6M12 17v4m-3 0h6"/></svg>}
+                                    {i === 1 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v2m0 16v2m8-10h2M2 12h2m15.071-7.071l-1.414 1.414M6.343 17.657l-1.414 1.414M17.657 17.657l1.414 1.414M6.343 6.343L4.929 4.929M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>}
+                                    {i === 2 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 21a9 9 0 110-18 9 9 0 010 18zM12 7v5l3 3"/></svg>}
+                                    {i === 3 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>}
+                                    {i === 4 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>}
+                                </div>
+                                <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40 group-hover:text-black transition-colors">{item}</span>
                             </div>
                         ))}
                     </div>
-                </div>
-            </section>
-
-            {/* 4. LA ECUACIÓN DE CONFIANZA - Impacto Total */}
-            <section className="py-24 bg-brand-green">
-                <div className="max-w-7xl mx-auto text-center px-8">
-                    <h2 className="text-xl md:text-3xl font-black text-white uppercase leading-none whitespace-nowrap">
-                        DATOS + TRAZABILIDAD = CONFIANZA ABSOLUTA
-                    </h2>
-                    <p className="text-white/80 font-bold uppercase text-[10px] mt-8">
-                        La infraestructura que elimina la incertidumbre en el mercado global de alto valor.
-                    </p>
-                </div>
-            </section>
-
-            {/* 5. ROADMAP - Panamá - Light Gray Theme */}
-            <section id="roadmap" className="py-32 bg-soft-white text-carbon relative overflow-hidden border-b border-brand-green-soft">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-green/5 blur-[150px] rounded-full translate-x-1/2 -translate-y-1/2 opacity-50"></div>
-                <div className="max-w-5xl mx-auto px-8 relative z-10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-                        <div className="space-y-8">
-                            <h2 className="text-4xl md:text-5xl font-black uppercase leading-none text-carbon">Expansión Tecnológica.</h2>
-                            <p className="text-gray-500 text-lg leading-relaxed font-medium">
-                                Estamos estableciendo el nuevo estándar operativo y predictivo para la próxima generación de exportaciones de café.
-                            </p>
-                        </div>
-                        <div className="bg-white border border-brand-green-soft rounded-industrial p-12 text-center shadow-sm">
-                            <div className="text-6xl font-black mb-4 text-carbon">2026</div>
-                            <p className="text-[10px] font-black uppercase text-brand-green">Fase de Despliegue Internacional</p>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-
-            {/* 6. FOOTER - Rediseño Corporativo Refinado */}
-            <footer className="bg-brand-green py-20 px-8 text-white">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 items-center gap-12">
-                    
-                    {/* Hito Izquierda - Reemplazando al Logo */}
-                    <div className="flex justify-center md:justify-start">
-                        <p className="text-[11px] font-bold text-white uppercase tracking-[0.4em] leading-relaxed max-w-[200px]">
-                            Próximo hito: World of Coffee Panama, Octubre 2026
+                    {/* SOLUTION PHRASE - CENTERED BOTTOM */}
+                    <div className="pt-16 border-t border-black/5">
+                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                            {t.concept.conclusion}
                         </p>
                     </div>
+                </div>
+            </section>
 
-                    {/* Ubicación Centro */}
-                    <div className="text-center">
-                        <p className="text-lg font-bold uppercase tracking-[0.4em] whitespace-nowrap">Risaralda, Colombia</p>
+            {/* 5. QUÉ HACE (FEATURES) */}
+            <section id="step-03" className="relative py-32 my-12 bg-white border-y border-black/5">
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
+                
+                <div className="max-w-7xl mx-auto px-8 relative z-10">
+                    <div className="mb-24 space-y-4 text-center">
+                        <div className="flex flex-col items-center gap-2 mb-8">
+                            <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
+                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">03</span>
+                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">The Engine</span>
+                        </div>
+                        <h2 className="text-[50px] font-black uppercase text-black tracking-tighter leading-none">{t.features.headline}</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-32">
+                        {t.features.items.map((item, i) => (
+                            <div key={i} className="group p-8 bg-white border border-black/5 rounded-industrial-sm hover:border-brand-green transition-all hover:shadow-2xl hover:shadow-brand-green/5">
+                                <div className="text-brand-green mb-8 group-hover:scale-110 transition-transform duration-500">
+                                    {i === 0 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 11l2 2 4-4"/></svg>}
+                                    {i === 1 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>}
+                                    {i === 2 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 1v22M5 5h14M5 19h14M2 12h4M18 12h4"/></svg>}
+                                    {i === 3 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"/></svg>}
+                                    {i === 4 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
+                                </div>
+                                <h3 className="text-base font-black uppercase text-black mb-4 tracking-tight">{item.title}</h3>
+                                <p className="text-base text-gray-500 leading-relaxed font-light">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                    {/* SOLUTION PHRASE - CENTERED BOTTOM */}
+                    <div className="pt-16 border-t border-black/5 text-center">
+                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                            {language === 'en' ? "Total structural memory for high-stakes coffee operations." : "Memoria estructural total para operaciones de café de alta complejidad."}
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* 6. PARA QUIÉN */}
+            <section id="step-04" className="relative py-32 my-12 bg-soft-white border-y border-black/5">
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
+                
+                <div className="max-w-7xl mx-auto px-8 relative z-10 text-center">
+                    <div className="mb-24 space-y-4 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
+                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">04</span>
+                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">The Ecosystem</span>
+                        </div>
+                        <h2 className="text-[50px] font-black uppercase text-black tracking-tighter max-w-4xl mx-auto leading-none">{t.target.headline}</h2>
+                        <div className="w-24 h-1 bg-brand-green mx-auto mt-8"></div>
                     </div>
 
-                    {/* Contacto Derecha - Más Grande y Menos Grueso */}
-                    <div className="flex flex-col items-center md:items-end gap-6">
-                        <a 
-                            href="https://www.linkedin.com/in/julio-cesar-uva-ram%C3%ADrez-b7a124163/" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="flex items-center gap-4 hover:opacity-80 transition-opacity group"
-                        >
-                            <span className="text-sm font-bold uppercase tracking-widest">Julio César Uva Ramírez</span>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="opacity-80 group-hover:opacity-100"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                        </a>
-                        
-                        <a 
-                            href="https://wa.me/573013970002?text=Hola%20Julio,%20estoy%20interesado%20en%20AxisOne%20Coffee" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="flex items-center gap-4 hover:opacity-80 transition-opacity group"
-                        >
-                            <span className="text-sm font-bold uppercase tracking-widest">+57 301 397 0002</span>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="opacity-80 group-hover:opacity-100"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884 0 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                        </a>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
+                        {/* GLOBAL MAP LEFT */}
+                        <div className="relative group overflow-hidden">
+                            <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-75 group-hover:scale-90 transition-transform duration-1000"></div>
+                            <img 
+                                src="/mapa-mundi.png" 
+                                alt="Global Ecosystem Map" 
+                                className="relative z-10 w-full h-auto drop-shadow-2xl grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100" 
+                            />
+                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-soft-white via-transparent to-soft-white pointer-events-none"></div>
+                        </div>
+
+                        {/* CLIENT PROFILES RIGHT */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                            {t.target.list.map((item, i) => (
+                                <div key={i} className="group p-6 bg-white border border-black/5 rounded-industrial-sm hover:border-brand-green/30 transition-all hover:shadow-lg hover:shadow-brand-green/5 flex flex-col gap-4">
+                                    <div className="text-brand-green">
+                                        {i === 0 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>}
+                                        {i === 1 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>}
+                                        {i === 2 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>}
+                                        {i === 3 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>}
+                                        {i === 4 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
+                                        {i === 5 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>}
+                                    </div>
+                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-black/40 group-hover:text-black transition-colors">{item}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
+                    {/* SOLUTION PHRASE - CENTERED BOTTOM */}
+                    <div className="pt-16 border-t border-black/5 text-center">
+                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                            {language === 'en' ? "A unified standard for the entire specialty value chain." : "Un estándar unificado para toda la cadena de valor de especialidad."}
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* 7. PROPUESTA ECONÓMICA */}
+            <section id="step-05" className="relative py-32 my-12 bg-white border-y border-black/5">
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
+                
+                <div className="max-w-7xl mx-auto px-8 text-center relative z-10">
+                    <div className="space-y-4 mb-20">
+                        <div className="flex flex-col items-center gap-2 mb-8">
+                            <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
+                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">05</span>
+                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">The Commitment</span>
+                        </div>
+                        <h2 className="text-[50px] font-black uppercase text-black tracking-tighter leading-none">{t.pricing.headline}</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32">
+                        {t.pricing.tiers.map((tier, i) => (
+                            <div key={i} className={`p-12 rounded-industrial border transition-all duration-500 text-left space-y-8 group ${i === 1 ? 'border-brand-green shadow-2xl shadow-brand-green/10 bg-soft-white scale-105 z-10' : 'border-black/5 bg-white hover:-translate-y-4 hover:shadow-2xl hover:shadow-black/5'}`}>
+                                <div className="space-y-2">
+                                    <h3 className="text-base font-black uppercase text-black group-hover:text-brand-green transition-colors">{tier.name}</h3>
+                                    <p className="text-xs text-gray-500 font-medium uppercase tracking-widest">{tier.desc}</p>
+                                </div>
+                                <div className="text-2xl font-black text-brand-green tracking-tighter">{tier.price}</div>
+                                <ul className="space-y-4 pt-8 border-t border-black/5">
+                                    {tier.features.map((f, j) => (
+                                        <li key={j} className="flex items-center gap-3 text-[10px] font-semibold uppercase text-black/60 tracking-widest group-hover:text-black transition-colors">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="text-brand-green"><polyline points="20 6 9 17 4 12"/></svg>
+                                            {f}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button className={`w-full py-4 rounded-industrial-sm text-xs font-semibold uppercase transition-all duration-500 ${i === 1 ? 'bg-brand-green text-white hover:bg-black' : 'border border-brand-green text-brand-green hover:bg-brand-green hover:text-white hover:shadow-lg hover:shadow-brand-green/20'}`}>Join Program</button>
+                            </div>
+                        ))}
+                    </div>
+                    {/* SOLUTION PHRASE - CENTERED BOTTOM */}
+                    <div className="pt-16 border-t border-black/5 text-center">
+                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                            {language === 'en' ? "Scalable infrastructure for sovereign digital operations." : "Infraestructura escalable para operaciones digitales soberanas."}
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            {/* 8. VISIÓN */}
+            <section id="step-06" className="py-48 bg-soft-white relative overflow-hidden">
+                <div className="max-w-4xl mx-auto px-8 text-center space-y-12 relative z-10">
+                    <h2 className="text-2xl md:text-6xl font-black uppercase text-black tracking-tighter leading-[0.95]">{t.vision.headline}</h2>
+                    <div className="w-32 h-1 bg-brand-green mx-auto"></div>
+                    <div className="space-y-8 pt-12">
+                        <p className="text-base font-bold text-gray-900 uppercase tracking-tight">{t.vision.copy1}</p>
+                        <p className="text-xs font-medium text-gray-600 uppercase tracking-widest">{t.vision.copy2}</p>
+                        <p className="text-2xl font-black text-brand-green uppercase tracking-tighter">{t.vision.copy3}</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* 9. FOOTER CTA */}
+            <footer id="step-07" className="py-48 bg-soft-white text-black px-8 text-center space-y-12 border-t border-black/5">
+                <h2 className="text-2xl md:text-6xl font-black uppercase tracking-tighter leading-none max-w-5xl mx-auto">{t.footer.headline}</h2>
+                <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-12">
+                    <button onClick={() => setShowLoginModal(true)} className="px-12 py-6 bg-brand-green text-white text-xs font-black uppercase rounded-industrial-sm hover:scale-105 transition-all shadow-2xl shadow-brand-green/30">{t.footer.cta}</button>
+                    <button className="px-12 py-6 border border-brand-green text-brand-green text-xs font-black uppercase rounded-industrial-sm hover:bg-brand-green hover:text-white transition-all">Request Private Demo</button>
+                </div>
+                <div className="pt-24 flex flex-col items-center gap-8 border-t border-black/5">
+                    <img src="/logo.png" alt="AXISONE" className="h-12 opacity-20" />
+                    <p className="text-xs font-semibold uppercase tracking-ultra-wide text-brand-green">© 2026 AXISONE COFFEE INFRASTRUCTURE COLOMBIA</p>
                 </div>
             </footer>
 
             {/* LOGIN MODAL */}
             {showLoginModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-carbon/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="w-full max-w-md bg-white rounded-industrial p-10 shadow-2xl border border-brand-green-soft relative">
-                        <button onClick={() => setShowLoginModal(false)} className="absolute top-6 right-6 text-gray-400 hover:text-carbon transition-colors">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/80 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="w-full max-w-md bg-white rounded-industrial p-10 shadow-2xl border border-black/5 relative">
+                        <button onClick={() => setShowLoginModal(false)} className="absolute top-6 right-6 text-black hover:text-brand-green transition-colors">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
-                        
                         <div className="mb-10 text-center">
-                            <img src="/logo.png" alt="AXISONE" className="h-36 mx-auto mb-6" />
-                            <h2 className="text-2xl font-black uppercase text-carbon">Acceso a Infraestructura</h2>
-
-
-                            <p className="text-[10px] text-gray-500 font-bold uppercase mt-2">Terminal de Control Maestro</p>
-
+                            <img src="/logo.png" alt="AXISONE" className="h-20 mx-auto mb-6" />
+                            <h2 className="text-2xl font-black uppercase text-black tracking-tighter">{t.login.title}</h2>
+                            <p className="text-xs text-brand-green font-black uppercase tracking-widest mt-2">{t.login.subtitle}</p>
                         </div>
-
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Identificador (Email o Cédula)</label>
-                                <input
-                                    type="text"
-                                    required
-                                    placeholder="usuario@email.com o 12345678"
-                                    value={identifier}
-                                    onChange={(e) => setIdentifier(e.target.value)}
-                                    className="w-full border-b-2 border-brand-green-soft/30 px-1 py-3 text-sm focus:border-brand-green outline-none transition-all font-bold text-carbon"
-                                />
+                                <label className="text-xs font-black text-black/40 uppercase tracking-widest ml-1">{t.login.labelId}</label>
+                                <input type="text" required placeholder="user@email.com" value={identifier} onChange={(e) => setIdentifier(e.target.value)} className="w-full border-b border-black/10 px-1 py-3 text-base focus:border-brand-green outline-none transition-all font-bold text-black bg-transparent" />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Clave de Acceso</label>
-                                <input
-
-                                    type="password"
-                                    required
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full border-b-2 border-brand-green-soft/30 px-1 py-3 text-sm focus:border-brand-green outline-none transition-all font-bold text-carbon"
-                                />
+                                <label className="text-xs font-black text-black/40 uppercase tracking-widest ml-1">{t.login.labelPass}</label>
+                                <input type="password" required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border-b border-black/10 px-1 py-3 text-base focus:border-brand-green outline-none transition-all font-bold text-black bg-transparent" />
                             </div>
-
-
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full bg-brand-green text-white font-black py-4 rounded-industrial-sm transition-all shadow-xl shadow-brand-green/20 uppercase text-xs flex items-center justify-center gap-3"
-                            >
-                                {isLoading ? "Verificando..." : "Entrar al Sistema"}
-                            </button>
-
+                            <button type="submit" disabled={isLoading} className="w-full bg-brand-green text-white font-black py-4 rounded-industrial-sm transition-all shadow-xl shadow-brand-green/20 uppercase text-xs tracking-widest mt-8">{isLoading ? t.login.verifying : t.login.button}</button>
                         </form>
                     </div>
                 </div>

@@ -91,7 +91,7 @@ export default function RadarDashboard({ user }: { user: any }) {
     const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO'>('ORIGEN');
     const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
 
-    const createSignalIcon = (scale = 1, isPulsing = false, color = '#00df9a') => {
+    const createSignalIcon = (scale = 1, isPulsing = false, color = '#000000') => {
         if (!L) return null;
         return L.divIcon({
             className: 'custom-pulse-icon',
@@ -197,18 +197,18 @@ export default function RadarDashboard({ user }: { user: any }) {
 
     if (!hasAccess) {
         return (
-            <div className="flex flex-col items-center justify-center h-screen bg-black text-white p-10">
+            <div className="flex flex-col items-center justify-center h-screen bg-black text-black p-10">
                 <div className="w-20 h-20 border-4 border-red-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
                     <span className="text-4xl font-black">!</span>
                 </div>
-                <h1 className="text-3xl font-black uppercase tracking-tighter">Acceso Denegado</h1>
-                <p className="text-gray-500 uppercase text-xs tracking-widest mt-2">Esta terminal requiere credenciales de Alta Gerencia FNC / AXIS ADMIN.</p>
+                <h1 className="text-3xl font-black uppercase er">Acceso Denegado</h1>
+                <p className="text-gray-900 uppercase text-xs  mt-2">Esta terminal requiere credenciales de Alta Gerencia FNC / AXIS ADMIN.</p>
             </div>
         );
     }
 
     return (
-        <div className="flex h-screen bg-[#0a0a0a] overflow-hidden font-sans text-white">
+        <div className="flex h-screen bg-[#0a0a0a] overflow-hidden font-sans text-black">
             <style jsx global>{`
                 .pulse-container {
                     position: relative;
@@ -238,7 +238,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                     display: flex;
                     align-items: center;
                     justify-center;
-                    filter: drop-shadow(0 0 5px #00df9a);
+                    filter: drop-shadow(0 0 5px #000000);
                 }
                 .leaflet-container {
                     background: #0a0a0a !important;
@@ -262,19 +262,19 @@ export default function RadarDashboard({ user }: { user: any }) {
             `}</style>
 
             {/* Side Control Tower (Métricas) */}
-            <aside className="w-96 bg-[#111] border-r border-white/5 p-6 flex flex-col gap-4 z-[2000] shadow-2xl relative overflow-y-auto sidebar-scroll">
-                <div className="flex items-center gap-4 border-b border-white/10 pb-4">
-                    <div className="w-10 h-10 bg-[#00df9a] rounded-lg flex items-center justify-center text-black font-black">AX</div>
+            <aside className="w-96 bg-[#111] border-r border-gray-400 shadow-sm p-6 flex flex-col gap-4 z-[2000] shadow-2xl relative overflow-y-auto sidebar-scroll">
+                <div className="flex items-center gap-4 border-b border-gray-400 shadow-sm pb-4">
+                    <div className="w-10 h-10 bg-[#000000] rounded-lg flex items-center justify-center text-black font-black">AX</div>
                     <div>
-                        <h2 className="text-sm font-black uppercase tracking-tighter">Control Center</h2>
-                        <p className="text-[10px] text-[#00df9a] font-bold uppercase tracking-widest">Global Logistics Radar</p>
+                        <h2 className="text-sm font-black uppercase er">Control Center</h2>
+                        <p className="text-[11px] text-[#000000] font-bold uppercase ">Global Logistics Radar</p>
                     </div>
                 </div>
 
                 {/* 1. CONFIGURACIONES (TOP) */}
-                <div className="bg-white/5 border border-white/10 p-5 rounded-2xl space-y-4">
+                <div className="bg-white border border-gray-400 shadow-sm p-5 rounded-2xl space-y-4">
                     <div>
-                        <h4 className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-3">Preestablecidos</h4>
+                        <h4 className="text-[9px] font-black uppercase  text-gray-900 mb-3">Preestablecidos</h4>
                         <div className="grid grid-cols-2 gap-2">
                             {[
                                 { label: 'Exotic Gold', var: 'GEISHA', proc: 'HONEY' },
@@ -288,21 +288,21 @@ export default function RadarDashboard({ user }: { user: any }) {
                                         setFilterVariety(preset.var);
                                         setFilterProcess(preset.proc);
                                     }}
-                                    className="text-left px-3 py-2 rounded-lg bg-white/5 border border-white/5 hover:border-[#00df9a]/50 hover:bg-[#00df9a]/5 transition-all group"
+                                    className="text-left px-3 py-2 rounded-lg bg-white border border-gray-400 shadow-sm hover:border-[#000000]/50 hover:bg-[#000000]/5 transition-all group"
                                 >
-                                    <p className="text-[8px] font-black text-gray-400 group-hover:text-white uppercase tracking-tighter">{preset.label}</p>
+                                    <p className="text-[9px] font-black text-black group-hover:text-black uppercase er">{preset.label}</p>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="pt-2 grid grid-cols-2 gap-2 border-t border-white/5">
+                    <div className="pt-2 grid grid-cols-2 gap-2 border-t border-gray-400 shadow-sm">
                         <div className="space-y-1">
-                            <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Varietal</label>
+                            <label className="text-[9px] font-bold text-gray-900 uppercase ">Varietal</label>
                             <select 
                                 value={filterVariety}
                                 onChange={(e) => setFilterVariety(e.target.value)}
-                                className="w-full bg-black border border-white/10 rounded-lg p-1.5 text-[9px] font-bold text-white outline-none"
+                                className="w-full bg-black border border-gray-400 shadow-sm rounded-lg p-1.5 text-[9px] font-bold text-black outline-none"
                             >
                                 <option value="ALL">ALL</option>
                                 <option value="GEISHA">Geisha</option>
@@ -312,11 +312,11 @@ export default function RadarDashboard({ user }: { user: any }) {
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Proceso</label>
+                            <label className="text-[9px] font-bold text-gray-900 uppercase ">Proceso</label>
                             <select 
                                 value={filterProcess}
                                 onChange={(e) => setFilterProcess(e.target.value)}
-                                className="w-full bg-black border border-white/10 rounded-lg p-1.5 text-[9px] font-bold text-white outline-none"
+                                className="w-full bg-black border border-gray-400 shadow-sm rounded-lg p-1.5 text-[9px] font-bold text-black outline-none"
                             >
                                 <option value="ALL">ALL</option>
                                 <option value="LAVADO">Lavado</option>
@@ -326,24 +326,24 @@ export default function RadarDashboard({ user }: { user: any }) {
                         </div>
                     </div>
 
-                    <div className="pt-2 flex flex-col gap-2 border-t border-white/5">
+                    <div className="pt-2 flex flex-col gap-2 border-t border-gray-400 shadow-sm">
                         <div className="flex gap-2">
                             <button 
                                 onClick={() => setViewMode('ORIGEN')} 
-                                className={`flex-1 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest border transition-all ${viewMode === 'ORIGEN' ? 'bg-[#00df9a] text-black border-[#00df9a]' : 'border-white/10 text-gray-500'}`}
+                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase  border transition-all ${viewMode === 'ORIGEN' ? 'bg-[#000000] text-black border-[#000000]' : 'border-gray-400 shadow-sm text-gray-900'}`}
                             >
                                 Origen
                             </button>
                             <button 
                                 onClick={() => setViewMode('LOGISTICA')} 
-                                className={`flex-1 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest border transition-all ${viewMode === 'LOGISTICA' ? 'bg-[#00df9a] text-black border-[#00df9a]' : 'border-white/10 text-gray-500'}`}
+                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase  border transition-all ${viewMode === 'LOGISTICA' ? 'bg-[#000000] text-black border-[#000000]' : 'border-gray-400 shadow-sm text-gray-900'}`}
                             >
                                 Logística
                             </button>
                         </div>
                         <button 
                             onClick={() => setViewMode('CONSUMO')} 
-                            className={`w-full py-2 rounded-lg text-[8px] font-black uppercase tracking-widest border transition-all ${viewMode === 'CONSUMO' ? 'bg-[#ffde59] text-black border-[#ffde59]' : 'border-white/10 text-gray-500 hover:border-[#ffde59]/50'}`}
+                            className={`w-full py-2 rounded-lg text-[9px] font-black uppercase  border transition-all ${viewMode === 'CONSUMO' ? 'bg-[#ffde59] text-black border-[#ffde59]' : 'border-gray-400 shadow-sm text-gray-900 hover:border-[#ffde59]/50'}`}
                         >
                             Deep Trace (Escaneos)
                         </button>
@@ -352,35 +352,35 @@ export default function RadarDashboard({ user }: { user: any }) {
 
                 {/* 2. MÉTRICAS (SMALLER & COMPACT) */}
                 <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                        <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest mb-1">Masa Crítica</p>
-                        <p className="text-lg font-black tracking-tighter">{(stats.totalWeight / 1000).toFixed(1)} <span className="text-[10px] text-[#00df9a]">T</span></p>
+                    <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
+                        <p className="text-gray-900 text-[9px] font-black uppercase  mb-1">Masa Crítica</p>
+                        <p className="text-lg font-black er">{(stats.totalWeight / 1000).toFixed(1)} <span className="text-[11px] text-[#000000]">T</span></p>
                     </div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                        <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest mb-1">Calidad (AVG)</p>
-                        <p className="text-lg font-black tracking-tighter">{stats.avgScore} <span className="text-[10px] text-[#00df9a]">PTS</span></p>
+                    <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
+                        <p className="text-gray-900 text-[9px] font-black uppercase  mb-1">Calidad (AVG)</p>
+                        <p className="text-lg font-black er">{stats.avgScore} <span className="text-[11px] text-[#000000]">PTS</span></p>
                     </div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5 col-span-2 flex justify-between items-center">
+                    <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm col-span-2 flex justify-between items-center">
                         <div>
-                            <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest mb-0.5">Cumplimiento Regulatorio</p>
-                            <p className="text-sm font-black tracking-tighter">{stats.complianceRate}% <span className="text-[9px] text-[#00df9a]">EUDR</span></p>
+                            <p className="text-gray-900 text-[9px] font-black uppercase  mb-0.5">Cumplimiento Regulatorio</p>
+                            <p className="text-sm font-black er">{stats.complianceRate}% <span className="text-[9px] text-[#000000]">EUDR</span></p>
                         </div>
-                        <div className="w-10 h-10 rounded-full border-2 border-[#00df9a]/20 border-t-[#00df9a] animate-spin"></div>
+                        <div className="w-10 h-10 rounded-full border-2 border-[#000000]/20 border-t-[#000000] animate-spin"></div>
                     </div>
                 </div>
 
                 <div className="mt-auto space-y-3">
                     <button 
                         onClick={() => setShowShareModal(true)}
-                        className="w-full flex items-center justify-center gap-2 bg-white text-black py-3 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-[#00df9a] transition-all"
+                        className="w-full flex items-center justify-center gap-2 bg-white text-black py-3 rounded-xl font-black text-[9px] uppercase  hover:bg-[#000000] transition-all"
                     >
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
                         Acceso Viewer
                     </button>
                     
-                    <div className="bg-[#00df9a]/5 border border-[#00df9a]/20 p-4 rounded-2xl relative overflow-hidden">
-                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#00df9a] mb-1">Sistema Live</h4>
-                        <p className="text-[8px] text-gray-400 leading-tight uppercase font-bold">{stats.activeAssociations} Asociaciones en Red.</p>
+                    <div className="bg-[#000000]/5 border border-[#000000]/20 p-4 rounded-2xl relative overflow-hidden">
+                        <h4 className="text-[9px] font-black uppercase  text-[#000000] mb-1">Sistema Live</h4>
+                        <p className="text-[9px] text-black leading-tight uppercase font-bold">{stats.activeAssociations} Asociaciones en Red.</p>
                     </div>
                 </div>
             </aside>
@@ -434,8 +434,8 @@ export default function RadarDashboard({ user }: { user: any }) {
                                     >
                                         <Popup className="custom-popup">
                                             <div className="p-2">
-                                                <p className="text-[10px] font-black uppercase tracking-tighter">{lot.lot_number}</p>
-                                                <p className="text-[9px] font-bold text-[#00df9a] mt-1">{lot.variety} • {lot.process}</p>
+                                                <p className="text-[11px] font-black uppercase er">{lot.lot_number}</p>
+                                                <p className="text-[9px] font-bold text-[#000000] mt-1">{lot.variety} • {lot.process}</p>
                                             </div>
                                         </Popup>
                                     </Marker>
@@ -444,7 +444,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                                     {selectedLotId === lot.id && (
                                         <Polyline 
                                             positions={[[lat, lon], portColombia as any]} 
-                                            pathOptions={{ color: '#00df9a', weight: 2, opacity: 0.6, dashArray: '5, 10' }} 
+                                            pathOptions={{ color: '#000000', weight: 2, opacity: 0.6, dashArray: '5, 10' }} 
                                         />
                                     )}
 
@@ -455,7 +455,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                                             <Polyline 
                                                 positions={[portColombia as any, [midLat, midLon], finalDestination as any]} 
                                                 pathOptions={{ 
-                                                    color: '#00df9a', 
+                                                    color: '#000000', 
                                                     weight: 3, 
                                                     opacity: 1, 
                                                     dashArray: '10, 20'
@@ -482,9 +482,9 @@ export default function RadarDashboard({ user }: { user: any }) {
                                                             <Marker position={cityCoords as any} icon={createSignalIcon(1, true, '#ffde59')}>
                                                                 <Popup className="custom-popup">
                                                                     <div className="p-2">
-                                                                        <p className="text-[10px] font-black uppercase text-[#ffde59]">Consumer Scan Active</p>
+                                                                        <p className="text-[11px] font-black uppercase text-[#ffde59]">Consumer Scan Active</p>
                                                                         <p className="text-[9px] font-bold mt-1">{cityName} • Cafetería de Especialidad</p>
-                                                                        <p className="text-[8px] text-gray-400 mt-0.5">Escaneo de QR detectado • Trazabilidad Deep</p>
+                                                                        <p className="text-[9px] text-black mt-0.5">Escaneo de QR detectado • Trazabilidad Deep</p>
                                                                     </div>
                                                                 </Popup>
                                                             </Marker>
@@ -508,7 +508,7 @@ export default function RadarDashboard({ user }: { user: any }) {
 
                         {/* Nodos de Consumo Mundial - Permanentes (Signal Icons) */}
                         {Object.entries(PORTS_GLOBAL).map(([name, coords]) => (
-                            <Marker key={name} position={coords as any} icon={createSignalIcon(0.8, false, '#00df9a')}>
+                            <Marker key={name} position={coords as any} icon={createSignalIcon(0.8, false, '#000000')}>
                                 <Popup>Puerto Global: {name}</Popup>
                             </Marker>
                         ))}
@@ -524,33 +524,33 @@ export default function RadarDashboard({ user }: { user: any }) {
 
                 {/* Overlays de Interfaz (HUD) */}
                 <div className="absolute top-8 right-8 z-[1000] flex flex-col gap-4">
-                    <div className="bg-black/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex items-center gap-6">
+                    <div className="bg-black/60 backdrop-blur-md border border-gray-400 shadow-sm p-4 rounded-2xl flex items-center gap-6">
                         <div className="text-right">
-                            <p className="text-[8px] text-gray-500 font-black uppercase tracking-widest">Global Status</p>
-                            <p className="text-[10px] font-black text-[#00df9a] uppercase">Operational Hub Active</p>
+                            <p className="text-[9px] text-gray-900 font-black uppercase ">Global Status</p>
+                            <p className="text-[11px] font-black text-[#000000] uppercase">Operational Hub Active</p>
                         </div>
-                        <div className="h-8 w-px bg-white/10"></div>
+                        <div className="h-8 w-px bg-white"></div>
                         <div className="flex gap-2">
                             {['UTC', 'BOG', 'AMS', 'NYC'].map(tz => (
-                                <div key={tz} className="text-[9px] font-black text-white/40 px-2 py-1 border border-white/5 rounded bg-white/5">{tz}</div>
+                                <div key={tz} className="text-[9px] font-black text-black/40 px-2 py-1 border border-gray-400 shadow-sm rounded bg-white">{tz}</div>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                <div className="absolute bottom-8 right-8 z-[1000] w-96 bg-black/60 backdrop-blur-md border border-white/10 p-6 rounded-[32px]">
-                    <p className="text-[10px] font-black uppercase text-gray-500 mb-4 tracking-[0.2em]">Logistics Velocity (24h)</p>
+                <div className="absolute bottom-8 right-8 z-[1000] w-96 bg-black/60 backdrop-blur-md border border-gray-400 shadow-sm p-6 rounded-[32px]">
+                    <p className="text-[11px] font-black uppercase text-gray-900 mb-4 ">Logistics Velocity (24h)</p>
                     <div className="h-32">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={[
                                 { t: '00:00', v: 20 }, { t: '04:00', v: 35 }, { t: '08:00', v: 65 }, 
                                 { t: '12:00', v: 45 }, { t: '16:00', v: 80 }, { t: '20:00', v: 55 }
                             ]}>
-                                <Area type="monotone" dataKey="v" stroke="#00df9a" fill="url(#colorV)" />
+                                <Area type="monotone" dataKey="v" stroke="#000000" fill="url(#colorV)" />
                                 <defs>
                                     <linearGradient id="colorV" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#00df9a" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#00df9a" stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="#000000" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
                                     </linearGradient>
                                 </defs>
                             </AreaChart>
@@ -561,35 +561,35 @@ export default function RadarDashboard({ user }: { user: any }) {
                 {/* MODAL COMPARTIR ESTILO DRIVE */}
                 {showShareModal && (
                     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-                        <div className="bg-[#111] border border-white/10 w-full max-w-md rounded-3xl p-10 shadow-3xl text-center space-y-6">
-                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-[#00df9a]">
+                        <div className="bg-[#111] border border-gray-400 shadow-sm w-full max-w-md rounded-3xl p-10 shadow-3xl text-center space-y-6">
+                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto text-[#000000]">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             </div>
-                            <h3 className="text-2xl font-black uppercase tracking-tighter">Compartir Radar</h3>
-                            <p className="text-xs text-gray-500 uppercase font-bold tracking-widest">Concede permisos de "Solo Lectura" a este panel de control.</p>
+                            <h3 className="text-2xl font-black uppercase er">Compartir Radar</h3>
+                            <p className="text-xs text-gray-900 uppercase font-bold ">Concede permisos de "Solo Lectura" a este panel de control.</p>
                             
                             <div className="space-y-2 text-left">
-                                <label className="text-[9px] font-black uppercase text-gray-500 ml-4 tracking-widest">Email del Invitado</label>
+                                <label className="text-[9px] font-black uppercase text-gray-900 ml-4 ">Email del Invitado</label>
                                 <input 
                                     type="email"
                                     value={inviteEmail}
                                     onChange={(e) => setInviteEmail(e.target.value)}
                                     placeholder="ej: gerencia@federacion.org"
-                                    className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-sm focus:border-[#00df9a] transition-all outline-none"
+                                    className="w-full bg-white border border-gray-400 shadow-sm p-5 rounded-2xl text-sm focus:border-[#000000] transition-all outline-none"
                                 />
                             </div>
 
                             <div className="flex gap-4">
                                 <button 
                                     onClick={() => setShowShareModal(false)}
-                                    className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all"
+                                    className="flex-1 py-4 text-[11px] font-black uppercase  text-gray-900 hover:text-black transition-all"
                                 >
                                     Cancelar
                                 </button>
                                 <button 
                                     onClick={handleInvite}
                                     disabled={isInviting}
-                                    className="flex-2 bg-[#00df9a] text-black px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#00df9a]-bright transition-all disabled:opacity-50"
+                                    className="flex-2 bg-[#000000] text-black px-10 py-4 rounded-2xl text-[11px] font-black uppercase  hover:bg-[#000000]-bright transition-all disabled:opacity-50"
                                 >
                                     {isInviting ? 'Otorgando...' : 'Dar Acceso Viewer'}
                                 </button>

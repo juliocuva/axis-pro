@@ -106,18 +106,18 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
 
     return (
         <div className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-md overflow-y-auto flex justify-center py-10 px-4 animate-in fade-in zoom-in-95 duration-500">
-            <div className="bg-bg-card border border-brand-green/30 rounded-industrial max-w-6xl w-full shadow-2xl relative overflow-hidden flex flex-col h-full max-h-[90vh]">
+            <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial max-w-6xl w-full shadow-2xl relative overflow-hidden flex flex-col h-full max-h-[90vh]">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-green via-brand-green-bright to-transparent z-10"></div>
 
-                <header className="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 gap-6">
+                <header className="p-8 border-b border-gray-400 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <span className="px-2 py-1 bg-brand-green/20 text-brand-green-bright text-[9px] font-bold uppercase tracking-widest rounded-sm border border-brand-green/30">
+                            <span className="px-2 py-1 bg-white border border-gray-400 shadow-sm text-black-bright text-[9px] font-bold uppercase  rounded-sm border border-gray-400 shadow-sm">
                                 Archivo Confidencial
                             </span>
-                            <span className="text-[10px] text-gray-400 font-mono">LOTES DE INVENTARIO</span>
+                            <span className="text-[11px] text-black font-mono">LOTES DE INVENTARIO</span>
                         </div>
-                        <h2 className="text-3xl font-bold text-white tracking-tighter uppercase">{companyName}</h2>
+                        <h2 className="text-3xl font-bold text-black er uppercase">{companyName}</h2>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full md:w-auto">
@@ -125,7 +125,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                             <select
                                 value={filterMonth}
                                 onChange={(e) => setFilterMonth(e.target.value)}
-                                className="bg-black/50 border border-white/10 text-white rounded-industrial-sm px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest outline-none focus:border-brand-green ring-0 transition-all appearance-none pr-10"
+                                className="bg-black/50 border border-gray-400 shadow-sm text-black rounded-industrial-sm px-4 py-2.5 text-[11px] font-bold uppercase  outline-none focus:border-black ring-0 transition-all appearance-none pr-10"
                                 style={{ backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2300df9a' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`, backgroundPosition: 'right 10px center', backgroundRepeat: 'no-repeat', backgroundSize: '16px 16px' }}
                             >
                                 <option value="all">TODOS LOS MESES</option>
@@ -141,7 +141,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                             </select>
                         )}
 
-                        <button onClick={onClose} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest transition-all group flex items-center justify-center gap-2 whitespace-nowrap">
+                        <button onClick={onClose} className="px-5 py-2.5 bg-white hover:bg-white text-black border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold uppercase  transition-all group flex items-center justify-center gap-2 whitespace-nowrap">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-90 transition-transform">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -154,27 +154,27 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                 <div className="flex-1 overflow-auto p-8">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-64">
-                            <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin mb-6"></div>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em]">Cargando registros...</p>
+                            <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin mb-6"></div>
+                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Cargando registros...</p>
                         </div>
                     ) : lots.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-64 opacity-50">
                             <svg className="w-16 h-16 text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
-                            <p className="text-[12px] text-gray-400 font-bold uppercase tracking-widest">No hay lotes registrados para este cliente</p>
+                            <p className="text-[12px] text-black font-bold uppercase ">No hay lotes registrados para este cliente</p>
                         </div>
                     ) : (
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/5 border-b border-white/10">
-                                    <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lote ID</th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Productor / Origen</th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Variedad / Proceso</th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Volumen</th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Estado</th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Fecha Entrada</th>
-                                    <th className="p-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Acciones</th>
+                                <tr className="bg-white border-b border-gray-400 shadow-sm">
+                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Lote ID</th>
+                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Productor / Origen</th>
+                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Variedad / Proceso</th>
+                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Volumen</th>
+                                    <th className="p-4 text-[11px] font-bold text-black uppercase  text-center">Estado</th>
+                                    <th className="p-4 text-[11px] font-bold text-black uppercase  text-right">Fecha Entrada</th>
+                                    <th className="p-4 text-[11px] font-bold text-black uppercase  text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -184,36 +184,36 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                                             <div className="flex items-center gap-3">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-brand-green/50 group-hover:bg-brand-green mt-1"></div>
                                                 <div>
-                                                    <p className="text-[12px] font-bold text-white uppercase tracking-tight">{lot.lot_number || 'S/N'}</p>
-                                                    <p className="text-[9px] text-gray-600 font-mono tracking-tighter mt-1 truncate w-24">{lot.id}</p>
+                                                    <p className="text-[12px] font-bold text-black uppercase ">{lot.lot_number || 'S/N'}</p>
+                                                    <p className="text-[9px] text-gray-600 font-mono er mt-1 truncate w-24">{lot.id}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="p-4">
                                             <p className="text-[12px] font-medium text-gray-200">{lot.farmer_name || 'Desconocido'}</p>
-                                            <p className="text-[10px] text-gray-500">{lot.farm_name || lot.region || '--'}</p>
+                                            <p className="text-[11px] text-gray-900">{lot.farm_name || lot.region || '--'}</p>
                                         </td>
                                         <td className="p-4">
                                             <p className="text-[12px] font-medium text-gray-300">{lot.variety || '--'}</p>
-                                            <p className="text-[10px] text-gray-500">{lot.process || '--'}</p>
+                                            <p className="text-[11px] text-gray-900">{lot.process || '--'}</p>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-end gap-1">
-                                                <span className="text-14px font-bold text-white">{lot.net_weight || 0}</span>
-                                                <span className="text-[9px] text-gray-500 mb-0.5">kg</span>
+                                                <span className="text-14px font-bold text-black">{lot.net_weight || 0}</span>
+                                                <span className="text-[9px] text-gray-900 mb-0.5">kg</span>
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`inline-block px-3 py-1 text-[9px] font-bold uppercase tracking-widest rounded-full border ${lot.status === 'purchased' ? 'bg-brand-green/10 text-brand-green-bright border-brand-green/20' :
-                                                lot.status === 'thrashed' ? 'bg-brand-green/10 text-brand-green-bright border-brand-green/20' :
-                                                    lot.status === 'completed' ? 'bg-brand-green/10 text-brand-green-bright border-brand-green/20' :
-                                                        'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                                            <span className={`inline-block px-3 py-1 text-[9px] font-bold uppercase  rounded-full border ${lot.status === 'purchased' ? 'bg-white text-black-bright border-gray-400 shadow-sm' :
+                                                lot.status === 'thrashed' ? 'bg-white text-black-bright border-gray-400 shadow-sm' :
+                                                    lot.status === 'completed' ? 'bg-white text-black-bright border-gray-400 shadow-sm' :
+                                                        'bg-white0/10 text-black border-gray-500/20'
                                                 }`}>
                                                 {lot.status || 'N/A'}
                                             </span>
                                         </td>
                                         <td className="p-4 text-right">
-                                            <p className="text-[10px] text-gray-400 font-mono">
+                                            <p className="text-[11px] text-black font-mono">
                                                 {new Date(lot.created_at).toLocaleDateString('es-CO')}
                                             </p>
                                         </td>
@@ -236,7 +236,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
 
                                                 <button
                                                     onClick={() => setSelectedLotId(lot.id)}
-                                                    className="px-3 py-1.5 bg-brand-green/10 hover:bg-brand-green/20 text-brand-green border border-brand-green/20 rounded text-[9px] font-bold uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    className="px-3 py-1.5 bg-white hover:bg-white border border-gray-400 shadow-sm text-black border border-gray-400 shadow-sm rounded text-[9px] font-bold uppercase  transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                                     disabled={lot.status !== 'completed'}
                                                 >
                                                     Certificado
@@ -250,25 +250,25 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                     )}
 
                     {totalPages > 1 && (
-                        <div className="mt-8 flex justify-between items-center bg-black/20 p-4 rounded-industrial border border-white/5">
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hidden sm:block">
+                        <div className="mt-8 flex justify-between items-center bg-black/20 p-4 rounded-industrial border border-gray-400 shadow-sm">
+                            <p className="text-[11px] text-black font-bold uppercase  hidden sm:block">
                                 Mostrando {(currentPage - 1) * LOTS_PER_PAGE + 1} - {Math.min(currentPage * LOTS_PER_PAGE, filteredLots.length)} de {filteredLots.length}
                             </p>
                             <div className="flex gap-2 w-full sm:w-auto justify-center">
                                 <button
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage === 1}
-                                    className="px-4 py-2 bg-white/5 text-white disabled:opacity-30 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all border border-white/10"
+                                    className="px-4 py-2 bg-white text-black disabled:opacity-30 rounded-full text-[11px] font-bold uppercase  hover:bg-white transition-all border border-gray-400 shadow-sm"
                                 >
                                     Anterior
                                 </button>
-                                <span className="px-5 py-2 flex items-center text-[10px] text-brand-green-bright font-bold tracking-widest bg-brand-green/10 rounded-full border border-brand-green/20">
+                                <span className="px-5 py-2 flex items-center text-[11px] text-black-bright font-bold  bg-white rounded-full border border-gray-400 shadow-sm">
                                     Página {currentPage} de {totalPages}
                                 </span>
                                 <button
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                     disabled={currentPage === totalPages}
-                                    className="px-4 py-2 bg-white/5 text-white disabled:opacity-30 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all border border-white/10"
+                                    className="px-4 py-2 bg-white text-black disabled:opacity-30 rounded-full text-[11px] font-bold uppercase  hover:bg-white transition-all border border-gray-400 shadow-sm"
                                 >
                                     Siguiente
                                 </button>

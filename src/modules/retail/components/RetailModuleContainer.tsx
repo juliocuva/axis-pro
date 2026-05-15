@@ -31,22 +31,22 @@ export default function RetailModuleContainer({ user }: RetailModuleContainerPro
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
-            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-white/5 pb-8">
+            <header className="flex flex-wrap items-center justify-between gap-6 border-b border-gray-400 shadow-sm pb-8">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight uppercase">Módulo 4: Retail Connect</h2>
-                    <p className="text-[10px] text-gray-400 font-bold tracking-widest uppercase mt-2 opacity-70">
+                    <h2 className="text-3xl font-bold  uppercase">4: Retail Connect</h2>
+                    <p className="text-[11px] text-black font-bold  uppercase mt-2 opacity-70">
                         "De la Tostia a la Taza: El Cierre del Círculo Comercial"
                     </p>
                 </div>
 
-                <nav className="flex bg-bg-card p-1 rounded-industrial-sm border border-white/5 shadow-2xl overflow-hidden">
+                <nav className="flex bg-bg-card p-1 rounded-industrial-sm border border-gray-400 shadow-sm shadow-2xl overflow-hidden">
                     {(['inventory', 'labels', 'traceability', 'sales', 'archive'] as RetailView[]).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-3 rounded-xl text-[10px] font-bold transition-all uppercase tracking-widest flex items-center gap-2 ${activeTab === tab
-                                ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20'
-                                : 'text-gray-500 hover:text-white'
+                            className={`px-6 py-3 rounded-xl text-[11px] font-bold transition-all uppercase  flex items-center gap-2 ${activeTab === tab
+                                ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20'
+                                : 'text-gray-900 hover:text-black'
                                 }`}
                         >
                             {tab === 'archive' && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>}
@@ -135,37 +135,37 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-                <div className="bg-bg-card border border-white/10 rounded-industrial p-10">
+                <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial p-10">
                     <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] flex items-center gap-3">
+                        <h3 className="text-sm font-bold uppercase  flex items-center gap-3">
                             <span className="w-2 h-2 rounded-full bg-brand-green"></span>
                             Stock de Producto Terminado
                         </h3>
-                        <button onClick={loadData} className="text-gray-500 hover:text-white transition-colors">
+                        <button onClick={loadData} className="text-gray-900 hover:text-black transition-colors">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
                         </button>
                     </div>
 
                     <div className="space-y-4">
                         {isLoading ? (
-                            <div className="py-20 text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">Consultando Inventario Cloud...</div>
+                            <div className="py-20 text-center text-[11px] font-bold text-gray-900 uppercase  animate-pulse">Consultando Inventario Cloud...</div>
                         ) : inventory.length === 0 ? (
-                            <div className="py-20 text-center border border-dashed border-white/10 rounded-industrial">
-                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Sin stock registrado.</p>
+                            <div className="py-20 text-center border border-dashed border-gray-400 shadow-sm rounded-industrial">
+                                <p className="text-[11px] text-gray-900 font-bold uppercase ">Sin stock registrado.</p>
                             </div>
                         ) : (
                             inventory.map((item) => (
-                                <div key={item.id} className="p-6 bg-bg-main border border-white/5 rounded-industrial-sm flex items-center justify-between group hover:border-brand-green/30 transition-all">
+                                <div key={item.id} className="p-6 bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm flex items-center justify-between group hover:border-gray-400 shadow-sm transition-all">
                                     <div className="flex gap-4 items-center">
-                                        <div className="w-12 h-12 bg-brand-green/10 rounded-xl flex items-center justify-center text-brand-green-bright font-bold text-xs uppercase">
+                                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-black-bright font-bold text-xs uppercase">
                                             {item.unit_size_grams}g
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <p className="text-xs font-bold uppercase">SKU: {item.sku}</p>
-                                                {item.metadata?.is_external && <span className="text-[7px] bg-brand-green/20 text-brand-green-bright px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
+                                                {item.metadata?.is_external && <span className="text-[7px] bg-white border border-gray-400 shadow-sm text-black-bright px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
                                             </div>
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-2 mt-1">
+                                            <p className="text-[11px] text-black font-bold uppercase  flex items-center gap-2 mt-1">
                                                 {item.roast_batches?.coffee_purchase_inventory?.varietal || 'Variedad'} |
                                                 {item.roast_batches?.coffee_purchase_inventory?.coffee_type || item.metadata?.process || 'Proceso'} |
                                                 Roasted: {item.roast_batches?.roast_date ? new Date(item.roast_batches.roast_date).toLocaleDateString() : 'N/A'}
@@ -173,8 +173,8 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-3xl font-bold tracking-tighter leading-none">{item.total_grams_available.toLocaleString()} <span className="text-[10px] text-gray-500 font-bold">G</span></p>
-                                        <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                                        <p className="text-3xl font-bold er leading-none">{item.total_grams_available.toLocaleString()} <span className="text-[11px] text-gray-900 font-bold">G</span></p>
+                                        <p className="text-[11px] font-bold text-black mt-1 uppercase ">
                                             {Math.floor(item.total_grams_available / item.unit_size_grams)} Bolsas Est.
                                         </p>
                                     </div>
@@ -185,25 +185,25 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                 </div>
 
                 {showPackager ? (
-                    <form onSubmit={handlePackage} className="bg-gradient-to-br from-brand-green/40 to-bg-card border border-brand-green/30 rounded-industrial p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
+                    <form onSubmit={handlePackage} className="bg-gradient-to-br from-brand-green/40 to-bg-card border border-gray-400 shadow-sm rounded-industrial p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
                         <div className="flex justify-between items-center mb-4">
-                            <h4 className="text-xl font-bold uppercase tracking-widest text-white">Ingreso de Producto al Retail</h4>
-                            <button type="button" onClick={() => setShowPackager(false)} className="text-gray-500 hover:text-white">✕</button>
+                            <h4 className="text-xl font-bold uppercase  text-black">Ingreso de Producto al Retail</h4>
+                            <button type="button" onClick={() => setShowPackager(false)} className="text-gray-900 hover:text-black">✕</button>
                         </div>
 
                         {/* Selector de Origen */}
-                        <div className="flex bg-bg-main p-1 rounded-industrial-sm border border-white/10 mb-6">
+                        <div className="flex bg-bg-main p-1 rounded-industrial-sm border border-gray-400 shadow-sm mb-6">
                             <button
                                 type="button"
                                 onClick={() => setSourceType('internal')}
-                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'internal' ? 'bg-brand-green text-white' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 py-2 text-[11px] font-bold uppercase rounded-lg transition-all ${sourceType === 'internal' ? 'bg-brand-green text-black' : 'text-gray-900 hover:text-black'}`}
                             >
                                 Producción AXIS (Interno)
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setSourceType('external')}
-                                className={`flex-1 py-2 text-[10px] font-bold uppercase rounded-lg transition-all ${sourceType === 'external' ? 'bg-brand-green text-white' : 'text-gray-500 hover:text-white'}`}
+                                className={`flex-1 py-2 text-[11px] font-bold uppercase rounded-lg transition-all ${sourceType === 'external' ? 'bg-brand-green text-black' : 'text-gray-900 hover:text-black'}`}
                             >
                                 Roaster Aliado (Externo)
                             </button>
@@ -212,20 +212,20 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                         <div className="grid grid-cols-2 gap-4">
                             {sourceType === 'internal' ? (
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Lote de Tueste (Materia Prima)</label>
+                                    <label className="text-[11px] font-bold text-gray-900 uppercase  block">Lote de Tueste (Materia Prima)</label>
                                     <div className="relative group/select">
                                         <select
                                             required
                                             value={packData.roastBatchId}
                                             onChange={(e) => setPackData({ ...packData, roastBatchId: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green text-sm font-bold appearance-none pr-12"
+                                            className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 outline-none focus:border-black text-sm font-bold appearance-none pr-12"
                                         >
                                             <option value="">Seleccionar lote...</option>
                                             {roastBatches.map(b => (
                                                 <option key={b.id} value={b.id}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
                                             ))}
                                         </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                         </div>
                                     </div>
@@ -233,53 +233,53 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                             ) : (
                                 <>
                                     <div className="col-span-2">
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Empresa Roaster (Marca)</label>
+                                        <label className="text-[11px] font-bold text-gray-900 uppercase  mb-1 block">Empresa Roaster (Marca)</label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="v.g. Café Pergamino, Amor Perfecto..."
                                             value={packData.externalRoaster}
                                             onChange={(e) => setPackData({ ...packData, externalRoaster: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold"
+                                            className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 outline-none focus:border-black font-bold"
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Origen / Finca / Región</label>
+                                        <label className="text-[11px] font-bold text-gray-900 uppercase  mb-1 block">Origen / Finca / Región</label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="Cauca, Tolima..."
                                             value={packData.externalOrigin}
                                             onChange={(e) => setPackData({ ...packData, externalOrigin: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold"
+                                            className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 outline-none focus:border-black font-bold"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Proceso de Beneficio</label>
+                                        <label className="text-[11px] font-bold text-gray-900 uppercase  block">Proceso de Beneficio</label>
                                         <div className="relative group/select">
                                             <select
                                                 value={packData.externalProcess}
                                                 onChange={(e) => setPackData({ ...packData, externalProcess: e.target.value })}
-                                                className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold appearance-none pr-12"
+                                                className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 outline-none focus:border-black font-bold appearance-none pr-12"
                                             >
                                                 <option value="Lavado">Lavado</option>
                                                 <option value="Natural">Natural</option>
                                                 <option value="Honey">Honey</option>
                                                 <option value="Anaeróbico">Anaeróbico</option>
                                             </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Notas de Cata (Separadas por coma)</label>
+                                        <label className="text-[11px] font-bold text-gray-900 uppercase  mb-1 block">Notas de Cata (Separadas por coma)</label>
                                         <input
                                             type="text"
                                             placeholder="Vainilla, Caramelo, Lima..."
                                             value={packData.externalNotes}
                                             onChange={(e) => setPackData({ ...packData, externalNotes: e.target.value })}
-                                            className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold font-mono text-[10px]"
+                                            className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 outline-none focus:border-black font-bold font-mono text-[11px]"
                                         />
                                     </div>
                                 </>
@@ -297,32 +297,32 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                 inputClassName="font-bold"
                             />
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Tamaño Unitario (g)</label>
+                                <label className="text-[11px] font-bold text-gray-900 uppercase  block">Tamaño Unitario (g)</label>
                                 <div className="relative group/select">
                                     <select
                                         value={packData.unitSizeGrams}
                                         onChange={(e) => setPackData({ ...packData, unitSizeGrams: parseInt(e.target.value) })}
-                                        className="w-full bg-bg-main border border-white/10 rounded-industrial-sm px-4 py-3 outline-none focus:border-brand-green font-bold appearance-none pr-12"
+                                        className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 outline-none focus:border-black font-bold appearance-none pr-12"
                                     >
                                         <option value="250">250g</option>
                                         <option value="340">340g (12oz)</option>
                                         <option value="500">500g</option>
                                         <option value="1000">1000g</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="col-span-2 p-4 bg-brand-green/10 border border-brand-green/30 rounded-xl flex justify-between items-center">
+                            <div className="col-span-2 p-4 bg-white border border-gray-400 shadow-sm rounded-xl flex justify-between items-center">
                                 <div>
-                                    <p className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest">Control de Masa Total (CMT)</p>
-                                    <p className="text-[8px] text-gray-500 uppercase mt-1">Masa neta que ingresará al inventario global</p>
+                                    <p className="text-[11px] font-bold text-black-bright uppercase ">Control de Masa Total (CMT)</p>
+                                    <p className="text-[9px] text-gray-900 uppercase mt-1">Masa neta que ingresará al inventario global</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xl font-bold text-white">{(packData.unitsProduced * packData.unitSizeGrams / 1000).toFixed(2)} KG</p>
-                                    <p className="text-[10px] text-gray-500 font-bold">({(packData.unitsProduced * packData.unitSizeGrams).toLocaleString()} G)</p>
+                                    <p className="text-xl font-bold text-black">{(packData.unitsProduced * packData.unitSizeGrams / 1000).toFixed(2)} KG</p>
+                                    <p className="text-[11px] text-gray-900 font-bold">({(packData.unitsProduced * packData.unitSizeGrams).toLocaleString()} G)</p>
                                 </div>
                             </div>
                         </div>
@@ -330,21 +330,21 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                         <button
                             type="submit"
                             disabled={isPackaging}
-                            className={`w-full py-4 rounded-industrial-sm text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-brand-green hover:bg-brand-green shadow-brand-green/40' : 'bg-brand-green hover:bg-brand-green shadow-brand-green/40'}`}
+                            className={`w-full py-4 rounded-industrial-sm text-[11px] font-bold uppercase  transition-all shadow-xl disabled:opacity-50 ${sourceType === 'internal' ? 'bg-brand-green hover:bg-brand-green shadow-brand-green/40' : 'bg-brand-green hover:bg-brand-green shadow-brand-green/40'}`}
                         >
                             {isPackaging ? 'PROCESANDO REGISTRO...' : `REGISTRAR CAFÉ ${sourceType === 'internal' ? 'PROPIO' : 'ADQUIRIDO'}`}
                         </button>
                     </form>
                 ) : (
-                    <div className="bg-gradient-to-r from-brand-green/20 to-transparent border border-brand-green/20 rounded-industrial p-8">
+                    <div className="bg-gradient-to-r from-brand-green/20 to-transparent border border-gray-400 shadow-sm rounded-industrial p-8">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h4 className="text-xl font-bold uppercase tracking-widest text-white">Gestión Multi-Origen</h4>
-                                <p className="text-[10px] text-gray-500 font-bold uppercase opacity-60 mt-1">Registra producción propia o café de aliados comerciales</p>
+                                <h4 className="text-xl font-bold uppercase  text-black">Gestión Multi-Origen</h4>
+                                <p className="text-[11px] text-gray-900 font-bold uppercase opacity-60 mt-1">Registra producción propia o café de aliados comerciales</p>
                             </div>
                             <button
                                 onClick={() => setShowPackager(true)}
-                                className="px-6 py-3 bg-brand-green hover:bg-brand-green text-white rounded-xl text-[10px] font-bold uppercase transition-all shadow-xl shadow-brand-green/20 hover:scale-105"
+                                className="px-6 py-3 bg-brand-green hover:bg-brand-green text-black rounded-xl text-[11px] font-bold uppercase transition-all shadow-xl shadow-brand-green/20 hover:scale-105"
                             >
                                 Registrar Entrada
                             </button>
@@ -354,26 +354,26 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
             </div>
 
             {/* HISTORIAL - ALTURA SINCRONIZADA CON SECCIONES DEL FORMULARIO */}
-            <div className="bg-bg-card border border-white/10 p-8 rounded-industrial flex flex-col relative overflow-hidden group h-[780px]">
-                <h3 className="text-[10px] font-bold text-brand-green-bright uppercase tracking-widest border-b border-white/5 pb-4">Alertas de Frescura AI</h3>
+            <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-industrial flex flex-col relative overflow-hidden group h-[780px]">
+                <h3 className="text-[11px] font-bold text-black-bright uppercase  border-b border-gray-400 shadow-sm pb-4">Alertas de Frescura AI</h3>
                 <div className="space-y-6">
-                    <div className="p-6 bg-brand-green/5 border border-brand-green/20 rounded-industrial-sm">
-                        <p className="text-[10px] text-brand-green uppercase font-bold mb-2">✓ Calidad Óptima</p>
+                    <div className="p-6 bg-white border border-gray-400 shadow-sm rounded-industrial-sm">
+                        <p className="text-[11px] text-black uppercase font-bold mb-2">✓ Calidad Óptima</p>
                         <p className="text-xs leading-relaxed text-gray-300">
                             95% de su inventario se encuentra en la ventana de frescura ideal (7-21 días post-tueste).
                         </p>
                     </div>
-                    <div className="h-px bg-white/5"></div>
+                    <div className="h-px bg-white"></div>
                     <div>
-                        <p className="text-[10px] text-gray-500 uppercase mb-4">Métricas de Empaque (Mes)</p>
+                        <p className="text-[11px] text-gray-900 uppercase mb-4">Métricas de Empaque (Mes)</p>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-bg-main rounded-xl border border-white/5 text-center">
-                                <p className="text-2xl font-bold tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 250 ? curr.units_produced : 0), 0) || 182}</p>
-                                <p className="text-[8px] text-gray-600 font-bold uppercase">Bolsas 250g</p>
+                            <div className="p-4 bg-bg-main rounded-xl border border-gray-400 shadow-sm text-center">
+                                <p className="text-2xl font-bold er text-black">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 250 ? curr.units_produced : 0), 0) || 182}</p>
+                                <p className="text-[9px] text-gray-600 font-bold uppercase">Bolsas 250g</p>
                             </div>
-                            <div className="p-4 bg-bg-main rounded-xl border border-white/5 text-center">
-                                <p className="text-2xl font-bold tracking-tighter text-white">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 500 ? curr.units_produced : 0), 0) || 54}</p>
-                                <p className="text-[8px] text-gray-600 font-bold uppercase">Bolsas 500g</p>
+                            <div className="p-4 bg-bg-main rounded-xl border border-gray-400 shadow-sm text-center">
+                                <p className="text-2xl font-bold er text-black">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 500 ? curr.units_produced : 0), 0) || 54}</p>
+                                <p className="text-[9px] text-gray-600 font-bold uppercase">Bolsas 500g</p>
                             </div>
                         </div>
                     </div>
@@ -386,23 +386,23 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
 function LabelGenerator() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="bg-bg-card border border-white/10 rounded-industrial p-12">
+            <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial p-12">
                 <h3 className="text-sm font-bold uppercase mb-8">Diseñador de Etiquetas Pro</h3>
                 <form className="space-y-6">
                     <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Seleccionar Lote de Tueste</label>
-                        <select className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 outline-none focus:border-brand-green">
+                        <label className="text-[11px] font-bold text-gray-900 uppercase ">Seleccionar Lote de Tueste</label>
+                        <select className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 outline-none focus:border-black">
                             <option>AX-2130 - Geisha Natural</option>
                             <option>AX-1942 - Bourbon Semi-Washed</option>
                         </select>
                     </div>
                     <div>
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Marca Destino</label>
-                        <input type="text" placeholder="Asociación Tatama" className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-3 mt-1 outline-none font-bold" />
+                        <label className="text-[11px] font-bold text-gray-900 uppercase ">Marca Destino</label>
+                        <input type="text" placeholder="Asociación Tatama" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 outline-none font-bold" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <button type="button" className="py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold uppercase">Vista Previa</button>
-                        <button type="button" className="py-4 bg-brand-green hover:bg-brand-green text-white rounded-xl text-xs font-bold uppercase">Imprimir (Zebra/PDF)</button>
+                        <button type="button" className="py-4 bg-white hover:bg-white text-black rounded-xl text-xs font-bold uppercase">Vista Previa</button>
+                        <button type="button" className="py-4 bg-brand-green hover:bg-brand-green text-black rounded-xl text-xs font-bold uppercase">Imprimir (Zebra/PDF)</button>
                     </div>
                 </form>
             </div>
@@ -416,16 +416,16 @@ function LabelGenerator() {
 
                     <div className="space-y-4">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-tighter">Variedad</p>
+                            <p className="text-[11px] font-bold uppercase er">Variedad</p>
                             <p className="text-xl font-bold uppercase">Geisha Especial</p>
                         </div>
                         <div className="flex justify-between border-t-2 border-black pt-4">
                             <div>
-                                <p className="text-[8px] font-bold uppercase">Tostión</p>
+                                <p className="text-[9px] font-bold uppercase">Tostión</p>
                                 <p className="text-sm font-bold">Omni-Roast</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-[8px] font-bold uppercase">Peso</p>
+                                <p className="text-[9px] font-bold uppercase">Peso</p>
                                 <p className="text-sm font-bold">250g / 8.8oz</p>
                             </div>
                         </div>
@@ -445,7 +445,7 @@ function LabelGenerator() {
                         </div>
                     </div>
                 </div>
-                <p className="mt-6 text-[10px] text-gray-500 uppercase font-mono tracking-widest font-bold">Demo de Etiqueta Térmica de Alta Resolución</p>
+                <p className="mt-6 text-[11px] text-gray-900 uppercase font-mono  font-bold">Demo de Etiqueta Térmica de Alta Resolución</p>
             </div>
         </div>
     );
@@ -475,18 +475,18 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                     value={searchBatch}
                     onChange={(e) => setSearchBatch(e.target.value)}
                     placeholder="Buscar Lote (v.g. AX-2130)"
-                    className="flex-1 bg-bg-card border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-brand-green text-xs font-bold uppercase"
+                    className="flex-1 bg-bg-card border border-gray-400 shadow-sm rounded-xl px-4 py-3 outline-none focus:border-black text-xs font-bold uppercase"
                 />
                 <button
                     onClick={handleSearch}
-                    className="px-6 py-3 bg-brand-green rounded-xl text-[10px] font-bold uppercase"
+                    className="px-6 py-3 bg-brand-green rounded-xl text-[11px] font-bold uppercase"
                 >
                     Explorar
                 </button>
             </div>
 
-            <div className="max-w-md mx-auto bg-bg-main border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white/5 rounded-full flex items-center justify-center text-[8px] font-mono text-gray-500 uppercase z-20">AXIS Mobile App</div>
+            <div className="max-w-md mx-auto bg-bg-main border border-gray-400 shadow-sm rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white rounded-full flex items-center justify-center text-[9px] font-mono text-gray-900 uppercase z-20">AXIS Mobile App</div>
 
                 <div className="h-64 relative overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=3540&auto=format&fit=crop" className="w-full h-full object-cover grayscale" alt="Farm" />
@@ -495,54 +495,54 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
 
                 <div className="p-8 -mt-12 bg-bg-main rounded-t-[3rem] relative space-y-8">
                     {isLoading ? (
-                        <div className="py-20 text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">Consultando Origen...</div>
+                        <div className="py-20 text-center text-[11px] font-bold text-gray-900 uppercase  animate-pulse">Consultando Origen...</div>
                     ) : (
                         <>
                             <header>
                                 <div className="flex justify-between items-start">
-                                    <h3 className="text-3xl font-bold uppercase tracking-tighter leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
-                                    <span className="bg-brand-green/20 text-brand-green text-[10px] font-bold px-3 py-1 rounded-full uppercase border border-brand-green/20">Lote {story?.roast?.batch_id_label || searchBatch}</span>
+                                    <h3 className="text-3xl font-bold uppercase er leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
+                                    <span className="bg-white border border-gray-400 shadow-sm text-black text-[11px] font-bold px-3 py-1 rounded-full uppercase border border-gray-400 shadow-sm">Lote {story?.roast?.batch_id_label || searchBatch}</span>
                                 </div>
-                                <p className="text-xs text-gray-400 mt-6 leading-relaxed font-medium">
+                                <p className="text-xs text-black mt-6 leading-relaxed font-medium">
                                     Este café fue cultivado en la finca <strong>{story?.farm || 'Alejandría'}</strong> a {story?.height || '1.850 msnm'}.
                                 </p>
                             </header>
 
-                            <div className="grid grid-cols-3 gap-4 py-6 border-y border-white/5">
+                            <div className="grid grid-cols-3 gap-4 py-6 border-y border-gray-400 shadow-sm">
                                 <div className="text-center">
-                                    <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Proceso</p>
-                                    <p className="text-xs font-bold uppercase text-white">{story?.process || 'Natural'}</p>
+                                    <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Proceso</p>
+                                    <p className="text-xs font-bold uppercase text-black">{story?.process || 'Natural'}</p>
                                 </div>
-                                <div className="text-center border-x border-white/10">
-                                    <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Puntaje</p>
-                                    <p className="text-xs font-bold text-brand-green-bright">{story?.sensoryScore || 87.5} pts (basado en estándares de la SCA)</p>
+                                <div className="text-center border-x border-gray-400 shadow-sm">
+                                    <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Puntaje</p>
+                                    <p className="text-xs font-bold text-black-bright">{story?.sensoryScore || 87.5} pts (basado en estándares de la SCA)</p>
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-[8px] text-gray-500 uppercase font-bold mb-1">Tueste</p>
-                                    <p className="text-xs font-bold uppercase text-white">Perfil Oro</p>
+                                    <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Tueste</p>
+                                    <p className="text-xs font-bold uppercase text-black">Perfil Oro</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green-bright">Notas Catadas</h4>
+                                <h4 className="text-[11px] font-bold uppercase  text-black-bright">Notas Catadas</h4>
                                 <div className="flex flex-wrap gap-2 text-[9px]">
                                     {story?.notes?.map((note: string) => (
-                                        <span key={note} className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">{note}</span>
+                                        <span key={note} className="px-3 py-1 bg-white rounded-full border border-gray-400 shadow-sm font-bold uppercase">{note}</span>
                                     )) || (
                                             <>
-                                                <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">Chocolate</span>
-                                                <span className="px-3 py-1 bg-white/5 rounded-full border border-white/10 font-bold uppercase">Frutos Rojos</span>
+                                                <span className="px-3 py-1 bg-white rounded-full border border-gray-400 shadow-sm font-bold uppercase">Chocolate</span>
+                                                <span className="px-3 py-1 bg-white rounded-full border border-gray-400 shadow-sm font-bold uppercase">Frutos Rojos</span>
                                             </>
                                         )}
                                 </div>
                             </div>
 
-                            <div className="p-6 bg-brand-green/10 border border-brand-green/20 text-white rounded-3xl space-y-2">
-                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-brand-green-bright">Recomendación Tatama</h4>
-                                <p className="text-[10px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
+                            <div className="p-6 bg-white border border-gray-400 shadow-sm text-black rounded-3xl space-y-2">
+                                <h4 className="text-[11px] font-bold uppercase  text-black-bright">Recomendación Tatama</h4>
+                                <p className="text-[11px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                             </div>
 
-                            <button className="w-full py-4 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-industrial-sm text-[10px] font-bold uppercase tracking-widest transition-all">Ver Telemetría Roaster</button>
+                            <button className="w-full py-4 bg-white hover:bg-white text-black hover:text-black border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold uppercase  transition-all">Ver Telemetría Roaster</button>
                         </>
                     )}
                 </div>
@@ -608,29 +608,29 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Ventas (Total Masa)</p>
-                    <h4 className="text-3xl font-bold tracking-tighter">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
+                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Ventas (Total Masa)</p>
+                    <h4 className="text-3xl font-bold er">
                         {sales.reduce((acc, curr) => acc + (Number(curr.grams_deducted) || 0), 0).toFixed(1)}
-                        <span className="text-xs text-brand-green-bright ml-2 font-mono">G</span>
+                        <span className="text-xs text-black-bright ml-2 font-mono">G</span>
                     </h4>
                 </div>
-                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Ingresos Netos</p>
-                    <h4 className="text-3xl font-bold tracking-tighter">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
+                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Ingresos Netos</p>
+                    <h4 className="text-3xl font-bold er">
                         ${sales.reduce((acc, curr) => acc + (Number(curr.total_sale_cop) || 0), 0).toLocaleString()}
-                        <span className="text-xs text-brand-green-bright ml-1">COP</span>
+                        <span className="text-xs text-black-bright ml-1">COP</span>
                     </h4>
                 </div>
-                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Ticket Promedio Masa</p>
-                    <h4 className="text-3xl font-bold tracking-tighter">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
+                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Ticket Promedio Masa</p>
+                    <h4 className="text-3xl font-bold er">
                         {sales.length > 0 ? (sales.reduce((acc, curr) => acc + (Number(curr.grams_deducted) || 0), 0) / sales.length).toFixed(0) : 0}g
                     </h4>
                 </div>
-                <div className="bg-bg-card border border-white/10 p-8 rounded-3xl">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-2 font-mono">Merma Molienda</p>
-                    <h4 className="text-3xl font-bold tracking-tighter text-brand-green">
+                <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
+                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Merma Molienda</p>
+                    <h4 className="text-3xl font-bold er text-black">
                         {sales.filter(s => s.delivery_type === 'molido').reduce((acc, curr) => acc + (Number(curr.grams_deducted) * 0.01), 0).toFixed(1)}g
                     </h4>
                 </div>
@@ -638,22 +638,22 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Formulario de Venta Rápida */}
-                <div className="bg-gradient-to-br from-bg-card to-brand-green-dark/10 border border-brand-green/20 p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden h-fit">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 blur-3xl rounded-full"></div>
-                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+                <div className="bg-gradient-to-br from-bg-card to-brand-green-dark/10 border border-gray-400 shadow-sm p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden h-fit">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl rounded-full"></div>
+                    <h3 className="text-sm font-bold uppercase  mb-8 flex items-center gap-3">
                         <span className="w-2 h-2 rounded-full bg-brand-green"></span>
                         Registrar Venta (POS)
                     </h3>
 
                     <form onSubmit={handleSale} className="space-y-6 relative z-10">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Seleccionar Producto</label>
+                            <label className="text-[11px] font-bold text-gray-900 uppercase  block">Seleccionar Producto</label>
                             <div className="relative group/select">
                                 <select
                                     required
                                     value={saleForm.inventoryId}
                                     onChange={(e) => setSaleForm({ ...saleForm, inventoryId: e.target.value })}
-                                    className="w-full bg-bg-main border border-white/10 rounded-xl px-4 py-4 text-xs font-bold outline-none focus:border-brand-green appearance-none pr-12"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-4 text-xs font-bold outline-none focus:border-black appearance-none pr-12"
                                 >
                                     <option value="">Seleccionar SKU...</option>
                                     {inventory.map(item => (
@@ -662,7 +662,7 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                                         </option>
                                     ))}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 group-hover/select:text-brand-green transition-colors">
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                 </div>
                             </div>
@@ -694,19 +694,19 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Estado de Entrega</label>
+                            <label className="text-[11px] font-bold text-gray-900 uppercase ">Estado de Entrega</label>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setSaleForm({ ...saleForm, deliveryType: 'grano' })}
-                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'grano' ? 'bg-brand-green border-brand-green text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
+                                    className={`py-4 rounded-xl text-[11px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'grano' ? 'bg-brand-green border-black text-black shadow-lg' : 'bg-bg-main border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     En Grano
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setSaleForm({ ...saleForm, deliveryType: 'molido' })}
-                                    className={`py-4 rounded-xl text-[10px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'molido' ? 'bg-brand-green border-brand-green text-white shadow-lg' : 'bg-bg-main border-white/5 text-gray-500'}`}
+                                    className={`py-4 rounded-xl text-[11px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'molido' ? 'bg-brand-green border-black text-black shadow-lg' : 'bg-bg-main border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     Molido (+1%)
                                 </button>
@@ -716,7 +716,7 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                         <button
                             type="submit"
                             disabled={isSubmitting || !saleForm.inventoryId}
-                            className="w-full py-6 bg-white hover:bg-brand-green text-black hover:text-white font-bold rounded-xl text-xs uppercase tracking-[0.2em] transition-all shadow-2xl disabled:opacity-30"
+                            className="w-full py-6 bg-white hover:bg-brand-green text-black hover:text-black font-bold rounded-xl text-xs uppercase  transition-all shadow-2xl disabled:opacity-30"
                         >
                             {isSubmitting ? 'SINCRONIZANDO VENTA...' : 'PROCEDER A DESPACHO'}
                         </button>
@@ -724,32 +724,32 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                 </div>
 
                 {/* Historial de Transacciones */}
-                <div className="lg:col-span-2 bg-bg-card border border-white/10 p-10 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-                    <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-8 border-b border-white/5 pb-6">Log de Transacciones Omni-Canal</h3>
+                <div className="lg:col-span-2 bg-bg-card border border-gray-400 shadow-sm p-10 rounded-[2.5rem] shadow-2xl overflow-hidden relative">
+                    <h3 className="text-sm font-bold uppercase  mb-8 border-b border-gray-400 shadow-sm pb-6">Log de Transacciones Omni-Canal</h3>
                     <div className="space-y-4 max-h-[500px] overflow-y-auto pr-4 custom-scrollbar">
                         {isLoading ? (
-                            <div className="py-20 text-center text-[10px] font-bold text-gray-500 uppercase tracking-widest animate-pulse">Consultando Registro de Ventas...</div>
+                            <div className="py-20 text-center text-[11px] font-bold text-gray-900 uppercase  animate-pulse">Consultando Registro de Ventas...</div>
                         ) : sales.length === 0 ? (
-                            <div className="py-20 text-center text-[10px] text-gray-600 font-bold uppercase tracking-widest">Sin transacciones hoy</div>
+                            <div className="py-20 text-center text-[11px] text-gray-600 font-bold uppercase ">Sin transacciones hoy</div>
                         ) : (
                             sales.map(sale => (
-                                <div key={sale.id} className="group p-6 bg-bg-main/50 border border-white/5 hover:border-brand-green/20 rounded-2xl flex items-center justify-between transition-all">
+                                <div key={sale.id} className="group p-6 bg-bg-main/50 border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm rounded-2xl flex items-center justify-between transition-all">
                                     <div className="flex gap-5">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sale.delivery_type === 'molido' ? 'bg-brand-green/10 text-brand-green-bright' : 'bg-brand-green/10 text-brand-green-bright'}`}>
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sale.delivery_type === 'molido' ? 'bg-white text-black-bright' : 'bg-white text-black-bright'}`}>
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-xs font-bold text-white uppercase tracking-tight">SKU: {sale.retail_inventory?.sku}</p>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">
+                                            <p className="text-xs font-bold text-black uppercase ">SKU: {sale.retail_inventory?.sku}</p>
+                                            <p className="text-[11px] text-gray-900 font-bold uppercase mt-1">
                                                 Canal: {sale.sale_channel} | {sale.delivery_type === 'molido' ? 'Despacho Molido' : 'Grano Entero'}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-bold text-white tracking-tighter leading-none">${Number(sale.total_sale_cop).toLocaleString()}</p>
-                                        <p className="text-[10px] text-brand-red-bright font-bold mt-1 uppercase tracking-tighter">-{Number(sale.grams_deducted).toFixed(1)}g</p>
+                                        <p className="text-lg font-bold text-black er leading-none">${Number(sale.total_sale_cop).toLocaleString()}</p>
+                                        <p className="text-[11px] text-brand-red-bright font-bold mt-1 uppercase er">-{Number(sale.grams_deducted).toFixed(1)}g</p>
                                     </div>
                                 </div>
                             ))

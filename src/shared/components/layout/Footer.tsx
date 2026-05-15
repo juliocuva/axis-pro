@@ -18,7 +18,7 @@ export default function Footer() {
             />
           </div>
           
-          <div className="h-10 w-px bg-white/10 hidden sm:block"></div>
+          <div className="h-10 w-px bg-white hidden sm:block"></div>
           
           <div className="flex flex-col items-center gap-2">
             <Image 
@@ -33,7 +33,7 @@ export default function Footer() {
         </div>
 
         {/* Text Section */}
-        <div className="flex-1 text-[10px] sm:text-xs text-zinc-500 lg:text-right space-y-2 leading-relaxed max-w-4xl text-justify lg:text-right">
+        <div className="flex-1 text-[11px] sm:text-xs text-zinc-500 lg:text-right space-y-2 leading-relaxed max-w-4xl text-justify lg:text-right">
           <p className="font-semibold text-zinc-400 text-sm">
             Aviso de Propiedad Intelectual &copy; 2026 Mouselab. Todos los derechos reservados.
           </p>

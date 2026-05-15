@@ -52,25 +52,26 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     };
 
     const variantStyles = {
-        default: 'border-carbon/20 bg-white text-carbon focus:border-brand-green',
-        industrial: 'border-carbon/20 bg-white text-brand-green focus:border-brand-green',
-        blue: 'border-brand-green/30 bg-white text-brand-green focus:border-brand-green',
+        default: 'border-gray-400 shadow-sm bg-white text-carbon focus:border-black',
+        industrial: 'border-gray-400 shadow-sm bg-white text-black focus:border-black',
+        blue: 'border-gray-400 shadow-sm bg-white text-black focus:border-black',
         red: 'border-brand-red/50 bg-white text-brand-red focus:border-brand-red',
-        orange: 'border-brand-green/50 bg-white text-brand-green focus:border-brand-green'
+        orange: 'border-gray-400 shadow-sm bg-white text-black focus:border-black'
     };
 
     const arrowColor = {
-        default: 'text-brand-green',
-        industrial: 'text-brand-green',
-        blue: 'text-brand-green-bright',
+        default: 'text-black',
+        industrial: 'text-black',
+        blue: 'text-black-bright',
         red: 'text-brand-red',
-        orange: 'text-brand-green-bright'
+        orange: 'text-black-bright'
     };
 
     return (
         <div className={`space-y-2 ${className}`}>
             {label && (
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">
+                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
+                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
                     {label}
                 </label>
             )}
@@ -99,13 +100,13 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         }
                         onChange(val);
                     }}
-                    className={`block w-full border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-carbon/40 placeholder:font-normal`}
+                    className={`block w-full border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-carbon/40 placeholder:font-medium`}
                 />
                 <div
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"
                     style={{ right: '16px' }}
                 >
-                    <div className="flex flex-col border-l border-carbon/10 pl-3">
+                    <div className="flex flex-col border-l border-gray-400 shadow-sm pl-3">
                         <button
                             type="button"
                             onClick={handleIncrement}
@@ -124,7 +125,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         </button>
                     </div>
                     {unit && (
-                        <span className="text-gray-500 font-bold opacity-60 text-[10px] tracking-tighter w-4 text-center">{unit}</span>
+                        <span className="text-black font-black text-[11px] er w-4 text-center">{unit}</span>
                     )}
                 </div>
             </div>
