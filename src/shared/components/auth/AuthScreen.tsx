@@ -323,7 +323,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 <img 
                                     src="/caos-document.png" 
                                     alt="Knowledge Chaos" 
-                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-150 group-hover:scale-175" 
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-150 group-hover:scale-155" 
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                             </div>
@@ -359,7 +359,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                             <img 
                                 src="/granos-digital.png" 
                                 alt="Digital Coffee DNA" 
-                                className="w-full h-full object-cover transition-transform duration-700 ease-out scale-150 group-hover:scale-175" 
+                                className="w-full h-full object-cover transition-transform duration-700 ease-out scale-150 group-hover:scale-155" 
                             />
                         </div>
                     </div>
@@ -447,7 +447,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 <img 
                                     src="/mapa-mundi.png" 
                                     alt="Global Ecosystem Map" 
-                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-150 group-hover:scale-175" 
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-150 group-hover:scale-155" 
                                 />
                             </div>
                             <div className="absolute inset-0 bg-gradient-to-r from-soft-white via-transparent to-soft-white pointer-events-none opacity-10"></div>
