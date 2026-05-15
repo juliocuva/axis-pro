@@ -549,7 +549,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     </a>
                 </div>
                 <div className="pt-24 flex flex-col items-center gap-10 border-t border-black/5">
-                    <img src="/logo.png" alt="AXISONE" className="h-32 opacity-100" />
+                    <img src="/logo.png" alt="AXISONE" className="h-64 opacity-100" />
                     <div className="flex flex-col items-center gap-6">
                         <a 
                             href="https://wa.me/573013970002" 
