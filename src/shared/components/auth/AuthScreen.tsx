@@ -272,7 +272,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </p>
                     </div>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-                        <button onClick={() => setShowLoginModal(true)} className="w-full md:w-auto bg-brand-green text-white px-12 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/30">{t.hero.cta}</button>
+                        <a 
+                            href="https://wa.me/573013970002?text=Hola,%20me%20interesa%20solicitar%20acceso%20a%20AxisOne%20Coffee" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full md:w-auto bg-brand-green text-white px-12 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/30 text-center"
+                        >
+                            {t.hero.cta}
+                        </a>
                     </div>
                 </div>
             </main>
@@ -524,11 +531,24 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <h2 className="text-2xl md:text-6xl font-black uppercase tracking-tighter leading-none max-w-5xl mx-auto">{t.footer.headline}</h2>
                 <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-12">
                     <button onClick={() => setShowLoginModal(true)} className="px-12 py-6 bg-brand-green text-white text-xs font-black uppercase rounded-industrial-sm hover:scale-105 transition-all shadow-2xl shadow-brand-green/30">{t.footer.cta}</button>
-                    <button className="px-12 py-6 border border-brand-green text-brand-green text-xs font-black uppercase rounded-industrial-sm hover:bg-brand-green hover:text-white transition-all">Request Private Demo</button>
+                    <a 
+                        href="https://wa.me/573013970002?text=Hola,%20me%20interesa%20una%20demo%20de%20AxisOne%20Coffee" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="px-12 py-6 border border-brand-green text-brand-green text-xs font-black uppercase rounded-industrial-sm hover:bg-brand-green hover:text-white transition-all inline-block"
+                    >
+                        {language === 'en' ? 'Request Private Demo' : 'Solicitar Demo Privada'}
+                    </a>
                 </div>
                 <div className="pt-24 flex flex-col items-center gap-8 border-t border-black/5">
                     <img src="/logo.png" alt="AXISONE" className="h-12 opacity-20" />
-                    <p className="text-xs font-semibold uppercase tracking-ultra-wide text-brand-green">© 2026 AXISONE COFFEE INFRASTRUCTURE COLOMBIA</p>
+                    <div className="flex flex-col items-center gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-ultra-wide text-brand-green">© 2026 AXISONE COFFEE INFRASTRUCTURE COLOMBIA</p>
+                        <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mt-2 flex items-center gap-2">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.27-2.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            +57 301 397 0002
+                        </p>
+                    </div>
                 </div>
             </footer>
 
