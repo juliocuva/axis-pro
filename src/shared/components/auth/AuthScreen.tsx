@@ -353,20 +353,20 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     <h2 className="text-[50px] font-black uppercase text-black tracking-tighter mb-12 leading-none">{t.concept.headline}</h2>
                     
                     {/* DIGITAL GRAINS IMAGE */}
-                    <div className="relative py-4 group mb-12 max-w-sm mx-auto aspect-square">
+                    <div className="relative group mb-12 max-w-sm mx-auto aspect-square">
                         <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
-                        <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand-green shadow-2xl">
+                        <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand-green shadow-2xl flex items-center justify-center bg-white">
                             <img 
                                 src="/granos-digital.png" 
                                 alt="Digital Coffee DNA" 
-                                className="w-full h-full object-cover transition-transform duration-700 ease-out scale-150 group-hover:scale-155" 
+                                className="w-full h-full object-cover rounded-full transition-transform duration-700 ease-out scale-150 group-hover:scale-155" 
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-24">
                         {t.concept.list.map((item, i) => (
-                            <div key={i} className="group p-10 bg-white border border-black/5 rounded-industrial-sm flex flex-col items-center justify-center text-center hover:border-brand-green/30 transition-all hover:shadow-xl hover:shadow-brand-green/5 space-y-6">
+                            <div key={i} className="group p-10 bg-white border border-black/5 rounded-full aspect-square flex flex-col items-center justify-center text-center hover:border-brand-green/30 transition-all hover:shadow-xl hover:shadow-brand-green/5 space-y-6">
                                 <div className="text-brand-green group-hover:scale-110 transition-transform duration-500">
                                     {i === 0 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 3v12a2 2 0 002 2h8a2 2 0 002-2V3M9 7h6M9 11h6M12 17v4m-3 0h6"/></svg>}
                                     {i === 1 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v2m0 16v2m8-10h2M2 12h2m15.071-7.071l-1.414 1.414M6.343 17.657l-1.414 1.414M17.657 17.657l1.414 1.414M6.343 6.343L4.929 4.929M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>}
@@ -456,7 +456,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         {/* CLIENT PROFILES RIGHT */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
                             {t.target.list.map((item, i) => (
-                                <div key={i} className="group p-6 bg-white border border-black/5 rounded-industrial-sm hover:border-brand-green/30 transition-all hover:shadow-lg hover:shadow-brand-green/5 flex flex-col gap-4">
+                                <div key={i} className="group p-6 bg-white border border-black/5 rounded-full aspect-square hover:border-brand-green/30 transition-all hover:shadow-lg hover:shadow-brand-green/5 flex flex-col items-center justify-center gap-4">
                                     <div className="text-brand-green">
                                         {i === 0 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>}
                                         {i === 1 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>}
