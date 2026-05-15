@@ -32,7 +32,15 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             },
             concept: {
                 headline: "Every coffee lot has a technical DNA.",
-                list: ["Fermentation variables.", "Drying behavior.", "Water activity.", "Cupping notes.", "Lab reports."],
+                list: [
+                    "Sourcing & Identification", 
+                    "Industrial Thrashing", 
+                    "Storage & Stabilization", 
+                    "Roast Intelligence", 
+                    "Cupping Protocol (CVA)", 
+                    "Digital Certification", 
+                    "Global Logistics"
+                ],
                 conclusion: "AxisOne Coffee structures that intelligence through precise, manual data logging."
             },
             features: {
@@ -93,7 +101,15 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             },
             concept: {
                 headline: "Cada lote de café tiene un ADN técnico.",
-                list: ["Variables de fermentación.", "Comportamiento de secado.", "Actividad de agua.", "Notas de cata.", "Reportes de laboratorio."],
+                list: [
+                    "Identificación y Compra", 
+                    "Trilla Industrial", 
+                    "Almacenamiento", 
+                    "Tostión Predictiva", 
+                    "Protocolo de Catación (CVA)", 
+                    "Certificación Digital", 
+                    "Logística Global"
+                ],
                 conclusion: "AxisOne Coffee estructura esa inteligencia mediante el registro manual preciso de datos."
             },
             features: {
@@ -364,20 +380,23 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-24">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4 mb-24">
                         {t.concept.list.map((item, i) => (
-                            <div key={i} className="group p-10 bg-white border border-black/5 rounded-full aspect-square flex flex-col items-center justify-center text-center hover:border-brand-green/30 transition-all hover:shadow-xl hover:shadow-brand-green/5 space-y-6">
+                            <div key={i} className="group p-6 bg-white border border-black/5 rounded-full aspect-square flex flex-col items-center justify-center text-center hover:border-brand-green/30 transition-all hover:shadow-xl hover:shadow-brand-green/5 space-y-4">
                                 <div className="text-brand-green group-hover:scale-110 transition-transform duration-500">
-                                    {i === 0 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 3v12a2 2 0 002 2h8a2 2 0 002-2V3M9 7h6M9 11h6M12 17v4m-3 0h6"/></svg>}
-                                    {i === 1 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v2m0 16v2m8-10h2M2 12h2m15.071-7.071l-1.414 1.414M6.343 17.657l-1.414 1.414M17.657 17.657l1.414 1.414M6.343 6.343L4.929 4.929M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>}
-                                    {i === 2 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 21a9 9 0 110-18 9 9 0 010 18zM12 7v5l3 3"/></svg>}
-                                    {i === 3 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>}
-                                    {i === 4 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>}
+                                    {i === 0 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 3v12a2 2 0 002 2h8a2 2 0 002-2V3M9 7h6M9 11h6M12 17v4m-3 0h6"/></svg>}
+                                    {i === 1 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v2m0 16v2m8-10h2M2 12h2m15.071-7.071l-1.414 1.414M6.343 17.657l-1.414 1.414M17.657 17.657l1.414 1.414M6.343 6.343L4.929 4.929M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>}
+                                    {i === 2 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 21a9 9 0 110-18 9 9 0 010 18zM12 7v5l3 3"/></svg>}
+                                    {i === 3 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v2m0 16v2m8-10h2M2 12h2m15.071-7.071l-1.414 1.414M6.343 17.657l-1.414 1.414M17.657 17.657l1.414 1.414M6.343 6.343L4.929 4.929M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>}
+                                    {i === 4 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>}
+                                    {i === 5 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>}
+                                    {i === 6 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12l-18 0M3 12l18 0M12 3l0 18M12 21l0-18"/></svg>}
                                 </div>
-                                <span className="text-[12px] font-black uppercase tracking-widest text-black/60 group-hover:text-black transition-colors max-w-[90px] text-center leading-tight">{item}</span>
+                                <span className="text-[10px] font-black uppercase tracking-tight text-black/60 group-hover:text-black transition-colors max-w-[80px] text-center leading-none">{item}</span>
                             </div>
                         ))}
                     </div>
+
                     {/* SOLUTION PHRASE - CENTERED BOTTOM */}
                     <div className="pt-16 border-t border-black/5">
                         <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">

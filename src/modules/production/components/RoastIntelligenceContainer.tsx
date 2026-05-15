@@ -269,19 +269,19 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
             <nav className="flex bg-transparent p-1.5 gap-2 w-full max-w-7xl mx-auto">
                 <button
                     onClick={() => setView('live')}
-                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase  ${view === 'live' ? 'bg-brand-green text-black shadow-lg' : 'bg-white text-gray-900 hover:text-black'}`}
+                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase  ${(view === 'live' || view === 'entry') ? 'bg-brand-green text-black shadow-lg' : 'bg-white text-gray-900 hover:text-black'}`}
                 >
-                    01. Predicción Térmica
+                    04. Tostión
                 </button>
                 <button
-                    onClick={() => setView('entry')}
-                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase  ${view === 'entry' ? 'bg-brand-green text-black shadow-lg' : 'bg-white text-gray-900 hover:text-black'}`}
+                    onClick={() => setView('cupping')}
+                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase  ${view === 'cupping' ? 'bg-brand-green text-black shadow-lg' : 'bg-white text-gray-900 hover:text-black'}`}
                 >
-                    02. Registro Tueste
+                    05. Catación
                 </button>
             </nav>
 
-            {view === 'live' ? (
+            {view === 'live' && (
                 <>
                     {/* Modal de Histórico */}
                     {showHistoryModal && (
@@ -296,7 +296,6 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                                     </button>
                                 </header>
-
                                 <div className="p-10 max-h-[60vh] overflow-y-auto space-y-4">
                                     {pastRoasts.length > 0 ? pastRoasts.map(roast => (
                                         <div key={roast.id} className="p-6 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex justify-between items-center hover:border-gray-400 shadow-sm transition-all group">
@@ -334,11 +333,6 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                         <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
                             {/* ENCABEZADO: IDENTIFICACIÓN DEL LOTE Y PUNTAJE */}
                             <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-end gap-6 pb-4 mb-2">
-                                <div>
-                                
-                                </div>
-
-                                {/* SELECTOR FÁCIL EN EL MEDIO */}
                                 <div className="flex-1 w-full max-w-sm mx-auto">
                                     <label className="text-[9px] text-gray-900 uppercase font-bold mb-1.5 block ">Cambiar Lote a Procesar</label>
                                     <div className="relative">
@@ -532,7 +526,6 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto relative z-10">
-                                {/* Option 1 */}
                                 <div className="bg-white border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm p-8 rounded-industrial-sm flex flex-col group transition-all duration-500 hover:shadow-[0_10px_40px_rgba(0,223,154,0.1)]">
                                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-black mb-6 border border-gray-400 shadow-sm group-hover:scale-110 transition-transform">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
@@ -547,7 +540,6 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                     </div>
                                 </div>
 
-                                {/* Option 2 */}
                                 <div className="bg-white border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm p-8 rounded-industrial-sm flex flex-col group transition-all duration-500 hover:shadow-[0_10px_40px_rgba(249,115,22,0.1)]">
                                     <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-black mb-6 border border-gray-400 shadow-sm group-hover:scale-110 transition-transform">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
@@ -575,12 +567,24 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                         </div>
                     )}
                 </>
-            ) : (
+            )}
+
+            {view === 'entry' && (
                 <RoastEntryForm 
                     user={user} 
                     lotData={selectedLot} 
                     initialTelemetry={capturedSession?.telemetry}
                 />
+            )}
+
+            {view === 'cupping' && (
+                <div className="max-w-7xl mx-auto w-full animate-in fade-in duration-700">
+                    <CVAAssessmentForm 
+                        inventoryId={selectedLot?.id} 
+                        user={user} 
+                        onCuppingComplete={() => setView('live')}
+                    />
+                </div>
             )}
         </div>
     );

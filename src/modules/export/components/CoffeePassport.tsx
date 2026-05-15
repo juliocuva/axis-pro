@@ -603,7 +603,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
 
                             <div className="flex justify-between items-center mt-4">
                                 <div className="flex items-center gap-3">
-                                    <QRCodeSVG value={`https://axis-pro.vercel.app/verify/eudr/${lotNum}`} size={64} />
+                                    <QRCodeSVG value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axisone.coffee'}/verify/lot/${lotNum}`} size={64} />
                                     <div>
                                         <p className="text-[9px] font-black uppercase text-black">Verificación Satelital</p>
                                         <p className="text-[9px] text-black uppercase">Escanea para ver el mapa interactivo</p>

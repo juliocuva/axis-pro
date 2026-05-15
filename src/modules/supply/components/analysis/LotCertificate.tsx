@@ -80,13 +80,21 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 50, 50, 900, 900);
-                const pngUrl = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pngUrl;
-                downloadLink.download = `QR-AXIS-${lotData?.lot_number || inventoryId}.png`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+                
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `QR-AXIS-${lotData?.lot_number || inventoryId}.jpg`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    } else {
+                        throw new Error('Canvas to Blob failed');
+                    }
+                }, 'image/jpeg', 0.90);
             }
             URL.revokeObjectURL(url);
         };
@@ -251,6 +259,17 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     if (loading) return (
         <div className="flex items-center justify-center p-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-black-bright"></div>
+        </div>
+    );
+
+    if (!lotData) return (
+        <div className="flex flex-col items-center justify-center p-20 text-center space-y-4">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg>
+            </div>
+            <h3 className="text-xl font-black uppercase text-black">Lote No Encontrado</h3>
+            <p className="text-xs text-gray-900 uppercase font-bold max-w-xs">El identificador de este lote no existe en el sistema de trazabilidad de AxisOne o ha sido restringido por seguridad.</p>
+            <button onClick={onClose} className="mt-8 px-8 py-3 bg-black text-black rounded-xl text-xs font-bold uppercase">Volver al Inicio</button>
         </div>
     );
 
@@ -956,8 +975,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         Escanea para conocer el viaje técnico de este café y liberar el bono de excelencia del productor.
                                     </p>
                                 </div>
-                                <div className="p-4 bg-white border-2 border-white rounded-[32px] shadow-xl relative z-10 transform hover:scale-110 transition-transform">
-                                    <QRCodeSVG value={`https://axisone.coffee/verify/lot/${inventoryId}`} size={100} level="H" />
+                                <div className="p-4 bg-white border-2 border-white rounded-[32px] shadow-xl relative z-10 transform hover:scale-110 transition-transform qr-container">
+                                    <QRCodeSVG value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axisone.coffee'}/verify/lot/${inventoryId}`} size={100} level="H" />
                                 </div>
                             </div>
                         </div>

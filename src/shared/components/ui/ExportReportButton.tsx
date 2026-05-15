@@ -7,7 +7,7 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
         e.preventDefault();
         e.stopPropagation();
         const btn = document.getElementById('btn-export-text');
-        if (btn) btn.innerText = 'GENERANDO PDF...';
+        if (btn) btn.innerText = 'GENERANDO REPORTE...';
 
         try {
             const html2canvas = (await import('html2canvas')).default;
@@ -134,7 +134,9 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                     const link = document.createElement('a');
                     link.href = url;
                     link.download = `${fileName}.jpg`;
+                    document.body.appendChild(link);
                     link.click();
+                    document.body.removeChild(link);
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
                 }
             }, 'image/jpeg', 0.90);
