@@ -374,7 +374,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                     {i === 3 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>}
                                     {i === 4 && <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>}
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-black/60 group-hover:text-black transition-colors">{item}</span>
+                                <span className="text-[12px] font-black uppercase tracking-widest text-black/60 group-hover:text-black transition-colors max-w-[110px] text-center leading-tight">{item}</span>
                             </div>
                         ))}
                     </div>
@@ -465,7 +465,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                         {i === 4 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
                                         {i === 5 && <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>}
                                     </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-black/60 group-hover:text-black transition-colors">{item}</span>
+                                    <span className="text-[12px] font-black uppercase tracking-widest text-black/60 group-hover:text-black transition-colors max-w-[110px] text-center leading-tight">{item}</span>
                                 </div>
                             ))}
                         </div>
@@ -502,7 +502,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 <div className="text-2xl font-black text-brand-green tracking-tighter">{tier.price}</div>
                                 <ul className="space-y-4 pt-8 border-t border-black/5">
                                     {tier.features.map((f, j) => (
-                                        <li key={j} className="flex items-center gap-3 text-[10px] font-black uppercase text-black/60 tracking-widest group-hover:text-black transition-colors">
+                                        <li key={j} className="flex items-center gap-3 text-[12px] font-black uppercase text-black/60 tracking-widest group-hover:text-black transition-colors">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="text-brand-green"><polyline points="20 6 9 17 4 12"/></svg>
                                             {f}
                                         </li>
