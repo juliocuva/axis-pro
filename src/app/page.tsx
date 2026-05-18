@@ -225,6 +225,17 @@ export default function Home() {
                         Sincronizar Lotes
                     </button>
 
+                    {user?.email?.toLowerCase() === 'juliocuva@gmail.com' && (
+                        <button
+                            onClick={() => setView('radar')}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-bg-offset text-black border border-border-main rounded-industrial-sm text-[10px] font-black uppercase transition-all hover:bg-white hover:border-black active:scale-95 shadow-sm"
+                            title="Ver Radar de Trazabilidad"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M12 12l5-5"/></svg>
+                            Ver Radar
+                        </button>
+                    )}
+
                     <div className="w-px h-8 bg-gray-200 mx-2"></div>
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden shadow-sm">
