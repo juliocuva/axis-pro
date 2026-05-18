@@ -228,7 +228,7 @@ export default function Home() {
                     {user?.email?.toLowerCase() === 'juliocuva@gmail.com' && (
                         <button
                             onClick={() => setView('radar')}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-bg-offset text-black border border-border-main rounded-industrial-sm text-[10px] font-black uppercase transition-all hover:bg-white hover:border-black active:scale-95 shadow-sm"
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all active:scale-95 shadow-sm border ${view === 'radar' ? 'bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/20' : 'bg-brand-green/10 text-brand-green border-brand-green/30 hover:bg-brand-green hover:text-white'}`}
                             title="Ver Radar de Trazabilidad"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M12 12l5-5"/></svg>
@@ -334,7 +334,7 @@ export default function Home() {
                     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1001] no-print">
                          <button 
                             onClick={() => setView('supply')}
-                            className="px-6 py-2 bg-white hover:bg-white backdrop-blur-md border border-gray-200 shadow-sm rounded-full text-[9px] font-black uppercase  text-black transition-all active:scale-95"
+                            className="px-6 py-2.5 bg-brand-green hover:bg-brand-green/90 text-white border border-brand-green shadow-lg shadow-brand-green/30 rounded-full text-[9px] font-black uppercase transition-all active:scale-95"
                          >
                             Cerrar Radar
                          </button>
