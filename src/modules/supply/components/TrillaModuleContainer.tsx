@@ -18,7 +18,7 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
             .select('*')
             .eq('company_id', user.companyId)
             // .or('status.eq.purchased,status.is.null,status.eq.stored')
-            .order('purchase_date', { ascending: false })
+            .order('created_at', { ascending: false })
             .limit(20);
 
         if (!data || data.length === 0) {
@@ -95,8 +95,8 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
                                 availableLots.map(lot => {
                                     const isThrashed = lot.status === 'thrashed' || lot.status === 'completed' || lot.coffee_type === 'excelso';
                                     return (
-                                        <option key={lot.id} value={lot.id} className="bg-bg-card text-black" disabled={isThrashed}>
-                                            {isThrashed ? '[YA TRILLADO / VERDE] ' : '[PERGAMINO PENDIENTE] '} - {lot.lot_number || 'LOTE'} ({lot.purchase_weight}kg)
+                                        <option key={lot.id} value={lot.id} className="bg-bg-card text-black">
+                                            {isThrashed ? '[TRILLADO / ORO] ' : '[PERGAMINO PENDIENTE] '} - {lot.lot_number || 'LOTE'} ({lot.purchase_weight}kg)
                                         </option>
                                     );
                                 })

@@ -73,7 +73,8 @@ export async function processThrashingAction(
                     .update({
                         thrashed_weight: excelsoWeight,
                         thrashing_yield: yieldFactor,
-                        status: 'thrashed'
+                        status: 'thrashed',
+                        process_data: updatedProcessData
                     })
                     .eq('id', inventoryId)
                     .eq('company_id', companyId);

@@ -5,7 +5,7 @@ import { supabase } from '@/shared/lib/supabase';
 import LiveRoastMonitor from './LiveRoastMonitor';
 import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
 import RoastCurveVisualizer from './RoastCurveVisualizer';
-import CVAAssessmentForm from './CVAAssessmentForm';
+
 import EUDRComplianceBadge from '@/modules/supply/components/EUDRComplianceBadge';
 
 interface RoastIntelligenceContainerProps {
@@ -15,7 +15,7 @@ interface RoastIntelligenceContainerProps {
 import RoastEntryForm from './RoastEntryForm';
 
 export default function RoastIntelligenceContainer({ user }: RoastIntelligenceContainerProps) {
-    const [view, setView] = useState<'live' | 'archive' | 'entry' | 'cupping'>('live');
+    const [view, setView] = useState<'live' | 'archive' | 'entry'>('live');
     const [selectedLot, setSelectedLot] = useState<any>(null);
     const [capturedSession, setCapturedSession] = useState<any>(null);
     const [extraLotData, setExtraLotData] = useState<{ physical: any, sca: any }>({ physical: null, sca: null });
@@ -23,7 +23,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     // Listen to inter-component navigation
     useEffect(() => {
         const handleViewChange = (e: any) => {
-            if (['live', 'archive', 'entry', 'cupping'].includes(e.detail)) {
+            if (['live', 'archive', 'entry'].includes(e.detail)) {
                 setView(e.detail);
             }
         };
@@ -188,7 +188,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
         if (m > 11.5) dynamicDryTime = (d >= 750) ? "6:30" : "5:45";
 
         // 2. RoR Range (based on process)
-        if (p.includes('natural') || p.includes('honey') || p.includes('anaerobico')) {
+        if (p.includes('natural') || p.includes('honey') || p.includes('anaerobico') || p.includes('sumergido')) {
             dynamicRorRange = "10-12";
         } else if (d >= 750) {
             dynamicRorRange = "14-16";
@@ -265,21 +265,6 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
 
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
-            {/* STEPPER DE NAVEGACIÓN (STYLE PRIMER MÓDULO) */}
-            <nav className="flex bg-transparent p-1.5 gap-2 w-full max-w-7xl mx-auto">
-                <button
-                    onClick={() => setView('live')}
-                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase  ${(view === 'live' || view === 'entry') ? 'bg-brand-green text-black shadow-lg' : 'bg-white text-gray-900 hover:text-black'}`}
-                >
-                    04. Tostión
-                </button>
-                <button
-                    onClick={() => setView('cupping')}
-                    className={`flex-1 py-4 rounded-industrial-sm text-xs font-bold transition-all uppercase  ${view === 'cupping' ? 'bg-brand-green text-black shadow-lg' : 'bg-white text-gray-900 hover:text-black'}`}
-                >
-                    05. Catación
-                </button>
-            </nav>
 
             {view === 'live' && (
                 <>
@@ -577,15 +562,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                 />
             )}
 
-            {view === 'cupping' && (
-                <div className="max-w-7xl mx-auto w-full animate-in fade-in duration-700">
-                    <CVAAssessmentForm 
-                        inventoryId={selectedLot?.id} 
-                        user={user} 
-                        onCuppingComplete={() => setView('live')}
-                    />
-                </div>
-            )}
+
         </div>
     );
 }

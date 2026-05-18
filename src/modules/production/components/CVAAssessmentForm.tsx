@@ -62,6 +62,14 @@ interface CVAData {
       fiscalCompliance: boolean;
     };
   };
+  extrinsicSCA: {
+    sampleNumber: string;
+    cultivo: { items: Record<string, boolean>; info: string; };
+    procesamiento: { items: Record<string, boolean>; info: string; };
+    comercio: { items: Record<string, boolean>; info: string; };
+    certificaciones: { items: Record<string, boolean>; info: string; };
+    otro: { items: Record<string, boolean>; info: string; };
+  };
 }
 interface CVAAssessmentFormProps {
   inventoryId: string;
@@ -167,6 +175,54 @@ const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }
     </div>
 );
 
+interface SCACheckboxItem { key: string; label: string; indent?: boolean; }
+
+const SCAExtrinsicSection = ({
+    title, infoLabel, items, checkedItems, info, onToggle, onInfoChange, disabled
+}: {
+    title: string; infoLabel: string; items: SCACheckboxItem[];
+    checkedItems: Record<string, boolean>; info: string;
+    onToggle: (key: string) => void; onInfoChange: (val: string) => void; disabled?: boolean;
+}) => (
+    <div className="flex flex-col border-r border-gray-400 last:border-r-0">
+        <div className="bg-brand-green text-black px-4 py-2">
+            <h4 className="text-[10px] font-black uppercase tracking-widest">{title}</h4>
+        </div>
+        <div className="flex flex-1">
+            <div className="flex-1 p-3 border-r border-gray-300 space-y-1.5">
+                {items.map(item => (
+                    <button key={item.key} type="button" disabled={disabled}
+                        onClick={() => onToggle(item.key)}
+                        className={`flex items-center gap-2 w-full text-left ${item.indent ? 'pl-4' : ''} ${disabled ? 'cursor-not-allowed' : ''}`}
+                    >
+                        <div className={`w-3 h-3 border flex-shrink-0 flex items-center justify-center transition-all ${
+                            checkedItems[item.key] ? 'bg-black border-black' : 'border-black bg-white'
+                        }`}>
+                            {checkedItems[item.key] && (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-2 h-2"><path d="M20 6L9 17l-5-5" /></svg>
+                            )}
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase leading-tight ${
+                            item.indent ? 'text-black/60 font-medium' : 'text-black'
+                        }`}>{item.label}</span>
+                    </button>
+                ))}
+            </div>
+            <div className="w-[280px] p-3 flex flex-col gap-1">
+                <p className="text-[8px] font-bold text-black/50 uppercase leading-tight">{infoLabel}</p>
+                <textarea
+                    value={info} disabled={disabled}
+                    onChange={(e) => onInfoChange(e.target.value)}
+                    className={`flex-1 bg-white border border-gray-200 rounded px-2 py-1.5 text-[10px] text-black outline-none resize-none focus:border-black min-h-[80px] ${
+                        disabled ? 'cursor-not-allowed opacity-60' : ''
+                    }`}
+                    placeholder="..."
+                />
+            </div>
+        </div>
+    </div>
+);
+
 const QualityScale = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => (
   <div className="space-y-2">
     <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-3">
@@ -249,6 +305,29 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             indigenousRights: false,
             fiscalCompliance: false
         }
+    },
+    extrinsicSCA: {
+        sampleNumber: '',
+        cultivo: {
+            items: { pais: false, region: false, finca: false, productor: false, especie: false, variedad: false, fecha: false, otro: false },
+            info: ''
+        },
+        procesamiento: {
+            items: { beneficiadorNombre: false, beneficiadorHumedo: false, beneficiadorSeco: false, beneficiadorOtro: false, tipoProceso: false, tipoLavado: false, tipoNatural: false, tipoOtro: false, descafeinado: false, descripcionProceso: false },
+            info: ''
+        },
+        comercio: {
+            items: { clasificacion: false, oic: false, importador: false, exportador: false, precio: false, tamano: false, otro: false },
+            info: ''
+        },
+        certificaciones: {
+            items: { c4: false, fairtrade: false, organico: false, rainforest: false, inocuidad: false, otro: false },
+            info: ''
+        },
+        otro: {
+            items: { premios: false },
+            info: ''
+        }
     }
   });
 
@@ -303,7 +382,11 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
               affective: record.cva_affective || prev.affective,
               defects: record.cva_descriptive?.defects || prev.defects,
               notes: record.notes || '',
-              tasterName: record.taster_name || 'Q-Grader Senior'
+              tasterName: record.taster_name || 'Q-Grader Senior',
+              extrinsicSCA: {
+                ...(record.cva_descriptive?.extrinsicSCA || prev.extrinsicSCA),
+                sampleNumber: record.cva_descriptive?.extrinsicSCA?.sampleNumber || lot?.lot_number || prev.extrinsicSCA.sampleNumber
+              }
             }));
           }
           setIsAlreadySealed(true);
@@ -322,6 +405,10 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
               transferPrice: lot.purchase_value ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Number(lot.purchase_value)) : '',
               productionCost: '$9.850.000,00',
               eudrHash: lot.lot_number || prev.extrinsic.eudrHash
+            },
+            extrinsicSCA: {
+              ...prev.extrinsicSCA,
+              sampleNumber: lot.lot_number || prev.extrinsicSCA.sampleNumber
             }
           }));
         }
@@ -386,7 +473,19 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   };
 
   const totalAffectiveScore = Object.values(data.affective).reduce((acc, val) => acc + (Number(val) > 0 ? Number(val) : 8.0), 0);
-  const totalScore = totalAffectiveScore + 25; 
+  const totalScore = totalAffectiveScore + 25;
+
+  const isExtrinsicFilled = (() => {
+    const sca = data.extrinsicSCA;
+    const hasSampleNumber = sca.sampleNumber.trim().length > 0;
+    const hasAnyCheckbox =
+      Object.values(sca.cultivo.items).some(v => v) ||
+      Object.values(sca.procesamiento.items).some(v => v) ||
+      Object.values(sca.comercio.items).some(v => v) ||
+      Object.values(sca.certificaciones.items).some(v => v) ||
+      Object.values(sca.otro.items).some(v => v);
+    return hasSampleNumber && hasAnyCheckbox;
+  })();
   const handleExtrinsicChange = (key: keyof CVAData['extrinsic'], val: string) => {
     setData(prev => ({
       ...prev,
@@ -394,8 +493,44 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
     }));
   };
 
+  const fillDemoExtrinsic = () => {
+    setData(prev => ({
+      ...prev,
+      extrinsicSCA: {
+        sampleNumber: prev.extrinsicSCA.sampleNumber || 'ALE-LOTE-DEMO',
+        cultivo: {
+          items: { pais: true, region: true, finca: true, productores: true, especie: true, variedad: true, cosecha: true, otro: false },
+          info: 'Colombia · Huila, Acevedo. Finca El Paraíso. Familia Martínez. Coffea arabica var. Geisha, cosecha principal oct-dic 2024.'
+        },
+        procesamiento: {
+          items: { beneficiador: true, humedo: true, seco: false, benefOtro: false, lavado: false, natural: false, procOtro: true, descafeinado: false, descripcion: true },
+          info: 'Beneficio propio en finca. Proceso Anaeróbico Natural 96h en tanques herméticos. pH controlado 4.8. Secado en camas africanas 22 días.'
+        },
+        comercio: {
+          items: { clasificacion: true, oic: true, importador: true, exportador: true, precio: true, lote: true, otro: false },
+          info: 'Clasificación: Specialty Grade 1. OIC: CO-12345. Exportador: Axis Coffee Exports SAS. Precio productor: $2.800.000 COP/carga.'
+        },
+        certificaciones: {
+          items: { c4: false, fairtrade: true, organico: true, rainforest: true, inocuidad: true, otro: false },
+          info: 'Fairtrade FLO-CERT #23891. USDA Organic NOP. Rainforest Alliance RA-2024-CO. Certificaciones vigentes hasta dic 2026.'
+        },
+        otro: {
+          items: { premios: true },
+          info: 'Ganador Taza de Excelencia Colombia 2023 (92.1 pts). Top 5 COE 2024. Perfil destacado en World Coffee Research varietal catalog.'
+        }
+      }
+    }));
+  };
+
   const handleSave = async () => {
     if (!inventoryId) return;
+
+    // Validación: el tab extrínseco debe estar completo antes de sellar
+    if (!isExtrinsicFilled && !isAlreadySealed) {
+      setActiveTab('extrinsic');
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { error } = await supabase
@@ -403,7 +538,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         .insert([{
           inventory_id: inventoryId,
           company_id: resolvedCompanyId,
-          cva_descriptive: { ...data.descriptive, defects: data.defects, extrinsic: data.extrinsic },
+          cva_descriptive: { ...data.descriptive, defects: data.defects, extrinsic: data.extrinsic, extrinsicSCA: data.extrinsicSCA },
           cva_affective: data.affective,
           notes: data.notes,
           taster_name: data.tasterName
@@ -444,7 +579,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 onClick={() => setActiveTab('intrinsic')}
                 className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'intrinsic' ? 'bg-brand-green border-transparent text-black' : 'bg-white border-gray-400 text-black'}`}
             >
-                1. Evaluación Sensorial (CVA)
+                1. Evaluación Sensorial y Afectiva (CVA)
             </button>
             <button
                 onClick={() => setActiveTab('extrinsic')}
@@ -642,82 +777,165 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-right duration-500">
-             <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm space-y-6">
-                <h3 className="text-[11px] font-bold text-black font-black uppercase ">Protocolo de Alquimia e Insumos</h3>
-                <div className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-black uppercase  block">Proceso de Alquimia</label>
-                        <input type="text" value={data.extrinsic.alchemyProcess} onChange={(e) => handleExtrinsicChange('alchemyProcess', e.target.value)} placeholder="Ej: Anaeróbico 72h / Lactic..." className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none focus:border-black placeholder:text-black" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-black uppercase  block">LMR (Químicos)</label>
-                            <input type="text" value={data.extrinsic.agrochemicalRegistry} onChange={(e) => handleExtrinsicChange('agrochemicalRegistry', e.target.value)} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-black uppercase  block">Agua (pH)</label>
-                            <input type="text" value={data.extrinsic.waterPh} onChange={(e) => handleExtrinsicChange('waterPh', e.target.value)} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none" />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-black uppercase  block">Certificado de Semilla</label>
-                        <input type="text" value={data.extrinsic.seedCertificate} onChange={(e) => handleExtrinsicChange('seedCertificate', e.target.value)} placeholder="ID de Certificación de Origen..." className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none placeholder:text-black" />
-                    </div>
-                </div>
-             </div>
+        <div className="flex flex-col gap-6 animate-in slide-in-from-right duration-500">
 
-             <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm space-y-6">
-                <h3 className="text-[11px] font-bold text-black font-black uppercase ">Transparencia Económica y Ambiental</h3>
-                <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-black uppercase  block">Transfer Price (USD)</label>
-                        <input type="text" value={data.extrinsic.transferPrice} onChange={(e) => handleExtrinsicChange('transferPrice', e.target.value)} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-black uppercase  block">Costo Prod.</label>
-                        <input type="text" value={data.extrinsic.productionCost} onChange={(e) => handleExtrinsicChange('productionCost', e.target.value)} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none" />
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-black uppercase  block">Condiciones de Almacén</label>
-                        <input type="text" value={data.extrinsic.storageConditions} onChange={(e) => handleExtrinsicChange('storageConditions', e.target.value)} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-black uppercase  block">Huella de Carbono</label>
-                        <input type="text" value={data.extrinsic.carbonFootprint} onChange={(e) => handleExtrinsicChange('carbonFootprint', e.target.value)} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold outline-none text-black" />
-                    </div>
-                </div>
-                <div className="p-6 bg-white border border-gray-400 shadow-sm rounded-2xl flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center text-black">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2L3 7v9l9 5 9-5V7l-9-5z"/></svg>
-                        </div>
-                        <div>
-                            <p className="text-[9px] font-bold text-black uppercase ">Sello de Trazabilidad EUDR</p>
-                            <p className="text-[11px] text-black font-bold font-mono">{data.extrinsic.eudrHash}</p>
-                        </div>
-                    </div>
-                    <EUDRComplianceBadge status="compliant" />
-                </div>
+          {/* DEMO FILL BUTTON */}
+          {!isAlreadySealed && !isReadOnly && (
+            <div className="flex justify-end">
+              <button
+                onClick={fillDemoExtrinsic}
+                type="button"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-dashed border-gray-400 rounded-xl text-[10px] font-bold text-gray-500 uppercase hover:border-brand-green hover:text-brand-green transition-all"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20M2 12h20"/></svg>
+                Llenar datos demo
+              </button>
+            </div>
+          )}
 
+          {/* N° DE MUESTRA */}
+          <div className="flex items-stretch border border-gray-400 rounded-xl overflow-hidden">
+            <div className="bg-brand-green text-black text-[11px] font-black uppercase px-6 py-4 whitespace-nowrap tracking-widest flex items-center">
+              N° DE MUESTRA
+            </div>
+            <input
+              type="text"
+              value={data.extrinsicSCA.sampleNumber}
+              disabled={isAlreadySealed || isReadOnly}
+              onChange={(e) => setData({...data, extrinsicSCA: {...data.extrinsicSCA, sampleNumber: e.target.value}})}
+              className="flex-1 bg-white px-6 py-4 text-xs font-bold text-black outline-none border-l border-gray-400"
+              placeholder="Ingrese el número de muestra..."
+            />
+          </div>
 
-                {!isAlreadySealed && (
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving || isAlreadySealed || isReadOnly}
-                        className="w-full mt-6 bg-black hover:bg-black/90 text-white font-black py-4 rounded-2xl uppercase  text-[11px] shadow-lg flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
-                    >
-                        {isSaving ? (
-                            <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
-                        ) : (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        )}
-                        Sellar y Finalizar Protocolo
-                    </button>
-                )}
-             </div>
+          {/* CULTIVO + PROCESAMIENTO */}
+          <div className="border border-gray-400 overflow-hidden rounded-xl">
+            <div className="grid grid-cols-2 divide-x divide-gray-400">
+              <SCAExtrinsicSection
+                title="Cultivo"
+                infoLabel="Información relevante sobre el cultivo"
+                items={[
+                  { key: 'pais', label: 'País' },
+                  { key: 'region', label: 'Región', indent: true },
+                  { key: 'finca', label: 'Nombre de la finca/cooperativa' },
+                  { key: 'productor', label: 'Nombre del (los) productor(es)' },
+                  { key: 'especie', label: 'Especie' },
+                  { key: 'variedad', label: 'Variedad o variedades', indent: true },
+                  { key: 'fecha', label: 'Fecha/Año de cosecha' },
+                  { key: 'otro', label: 'Otro' },
+                ]}
+                checkedItems={data.extrinsicSCA.cultivo.items}
+                info={data.extrinsicSCA.cultivo.info}
+                onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, cultivo: {...p.extrinsicSCA.cultivo, items: {...p.extrinsicSCA.cultivo.items, [key]: !p.extrinsicSCA.cultivo.items[key]}}}}))} 
+                onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, cultivo: {...p.extrinsicSCA.cultivo, info: val}}}))}
+                disabled={isAlreadySealed || isReadOnly}
+              />
+              <SCAExtrinsicSection
+                title="Procesamiento"
+                infoLabel="Información relevante sobre el procesamiento"
+                items={[
+                  { key: 'beneficiadorNombre', label: 'Nombre(s) del beneficiador(es)' },
+                  { key: 'beneficiadorHumedo', label: 'Beneficio húmedo / Planta de procesamiento', indent: true },
+                  { key: 'beneficiadorSeco', label: 'Beneficio seco/Trilla', indent: true },
+                  { key: 'beneficiadorOtro', label: 'Otro', indent: true },
+                  { key: 'tipoProceso', label: 'Tipo de proceso' },
+                  { key: 'tipoLavado', label: 'Lavado', indent: true },
+                  { key: 'tipoNatural', label: 'Natural', indent: true },
+                  { key: 'tipoOtro', label: 'Otro', indent: true },
+                  { key: 'descafeinado', label: 'Descafeinado' },
+                  { key: 'descripcionProceso', label: 'Descripción del proceso' },
+                ]}
+                checkedItems={data.extrinsicSCA.procesamiento.items}
+                info={data.extrinsicSCA.procesamiento.info}
+                onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, procesamiento: {...p.extrinsicSCA.procesamiento, items: {...p.extrinsicSCA.procesamiento.items, [key]: !p.extrinsicSCA.procesamiento.items[key]}}}}))} 
+                onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, procesamiento: {...p.extrinsicSCA.procesamiento, info: val}}}))}
+                disabled={isAlreadySealed || isReadOnly}
+              />
+            </div>
+          </div>
+
+          {/* COMERCIO + CERTIFICACIONES */}
+          <div className="border border-gray-400 overflow-hidden rounded-xl">
+            <div className="grid grid-cols-2 divide-x divide-gray-400">
+              <SCAExtrinsicSection
+                title="Comercio"
+                infoLabel="Información relevante sobre el comercio"
+                items={[
+                  { key: 'clasificacion', label: 'Clasificación local/regional' },
+                  { key: 'oic', label: 'Número OIC' },
+                  { key: 'importador', label: 'Nombre del importador' },
+                  { key: 'exportador', label: 'Nombre del exportador' },
+                  { key: 'precio', label: 'Precio al productor' },
+                  { key: 'tamano', label: 'Tamaño del lote' },
+                  { key: 'otro', label: 'Otro' },
+                ]}
+                checkedItems={data.extrinsicSCA.comercio.items}
+                info={data.extrinsicSCA.comercio.info}
+                onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, comercio: {...p.extrinsicSCA.comercio, items: {...p.extrinsicSCA.comercio.items, [key]: !p.extrinsicSCA.comercio.items[key]}}}}))} 
+                onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, comercio: {...p.extrinsicSCA.comercio, info: val}}}))}
+                disabled={isAlreadySealed || isReadOnly}
+              />
+              <SCAExtrinsicSection
+                title="Certificaciones"
+                infoLabel="Información relevante sobre certificaciones"
+                items={[
+                  { key: 'c4', label: '4C' },
+                  { key: 'fairtrade', label: 'Comercio justo/Fairtrade' },
+                  { key: 'organico', label: 'Orgánico' },
+                  { key: 'rainforest', label: 'Rainforest Alliance' },
+                  { key: 'inocuidad', label: 'Inocuidad alimentaria' },
+                  { key: 'otro', label: 'Otro' },
+                ]}
+                checkedItems={data.extrinsicSCA.certificaciones.items}
+                info={data.extrinsicSCA.certificaciones.info}
+                onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, certificaciones: {...p.extrinsicSCA.certificaciones, items: {...p.extrinsicSCA.certificaciones.items, [key]: !p.extrinsicSCA.certificaciones.items[key]}}}}))} 
+                onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, certificaciones: {...p.extrinsicSCA.certificaciones, info: val}}}))}
+                disabled={isAlreadySealed || isReadOnly}
+              />
+            </div>
+          </div>
+
+          {/* OTRO */}
+          <div className="border border-gray-400 overflow-hidden rounded-xl">
+            <div className="grid grid-cols-2 divide-x divide-gray-400">
+              <SCAExtrinsicSection
+                title="Otro"
+                infoLabel="Otra información relevante"
+                items={[
+                  { key: 'premios', label: 'Premios/reconocimientos' },
+                ]}
+                checkedItems={data.extrinsicSCA.otro.items}
+                info={data.extrinsicSCA.otro.info}
+                onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, otro: {...p.extrinsicSCA.otro, items: {...p.extrinsicSCA.otro.items, [key]: !p.extrinsicSCA.otro.items[key]}}}}))} 
+                onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, otro: {...p.extrinsicSCA.otro, info: val}}}))}
+                disabled={isAlreadySealed || isReadOnly}
+              />
+              <div className="p-4 bg-white flex items-center justify-center">
+                <p className="text-[9px] font-bold text-black/40 uppercase text-center">Campos adicionales disponibles<br />en el módulo de Protocolo Alquimia</p>
+              </div>
+            </div>
+          </div>
+
+          {/* BOTÓN SELLAR EN TAB EXTRÍNSECO */}
+          {!isAlreadySealed && !isReadOnly && (
+            <button
+              onClick={handleSave}
+              disabled={isSaving || !isExtrinsicFilled}
+              className={`w-full py-5 rounded-2xl font-black uppercase text-xs transition-all flex items-center justify-center gap-3 ${
+                isExtrinsicFilled
+                  ? 'bg-brand-green hover:bg-brand-green-bright text-black shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'
+                  : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+              }`}
+            >
+              {isSaving ? (
+                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              )}
+              {isExtrinsicFilled ? 'SELLAR PROTOCOLO COMPLETO' : 'COMPLETA N° MUESTRA Y AL MENOS UN CAMPO'}
+            </button>
+          )}
+
         </div>
       )}
 
@@ -756,10 +974,23 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     <label className="text-[11px] font-bold text-black uppercase  block">Notas de Laboratorio</label>
                     <textarea rows={4} value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none resize-none focus:border-black" placeholder="Escriba aquí los descriptores finales..." />
                 </div>
+                {/* ADVERTENCIA SI EXTRÍNSECO INCOMPLETO */}
+                {!isAlreadySealed && !isReadOnly && !isExtrinsicFilled && (
+                  <div
+                    onClick={() => setActiveTab('extrinsic')}
+                    className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-100 transition-all"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <div>
+                      <p className="text-[10px] font-black text-amber-800 uppercase">Completa la evaluación extrínseca primero</p>
+                      <p className="text-[9px] text-amber-700 font-medium">Haz clic aquí para ir al tab 2 → N° Muestra + al menos un campo</p>
+                    </div>
+                  </div>
+                )}
                 <button
                     onClick={handleSave}
-                    disabled={isSaving || isAlreadySealed || isReadOnly}
-                    className={`w-full py-6 rounded-2xl font-black uppercase  text-xs transition-all flex items-center justify-center gap-4 ${isAlreadySealed ? 'bg-[#0B1E1A] text-black border border-gray-400 shadow-sm cursor-default' : isReadOnly ? 'bg-white text-black border border-gray-400 shadow-sm cursor-not-allowed' : 'bg-black hover:bg-black/90 text-black font-black shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'}`}
+                    disabled={isSaving || isAlreadySealed || isReadOnly || !isExtrinsicFilled}
+                    className={`w-full py-6 rounded-2xl font-black uppercase  text-xs transition-all flex items-center justify-center gap-4 ${isAlreadySealed ? 'bg-brand-green text-black border border-gray-400 shadow-sm cursor-default' : isReadOnly ? 'bg-white text-black border border-gray-400 shadow-sm cursor-not-allowed' : !isExtrinsicFilled ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : 'bg-brand-green hover:bg-brand-green-bright text-black shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'}`}
                 >
                     {isAlreadySealed ? (
                         <>
@@ -775,6 +1006,11 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                         <>
                             <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
                             SINCRONIZANDO...
+                        </>
+                    ) : !isExtrinsicFilled ? (
+                        <>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            COMPLETA LA EVALUACIÓN EXTRÍNSECA
                         </>
                     ) : (
                         <>

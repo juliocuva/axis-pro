@@ -69,6 +69,7 @@ export async function createCoffeePurchase(formData: any) {
             latitude: parseFloat(formData.latitude) || 0,
             longitude: parseFloat(formData.longitude) || 0,
             process_data: formData.processData || {},
+            sica_id: formData.sicaId || null,
             company_id: formData.companyId,
             status: formData.status || (formData.coffeeType === 'excelso' ? 'thrashed' : 'purchased'),
             coffee_type: formData.coffeeType || 'pergamino',
@@ -91,6 +92,7 @@ export async function createCoffeePurchase(formData: any) {
             delete legacyData.export_certificate;
             delete legacyData.latitude;
             delete legacyData.longitude;
+            delete legacyData.sica_id;
             // MANTENER process_data SIEMPRE
 
             insertResponse = await supabase
@@ -170,7 +172,8 @@ export async function updateCoffeePurchase(lotId: string, formData: any, user: a
             latitude: formData.latitude,
             longitude: formData.longitude,
             process_data: formData.processData || {},
-            coffee_type: formData.coffeeType
+            coffee_type: formData.coffeeType,
+            sica_id: formData.sicaId || null
         };
 
         // AXIS AUTOMATION: Si el lote ya fue trillado y se modifica el peso de compra,
@@ -207,6 +210,7 @@ export async function updateCoffeePurchase(lotId: string, formData: any, user: a
             delete legacyData.export_certificate;
             delete legacyData.latitude;
             delete legacyData.longitude;
+            delete legacyData.sica_id;
             // MANTENER process_data SIEMPRE
 
             updateResponse = await supabase

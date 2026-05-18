@@ -7,25 +7,33 @@ import ModuleCard from '@/shared/components/layout/ModuleCard';
 // Componentes de Módulos (Carga perezosa o condicional)
 import SupplyModuleContainer from '@/modules/supply/components/SupplyModuleContainer';
 import TrillaModuleContainer from '@/modules/supply/components/TrillaModuleContainer';
-import GlobalHistoryArchive from '@/modules/export/components/GlobalHistoryArchive';
-import GreenExportForm from '@/modules/export/components/GreenExportForm';
 import MasterControlCenter from '@/modules/admin/components/MasterControlCenter';
 import RoastIntelligenceContainer from '@/modules/production/components/RoastIntelligenceContainer';
 import GratefulModule from '@/modules/supply/components/GratefulModule';
 import RadarDashboard from '@/modules/supply/components/analysis/RadarDashboard';
+import CloudVault from '@/modules/export/components/CloudVault';
+import PurchaseForm from '@/modules/supply/components/PurchaseForm';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
 
 export default function Home() {
     const [user, setUser] = useState<{ name: string, email: string, companyId: string, role?: string } | null>(null);
-    const [view, setView] = useState<'launcher' | 'supply' | 'trilla' | 'export' | 'archive' | 'master' | 'production' | 'grateful' | 'radar'>('launcher');
+    const [view, setView] = useState<'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar'>('supply');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isDemoUnlocked, setIsDemoUnlocked] = useState(false);
     const [clickCount, setClickCount] = useState(0);
     const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+    // Lifted and Shared lot states
+    const [selectedLot, setSelectedLot] = useState<any>(null);
+    const [recentLots, setRecentLots] = useState<any[]>([]);
+    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' | 'archive'>('purchase');
+    const [showSyncModal, setShowSyncModal] = useState(false);
+    const [syncSearchQuery, setSyncSearchQuery] = useState('');
+    const [syncCurrentPage, setSyncCurrentPage] = useState(1);
 
     const toggleTheme = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -45,6 +53,7 @@ export default function Home() {
     const [showCloudVault, setShowCloudVault] = useState(false);
     const [showFunctionalDocs, setShowFunctionalDocs] = useState(false);
     const [showUpdates, setShowUpdates] = useState(false);
+    const [showPurchaseForm, setShowPurchaseForm] = useState(false);
 
     const handleLogoClick = () => {
         const newCount = clickCount + 1;
@@ -55,11 +64,54 @@ export default function Home() {
         }
     };
 
-    useEffect(() => {
-        if (user && view === 'launcher') {
-            fetchRecentBatches();
+    const fetchRecentLots = async (currentSelectedLot = selectedLot) => {
+        if (!user) return;
+        try {
+            let query = supabase
+                .from('coffee_purchase_inventory')
+                .select('*, roast_batches(id)');
+                
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase()?.includes('julio') && !user?.email?.toLowerCase()?.includes('main')) {
+                query = query.eq('company_id', user?.companyId);
+            }
+
+            const { data: recent } = await query
+                .order('created_at', { ascending: false });
+
+            if (recent) setRecentLots(recent);
+
+            // Refrescar el lote seleccionado actual para evitar datos stale
+            if (currentSelectedLot) {
+                const { data: freshLot } = await supabase
+                    .from('coffee_purchase_inventory')
+                    .select('*, roast_batches(id)')
+                    .eq('id', currentSelectedLot.id)
+                    .maybeSingle();
+                
+                if (freshLot) {
+                    setSelectedLot(freshLot);
+                }
+            }
+        } catch (err) {
+            console.error("AXIS Error fetching lots:", err);
         }
-    }, [user, view]);
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchRecentBatches();
+            fetchRecentLots();
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (showSyncModal) {
+            fetchRecentLots();
+            setSyncSearchQuery('');
+            setSyncCurrentPage(1);
+        }
+    }, [showSyncModal]);
+
 
     const fetchRecentBatches = async () => {
         setIsLoading(true);
@@ -87,8 +139,8 @@ export default function Home() {
             }
 
             const { data } = await batchesQuery
-                .order('purchase_date', { ascending: false })
-                .limit(3);
+                .order('created_at', { ascending: false })
+                .limit(10);
 
             if (data && data.length > 0) {
                 const transformed = data.map(b => ({
@@ -115,6 +167,23 @@ export default function Home() {
         }
     };
 
+    const filteredLots = recentLots.filter(lot => {
+        const query = syncSearchQuery.toLowerCase();
+        return (
+            (lot.farmer_name || '').toLowerCase().includes(query) ||
+            (lot.lot_number || '').toLowerCase().includes(query) ||
+            (lot.region || '').toLowerCase().includes(query) ||
+            (lot.variety || '').toLowerCase().includes(query)
+        );
+    });
+
+    const itemsPerPage = 8;
+    const totalSyncPages = Math.ceil(filteredLots.length / itemsPerPage);
+    const syncCurrentItems = filteredLots.slice(
+        (syncCurrentPage - 1) * itemsPerPage,
+        syncCurrentPage * itemsPerPage
+    );
+
     if (!user) {
         return <AuthScreen onLogin={(userData) => {
             setUser(userData);
@@ -130,48 +199,69 @@ export default function Home() {
                             <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xl font-bold text-black uppercase ">COLOMBIA</span>
+                            <span className="text-xl font-bold text-black uppercase tracking-widest">AXIS ONE <span className="text-brand-green">PRO</span></span>
+                            <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.3em] mt-1">Industrial Supply Chain</span>
                         </div>
                     </div>
                 </div>
 
                 <nav className="flex items-center gap-4">
-                    {view !== 'launcher' && (
-                        <button
-                            onClick={() => setView('launcher')}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-bg-offset hover:bg-white rounded-industrial-sm text-[11px] font-bold transition-all border border-border-main uppercase  text-black hover:text-black"
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-                            Volver al Panel
-                        </button>
-                    )}
+                    <div className="w-px h-8 bg-gray-200 mx-2"></div>
 
-                    <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden">
+                    <button
+                        onClick={() => setShowPurchaseForm(true)}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-brand-green text-white rounded-industrial-sm text-[10px] font-black uppercase transition-all shadow-lg shadow-brand-green/20 hover:scale-105 active:scale-95"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                        Nuevo Lote
+                    </button>
+
+                    <button
+                        onClick={() => setShowSyncModal(true)}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-bg-offset text-black border border-border-main rounded-industrial-sm text-[10px] font-black uppercase transition-all hover:bg-white hover:border-black active:scale-95 shadow-sm"
+                        title="Buscar y Sincronizar Lotes"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        Sincronizar Lotes
+                    </button>
+
+                    <div className="w-px h-8 bg-gray-200 mx-2"></div>
+
+                    <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden shadow-sm">
+                        <button
+                            onClick={() => { setView('supply'); setShowCloudVault(false); }}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view !== 'master' && !showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-black/40 hover:text-black'}`}
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
+                            Operaciones
+                        </button>
+
                         {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
                             <button
-                                onClick={() => setView('master')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-industrial-sm text-[9px] font-bold uppercase  transition-all ${view === 'master' ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20' : 'text-black hover:text-black'}`}
+                                onClick={() => { setView('master'); setShowCloudVault(false); }}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view === 'master' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-black/40 hover:text-black'}`}
                                 title="Panel de Gobernanza Global"
                             >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                                 Gobernanza
                             </button>
                         )}
+                        
                         <button
                             onClick={() => setShowCloudVault(true)}
-                            className="flex items-center gap-2 px-4 py-2 hover:bg-white text-black-bright text-[9px] font-bold uppercase  transition-all"
-                            title="Bóveda de Documentos"
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-black/40 hover:text-black'}`}
+                            title="Archivo Maestro de Procesos"
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-                            Bóveda en la Nube
+                            Archivo
                         </button>
                     </div>
 
-                    <div className="w-px h-6 bg-border-main mx-2"></div>
+                    <div className="w-px h-8 bg-gray-200 mx-2"></div>
 
                     <button
                         onClick={toggleTheme}
-                        className="w-11 h-11 rounded-industrial-sm bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white transition-all group"
+                        className="w-11 h-11 rounded-industrial-sm bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white transition-all group shadow-sm"
                         title={theme === 'dark' ? 'Modo Luz' : 'Modo Oscuro'}
                     >
                         {theme === 'dark' ? (
@@ -194,179 +284,19 @@ export default function Home() {
                 </nav>
             </header>
 
-            {view === 'launcher' && (
-                <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
-                    {(user?.role === 'gerente' || user?.role === 'auditor' || user?.role === 'admin') ? (
-                        <section>
-                            <h2 className="text-[11px] font-bold text-black-bright uppercase  mb-10 flex items-center gap-4">
-                                <span className="w-8 h-px bg-white"></span>
-                                Panel de Gerencia y Supervisión de Asociación
-                                <span className="w-full h-px bg-white"></span>
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <ModuleCard
-                                    title="Mi Equipo y Roles"
-                                    description="Gestión delegada de personal: Catadores, Tostadores y Operadores de tu asociación."
-                                    status="active"
-                                    color="brand-green"
-                                    onClick={() => setView('master')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
-                                />
-                                {user?.role !== 'auditor' && (
-                                    <>
-                                        <ModuleCard
-                                            title="Lotes Certificados"
-                                            description="Auditoría de lotes con aval EUDR y pasaportes digitales listos para exportación."
-                                            status="active"
-                                            color="gray-500"
-                                            onClick={() => setView('archive')}
-                                            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>}
-                                        />
-                                        <ModuleCard
-                                            title="Tostión y CVA 2.0"
-                                            description="Supervisión de calidad sensorial y perfiles de tueste de la asociación."
-                                            status="active"
-                                            color="gray-500"
-                                            onClick={() => setView('production')}
-                                            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 18l10-4 10 4M2 12l10-4 10 4M2 6l10-4 10 4" /></svg>}
-                                        />
-                                        {(user?.role === 'admin' || user?.email?.toLowerCase().includes('julio')) && (
-                                            <ModuleCard
-                                                title="Radar de Soberanía"
-                                                description="Monitoreo 'FlightRadar' de lotes en tiempo real. Vista de Alta Gerencia FNC."
-                                                status="active"
-                                                color="brand-green"
-                                                onClick={() => setView('radar')}
-                                                icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0C6056" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="6"/></svg>}
-                                            />
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </section>
-                    ) : (
-                        <section>
-                            <h2 className="text-[11px] font-bold text-black-bright uppercase  mb-10 flex items-center gap-4">
-                                <span className="w-8 h-px bg-white"></span>
-                                Emisión de Certificados de Calidad de Exportación
-                                <span className="w-full h-px bg-white"></span>
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <ModuleCard
-                                    title="Origen Inmutable"
-                                    description="Fijación de coordenadas GIS/WGS84, polígonos EUDR y protocolos de calidad integrados (Trilla/Tostión)."
-                                    status="active"
-                                    color="brand-green"
-                                    onClick={() => setView('supply')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>}
-                                />
-                                <ModuleCard
-                                    title="Pasaporte Aduanero"
-                                    description="Emisión de Certificado de Exportación QR/Hash: Prueba irrefutable de autenticidad y cumplimiento EUDR/FDA."
-                                    status="active"
-                                    color="gray-500"
-                                    onClick={() => setView('export')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>}
-                                />
-                                <ModuleCard
-                                    title="Reconocimiento"
-                                    description="Grateful Ledger: El radar de excelencia que conecta al consumidor final con el Alquimista del café."
-                                    status="active"
-                                    color="brand-green"
-                                    onClick={() => setView('grateful')}
-                                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>}
-                                />
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Acceso Universal al Monitor Comercial para todos los usuarios */}
-                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-2 bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-8">
-                                <h3 className="text-sm font-bold uppercase  mb-8 flex items-center gap-3">
-                                    <span className="w-2 h-2 rounded-full bg-brand-green-bright"></span>
-                                    Monitor Comercial Lotes Verdes
-                                </h3>
-                                <div className="space-y-4">
-                                    {batches.map((batch, index) => {
-                                        return (
-                                            <div key={`${batch.id}-${index}`} className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-gray-200 shadow-sm group hover:border-gray-200 shadow-sm transition-all">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-industrial-sm bg-white flex items-center justify-center font-bold text-[11px] uppercase er">
-                                                        {batch.process.substring(0, 3)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-xs font-bold uppercase text-black ">Lote: {batch.id}</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <p className="text-[11px] text-gray-900 font-bold uppercase ">{batch.process} • {batch.greenWeight}kg</p>
-                                                            {batch.isDemo && (
-                                                                <span className="text-[9px] bg-white border border-gray-200 shadow-sm text-black-bright px-2 py-0.5 rounded-md font-bold border border-gray-200 shadow-sm uppercase ">Demo WGS84</span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className={`text-[11px] font-bold uppercase  text-black-bright`}>
-                                                        LISTO PARA EXPORTAR
-                                                    </p>
-                                                    <p className="text-[9px] text-black font-bold uppercase mt-1 ">SICA / EUDR Asignado</p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    {batches.length === 0 && <div className="p-8 text-center text-gray-600 font-mono text-xs border border-dashed border-gray-200 shadow-sm rounded-2xl">SIN REGISTROS EN ESTE TURNO</div>}
-                                </div>
-                            </div>
-
-                            <div className="bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-8 relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <h3 className="text-[11px] font-bold text-gray-900 uppercase  mb-8 border-b border-gray-200 shadow-sm pb-4">Estado del Sistema</h3>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-xs">
-                                        <span className="text-black font-bold uppercase  text-[9px]">Sincronización Aduanera</span>
-                                        <span className="text-black-bright font-bold">OPERATIVO</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-xs">
-                                        <span className="text-black font-bold uppercase  text-[9px]">Scanner WGS84 / GIS</span>
-                                        <span className="text-black-bright font-bold">ACTIVO</span>
-                                    </div>
-                                    <div className="h-px bg-white my-4"></div>
-                                    <div className="text-center p-6 bg-white/2 border border-gray-200 shadow-sm rounded-industrial-sm">
-                                        <p className="text-[11px] text-gray-900 font-bold uppercase  mb-3">Total Auditado (Mes)</p>
-                                        <p className="text-4xl font-bold text-black er">18,450 <span className="text-[11px] text-black-bright font-bold">KG</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    {/* SECCIÓN ESPECIAL SOLO PARA EMAIL MAESTRO / AUDITOR / ADMIN */}
-                    {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
-                        <section className="bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-20 text-center space-y-8 animate-in zoom-in duration-500 mt-20">
-                             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto border border-gray-200 shadow-sm">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0C6056" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                             </div>
-                             <div className="space-y-2">
-                                <h2 className="text-3xl font-black text-text-main uppercase er">Terminal de Seguridad Axis</h2>
-                                <p className="text-xs text-gray-900 font-bold uppercase ">Control de Acceso y Gobernanza Global</p>
-                             </div>
-                             <p className="max-w-md mx-auto text-sm text-text-offset leading-relaxed font-medium">
-                                Has ingresado con privilegios de nivel maestro. Tu terminal está optimizada para la auditoría de red, gestión de roles y cumplimiento normativo EUDR.
-                             </p>
-                             <button 
-                                onClick={() => setView('master')}
-                                className="px-10 py-4 bg-brand-green text-black text-xs font-black uppercase  rounded-industrial-sm hover:bg-brand-green-bright transition-all shadow-2xl shadow-brand-green/30"
-                             >
-                                Entrar a la Bóveda de Control
-                             </button>
-                        </section>
-                    )}
-                </div>
-            )}
 
             {view === 'supply' && (
                 <div className="max-w-7xl mx-auto space-y-8">
-                    <SupplyModuleContainer user={user} />
+                    <SupplyModuleContainer 
+                        user={user} 
+                        selectedLot={selectedLot}
+                        setSelectedLot={setSelectedLot}
+                        recentLots={recentLots}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        fetchRecentLots={fetchRecentLots}
+                        onOpenSyncModal={() => setShowSyncModal(true)}
+                    />
                 </div>
             )}
 
@@ -392,10 +322,10 @@ export default function Home() {
                 <div className="fixed inset-0 z-[500] bg-black animate-in fade-in duration-700">
                     <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1001] no-print">
                          <button 
-                            onClick={() => setView('launcher')}
+                            onClick={() => setView('supply')}
                             className="px-6 py-2 bg-white hover:bg-white backdrop-blur-md border border-gray-200 shadow-sm rounded-full text-[9px] font-black uppercase  text-black transition-all active:scale-95"
                          >
-                            Escapar del Radar
+                            Cerrar Radar
                          </button>
                     </div>
                     <RadarDashboard user={user} />
@@ -442,31 +372,7 @@ export default function Home() {
                 </div>
             )}
 
-            {(view === 'export' || view === 'archive') && (
-                <div className="max-w-7xl mx-auto space-y-8">
-                    <div className="flex flex-wrap items-center justify-between gap-6 mb-8">
-                        <div className="flex bg-bg-card p-1 rounded-industrial-sm border border-gray-200 shadow-sm shadow-xl">
-                            <button
-                                onClick={() => setView('export')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[11px] font-bold transition-all uppercase  ${view === 'export' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-900 hover:text-black'}`}
-                            >
-                                Emisión de Pasaportes
-                            </button>
-                            <button
-                                onClick={() => setView('archive')}
-                                className={`px-6 py-2.5 rounded-industrial-sm text-[11px] font-bold transition-all uppercase  ${view === 'archive' ? 'bg-brand-green text-black shadow-lg' : 'text-gray-900 hover:text-black'}`}
-                            >
-                                Archivo Confidencial Nube
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {view === 'export' && <GreenExportForm user={user} />}
-                        {view === 'archive' && <GlobalHistoryArchive user={user} />}
-                    </div>
-                </div>
-            )}
+            {/* BLOQUE DE EXPORTACIÓN Y ARCHIVO ELIMINADO - INTEGRADO EN ARCHIVO MAESTRO (MODAL) */}
 
             {view === 'master' && (
                 <div className="max-w-7xl mx-auto py-10">
@@ -498,62 +404,205 @@ export default function Home() {
                             </button>
                         </div>
                         <div className="bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-12">
-                            <GlobalHistoryArchive user={user} />
+                            <CloudVault user={user} />
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* 2. Guía Sistema: Documentación Funcional del Sistema */}
-            {showFunctionalDocs && (
-                <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[300] p-12 overflow-y-auto">
-                    <div className="max-w-4xl mx-auto space-y-12">
-                        <div className="flex justify-between items-center">
+
+            {/* 3. Formulario de Nuevo Lote: Acceso Directo */}
+            {showPurchaseForm && (
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[600] p-6 md:p-12 overflow-y-auto animate-in fade-in duration-500">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="flex justify-between items-center mb-8">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white rounded-industrial-sm flex items-center justify-center text-black-bright">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                                <div className="w-12 h-12 bg-brand-green rounded-industrial-sm flex items-center justify-center text-black">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                                 </div>
-                                <h2 className="text-4xl font-bold uppercase er text-black">Manual de Ingeniería Pro</h2>
+                                <div>
+                                    <h2 className="text-4xl font-bold uppercase er text-white">Registro de Nuevo Lote</h2>
+                                    <p className="text-[11px] text-brand-green font-bold uppercase  mt-1">Iniciando Trazabilidad en Origen</p>
+                                </div>
                             </div>
                             <button
-                                onClick={() => setShowFunctionalDocs(false)}
-                                className="w-14 h-14 bg-white hover:bg-white rounded-full flex items-center justify-center text-black transition-all"
+                                onClick={() => setShowPurchaseForm(false)}
+                                className="w-14 h-14 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all border border-white/10 shadow-sm"
                             >
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
-
-                        <div className="bg-white/2 border border-gray-200 shadow-sm rounded-industrial p-16 space-y-12 shadow-inner text-gray-300">
-                            <section className="space-y-4">
-                                <h3 className="text-2xl font-bold text-black uppercase ">Estatus Tecnológico: Sistema Operativo</h3>
-                                <p className="text-sm leading-relaxed">AXISONE COFFEE es una solución industrial operativa demostrada en entornos reales. El sistema centraliza la trazabilidad desde la recepción en finca hasta el retail transfronterizo.</p>
-
-                            </section>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
-                                    <h4 className="text-sm font-bold text-black-bright uppercase">Acopio y Calidad</h4>
-                                    <p className="text-xs leading-relaxed">Control de trilla, factor de rendimiento y protocolos basados en estándares de la SCA ciegos con firma digital.</p>
-                                </div>
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
-                                    <h4 className="text-sm font-bold text-black uppercase">Inteligencia de Tostión</h4>
-                                    <p className="text-xs leading-relaxed">Monitoreo espectral en vivo, Perfiles Espejo y asistente IA para control de variables físicas.</p>
-                                </div>
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
-                                    <h4 className="text-sm font-bold text-black uppercase">Comercio Global</h4>
-                                    <p className="text-xs leading-relaxed">Pasaportes digitales QR y motores dinámicos de desgasificación para logística segura.</p>
-                                </div>
-                                <div className="p-8 bg-white/3 rounded-industrial-sm border border-gray-200 shadow-sm space-y-3">
-                                    <h4 className="text-sm font-bold text-black uppercase">Sello Inmutable</h4>
-                                    <p className="text-xs leading-relaxed">Generación de Hashes y QR dinámicos que prueban criptográficamente la autenticidad del café ante cualquier puerto.</p>
-                                </div>
-                            </div>
-
-                            <div className="p-10 bg-white border border-gray-200 shadow-sm rounded-industrial-sm shadow-[0_0_30px_rgba(0,255,136,0.1)]">
-                                <h4 className="text-black-bright text-[11px] font-bold uppercase  mb-3">La Llave Maestra (Propuesta de Valor)</h4>
-                                <p className="text-sm text-black leading-relaxed font-bold">"AXIS es el emisor de Certificados Digitales de Autenticidad para café verde de exportación. Garantizamos que el contenedor que subes al barco cumple instantáneamente con las normativas EUDR, FDA y auditorías globales de calidad. Lo que dices que va en el saco, está matemáticamente probado para cruzar fronteras sin fricción."</p>
-                            </div>
+                        <div className="bg-white border border-gray-200 shadow-sm rounded-industrial p-2 md:p-10">
+                            <PurchaseForm 
+                                user={user} 
+                                onPurchaseComplete={() => {
+                                    setShowPurchaseForm(false);
+                                    fetchRecentBatches();
+                                }} 
+                            />
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 4. Portal de Sincronización y Búsqueda de Lotes: Acceso Pagina Completa y Paginado */}
+            {showSyncModal && (
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[600] p-6 md:p-12 overflow-y-auto animate-in fade-in duration-500">
+                    <div className="max-w-4xl mx-auto flex flex-col min-h-[85vh] justify-between">
+                        <div>
+                            {/* Cabecera del Portal */}
+                            <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-bg-offset border border-border-main rounded-industrial-sm flex items-center justify-center text-black shadow-sm">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green animate-spin-slow"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-3xl font-bold uppercase er text-white tracking-wider">Sincronizador de Lotes</h2>
+                                        <p className="text-[11px] text-brand-green font-black uppercase mt-1">Historial de Flujo e Integridad en Tiempo Real</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowSyncModal(false)}
+                                    className="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-all border border-white/10 shadow-sm hover:scale-105 active:scale-95"
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+
+                            {/* Barra de Búsqueda Premium */}
+                            <div className="relative mb-6">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-white/40"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={syncSearchQuery}
+                                    onChange={(e) => {
+                                        setSyncSearchQuery(e.target.value);
+                                        setSyncCurrentPage(1); // Reset page on type
+                                    }}
+                                    placeholder="Buscar por productor, número de lote, finca, región o variedad..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-industrial-sm py-4 pl-12 pr-6 text-white text-xs font-medium placeholder-white/30 focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green transition-all"
+                                />
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    <span className="text-[10px] font-black text-brand-green bg-brand-green/10 border border-brand-green/20 px-3 py-1 rounded-full uppercase">
+                                        {filteredLots.length} Lotes Criptográficos
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Listado de Lotes */}
+                            {syncCurrentItems.length === 0 ? (
+                                <div className="bg-white/5 border border-white/5 rounded-industrial p-12 text-center my-8">
+                                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/30 mx-auto mb-4 border border-white/5">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                                    </div>
+                                    <p className="text-xs uppercase font-bold text-white/50 tracking-wider">No se encontraron lotes que coincidan con la búsqueda</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3 my-4">
+                                    {syncCurrentItems.map(lot => {
+                                        let step = 1;
+                                        if (lot.status === 'thrashed' || lot.status === 'completed' || lot.thrashed_weight > 0) step = 2;
+                                        if (lot.status === 'completed' || lot.status === 'physical_analyzed') step = 3;
+                                        if (lot.status === 'completed') step = 4;
+                                        if (lot.roast_batches && lot.roast_batches.length > 0) step = 5;
+
+                                        const isCurrent = selectedLot?.id === lot.id;
+
+                                        return (
+                                            <div
+                                                key={lot.id}
+                                                onClick={() => {
+                                                    setSelectedLot(lot);
+                                                    let tab: 'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' = 'purchase';
+                                                    if (lot.status === 'completed') tab = 'cupping';
+                                                    else if (lot.status === 'purchased') tab = 'thrashing';
+                                                    else if (lot.status === 'thrashed') tab = 'analysis';
+                                                    else if (lot.status === 'physical_analyzed') tab = 'roast';
+                                                    else tab = 'roast';
+
+                                                    setActiveTab(tab);
+                                                    setView('supply');
+                                                    setShowSyncModal(false);
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                                className={`group flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer ${
+                                                    isCurrent 
+                                                        ? 'bg-brand-green/10 border-brand-green shadow-lg shadow-brand-green/5' 
+                                                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                                                }`}
+                                            >
+                                                {/* Izquierda: Productor e Info */}
+                                                <div className="flex items-center gap-4 min-w-[200px]">
+                                                    <div className={`w-3 h-3 rounded-full ${isCurrent ? 'bg-brand-green animate-pulse' : 'bg-white/20 group-hover:bg-brand-green/60 transition-colors'}`}></div>
+                                                    <div>
+                                                        <p className="text-xs font-black text-white uppercase group-hover:text-brand-green transition-colors">{lot.farmer_name || 'Independiente'}</p>
+                                                        <p className="text-[10px] text-white/50 uppercase mt-0.5">{lot.farm_name || 'Sin Finca'} • {lot.region || 'Huila'}</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Centro: ID de Lote y Detalles del Café */}
+                                                <div className="flex flex-col min-w-[150px]">
+                                                    <span className="text-xs font-mono font-black text-white tracking-widest uppercase">{lot.lot_number}</span>
+                                                    <span className="text-[9px] text-white/40 uppercase mt-0.5">{lot.variety || 'Caturra'} • {lot.process_type || lot.process || 'Lavado'}</span>
+                                                </div>
+
+                                                {/* Derecha: Indicador de Fases e Info */}
+                                                <div className="flex items-center gap-6">
+                                                    {/* Fase Dots */}
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Fase {step}/5</span>
+                                                        <div className="flex gap-1 bg-black/40 p-1.5 rounded-lg border border-white/5">
+                                                            {[1, 2, 3, 4, 5].map(i => (
+                                                                <div 
+                                                                    key={i} 
+                                                                    className={`w-1.5 h-1.5 rounded-full ${
+                                                                        i <= step 
+                                                                            ? 'bg-brand-green shadow-[0_0_6px_rgba(0,255,136,0.6)]' 
+                                                                            : 'bg-white/10'
+                                                                    }`}
+                                                                ></div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Flecha de Selección */}
+                                                    <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-brand-green group-hover:text-black flex items-center justify-center text-white/60 transition-all">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="rotate-180"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Paginación en la Parte Inferior */}
+                        {totalSyncPages > 1 && (
+                            <div className="flex items-center justify-between border-t border-white/10 pt-6 mt-8">
+                                <button
+                                    onClick={() => setSyncCurrentPage(p => Math.max(p - 1, 1))}
+                                    disabled={syncCurrentPage === 1}
+                                    className="px-6 py-3 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white/60 hover:text-white hover:border-white/20 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center gap-2"
+                                >
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                                    Anterior
+                                </button>
+                                <span className="text-[10px] font-black uppercase text-white/50 tracking-wider">
+                                    Página {syncCurrentPage} de {totalSyncPages}
+                                </span>
+                                <button
+                                    onClick={() => setSyncCurrentPage(p => Math.min(p + 1, totalSyncPages))}
+                                    disabled={syncCurrentPage === totalSyncPages}
+                                    className="px-6 py-3 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white/60 hover:text-white hover:border-white/20 transition-all disabled:opacity-30 disabled:pointer-events-none flex items-center gap-2"
+                                >
+                                    Siguiente
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

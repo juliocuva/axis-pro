@@ -25,10 +25,10 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
         waterActivity: 0.58,
         density: 720,
         screenSize: {
-            size18: 20,
-            size17: 45,
-            size16: 25,
-            size15: 10,
+            size18: 0,
+            size17: 0,
+            size16: 0,
+            size15: 0,
             size14: 0,
             size13: 0,
             size12: 0,
@@ -62,6 +62,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
     useEffect(() => {
         const fetchAnalysis = async () => {
             if (!inventoryId) return;
+            console.log("AXIS DEBUG: fetchAnalysis starting for ID ->", inventoryId);
             setIsLoading(true);
             try {
                 // Fetch physical analysis
@@ -111,6 +112,39 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                 if (!lotError && lotData) {
                     setLotDetails(lotData);
                     const pd = lotData.process_data;
+                    
+                    // Pre-fill screen size from thrashing data if not already analyzed or if analyzed but empty (defaults)
+                    if (pd?.sieve_analysis) {
+                        const sa = pd.sieve_analysis;
+                        setFormData(prev => {
+                            const currentValues = Object.values(prev.screenSize);
+                            const isCurrentlyEmpty = currentValues.length === 0 || currentValues.every(v => Number(v) === 0);
+                            
+                            // If we already have data in the form, don't overwrite it automatically
+                            if (!isCurrentlyEmpty) {
+                                console.log("AXIS SYNC: Form already has data, skipping automatic sync.");
+                                return prev;
+                            }
+
+                            console.log("AXIS SYNC: Pulling sieve analysis from Trilla ->", sa);
+                            return {
+                                ...prev,
+                                screenSize: {
+                                    size18: Number(sa.m18) || 0,
+                                    size17: Number(sa.m17) || 0,
+                                    size16: Number(sa.m16) || 0,
+                                    size15: Number(sa.m15) || 0,
+                                    size14: Number(sa.caracol) || 0,
+                                    size13: 0,
+                                    size12: 0,
+                                    under12: Number(sa.menores) || 0
+                                }
+                            };
+                        });
+                    } else {
+                        console.log("AXIS SYNC: No sieve analysis found in Trilla data for this lot.");
+                    }
+
                     if (pd) {
                         setPhysicochemicalData({
                             ph_inicial: pd.ph_inicial || '4.5',
@@ -211,7 +245,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                         />
                         <div className="mt-4 flex items-center justify-between">
                             <span className="text-[9px] font-bold uppercase text-gray-900 ">Rango Ideal: 10.0 - 12.0%</span>
-                            <div className={`w-2 h-2 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
 
@@ -227,7 +261,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                         />
                         <div className="mt-4 flex items-center justify-between">
                             <span className="text-[9px] font-bold uppercase text-gray-900 ">Norma Export: ≤ 0.70</span>
-                            <div className={`w-2 h-2 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+                            <div className={`w-2 h-2 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
 
@@ -258,10 +292,39 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             <h4 className="text-[11px] font-bold text-black-bright uppercase ">Instrumento: Granulometría</h4>
                             <p className="text-xl font-bold text-black ">Sieve Distribution Profile</p>
                         </div>
-                        <div className={`flex flex-col items-end gap-1 ${isScreenValid ? 'text-black' : 'text-red-500'}`}>
-                            <span className="text-[9px] font-bold uppercase  opacity-60">Balance de Masa</span>
-                            <span className="text-3xl font-black er leading-none">{screenSum.toFixed(1)}%</span>
-                            {!isScreenValid && <span className="text-[9px] font-bold uppercase animate-pulse">Ajuste Requerido (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
+                        <div className={`flex flex-col items-end gap-1 text-black`}>
+                            <span className="text-[9px] font-bold uppercase opacity-60">Balance de Masa</span>
+                            <div className="flex items-center gap-3">
+                                <span className="text-3xl font-black er leading-none">{screenSum.toFixed(1)}%</span>
+                                {!isReadOnly && !isAlreadyAnalyzed && (
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            if (lotDetails?.process_data?.sieve_analysis) {
+                                                const sa = lotDetails.process_data.sieve_analysis;
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    screenSize: {
+                                                        size18: Number(sa.m18) || 0,
+                                                        size17: Number(sa.m17) || 0,
+                                                        size16: Number(sa.m16) || 0,
+                                                        size15: Number(sa.m15) || 0,
+                                                        size14: Number(sa.caracol) || 0,
+                                                        size13: 0,
+                                                        size12: 0,
+                                                        under12: Number(sa.menores) || 0
+                                                    }
+                                                }));
+                                            }
+                                        }}
+                                        className="p-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all flex items-center gap-2 text-[8px] font-bold uppercase animate-pulse shadow-lg"
+                                    >
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
+                                        Sincronizar Trilla
+                                    </button>
+                                )}
+                            </div>
+                            {!isScreenValid && <span className="text-[9px] font-bold uppercase">Ajuste Requerido (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
                         </div>
                     </div>
 
@@ -307,7 +370,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="text-4xl font-black py-4 text-red-500"
+                                inputClassName="text-4xl font-black py-4 text-black"
                                 unit="PTS"
                             />
                             <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
@@ -320,7 +383,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="text-4xl font-black py-4 text-yellow-500"
+                                inputClassName="text-4xl font-black py-4 text-black"
                                 unit="PTS"
                             />
                             <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>

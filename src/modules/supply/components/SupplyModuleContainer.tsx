@@ -14,12 +14,25 @@ import ModuleHeader from '@/shared/components/ui/ModuleHeader';
 
 interface SupplyModuleContainerProps {
     user: { email: string, name: string, companyId: string, role?: string } | null;
+    selectedLot: any;
+    setSelectedLot: (lot: any) => void;
+    recentLots: any[];
+    activeTab: 'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' | 'archive';
+    setActiveTab: (tab: 'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' | 'archive') => void;
+    fetchRecentLots: () => Promise<void>;
+    onOpenSyncModal: () => void;
 }
 
-export default function SupplyModuleContainer({ user }: SupplyModuleContainerProps) {
-    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'archive' | 'team'>('purchase');
-    const [selectedLot, setSelectedLot] = useState<any>(null);
-    const [recentLots, setRecentLots] = useState<any[]>([]);
+export default function SupplyModuleContainer({ 
+    user,
+    selectedLot,
+    setSelectedLot,
+    recentLots,
+    activeTab,
+    setActiveTab,
+    fetchRecentLots,
+    onOpenSyncModal
+}: SupplyModuleContainerProps) {
     const [showCertificate, setShowCertificate] = useState(false);
     const [sidebarMode, setSidebarMode] = useState<'recent' | 'archive'>('recent');
 
@@ -29,22 +42,6 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
         }
     }, [user?.companyId]);
 
-    const fetchRecentLots = async () => {
-        let query = supabase
-            .from('coffee_purchase_inventory')
-            .select('*, roast_batches(id)');
-            
-        if (user?.role !== 'auditor' && !user?.email?.toLowerCase()?.includes('julio') && !user?.email?.toLowerCase()?.includes('main')) {
-            query = query.eq('company_id', user?.companyId);
-        }
-
-        const { data: recent } = await query
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-        if (recent) setRecentLots(recent);
-    };
-
     const handleLotSelect = (lot: any) => {
         console.log("AXIS DEBUG: Seleccionando Lote ->", lot.lot_number, lot.id);
         setSelectedLot(lot);
@@ -53,7 +50,8 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
         if (lot.status === 'completed') setActiveTab('cupping');
         else if (lot.status === 'purchased') setActiveTab('thrashing');
         else if (lot.status === 'thrashed') setActiveTab('analysis');
-        else setActiveTab('cupping');
+        else if (lot.status === 'physical_analyzed') setActiveTab('roast');
+        else setActiveTab('roast');
     };
 
     return (
@@ -74,8 +72,8 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                             activeTab === 'purchase' ? 'Registro de Origen' :
                             activeTab === 'thrashing' ? 'Trilla Industrial' :
                             activeTab === 'analysis' ? 'Laboratorio Físico' :
-                            activeTab === 'cupping' ? 'Catación' : 
-                            activeTab === 'roast' ? 'Tostión Inteligente' : 'Archivo'
+                            activeTab === 'cupping' ? 'Catación y Evaluación Sensorial' : 
+                            activeTab === 'roast' ? 'Tostión Inteligente' : 'Configuración de Equipo'
                         }
                         subtitle="AXISONE COFFEE COLOMBIA • SISTEMA DE TRAZABILIDAD INDUSTRIAL"
                     >
@@ -97,9 +95,8 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                             { id: 'purchase', label: '01. Origen' },
                             { id: 'thrashing', label: '02. Trilla' },
                             { id: 'analysis', label: '03. Lab' },
-                            { id: 'cupping', label: '04. CATACIÓN' },
-                            { id: 'roast', label: '05. Tostión' },
-                            { id: 'archive', label: '06. Archivo' }
+                            { id: 'roast', label: '04. Tostión' },
+                            { id: 'cupping', label: '05. Catación' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -125,10 +122,10 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                                     </p>
                                 </div>
                                 <button 
-                                    onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-                                    className="px-6 py-3 bg-white border border-gray-400 shadow-sm rounded-full text-[11px] font-black text-black uppercase  hover:bg-white border border-gray-400 shadow-sm transition-all"
+                                    onClick={onOpenSyncModal}
+                                    className="px-6 py-3 bg-[#0C6056] text-white shadow-lg shadow-brand-green/20 rounded-full text-[11px] font-black uppercase transition-all hover:scale-105 active:scale-95"
                                 >
-                                    Ir a Sincronización Viva
+                                    Sincronizar Lotes
                                 </button>
                             </div>
                         )}
@@ -138,7 +135,7 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                             
                             return (
                                 <>
-                                    {activeTab === 'purchase' && <PurchaseForm key={selectedLot?.id || 'new'} selectedLot={selectedLot} user={user} isReadOnly={isReadOnly} onPurchaseComplete={(lot) => { setSelectedLot(lot); fetchRecentLots(); }} />}
+                                    {activeTab === 'purchase' && <PurchaseForm key={selectedLot?.id || 'new'} selectedLot={selectedLot} user={user} isReadOnly={isReadOnly} onPurchaseComplete={(lot) => { handleLotSelect(lot); fetchRecentLots(); }} />}
                                     {activeTab === 'thrashing' && selectedLot && <ThrashingForm key={selectedLot.id} inventoryId={selectedLot.id} parchmentWeight={selectedLot.purchase_weight} user={user} isReadOnly={isReadOnly} onThrashingComplete={fetchRecentLots} />}
                                     {activeTab === 'analysis' && selectedLot && <PhysicalAnalysisForm key={selectedLot.id} inventoryId={selectedLot.id} user={user} isReadOnly={isReadOnly} onAnalysisComplete={fetchRecentLots} />}
                                     {activeTab === 'cupping' && selectedLot && <CVAAssessmentForm key={selectedLot.id} inventoryId={selectedLot.id} user={user} isReadOnly={isReadOnly} onCuppingComplete={fetchRecentLots} />}
@@ -147,63 +144,6 @@ export default function SupplyModuleContainer({ user }: SupplyModuleContainerPro
                                 </>
                             );
                         })()}
-                    </div>
-                </div>
-                
-                {/* NUEVA SECCIÓN INFERIOR TÉCNICA */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-12 border-t border-gray-400 shadow-sm">
-                    <div className="lg:col-span-1">
-                         <button 
-                            onClick={() => { setSelectedLot(null); setActiveTab('purchase'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                            className="w-full py-8 bg-white text-black font-black uppercase text-xs  rounded-2xl hover:bg-brand-green transition-all shadow-[0_20px_50px_rgba(0,0,0,0.3)] group"
-                        >
-                            <span className="flex items-center justify-center gap-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                INICIAR NUEVO LOTE
-                            </span>
-                        </button>
-                    </div>
-
-                    <div className="lg:col-span-2">
-                        <div className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial">
-                            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-400 shadow-sm">
-                                <h4 className="text-[11px] font-black text-gray-600 uppercase ">Sincronización Viva • Historial de Flujo</h4>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                                    <span className="text-[9px] font-bold text-black uppercase ">Conectado a AXIS Cloud</span>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {recentLots.map(lot => {
-                                    let step = 1;
-                                    if (lot.status === 'thrashed' || lot.status === 'completed' || lot.thrashed_weight > 0) step = 2;
-                                    if (lot.status === 'completed' || lot.status === 'physical_analyzed') step = 3;
-                                    if (lot.status === 'completed') step = 4;
-                                    if (lot.roast_batches && lot.roast_batches.length > 0) step = 5;
-
-                                    return (
-                                        <div key={lot.id} onClick={() => { handleLotSelect(lot); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedLot?.id === lot.id ? 'bg-white border-gray-400 shadow-sm' : 'bg-white/2 border-gray-400 shadow-sm hover:border-gray-400 shadow-sm'}`}>
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="space-y-1">
-                                                    <p className="text-[11px] font-black text-carbon uppercase truncate max-w-[120px]">{lot.farmer_name}</p>
-                                                    <p className="text-[9px] font-mono text-gray-600">{lot.lot_number}</p>
-                                                </div>
-                                                <div className="flex gap-1 bg-black/20 p-1.5 rounded-lg">
-                                                    {[1,2,3,4,5].map(i => (
-                                                        <div key={i} className={`w-1.5 h-1.5 rounded-full ${i <= step ? 'bg-brand-green' : 'bg-carbon/10'}`}></div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div className="pt-2 border-t border-gray-400 shadow-sm flex justify-between items-center">
-                                                <span className="text-[9px] font-bold text-gray-600 uppercase ">Fase {step}/5</span>
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-gray-700"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

@@ -79,7 +79,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             if (d >= 750) { min = 15.0; max = 16.0; }
             else if (d <= 680) { min = 13.5; max = 14.5; }
             
-            if (p.includes('natural') || p.includes('honey') || p.includes('anaerobico')) {
+            if (p.includes('natural') || p.includes('honey') || p.includes('anaerobico') || p.includes('sumergido')) {
                 min -= 1.0;
                 max -= 1.0;
             }

@@ -15,17 +15,11 @@ const COFFEE_VARIETIES_BASE: string[] = [
     'SL28', 'Tabi', 'Typica', 'Wush Wush'
 ];
 
-const PROCESS_TYPES: ProcessType[] = ['lavado', 'honey', 'natural'];
+const PROCESS_TYPES: ProcessType[] = ['lavado', 'semilavado', 'honey', 'natural', 'sumergido'];
 
 const FERMENTATION_STYLES = [
-    { id: 'estandar', label: 'Estándar' },
-    { id: 'anaerobico', label: 'Anaeróbico' },
-    { id: 'doble_fermentacion', label: 'Doble Fermentación' },
-    { id: 'co_fermentacion', label: 'Co-Fermentación' },
-    { id: 'honey_yellow', label: 'Yellow Honey' },
-    { id: 'honey_red', label: 'Red Honey' },
-    { id: 'honey_black', label: 'Black Honey' },
-    { id: 'semi_lavado', label: 'Semi-Lavado / Gilling Basah' },
+    { id: 'estandar', label: 'Estándar / Tradicional' },
+    { id: 'anaerobico', label: 'Anaeróbico (General)' },
     { id: 'otro', label: '+ OTRO (ESPECIFICAR)' }
 ];
 
@@ -36,6 +30,9 @@ const COLOMBIAN_REGIONS = [
 ];
 
 const COMMON_MUNICIPALITIES = [
+    'Pereira', 'Apía', 'Balboa', 'Belén de Umbría', 'Dosquebradas', 
+    'Guática', 'La Celia', 'La Virginia', 'Marsella', 'Mistrató', 
+    'Pueblo Rico', 'Quinchía', 'Santa Rosa de Cabal', 'Santuario',
     'Pitalito', 'Acevedo', 'Garzón', 'Gigante', 'San Agustín', 'Andes', 
     'Fredonia', 'Salgar', 'Ciudad Bolívar', 'Planadas', 'Ibagué', 'Ataco', 'Chaparral',
     'Popayán', 'Inzá', 'Páez', 'Timbío', 'Manizales', 'Chinchiná', 'Palestina', 
@@ -56,6 +53,8 @@ interface PurchaseFormProps {
 export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, isReadOnly }: PurchaseFormProps) {
     const [dynamicVarieties, setDynamicVarieties] = useState<string[]>(COFFEE_VARIETIES_BASE);
     const [customVariety, setCustomVariety] = useState('');
+    const [customRegion, setCustomRegion] = useState('');
+    const [customMunicipality, setCustomMunicipality] = useState('');
 
     const initialFormState = {
         sicaId: '',
@@ -182,6 +181,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
     useEffect(() => {
         if (selectedLot) {
             const isBase = COFFEE_VARIETIES_BASE.includes(selectedLot.variety);
+            const isRegionBase = COLOMBIAN_REGIONS.includes(selectedLot.region);
+            const isMunBase = COMMON_MUNICIPALITIES.includes(selectedLot.municipality);
+
             setFormData({
                 sicaId: selectedLot.process_data?.sica_id || '',
                 farmerName: selectedLot.farmer_name || '',
@@ -189,8 +191,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 farmSizeHectares: selectedLot.farm_size_hectares || undefined,
                 altitude: selectedLot.altitude || 1600,
                 country: selectedLot.country || 'Colombia',
-                region: selectedLot.region || '',
-                municipality: selectedLot.municipality || '',
+                region: isRegionBase ? selectedLot.region : 'Otro',
+                municipality: isMunBase ? selectedLot.municipality : 'Otro',
                 variety: isBase ? selectedLot.variety : 'Otro',
                 process: (selectedLot.process as ProcessType) || 'lavado',
                 farmerPhone: selectedLot.process_data?.farmer_phone || '',
@@ -245,6 +247,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 })()
             });
             if (!isBase) setCustomVariety(selectedLot.variety);
+            if (!isRegionBase) setCustomRegion(selectedLot.region);
+            if (!isMunBase) setCustomMunicipality(selectedLot.municipality);
+
             setDisplayValue(formatCOP(String(selectedLot.purchase_value || 0)));
             setDisplayWeight(formatWeight(String(selectedLot.purchase_weight || 0).replace('.', ',')));
             setIsDirty(false); // Reset dirty on explicit load
@@ -254,6 +259,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
         if (!selectedLot) {
             setFormData(initialFormState);
             setCustomVariety('');
+            setCustomRegion('');
+            setCustomMunicipality('');
             setDisplayValue('');
             setDisplayWeight('');
             setSmartLinkText('');
@@ -397,6 +404,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             const finalVariety = formData.variety === 'Otro' ? customVariety : formData.variety;
             if (!finalVariety) throw new Error("Debe especificar una variedad.");
 
+            const finalRegion = formData.region === 'Otro' ? customRegion : formData.region;
+            const finalMunicipality = formData.municipality === 'Otro' ? customMunicipality : formData.municipality;
+
             // VALIDACIÓN ESTRICTA EUDR
             const isEudrRequired = (formData.farmSizeHectares ?? 0) >= 4;
             if (isEudrRequired && formData.isEuropeDestination && !formData.processData?.eudr_polygon) {
@@ -411,6 +421,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 result = await updateCoffeePurchase(selectedLot.id, {
                     ...formData,
                     variety: finalVariety,
+                    region: finalRegion,
+                    municipality: finalMunicipality,
                     processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone }
                 }, user);
             } else {
@@ -418,6 +430,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 result = await createCoffeePurchase({
                     ...formData,
                     variety: finalVariety,
+                    region: finalRegion,
+                    municipality: finalMunicipality,
                     processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone },
                     companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
                 });
@@ -463,6 +477,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             ...initialFormState,
             lotNumber: `AX-${Math.floor(Math.random() * 9000 + 1000)}`
         });
+        setCustomVariety('');
+        setCustomRegion('');
+        setCustomMunicipality('');
         setDisplayValue('');
         setStatus(null);
         setCurrentStep(1);
@@ -495,7 +512,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 onClick={() => {
                                     handleNewLot();
                                 }}
-                                className="w-full bg-black hover:bg-black/90 text-black font-bold py-5 rounded-industrial-sm transition-all uppercase  text-sm shadow-lg shadow-brand-green/20"
+                                className="w-full bg-brand-green hover:bg-brand-green/90 text-white font-bold py-5 rounded-industrial-sm transition-all uppercase  text-sm shadow-lg shadow-brand-green/20"
                             >
                                 Nuevo Lote (Limpiar Todo)
                             </button>
@@ -597,7 +614,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         type="button"
                                         onClick={handleSicaSearch}
                                         disabled={isSearchingSica || !formData.sicaId}
-                                        className="bg-brand-green hover:bg-brand-green/90 disabled:opacity-50 text-black px-8 py-4 rounded-full font-bold uppercase  transition-all shadow-lg hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
+                                        className="bg-brand-green hover:bg-brand-green/90 disabled:opacity-50 text-white px-8 py-4 rounded-full font-bold uppercase  transition-all shadow-lg hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
                                         title="Autocompletar"
                                     >
                                         {isSearchingSica ? (
@@ -673,10 +690,24 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     Identificación Individual de Lote
                                 </span>
                             </div>
+                            <div className="md:col-span-1">
+                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
+                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    Cédula SICA
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej. 1081492345"
+                                    value={formData.sicaId}
+                                    onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-black font-mono"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
                             <div className="md:col-span-2">
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Caficultor
+                                    Caficultor (Productor)
                                 </label>
                                 <input
                                     type="text"
@@ -804,7 +835,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             });
                                             if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
                                         }}
-                                        className="bg-brand-green hover:bg-brand-green/90 text-black border border-brand-green shadow-sm transition-colors px-4 py-3 rounded-industrial-sm text-[11px] font-bold uppercase  whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-brand-green hover:bg-brand-green/90 text-white border border-brand-green shadow-sm transition-colors px-4 py-3 rounded-industrial-sm text-[11px] font-bold uppercase  whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Extraer GPS"
                                     >
                                         Extraer GPS
@@ -859,7 +890,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Región / Departamento
+                                    Departamento
                                 </label>
                                 <select
                                     required
@@ -875,6 +906,17 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         </option>
                                     ))}
                                 </select>
+                                {formData.region === 'Otro' && (
+                                    <input
+                                        type="text"
+                                        placeholder="Especificar Departamento"
+                                        value={customRegion}
+                                        onChange={(e) => setCustomRegion(e.target.value)}
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-black animate-in fade-in slide-in-from-top-2 duration-300"
+                                        required
+                                        disabled={isSubmitting}
+                                    />
+                                )}
                             </div>
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
@@ -895,6 +937,17 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         </option>
                                     ))}
                                 </select>
+                                {formData.municipality === 'Otro' && (
+                                    <input
+                                        type="text"
+                                        placeholder="Especificar Municipio"
+                                        value={customMunicipality}
+                                        onChange={(e) => setCustomMunicipality(e.target.value)}
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-black animate-in fade-in slide-in-from-top-2 duration-300"
+                                        required
+                                        disabled={isSubmitting}
+                                    />
+                                )}
                             </div>
                         </div>
 
@@ -1011,6 +1064,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-black transition-all"
                                     >
                                         <option value="lavado">Lavado</option>
+                                        <option value="semilavado">Semilavado</option>
+                                        <option value="sumergido">Sumergido</option>
                                         <option value="honey">Honey</option>
                                         <option value="natural">Natural</option>
                                     </select>
@@ -1359,7 +1414,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 ) : <div></div>}
 
                 {currentStep < 3 ? (
-                    <button type="button" onClick={nextStep} className="px-10 py-4 bg-white text-black border border-gray-400 shadow-sm rounded-industrial-sm font-bold uppercase  text-[11px] hover:bg-black hover:text-black transition-colors shadow-[0_0_15px_rgba(0,255,136,0.1)]">
+                    <button type="button" onClick={nextStep} className="px-10 py-4 bg-white text-black border border-gray-400 shadow-sm rounded-industrial-sm font-bold uppercase  text-[11px] hover:bg-brand-green hover:text-white transition-colors shadow-[0_0_15px_rgba(0,255,136,0.1)]">
                         Siguiente Paso &rarr;
                     </button>
                 ) : (
@@ -1367,7 +1422,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                         <button
                             type="submit"
                             disabled={isSubmitting || isReadOnly}
-                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl bg-black text-black hover:bg-opacity-90 disabled:opacity-50`}
+                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50`}
                         >
                             {isSubmitting ? (
                                 <>

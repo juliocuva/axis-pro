@@ -23,15 +23,11 @@ interface ThrashingFormProps {
 export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashingComplete, user, isReadOnly }: ThrashingFormProps) {
     const PROCESS_PARAMS: Record<string, { shrinkageMin: number; shrinkageMax: number; conversion: number; frMin: number; frMax: number }> = {
         'Lavado': { shrinkageMin: 18.0, shrinkageMax: 20.0, conversion: 0.81, frMin: 88, frMax: 94 },
-        'Semi Lavado': { shrinkageMin: 19.0, shrinkageMax: 21.0, conversion: 0.80, frMin: 90, frMax: 96 },
+        'Semilavado': { shrinkageMin: 19.0, shrinkageMax: 21.0, conversion: 0.80, frMin: 90, frMax: 96 },
         'Honey': { shrinkageMin: 22.0, shrinkageMax: 24.0, conversion: 0.78, frMin: 95, frMax: 102 },
-        'Yellow Honey': { shrinkageMin: 20.0, shrinkageMax: 22.0, conversion: 0.80, frMin: 92, frMax: 98 },
-        'Red Honey': { shrinkageMin: 22.0, shrinkageMax: 24.0, conversion: 0.78, frMin: 95, frMax: 102 },
-        'Black Honey': { shrinkageMin: 24.0, shrinkageMax: 26.0, conversion: 0.75, frMin: 100, frMax: 108 },
         'Natural': { shrinkageMin: 28.0, shrinkageMax: 32.0, conversion: 0.70, frMin: 115, frMax: 130 },
-        'Anaerobico': { shrinkageMin: 21.0, shrinkageMax: 23.0, conversion: 0.79, frMin: 93, frMax: 100 },
-        'Doble Fermentacion': { shrinkageMin: 20.0, shrinkageMax: 22.0, conversion: 0.80, frMin: 92, frMax: 98 },
-        'Co Fermentacion': { shrinkageMin: 22.0, shrinkageMax: 25.0, conversion: 0.77, frMin: 96, frMax: 104 }
+        'Sumergido': { shrinkageMin: 21.0, shrinkageMax: 23.0, conversion: 0.79, frMin: 93, frMax: 100 },
+        'Anaerobico': { shrinkageMin: 21.0, shrinkageMax: 23.0, conversion: 0.79, frMin: 93, frMax: 100 }
     };
 
     const [formData, setFormData] = useState({
@@ -43,8 +39,8 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
         preparationProtocol: 'EP',
         sortingMethod: 'Máquina Selectora Óptica',
         sieveAnalysis: {
-            m18: 0,
-            m17: 0,
+            m18: 50,
+            m17: 50,
             m16: 0,
             m15: 0,
             caracol: 0,
@@ -76,25 +72,19 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 if (error) {
                     console.error("AXIS DB ERROR (Trilla):", error);
                 } else if (data) {
-                    console.log("AXIS DB SUCCESS (Trilla):", data);
-                    // Map process and fermentation style from DB to our internal parameters
                     let processKey = 'Lavado';
                     const dbProcess = (data.process || 'lavado').toLowerCase();
-                    const fs = (data.process_data?.fermentation_style || 'estandar').toLowerCase();
 
                     if (dbProcess === 'natural') {
                         processKey = 'Natural';
                     } else if (dbProcess === 'honey') {
-                        if (fs === 'honey_yellow') processKey = 'Yellow Honey';
-                        else if (fs === 'honey_red') processKey = 'Red Honey';
-                        else if (fs === 'honey_black') processKey = 'Black Honey';
-                        else processKey = 'Honey';
-                    } else { // Default to Lavado base
-                        if (fs === 'anaerobico') processKey = 'Anaerobico';
-                        else if (fs === 'doble_fermentacion') processKey = 'Doble Fermentacion';
-                        else if (fs === 'co_fermentacion') processKey = 'Co Fermentacion';
-                        else if (fs === 'semi_lavado') processKey = 'Semi Lavado';
-                        else processKey = 'Lavado';
+                        processKey = 'Honey';
+                    } else if (dbProcess === 'sumergido') {
+                        processKey = 'Sumergido';
+                    } else if (dbProcess === 'semilavado') {
+                        processKey = 'Semilavado';
+                    } else { 
+                        processKey = 'Lavado';
                     }
 
                     const thrashedW = Number(data.thrashed_weight) || 0;
@@ -107,9 +97,8 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         humidity: Number(data.humidity) || 11.0,
                         preparationProtocol: data.process_data?.preparation_protocol || 'EP',
                         sortingMethod: data.process_data?.sorting_method || 'Máquina Selectora Óptica',
-                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 0, m17: 0, m16: 0, m15: 0, caracol: 0, menores: 0 }
+                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 50, m17: 50, m16: 0, m15: 0, caracol: 0, menores: 0 }
                     }));
-
 
                     if (thrashedW > 0) {
                         setIsAlreadyThrashed(true);
@@ -126,10 +115,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
         fetchThrashingData();
     }, [inventoryId]);
 
-    // Estimación visual en el cliente (solo para UX, no se guarda)
     const [stats, setStats] = useState({
         totalOut: 0,
-        almondWeight: 0, // Excelso + Pasilla
+        almondWeight: 0,
         loss: 0,
         lossPct: 0,
         yieldPct: 0,
@@ -165,7 +153,6 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             theoreticalLossPct
         });
 
-        // Alerta de Desviación (solo mostrar si han ingresado pesajes para evitar alertas prematuras)
         if (almondWeight > 10) {
             if (lossPct < params.shrinkageMin) {
                 setWarning({
@@ -180,7 +167,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             } else {
                 setWarning({
                     message: `VALIDACIÓN DE CONTROL: Merma (${lossPct.toFixed(1)}%) dentro de los parámetros de estándar ideal para proceso ${formData.processType}.`,
-                    type: 'optimal' // changed from high to positive type visually later if we want
+                    type: 'optimal'
                 });
             }
         } else {
@@ -234,11 +221,8 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 </div>
             )}
             
-            
-
             <EUDRComplianceBadge lotData={lotDetails} className="mb-2" />
 
-            {/* Configuración Inicial de Parámetros */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
                 <div className="space-y-2">
                     <label className="text-[11px] font-bold text-black uppercase  block">1. Tipo de Proceso</label>
@@ -247,18 +231,14 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             value={formData.processType}
                             onChange={(e) => setFormData({ ...formData, processType: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-black transition-all appearance-none pr-12 disabled:opacity-100 disabled:text-black uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
                         >
                             <option value="Lavado">LAVADO (18-20%)</option>
-                            <option value="Semi Lavado">SEMI LAVADO (19-21%)</option>
+                            <option value="Semilavado">SEMILAVADO (19-21%)</option>
                             <option value="Honey">HONEY (22-24%)</option>
-                            <option value="Yellow Honey">YELLOW HONEY (20-22%)</option>
-                            <option value="Red Honey">RED HONEY (22-24%)</option>
-                            <option value="Black Honey">BLACK HONEY (24-26%)</option>
                             <option value="Natural">NATURAL (28-32%)</option>
+                            <option value="Sumergido">SUMERGIDO (21-23%)</option>
                             <option value="Anaerobico">ANAERÓBICO (21-23%)</option>
-                            <option value="Doble Fermentacion">DOBLE FERM. (20-22%)</option>
-                            <option value="Co Fermentacion">CO FERM. (22-25%)</option>
                         </select>
                     </div>
                 </div>
@@ -288,7 +268,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             value={formData.preparationProtocol}
                             onChange={(e) => setFormData({ ...formData, preparationProtocol: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-black transition-all appearance-none pr-12 disabled:opacity-100 disabled:text-black uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
                         >
                             <option value="EP">European Prep (EP) - Especialidad</option>
                             <option value="American">American Prep - Comercial Plus</option>
@@ -307,17 +287,16 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         value={formData.sortingMethod}
                         onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
                         disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                        className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-carbon transition-all appearance-none pr-12 disabled:opacity-50 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat shadow-sm"
+                        className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-black transition-all appearance-none pr-12 disabled:opacity-100 disabled:text-black uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat shadow-sm"
                     >
-                        <option value="Máquina Selectora Óptica">Selectora Óptica (Electrónica)</option>
-                        <option value="Manual (Hand-Sorted)">Manual en Banda (Hand-Sorted)</option>
+                        <option value="Máquina Selectora Óptica">Máquina Selectora Óptica</option>
+                        <option value="Manual (Hand-Sorted)">Manual (Hand-Sorted)</option>
                         <option value="Mixto (Óptica + Repaso Manual)">Mixto (Óptica + Repaso Manual)</option>
-                        <option value="Solo Densimétrica">Solo Densimétrica (Sin Óptica)</option>
+                        <option value="Solo Densimétrica">Solo Densimétrica</option>
                     </select>
                 </div>
             </div>
 
-            {/* SECCIÓN DE MALLAS (GRANULOMETRÍA) */}
             <div className="pt-6 border-t border-gray-400 shadow-sm space-y-4 relative z-10">
                 <div className="flex items-center justify-between">
                     <h4 className="text-[11px] font-bold text-black uppercase  flex items-center gap-2">
@@ -497,7 +476,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 <button
                     type="submit"
                     disabled={isSubmitting || !formData.excelsoWeight || isAlreadyThrashed || isReadOnly}
-                    className="w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl bg-brand-green text-black hover:bg-opacity-90 disabled:opacity-50"
+                    className="w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase text-xs shadow-2xl bg-brand-green text-black hover:bg-opacity-90 disabled:opacity-100 disabled:text-black"
                 >
                     {isSubmitting ? (
                         <div className="flex items-center gap-3">
