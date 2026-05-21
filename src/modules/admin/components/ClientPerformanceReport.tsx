@@ -47,7 +47,7 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                             <span className="text-[11px] text-brand-navy font-mono">ÚLTIMOS 5 MESES</span>
                         </div>
                         <h2 className="text-4xl font-bold text-brand-navy er uppercase">{companyName}</h2>
-                        <p className="text-[11px] text-gray-900 font-mono  mt-1">ID: {companyId}</p>
+                        <p className="text-[11px] text-brand-navy font-mono  mt-1">ID: {companyId}</p>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -67,7 +67,7 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                             <p className="text-[11px] text-brand-navy font-bold uppercase  mb-1">Volumen Trimestre</p>
                             <div className="flex items-end gap-3">
                                 <p className="text-4xl font-black text-brand-navy">3,440</p>
-                                <p className="text-sm text-gray-900 mb-1 font-mono">kg</p>
+                                <p className="text-sm text-brand-navy mb-1 font-mono">kg</p>
                             </div>
                             <div className="mt-4 inline-flex text-[11px] font-bold text-brand-navy-bright bg-white px-2 py-1 rounded">
                                 +31.8% vs Anterior
@@ -78,7 +78,7 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                             <p className="text-[11px] text-brand-navy font-bold uppercase  mb-1">Tueste Consistente</p>
                             <div className="flex items-end gap-3">
                                 <p className="text-4xl font-black text-brand-navy">96.5</p>
-                                <p className="text-sm text-gray-900 mb-1 font-mono">%</p>
+                                <p className="text-sm text-brand-navy mb-1 font-mono">%</p>
                             </div>
                             <div className="mt-4 inline-flex text-[11px] font-bold text-gold bg-gold/10 px-2 py-1 rounded">
                                 R-Squared: 0.98
@@ -89,7 +89,7 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                             <p className="text-[11px] text-brand-navy font-bold uppercase  mb-1">Merma Promedio</p>
                             <div className="flex items-end gap-3">
                                 <p className="text-4xl font-black text-brand-navy">14.2</p>
-                                <p className="text-sm text-gray-900 mb-1 font-mono">%</p>
+                                <p className="text-sm text-brand-navy mb-1 font-mono">%</p>
                             </div>
                             <div className="mt-4 inline-flex text-[11px] font-bold text-brand-navy-bright bg-white px-2 py-1 rounded">
                                 -1.2% Optimizado
@@ -100,7 +100,7 @@ export default function ClientPerformanceReport({ companyId, companyName, onClos
                             <p className="text-[11px] text-brand-navy font-bold uppercase  mb-1">Impacto Ambiental</p>
                             <div className="flex items-end gap-3">
                                 <p className="text-4xl font-black text-brand-navy">B+</p>
-                                <p className="text-sm text-gray-900 mb-1 font-mono">Score</p>
+                                <p className="text-sm text-brand-navy mb-1 font-mono">Score</p>
                             </div>
                             <div className="mt-4 inline-flex text-[11px] font-bold text-brand-navy bg-white px-2 py-1 rounded">
                                 Huella Medida

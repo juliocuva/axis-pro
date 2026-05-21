@@ -155,7 +155,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-64">
                             <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin mb-6"></div>
-                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Cargando registros...</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase ">Cargando registros...</p>
                         </div>
                     ) : lots.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-64 opacity-50">
@@ -191,16 +191,16 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                                         </td>
                                         <td className="p-4">
                                             <p className="text-[12px] font-medium text-gray-200">{lot.farmer_name || 'Desconocido'}</p>
-                                            <p className="text-[11px] text-gray-900">{lot.farm_name || lot.region || '--'}</p>
+                                            <p className="text-[11px] text-brand-navy">{lot.farm_name || lot.region || '--'}</p>
                                         </td>
                                         <td className="p-4">
                                             <p className="text-[12px] font-medium text-gray-300">{lot.variety || '--'}</p>
-                                            <p className="text-[11px] text-gray-900">{lot.process || '--'}</p>
+                                            <p className="text-[11px] text-brand-navy">{lot.process || '--'}</p>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-end gap-1">
                                                 <span className="text-14px font-bold text-brand-navy">{lot.net_weight || 0}</span>
-                                                <span className="text-[9px] text-gray-900 mb-0.5">kg</span>
+                                                <span className="text-[9px] text-brand-navy mb-0.5">kg</span>
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">

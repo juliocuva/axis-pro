@@ -74,7 +74,7 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 pb-6 border-b border-gray-400 shadow-sm">
                 <div>
                     <h2 className="text-3xl font-black uppercase er text-brand-navy">Planta & Trilla</h2>
-                    <p className="text-[11px] text-gray-900 font-bold uppercase  mt-1">Control de Mermas y Rendimiento</p>
+                    <p className="text-[11px] text-brand-navy font-bold uppercase  mt-1">Control de Mermas y Rendimiento</p>
                 </div>
 
                 {/* SELECTOR DE LOTE */}
@@ -102,7 +102,7 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
                                 })
                             )}
                         </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-brand-navy transition-colors">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy group-hover/select:text-brand-navy transition-colors">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
                         </div>
                     </div>
@@ -127,7 +127,7 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
                     />
                 )
             ) : (
-                <div className="h-64 border border-dashed border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-4 text-gray-900">
+                <div className="h-64 border border-dashed border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-4 text-brand-navy">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
                     <p className="text-xs uppercase font-bold ">Selecciona un lote para iniciar la trilla</p>
                 </div>

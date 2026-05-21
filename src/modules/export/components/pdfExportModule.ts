@@ -73,129 +73,78 @@ export const exportarInformeLotePDF = async (
   lote: LotData,
   options: PDFExportOptions
 ): Promise<void> => {
-  console.log('Iniciando exportación PDF para lote:', lote.loteNumber, options);
+  console.log('Iniciando exportación PDF server-side para lote:', lote.loteNumber, options);
 
-  // Intentamos capturar el elemento con ID 'lot-certificate-area' si existe en el DOM
   const element = document.getElementById('lot-certificate-area');
   
   if (element) {
     try {
-      // Buscamos las páginas individuales con la clase 'certificate-page'
-      let pages = element.querySelectorAll('.certificate-page');
+      // 1. Clonar el elemento de forma temporal para limpiarlo y preparar las páginas
+      const clonedElement = element.cloneNode(true) as HTMLElement;
       
-      // Si por alguna razón no la tienen todavía, buscamos divs que tengan minHeight de 1056px
-      if (pages.length === 0) {
-        pages = element.querySelectorAll('div[style*="1056px"]');
-      }
+      // Remover barras de control interactivo, botones y elementos no imprimibles en el clon
+      const interactiveElements = clonedElement.querySelectorAll('.no-print, .no-export, button, select');
+      interactiveElements.forEach(el => el.remove());
 
-      if (pages.length > 0) {
-        console.log(`Detectadas ${pages.length} páginas para exportación de alta fidelidad.`);
+      // Asegurar visibilidad completa de todas las páginas del certificado en el HTML clonado
+      const pages = clonedElement.querySelectorAll('.certificate-page');
+      pages.forEach((pageEl: any) => {
+        pageEl.style.setProperty('display', 'block', 'important');
+        pageEl.style.setProperty('visibility', 'visible', 'important');
+        pageEl.style.setProperty('opacity', '1', 'important');
+        pageEl.style.setProperty('position', 'relative', 'important');
+        pageEl.style.setProperty('margin', '0 0 20px 0', 'important');
+        pageEl.style.setProperty('box-shadow', 'none', 'important');
+        pageEl.style.setProperty('border', 'none', 'important');
         
-        // Crear documento PDF en formato de píxeles para coincidir 1:1 con el diseño del certificado (816x1056 px)
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'px',
-          format: [816, 1056],
-          hotfixes: ["px_scaling"]
-        });
+        // Quitar clases responsivas o de paso oculto
+        pageEl.classList.remove('step-hidden');
+        pageEl.classList.add('step-visible');
+      });
 
-        for (let i = 0; i < pages.length; i++) {
-          const pageEl = pages[i] as HTMLElement;
-          
-          // Guardar estilos originales
-          const originalStyle = pageEl.style.cssText;
-          
-          // Forzar estilos de renderizado perfectos para html2canvas
-          pageEl.style.setProperty('display', 'flex', 'important');
-          pageEl.style.setProperty('visibility', 'visible', 'important');
-          pageEl.style.width = '816px';
-          pageEl.style.height = '1056px';
-          pageEl.style.minHeight = '1056px';
-          pageEl.style.maxHeight = '1056px';
-          pageEl.style.boxShadow = 'none';
-          pageEl.style.border = 'none';
-          pageEl.style.margin = '0';
-          
-          // Capturar la página con alta resolución
-          const canvas = await html2canvas(pageEl, {
-            scale: 2, // Calidad retina
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff',
-            width: 816,
-            height: 1056,
-            windowWidth: 816,
-            windowHeight: 1056
-          });
+      // Asegurar que las dimensiones de los gráficos de Recharts estén fijadas
+      const charts = clonedElement.querySelectorAll('.recharts-responsive-container');
+      charts.forEach((chart: any) => {
+        chart.style.width = '750px';
+        chart.style.height = '400px';
+        chart.style.visibility = 'visible';
+        chart.style.opacity = '1';
+      });
 
-          // Restaurar estilo original
-          pageEl.style.cssText = originalStyle;
+      // Llamar al endpoint del servidor
+      const response = await fetch('/api/pdf/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          htmlContent: clonedElement.innerHTML,
+          fileName: `Certificado-Lote-${lote.loteNumber}`
+        })
+      });
 
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
-          
-          if (i > 0) {
-            pdf.addPage([816, 1056], 'portrait');
-          }
-          
-          pdf.addImage(imgData, 'JPEG', 0, 0, 816, 1056);
-        }
-
-        pdf.save(`Informe-Axis-${lote.loteNumber}.pdf`);
-        return;
+      if (!response.ok) {
+        throw new Error(`Servidor retornó código: ${response.status}`);
       }
 
-      // Fallback a captura de contenedor completo tradicional si no se detectan páginas individuales
-      console.warn('No se encontraron páginas individuales. Usando captura de contenedor completo...');
-      const originalStyle = element.style.cssText;
-      element.style.width = '816px';
-      element.style.maxWidth = '816px';
-      element.style.minWidth = '816px';
-      element.style.height = 'auto';
-      element.style.overflow = 'visible';
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Certificado-Lote-${lote.loteNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        windowWidth: 816,
-        height: element.scrollHeight
-      });
-
-      element.style.cssText = originalStyle;
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [816, 1056],
-      });
-
-      const imgWidth = 816;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= 1056;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage([816, 1056], 'portrait');
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= 1056;
-      }
-
-      pdf.save(`Informe-Axis-${lote.loteNumber}.pdf`);
+      console.log('PDF generado en servidor descargado con éxito.');
       return;
     } catch (error) {
-      console.error('Error capturando DOM para PDF:', error);
-      throw error;
+      console.error('Error al generar PDF en el servidor. Intentando fallback básico...', error);
     }
   }
 
-  // Fallback: Generación básica de PDF si no hay elemento DOM (MVP)
+  // Fallback: Generación básica de PDF si no hay elemento DOM o falla la API (MVP)
   const doc = new jsPDF({
     orientation: options.orientacion,
     unit: 'mm',

@@ -24,6 +24,31 @@ interface LotCertificateProps {
     } | null;
 }
 
+interface PageWrapperProps {
+    pageNum: number;
+    viewType: 'continuous' | 'paginated' | 'grid';
+    setViewType: (val: any) => void;
+    setActivePage: (val: number) => void;
+    children: React.ReactNode;
+}
+
+function PageWrapper({ pageNum, viewType, setViewType, setActivePage, children }: PageWrapperProps) {
+    if (viewType === 'grid') {
+        return (
+            <div 
+                className="grid-page-wrapper animate-in zoom-in duration-300" 
+                onClick={() => { setViewType('paginated'); setActivePage(pageNum); }}
+            >
+                <div className="grid-page-badge">PÁGINA {pageNum}</div>
+                <div className="grid-page-content">
+                    {children}
+                </div>
+            </div>
+        );
+    }
+    return <>{children}</>;
+}
+
 export default function LotCertificate({ inventoryId, onClose, user }: LotCertificateProps) {
     const [lotData, setLotData] = useState<any>(null);
     const [physicalData, setPhysicalData] = useState<any>(null);
@@ -36,9 +61,9 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     const [tracesStatus, setTracesStatus] = useState<'idle' | 'preparing' | 'sending' | 'certified'>('idle');
     const [ddsReference, setDdsReference] = useState<string | null>(null);
 
-    // Estados para la previsualización por pasos
-    const [activeStep, setActiveStep] = useState(1);
-    const [isStepMode, setIsStepMode] = useState(false); // Por defecto mostrar todo
+    // Estados para la previsualización multipágina
+    const [viewType, setViewType] = useState<'continuous' | 'paginated' | 'grid'>('continuous');
+    const [activePage, setActivePage] = useState(1);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [loadingMessage, setLoadingMessage] = useState('Iniciando auditoría digital...');
 
@@ -322,7 +347,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" /></svg>
             </div>
             <h3 className="text-xl font-black uppercase text-brand-navy">Lote No Encontrado</h3>
-            <p className="text-xs text-gray-900 uppercase font-bold max-w-xs">El identificador de este lote no existe en el sistema de trazabilidad de AxisOne o ha sido restringido por seguridad.</p>
+            <p className="text-xs text-brand-navy uppercase font-bold max-w-xs">El identificador de este lote no existe en el sistema de trazabilidad de AxisOne o ha sido restringido por seguridad.</p>
             <button onClick={onClose} className="mt-8 px-8 py-3 bg-[#0C6056] text-white rounded-xl text-xs font-bold uppercase">Volver al Inicio</button>
         </div>
     );
@@ -368,6 +393,11 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     const pData = lotData?.process_data || {};
     const isAxisCertifiedTech = pData.ph_inicial && pData.ph_final && pData.brix_inicial && pData.temperatura_masa_max && pData.duracion_fermentacion_horas;
 
+    const getPageClass = (pageNum: number) => {
+        if (viewType === 'paginated') return activePage === pageNum ? 'step-visible' : 'step-hidden';
+        return 'step-visible';
+    };
+
     return (
         <>
              <style jsx global>{`
@@ -385,6 +415,56 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 @media screen {
                     .step-hidden { display: none !important; }
                     .step-visible { display: flex !important; animation: stepFadeIn 0.4s ease-out; }
+
+                    /* Estilos para Vista Cuadrícula 2x2 */
+                    .certificate-grid {
+                        display: grid !important;
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 24px !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                    }
+                    .grid-page-wrapper {
+                        position: relative !important;
+                        cursor: pointer !important;
+                        border: 2px solid transparent !important;
+                        border-radius: 16px !important;
+                        overflow: hidden !important;
+                        transition: all 0.3s ease !important;
+                        background: rgba(255, 255, 255, 0.05) !important;
+                        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+                    }
+                    .grid-page-wrapper:hover {
+                        border-color: #0C6056 !important;
+                        transform: translateY(-4px) !important;
+                        box-shadow: 0 10px 30px rgba(12, 96, 86, 0.2) !important;
+                    }
+                    .grid-page-badge {
+                        position: absolute !important;
+                        top: 12px !important;
+                        left: 12px !important;
+                        background: #0C6056 !important;
+                        color: white !important;
+                        padding: 4px 8px !important;
+                        border-radius: 8px !important;
+                        font-size: 10px !important;
+                        font-weight: 800 !important;
+                        z-index: 50 !important;
+                        text-transform: uppercase !important;
+                        letter-spacing: 0.05em !important;
+                    }
+                    .grid-page-content {
+                        transform: scale(0.48) !important;
+                        transform-origin: top left !important;
+                        width: 816px !important;
+                        height: 1056px !important;
+                    }
+                    /* Asegurar que las páginas escaladas quepan en sus contenedores */
+                    .certificate-grid .grid-page-wrapper {
+                        width: 392px !important;
+                        height: 507px !important;
+                        overflow: hidden !important;
+                    }
                 }
                 @keyframes stepFadeIn {
                     from { opacity: 0; transform: translateY(10px); }
@@ -459,12 +539,92 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             `}</style>
             <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
 
+                    {/* Visualizer Control Bar - Premium Glassmorphic */}
+                    <div className="w-full max-w-[816px] bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-2xl no-print">
+                        <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-[#0C6056] animate-pulse"></div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">
+                                Previsualización de Documento
+                            </span>
+                        </div>
+                        
+                        {/* Selector de Modos de Vista */}
+                        <div className="flex items-center bg-black/40 p-1.5 rounded-xl border border-white/5 gap-1">
+                            <button
+                                type="button"
+                                onClick={() => setViewType('continuous')}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                    viewType === 'continuous'
+                                        ? 'bg-[#0C6056] text-white shadow-lg'
+                                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                                }`}
+                            >
+                                Vista Continua
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setViewType('paginated')}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                    viewType === 'paginated'
+                                        ? 'bg-[#0C6056] text-white shadow-lg'
+                                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                                }`}
+                            >
+                                Vista Paginada
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setViewType('grid')}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                    viewType === 'grid'
+                                        ? 'bg-[#0C6056] text-white shadow-lg'
+                                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                                }`}
+                            >
+                                Vista Cuadrícula 2x2
+                            </button>
+                        </div>
+
+                        {/* Paginador (Solo para Vista Paginada) */}
+                        {viewType === 'paginated' && (
+                            <div className="flex items-center gap-3 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5 animate-in fade-in slide-in-from-right-4 duration-300">
+                                <button
+                                    type="button"
+                                    onClick={() => setActivePage(prev => Math.max(prev - 1, 1))}
+                                    disabled={activePage === 1}
+                                    className="p-1.5 rounded-lg text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+                                </button>
+                                <span className="text-[10px] font-black uppercase text-white font-mono tracking-wider min-w-[70px] text-center">
+                                    Pág. {activePage} / 4
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setActivePage(prev => Math.min(prev + 1, 4))}
+                                    disabled={activePage === 4}
+                                    className="p-1.5 rounded-lg text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Contenedor Maestro para Exportación */}
-                    <div id="lot-certificate-area" className="w-[816px] mx-auto space-y-8 print:space-y-0 print:m-0 text-brand-navy font-medium">
+                    <div 
+                        id="lot-certificate-area" 
+                        className={`mx-auto text-brand-navy font-medium ${
+                            viewType === 'grid' 
+                                ? 'certificate-grid' 
+                                : 'w-[816px] space-y-8 print:space-y-0 print:m-0'
+                        }`}
+                    >
 
                         {/* HOJA 1: ETAPA 01 (INGRESO) & ETAPA 02 (TRILLA) */}
-                        <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${isStepMode && (activeStep !== 1 && activeStep !== 2) ? 'step-hidden' : 'step-visible'}`}
-                            style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                        <PageWrapper pageNum={1} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(1)}`}
+                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
 
                             {/* Header Premium */}
                             <div className="bg-white px-10 py-8 flex justify-between items-center border-b-4 border-[#0C6056] relative overflow-hidden">
@@ -747,18 +907,15 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 );
                             })()}
 
-                            {/* Footer Hoja 1 */}
-                            <div className="mt-auto px-6 py-4 flex justify-between items-center border-t border-gray-400 bg-white">
-                                <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">INDUSTRIAL STANDARDIZATION • ETAPAS 01-02 • INDUSTRIAL VERIFICATION</p>
-                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 01 DE 04</p>
                             </div>
-                        </div>
+                        </PageWrapper>
 
-                        <div className="w-full h-8 print:hidden"></div>
+                        {viewType !== 'grid' && <div className="w-full h-8 print:hidden"></div>}
 
                         {/* HOJA 2: ETAPA 03 (LABORATORIO) & ETAPA 04 (CATACIÓN) */}
-                        <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${isStepMode && (activeStep !== 3 && activeStep !== 4) ? 'step-hidden' : 'step-visible'}`}
-                            style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                        <PageWrapper pageNum={2} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(2)}`}
+                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
@@ -851,17 +1008,15 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             </div>
 
                             {/* Footer Hoja 2 */}
-                            <div className="mt-auto px-10 py-8 flex justify-between items-center border-t border-gray-400 bg-white">
-                                <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">INDUSTRIAL STANDARDIZATION • ETAPAS 03-04 • INDUSTRIAL VERIFICATION</p>
-                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 02 DE 04</p>
                             </div>
-                        </div>
+                        </PageWrapper>
 
-                        <div className="w-full h-8 print:hidden"></div>
+                        {viewType !== 'grid' && <div className="w-full h-8 print:hidden"></div>}
 
                         {/* HOJA 3: ETAPA 05 (TOSTIÓN) */}
-                        <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl ${isStepMode && activeStep !== 5 ? 'step-hidden' : 'step-visible'}`}
-                            style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                        <PageWrapper pageNum={3} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl ${getPageClass(3)}`}
+                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
@@ -887,7 +1042,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             <div className="space-y-2">
                                                 {scaRadarData.map((d, i) => (
                                                     <div key={i} className="flex justify-between gap-12 text-[11px] border-b border-[#1A1A1A]/5 pb-1">
-                                                        <span className="font-bold uppercase text-gray-900">{d.subject}</span>
+                                                        <span className="font-bold uppercase text-brand-navy">{d.subject}</span>
                                                         <span className="font-black text-[#1A1A1A]">{Number(d.A).toFixed(2)}</span>
                                                     </div>
                                                 ))}
@@ -943,18 +1098,15 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 </div>
                             </div>
 
-                            {/* Footer Hoja 3 */}
-                            <div className="mt-auto px-6 py-4 flex justify-between items-center border-t border-gray-400 bg-white">
-                                <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">INTEGRIDAD TÉCNICA • ETAPA 04-05 • VERIFICACIÓN INDUSTRIAL</p>
-                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 03 DE 04</p>
                             </div>
-                        </div>
+                        </PageWrapper>
 
-                        <div className="w-full h-8 print:hidden"></div>
+                        {viewType !== 'grid' && <div className="w-full h-8 print:hidden"></div>}
 
                         {/* HOJA 4: ADN FINAL Y CERTIFICACIÓN */}
-                        <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl mb-8 print:mb-0 print:shadow-none print:break-after-page ${isStepMode && activeStep !== 6 ? 'step-hidden' : 'step-visible'}`}
-                            style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                        <PageWrapper pageNum={4} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl mb-8 print:mb-0 print:shadow-none print:break-after-page ${getPageClass(4)}`}
+                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
@@ -1069,6 +1221,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 04 DE 04</p>
                             </div>
                         </div>
+                    </PageWrapper>
 
                     </div>
 

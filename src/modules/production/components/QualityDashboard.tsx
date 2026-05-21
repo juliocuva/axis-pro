@@ -17,12 +17,12 @@ const QualityMetric = ({ label, master, current, unit, deviation }: QualityMetri
     return (
         <div className="flex items-center justify-between p-4 bg-bg-main rounded-industrial-sm border border-gray-400 shadow-sm group hover:border-gray-400 shadow-sm transition-all">
             <div className="flex flex-col">
-                <span className="text-[11px] text-gray-900 uppercase font-mono ">{label}</span>
+                <span className="text-[11px] text-brand-navy uppercase font-mono ">{label}</span>
                 <span className="text-sm font-bold mt-1 text-gray-200">{current} {unit}</span>
             </div>
             <div className="flex items-center gap-4">
                 <div className="text-right">
-                    <p className="text-[11px] text-gray-900 uppercase font-mono">Maestro</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-mono">Maestro</p>
                     <p className="text-xs font-medium text-brand-navy">{master} {unit}</p>
                 </div>
                 {deviation !== undefined && (
@@ -49,7 +49,7 @@ export default function QualityDashboard() {
                                     Monitor de Consistencia
                                     <span className="bg-white border border-gray-400 shadow-sm text-brand-navy-bright text-[11px] px-2 py-1 rounded-full uppercase ">En Vivo</span>
                                 </h3>
-                                <p className="text-xs text-gray-900 font-mono">Lot: AX-9432 • Perfil: Supremo-DXB</p>
+                                <p className="text-xs text-brand-navy font-mono">Lot: AX-9432 • Perfil: Supremo-DXB</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -81,12 +81,12 @@ export default function QualityDashboard() {
                                     </div>
                                     <div className="w-full flex justify-between mt-3 px-2">
                                         <div className="text-center">
-                                            <p className="text-[11px] text-gray-900 uppercase">Grano</p>
+                                            <p className="text-[11px] text-brand-navy uppercase">Grano</p>
                                             <p className="text-lg font-bold">58.2</p>
                                         </div>
                                         <div className="h-8 w-px bg-white"></div>
                                         <div className="text-center">
-                                            <p className="text-[11px] text-gray-900 uppercase">Molido</p>
+                                            <p className="text-[11px] text-brand-navy uppercase">Molido</p>
                                             <p className="text-lg font-bold">64.5</p>
                                         </div>
                                     </div>
@@ -105,7 +105,7 @@ export default function QualityDashboard() {
                         </div>
 
                         <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial-sm">
-                            <p className="text-[11px] text-gray-900 uppercase font-mono mb-2">Sello Digial de Calidad</p>
+                            <p className="text-[11px] text-brand-navy uppercase font-mono mb-2">Sello Digial de Calidad</p>
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 bg-white border border-gray-400 shadow-sm rounded flex items-center justify-center text-brand-navy-bright text-[9px]">QR</div>
                                 <p className="text-[9px] text-brand-navy leading-tight">Autenticado por el Motor de Inteligencia AXIS COFFEE PRO v2.0</p>

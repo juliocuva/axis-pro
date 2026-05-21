@@ -165,7 +165,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
 
                         <div className="space-y-4">
                             <div>
-                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Lote a Exportar</label>
+                                <label className="text-[9px] font-bold text-brand-navy uppercase  pl-1">Lote a Exportar</label>
                                 <select
                                     className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 focus:border-black outline-none transition-all text-sm font-bold uppercase"
                                     value={selectedLotId}
@@ -187,7 +187,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             </div>
 
                             <div>
-                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Mercado Destino (Continente)</label>
+                                <label className="text-[9px] font-bold text-brand-navy uppercase  pl-1">Mercado Destino (Continente)</label>
                                 <select
                                     className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 focus:border-black outline-none transition-all text-sm font-bold uppercase"
                                     value={formData.targetMarket}
@@ -201,7 +201,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             </div>
 
                             <div>
-                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Puerto / Ciudad Destino</label>
+                                <label className="text-[9px] font-bold text-brand-navy uppercase  pl-1">Puerto / Ciudad Destino</label>
                                 <input
                                     type="text"
                                     required
@@ -225,7 +225,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             />
 
                             <div>
-                                <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Fecha Programada de Exportación</label>
+                                <label className="text-[9px] font-bold text-brand-navy uppercase  pl-1">Fecha Programada de Exportación</label>
                                 <input
                                     type="date"
                                     required
@@ -320,7 +320,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             )}
 
                             <div className="mt-6 p-4 rounded-xl bg-black/40 border border-gray-400 shadow-sm">
-                                <span className="text-[9px] text-gray-900 uppercase font-bold  block mb-2">Bioseguridad del Lote</span>
+                                <span className="text-[9px] text-brand-navy uppercase font-bold  block mb-2">Bioseguridad del Lote</span>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[11px] font-bold text-brand-navy uppercase">{formData.moistureContent}% Humedad</span>
                                     <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-md ${formData.moistureContent > 12.5 ? 'bg-brand-red border-brand-red text-brand-navy' : 'bg-white text-brand-navy border border-gray-400 shadow-sm'}`}>

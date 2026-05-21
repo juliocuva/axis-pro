@@ -275,7 +275,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 <header className="p-10 border-b border-gray-400 shadow-sm flex justify-between items-center">
                                     <div>
                                         <h3 className="text-2xl font-bold uppercase  text-brand-navy">Archivo de Perfiles Maestro</h3>
-                                        <p className="text-[11px] text-gray-900 font-mono mt-1 uppercase">Sincronización con Copiloto Industrial</p>
+                                        <p className="text-[11px] text-brand-navy font-mono mt-1 uppercase">Sincronización con Copiloto Industrial</p>
                                     </div>
                                     <button onClick={() => setShowHistoryModal(false)} className="p-3 bg-white rounded-full hover:bg-white transition-colors">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -290,12 +290,12 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-lg text-brand-navy mb-0.5">{roast.batch_id_label}</p>
-                                                    <p className="text-[11px] text-gray-900 font-mono uppercase">{new Date(roast.roast_date).toLocaleDateString()} • {roast.process.toUpperCase()}</p>
+                                                    <p className="text-[11px] text-brand-navy font-mono uppercase">{new Date(roast.roast_date).toLocaleDateString()} • {roast.process.toUpperCase()}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-8">
                                                 <div className="text-right">
-                                                    <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Puntaje basado en estándares SCA</p>
+                                                    <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Puntaje basado en estándares SCA</p>
                                                     <p className="text-lg font-bold text-brand-navy-bright">{roast.sca_score || '86.5'}</p>
                                                 </div>
                                                 <button
@@ -319,7 +319,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                             {/* ENCABEZADO: IDENTIFICACIÓN DEL LOTE Y PUNTAJE */}
                             <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-end gap-6 pb-4 mb-2">
                                 <div className="flex-1 w-full max-w-sm mx-auto">
-                                    <label className="text-[9px] text-gray-900 uppercase font-bold mb-1.5 block ">Cambiar Lote a Procesar</label>
+                                    <label className="text-[9px] text-brand-navy uppercase font-bold mb-1.5 block ">Cambiar Lote a Procesar</label>
                                     <div className="relative">
                                         <select
                                             value={selectedLot?.id || ''}
@@ -336,14 +336,14 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                                 </option>
                                             ))}
                                         </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover:text-brand-navy transition-colors">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy group-hover:text-brand-navy transition-colors">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="text-right">
-                                    <p className="text-[9px] text-gray-900 uppercase font-bold mb-1 ">Puntaje SCA (Crudo)</p>
+                                    <p className="text-[9px] text-brand-navy uppercase font-bold mb-1 ">Puntaje SCA (Crudo)</p>
                                     <p className="text-4xl font-black text-brand-navy-bright">
                                         {getScaScore(selectedLot)}
                                     </p>
@@ -357,25 +357,25 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-industrial relative overflow-hidden flex flex-col justify-between group">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl pointer-events-none group-hover:bg-white transition-colors"></div>
                                     <div className="mb-6 relative z-10">
-                                        <h4 className="text-[11px] font-bold text-gray-900 uppercase  mb-1">1. Indicadores Críticos</h4>
+                                        <h4 className="text-[11px] font-bold text-brand-navy uppercase  mb-1">1. Indicadores Críticos</h4>
                                         <p className="text-[11px] text-gray-600 font-medium">Dictan la Temperatura de Carga</p>
                                     </div>
 
                                     <div className="space-y-6 relative z-10">
                                         {/* Densidad es el más grande */}
                                         <div className="flex justify-between items-end border-b border-gray-400 shadow-sm pb-4">
-                                            <p className="text-xs text-gray-900 uppercase font-bold">Densidad</p>
+                                            <p className="text-xs text-brand-navy uppercase font-bold">Densidad</p>
                                             <div className="text-right">
                                                 <p className="text-5xl font-black text-brand-navy er">
                                                     {extraLotData.physical?.density_gl || selectedLot.physical_analysis?.[0]?.density_gl || '--'}
                                                 </p>
-                                                <p className="text-[11px] text-gray-900 font-bold uppercase">g/L</p>
+                                                <p className="text-[11px] text-brand-navy font-bold uppercase">g/L</p>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
-                                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Humedad</p>
+                                                <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Humedad</p>
                                                 <p className="text-2xl font-bold text-brand-navy ">
                                                     {extraLotData.physical?.moisture_pct 
                                                         ? `${extraLotData.physical.moisture_pct}%` 
@@ -385,7 +385,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                                 </p>
                                             </div>
                                             <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
-                                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Actividad Agua (aW)</p>
+                                                <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Actividad Agua (aW)</p>
                                                 <p className="text-2xl font-bold text-brand-navy ">
                                                     {extraLotData.physical?.aw || selectedLot.physical_analysis?.[0]?.aw || '0.58'}
                                                 </p>
@@ -397,22 +397,22 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 {/* 2. ESPECIFICACIONES DEL LOTE */}
                                 <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-industrial relative overflow-hidden flex flex-col justify-between group">
                                     <div className="mb-6 relative z-10">
-                                        <h4 className="text-[11px] font-bold text-gray-900 uppercase  mb-1">2. Especificaciones</h4>
+                                        <h4 className="text-[11px] font-bold text-brand-navy uppercase  mb-1">2. Especificaciones</h4>
                                         <p className="text-[11px] text-gray-600 font-medium">Determinan la Estrategia de Perfil</p>
                                     </div>
 
                                     <div className="space-y-4 relative z-10 flex-1 flex flex-col justify-center">
                                         <div className="flex justify-between items-center bg-white p-4 rounded border border-gray-400 shadow-sm">
-                                            <span className="text-[11px] text-gray-900 font-bold uppercase">Varietal</span>
+                                            <span className="text-[11px] text-brand-navy font-bold uppercase">Varietal</span>
                                             <span className="text-sm font-bold text-brand-navy uppercase ">{selectedLot.variety || 'Caturra'}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-white p-4 rounded border border-gray-400 shadow-sm">
-                                            <span className="text-[11px] text-gray-900 font-bold uppercase">Proceso</span>
+                                            <span className="text-[11px] text-brand-navy font-bold uppercase">Proceso</span>
                                             <span className="text-sm font-bold text-brand-navy-bright uppercase ">{selectedLot.process || 'Lavado'}</span>
                                         </div>
                                         <div className="flex justify-between items-center bg-white p-4 rounded border border-gray-400 shadow-sm">
-                                            <span className="text-[11px] text-gray-900 font-bold uppercase">Altura</span>
-                                            <span className="text-sm font-bold text-brand-navy ">{selectedLot.altitude ? Number(selectedLot.altitude).toLocaleString('es-CO') : '1.750'} <span className="text-[9px] text-gray-900">msnm</span></span>
+                                            <span className="text-[11px] text-brand-navy font-bold uppercase">Altura</span>
+                                            <span className="text-sm font-bold text-brand-navy ">{selectedLot.altitude ? Number(selectedLot.altitude).toLocaleString('es-CO') : '1.750'} <span className="text-[9px] text-brand-navy">msnm</span></span>
                                         </div>
                                     </div>
                                 </div>
@@ -420,14 +420,14 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 {/* 3. CALIDAD DE MATERIA PRIMA */}
                                 <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-industrial relative overflow-hidden flex flex-col justify-between">
                                     <div className="mb-6">
-                                        <h4 className="text-[11px] font-bold text-gray-900 uppercase  mb-1">3. Calidad Materia Prima</h4>
+                                        <h4 className="text-[11px] font-bold text-brand-navy uppercase  mb-1">3. Calidad Materia Prima</h4>
                                         <p className="text-[11px] text-gray-600 font-medium">Previsión de Limpieza y Uniformidad</p>
                                     </div>
 
                                     <div className="space-y-6">
                                         <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
                                             <div className="flex justify-between items-end mb-3">
-                                                <p className="text-[9px] text-gray-900 uppercase font-bold">Defectos Físicos Totales</p>
+                                                <p className="text-[9px] text-brand-navy uppercase font-bold">Defectos Físicos Totales</p>
                                                 <p className="text-lg font-bold text-brand-navy">
                                                     {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0)
                                                         ? `${selectedLot.physical_analysis[0].total_defects_grams || 0}g`
@@ -438,17 +438,17 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                             <div className="w-full bg-white h-1.5 rounded-full overflow-hidden">
                                                 <div className="bg-brand-green h-full w-[5%]" />
                                             </div>
-                                            <p className="text-[9px] text-gray-900 uppercase mt-2 text-right">Lote Limpio (Grado Especialidad)</p>
+                                            <p className="text-[9px] text-brand-navy uppercase mt-2 text-right">Lote Limpio (Grado Especialidad)</p>
                                         </div>
 
                                         <div>
-                                            <p className="text-[9px] text-gray-900 uppercase font-bold mb-3">Distribución de Malla (Homogeneidad)</p>
+                                            <p className="text-[9px] text-brand-navy uppercase font-bold mb-3">Distribución de Malla (Homogeneidad)</p>
                                             <div className="flex items-end gap-2 h-16 border-b border-gray-400 shadow-sm pb-1">
                                                 {/* Bar Chart Mock for mesh distribution */}
                                                 <div className="w-1/4 bg-white hover:bg-white transition-all rounded-t-sm group relative" style={{ height: `${meshViz.under14}%` }}><span className="absolute -bottom-4 text-[9px] w-full text-center text-gray-600 font-bold">&lt;14</span></div>
-                                                <div className="w-1/4 bg-brand-green/50 hover:bg-brand-green transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m15_16}%` }}><span className="absolute -bottom-4 text-[9px] w-full text-center text-gray-900 font-bold">15-16</span></div>
+                                                <div className="w-1/4 bg-brand-green/50 hover:bg-brand-green transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m15_16}%` }}><span className="absolute -bottom-4 text-[9px] w-full text-center text-brand-navy font-bold">15-16</span></div>
                                                 <div className="w-1/4 bg-brand-green/70 hover:bg-brand-green transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m17_18}%` }}><span className="absolute -bottom-4 text-[9px] w-full text-center text-brand-navy font-bold">17-18</span></div>
-                                                <div className="w-1/4 bg-white hover:bg-white transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m19}%` }}><span className="absolute -bottom-4 text-[9px] w-full text-center text-gray-900 font-bold">19+</span></div>
+                                                <div className="w-1/4 bg-white hover:bg-white transition-all rounded-t-sm group relative" style={{ height: `${meshViz.m19}%` }}><span className="absolute -bottom-4 text-[9px] w-full text-center text-brand-navy font-bold">19+</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -464,15 +464,15 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                     <div>
                                         <h4 className="text-[11px] font-bold text-brand-navy-bright uppercase  mb-1">4. Objetivo de Tueste</h4>
                                         <p className="text-sm font-bold text-brand-navy mb-2">Perfil Base: {masterProfile?.label || 'Curva Inteligente AXIS (TRL-7)'}</p>
-                                        <p className="text-[11px] text-gray-900 leading-relaxed max-w-lg">
+                                        <p className="text-[11px] text-brand-navy leading-relaxed max-w-lg">
                                             {masterProfile ? 'Curva de Campeón Global Ghost sincronizada.' : `Estrategia: Carga a ${dynamicChargeTemp}°C, Desarrollo Corto (${dynamicDevPct}%) para resaltar acidez floral debido al proceso ${selectedLot.process || 'Lavado'} y su alta puntuación.`}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-6">
                                     <div className="text-right border-r border-gray-400 shadow-sm pr-6">
-                                        <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Peso de Carga Óptimo</p>
-                                        <p className="text-2xl font-bold text-brand-navy er">15.0 <span className="text-xs text-gray-900">kg</span></p>
+                                        <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Peso de Carga Óptimo</p>
+                                        <p className="text-2xl font-bold text-brand-navy er">15.0 <span className="text-xs text-brand-navy">kg</span></p>
                                     </div>
                                     <button
                                         onClick={() => setView('entry')}
@@ -488,7 +488,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 <div className="animate-in slide-in-from-bottom-4 duration-700">
                                     <div className="flex items-center gap-3 mb-6 px-4">
                                         <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
-                                        <h3 className="text-xs font-bold text-gray-900 uppercase ">Telemetría del Perfil Maestro Activo</h3>
+                                        <h3 className="text-xs font-bold text-brand-navy uppercase ">Telemetría del Perfil Maestro Activo</h3>
                                     </div>
                                     <RoastCurveVisualizer data={masterProfile.points} title={`Curva de Referencia: ${masterProfile.label}`} />
                                 </div>
@@ -505,7 +505,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-brand-navy"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                                 </div>
                                 <h3 className="text-4xl lg:text-5xl font-bold uppercase er text-brand-navy mb-4">Centro de Tostión</h3>
-                                <p className="text-gray-900 max-w-2xl mx-auto font-medium uppercase text-[11px]  leading-relaxed">
+                                <p className="text-brand-navy max-w-2xl mx-auto font-medium uppercase text-[11px]  leading-relaxed">
                                     Software predictivo para maximizar el desarrollo de sabor y minimizar la merma industrial.
                                 </p>
                             </div>
@@ -516,7 +516,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
                                     </div>
                                     <h4 className="text-brand-navy font-black uppercase  text-lg mb-3">1. Tostión Predictiva (IA)</h4>
-                                    <p className="text-[11px] text-gray-900 uppercase  leading-relaxed mb-8 flex-1">
+                                    <p className="text-[11px] text-brand-navy uppercase  leading-relaxed mb-8 flex-1">
                                         Sistema de predicción basado en los datos físico-químicos cargados en el primer módulo. Te genera una estrategia algorítmica sugerida para el tostador aprendiz.
                                     </p>
                                     <div className="bg-white border border-gray-400 shadow-sm p-3 rounded flex items-center gap-2 text-[11px] text-brand-navy-bright font-bold uppercase ">
@@ -530,7 +530,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                     </div>
                                     <h4 className="text-brand-navy font-black uppercase  text-lg mb-3">2. Registro e Importación</h4>
-                                    <p className="text-[11px] text-gray-900 uppercase  leading-relaxed mb-8 flex-1">
+                                    <p className="text-[11px] text-brand-navy uppercase  leading-relaxed mb-8 flex-1">
                                         Cargue archivos .CSV / .ALOG de su tostadora o registre manualmente los parámetros de rendimiento y merma industrial.
                                     </p>
                                     <div className="grid grid-cols-2 gap-3">

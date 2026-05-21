@@ -299,12 +299,12 @@ export default function EUDRGeoreference({ onPolygonChange, initialPolygon, user
                             Módulo de Mapeo Satelital
                         </h3>
                     </div>
-                    <p className="text-[7px] text-gray-900 font-bold uppercase  mt-1 max-w-[250px] leading-tight">
+                    <p className="text-[7px] text-brand-navy font-bold uppercase  mt-1 max-w-[250px] leading-tight">
                         Protocolo de Seguridad: Captura Sensorial por Orden Público (Restricción RPAS/Drones)
                     </p>
                 </div>
                 {(geoJsonData || gpsPoints.length > 0) && (
-                    <button onClick={handleClear} className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-gray-900 hover:text-brand-navy transition-colors">
+                    <button onClick={handleClear} className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-brand-navy hover:text-brand-navy transition-colors">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
                     </button>
                 )}

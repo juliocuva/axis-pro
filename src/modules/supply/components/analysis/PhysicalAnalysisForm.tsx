@@ -244,7 +244,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             unit="%"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-bold uppercase text-gray-900 ">Rango Ideal: 10.0 - 12.0%</span>
+                            <span className="text-[9px] font-bold uppercase text-brand-navy ">Rango Ideal: 10.0 - 12.0%</span>
                             <div className={`w-2 h-2 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
@@ -260,7 +260,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             inputClassName="text-5xl font-black py-6 er"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-bold uppercase text-gray-900 ">Norma Export: ≤ 0.70</span>
+                            <span className="text-[9px] font-bold uppercase text-brand-navy ">Norma Export: ≤ 0.70</span>
                             <div className={`w-2 h-2 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
@@ -277,7 +277,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             unit="g/L"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-bold uppercase text-gray-900 ">Standard: {'>'} 680 g/L</span>
+                            <span className="text-[9px] font-bold uppercase text-brand-navy ">Standard: {'>'} 680 g/L</span>
                             <div className={`w-2 h-2 rounded-full ${formData.density > 680 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]'}`}></div>
                         </div>
                     </div>
@@ -331,7 +331,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                         {[18, 17, 16, 15, 14, 13, 12, 'under12'].map((size, idx) => (
                             <div key={idx} className="space-y-2">
-                                <label className="text-[9px] font-bold text-gray-900 uppercase  block text-center">
+                                <label className="text-[9px] font-bold text-brand-navy uppercase  block text-center">
                                     {size === 'under12' ? 'Fondo' : `Malla ${size}`}
                                 </label>
                                 <div className="relative group">
@@ -344,7 +344,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                             screenSize: { ...formData.screenSize, [size === 'under12' ? 'under12' : `size${size}`]: parseFloat(e.target.value) || 0 }
                                         })}
                                         disabled={isSubmitting || isAlreadyAnalyzed}
-                                        className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-2 py-4 text-lg font-black text-carbon text-center outline-none focus:border-black focus:bg-white transition-all appearance-none"
+                                        className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-2 py-4 text-lg font-black text-brand-navy text-center outline-none focus:border-black focus:bg-white transition-all appearance-none"
                                     />
                                     <span className="absolute bottom-1 right-1 text-[7px] font-black text-gray-600 uppercase">%</span>
                                 </div>
@@ -373,7 +373,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 inputClassName="text-4xl font-black py-4 text-brand-navy"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
+                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
                         </div>
                         <div className="space-y-4">
                             <NumericInput
@@ -386,7 +386,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 inputClassName="text-4xl font-black py-4 text-brand-navy"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>
+                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>
                         </div>
                     </div>
 
@@ -397,7 +397,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 <select
                                     value={formData.grainColor}
                                     disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
-                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-2xl px-6 py-5 text-sm font-black text-carbon outline-none focus:border-black uppercase appearance-none transition-all shadow-inner"
+                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-2xl px-6 py-5 text-sm font-black text-brand-navy outline-none focus:border-black uppercase appearance-none transition-all shadow-inner"
                                     onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
                                 >
                                     <option value="VERDE OLIVA">Verde Oliva (Optimum)</option>
@@ -420,7 +420,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             }`}></div>
                             <div className="flex-1">
                                 <p className="text-[9px] font-bold text-brand-navy uppercase ">Previsualización Cromática</p>
-                                <p className="text-[9px] text-gray-900 uppercase mt-0.5">Basado en Patrones SCA Agtron</p>
+                                <p className="text-[9px] text-brand-navy uppercase mt-0.5">Basado en Patrones SCA Agtron</p>
                             </div>
                         </div>
                     </div>
@@ -435,10 +435,10 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             isAlreadyAnalyzed 
                             ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-default' 
                             : isReadOnly 
-                            ? 'bg-white text-gray-900 border border-gray-400 shadow-sm cursor-not-allowed' 
+                            ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-not-allowed' 
                             : isScreenValid 
                             ? 'bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-brand-green/20 hover:shadow-brand-green/40' 
-                            : 'bg-white text-gray-900 cursor-not-allowed border border-gray-400 shadow-sm opacity-50'
+                            : 'bg-white text-brand-navy cursor-not-allowed border border-gray-400 shadow-sm opacity-50'
                         }`}
                     >
                         {isSubmitting ? (
@@ -470,7 +470,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             </>
                         )}
                     </button>
-                    <p className="text-center text-[9px] text-gray-900 uppercase font-black  mt-8 opacity-40">
+                    <p className="text-center text-[9px] text-brand-navy uppercase font-black  mt-8 opacity-40">
                         AXISONE COFFEE • DATA SOVEREIGNTY • CERTIFIED HUB
                     </p>
                 </div>

@@ -116,7 +116,7 @@ export default function SupplyModuleContainer({
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v20M2 12h20M12 2l10 10-10 10M12 2L2 12l10 10"/></svg>
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-carbon uppercase ">Requiere Selección de Lote</h3>
+                                    <h3 className="text-lg font-bold text-brand-navy uppercase ">Requiere Selección de Lote</h3>
                                     <p className="text-xs text-gray-600 max-w-xs mx-auto uppercase  leading-relaxed">
                                         Por favor, selecciona un lote del <span className="text-brand-navy font-black">Historial de Flujo</span> en la parte inferior para cargar los datos técnicos.
                                     </p>

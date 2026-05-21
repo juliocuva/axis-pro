@@ -126,7 +126,7 @@ export default function AxisNexusWidget() {
                                         <div className="w-4 h-4 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center border border-gray-400 shadow-sm">
                                             <div className="w-1.5 h-1.5 rounded-full bg-brand-green"></div>
                                         </div>
-                                        <span className="text-[9px] font-bold text-gray-900 uppercase ">Protocolo Anexo</span>
+                                        <span className="text-[9px] font-bold text-brand-navy uppercase ">Protocolo Anexo</span>
                                     </div>
                                 )}
                                 <div
@@ -149,7 +149,7 @@ export default function AxisNexusWidget() {
                                     <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                                     <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                                     <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                                    <span className="text-[11px] text-gray-900 uppercase ml-2 font-mono ">Verificando Normativa...</span>
+                                    <span className="text-[11px] text-brand-navy uppercase ml-2 font-mono ">Verificando Normativa...</span>
                                 </div>
                             </div>
                         )}

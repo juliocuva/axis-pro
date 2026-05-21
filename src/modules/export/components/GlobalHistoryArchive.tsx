@@ -168,21 +168,21 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         <RoastCurveVisualizer data={selectedItem.raw.roast_curve || []} title={`Historial Térmico: ${selectedItem.label}`} />
                         <footer className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
-                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Carga Verde</p>
+                                <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Carga Verde</p>
                                 <p className="text-lg font-bold text-brand-navy">{selectedItem.raw.green_weight} KG</p>
                              </div>
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
-                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Café Tostado</p>
+                                <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Café Tostado</p>
                                 <p className="text-lg font-bold text-brand-navy">{selectedItem.raw.roasted_weight} KG</p>
                              </div>
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
-                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Merma</p>
+                                <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Merma</p>
                                 <p className="text-lg font-bold text-brand-navy">
                                     {(((selectedItem.raw.green_weight - selectedItem.raw.roasted_weight)/selectedItem.raw.green_weight)*100).toFixed(2)}%
                                 </p>
                              </div>
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
-                                <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Fecha</p>
+                                <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Fecha</p>
                                 <p className="text-lg font-bold text-brand-navy-bright">{selectedItem.raw.roast_date}</p>
                              </div>
                         </footer>
@@ -209,7 +209,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
 
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900 group-focus-within:text-brand-navy transition-colors">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-navy group-focus-within:text-brand-navy transition-colors">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                             </div>
                             <input 
@@ -221,7 +221,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                             />
                         </div>
                         <div className="flex items-center gap-4 bg-bg-card border border-gray-400 shadow-sm rounded-2xl p-1 px-4">
-                            <span className="text-[9px] font-bold text-gray-900 uppercase">Ver:</span>
+                            <span className="text-[9px] font-bold text-brand-navy uppercase">Ver:</span>
                             {[10, 25, 50, 100].map((n) => (
                                 <button
                                     key={n}
@@ -245,7 +245,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                             setCurrentPage(1); 
                                         }
                                     }}
-                                    className={`px-6 py-2 rounded-xl text-[9px] font-bold uppercase  transition-all ${filterType === t || (t === 'AUDIT' && showAuditModal) ? 'bg-brand-green text-brand-navy' : 'text-gray-900 hover:text-brand-navy'}`}
+                                    className={`px-6 py-2 rounded-xl text-[9px] font-bold uppercase  transition-all ${filterType === t || (t === 'AUDIT' && showAuditModal) ? 'bg-brand-green text-brand-navy' : 'text-brand-navy hover:text-brand-navy'}`}
                                 >
                                     {t === 'ALL' ? 'Todo' : t === 'EXPORT' ? 'Exports' : t === 'LOTE' ? 'Lotes' : 'Auditoría'}
                                 </button>
@@ -258,11 +258,11 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-white/2 border-b border-gray-400 shadow-sm">
-                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">Tipo</th>
-                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">ID Lote / Referencia</th>
-                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">Fases (01-05)</th>
-                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none">Fecha</th>
-                                <th className="px-8 py-5 text-[11px] font-bold text-gray-900 uppercase  leading-none text-right">Acción</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-brand-navy uppercase  leading-none">Tipo</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-brand-navy uppercase  leading-none">ID Lote / Referencia</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-brand-navy uppercase  leading-none">Fases (01-05)</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-brand-navy uppercase  leading-none">Fecha</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-brand-navy uppercase  leading-none text-right">Acción</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -271,7 +271,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                     <td colSpan={5} className="px-8 py-20 text-center">
                                         <div className="flex flex-col items-center gap-4">
                                             <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Sincronizando con AXIS CLOUD...</p>
+                                            <p className="text-[11px] text-brand-navy font-bold uppercase ">Sincronizando con AXIS CLOUD...</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -308,7 +308,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                     ></div>
                                                 ))}
                                                 {item.type !== 'EXPORT' && (
-                                                    <span className="ml-2 text-[9px] font-bold text-gray-900 uppercase">
+                                                    <span className="ml-2 text-[9px] font-bold text-brand-navy uppercase">
                                                         {item.step}/5
                                                     </span>
                                                 )}
@@ -318,7 +318,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className="text-xs font-bold text-gray-900">{item.date}</span>
+                                            <span className="text-xs font-bold text-brand-navy">{item.date}</span>
                                             {item.type === 'EXPORT' && (
                                               <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-white border border-gray-400 shadow-sm text-brand-navy border border-gray-400 shadow-sm' : 'bg-white border border-gray-400 shadow-sm text-brand-navy-bright border border-gray-400 shadow-sm'}`}>
                                                   {item.raw.status === 'FINALIZADA' ? 'Inmutable' : 'Borrador'}
@@ -366,7 +366,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         </div>
                         
                         <div className="flex items-center gap-4">
-                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Página {currentPage} / {totalPages || 1}</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase ">Página {currentPage} / {totalPages || 1}</p>
                             <div className="flex gap-2">
                                 <button 
                                     disabled={currentPage === 1}
@@ -394,9 +394,9 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl rounded-full group-hover:bg-white transition-all"></div>
                         <div className="relative z-10 flex flex-col h-full justify-between">
                             <div className="space-y-4">
-                                <h4 className="text-[11px] font-bold text-gray-900 uppercase ">Analytics Export</h4>
+                                <h4 className="text-[11px] font-bold text-brand-navy uppercase ">Analytics Export</h4>
                                 <p className="text-xl font-bold text-brand-navy ">Reporte Consolidado Mensual</p>
-                                <p className="text-xs text-gray-900 leading-relaxed uppercase font-bold ">Genera un PDF con todos los movimientos del mes, puntajes basados en estándares de la SCA promedio y yield de trilla acumulado.</p>
+                                <p className="text-xs text-brand-navy leading-relaxed uppercase font-bold ">Genera un PDF con todos los movimientos del mes, puntajes basados en estándares de la SCA promedio y yield de trilla acumulado.</p>
                             </div>
                             <button className="mt-8 w-full py-4 border border-gray-400 shadow-sm rounded-2xl text-[11px] font-bold uppercase  hover:bg-white transition-all">Sincronizar Reporte Completo</button>
                         </div>
@@ -428,7 +428,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                 <h3 className="text-xl font-bold text-brand-navy uppercase er">Bóveda de Trazabilidad In-Situ</h3>
                                 <p className="text-[11px] text-brand-navy font-bold uppercase  mt-1">Registros de validación y georreferenciación en tiempo real</p>
                             </div>
-                            <button onClick={() => setShowAuditModal(false)} className="text-gray-900 hover:text-brand-navy transition-colors">
+                            <button onClick={() => setShowAuditModal(false)} className="text-brand-navy hover:text-brand-navy transition-colors">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </header>
@@ -444,7 +444,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                     <span className="px-2 py-0.5 bg-white text-brand-navy-bright text-[9px] font-bold rounded uppercase border border-gray-400 shadow-sm">{log.eudr_status || 'CAPTURED'}</span>
                                                     <span className="text-sm font-bold text-brand-navy uppercase">{log.farm_name}</span>
                                                 </div>
-                                                <div className="flex items-center gap-4 text-[11px] text-gray-900 font-bold uppercase ">
+                                                <div className="flex items-center gap-4 text-[11px] text-brand-navy font-bold uppercase ">
                                                     <span className="text-brand-navy-bright">{log.email}</span>
                                                     <span>•</span>
                                                     <span>{new Date(log.verified_at).toLocaleString()}</span>
@@ -479,7 +479,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                 <span className="text-[9px] font-mono text-gray-700 bg-white px-2 py-1 rounded">{log.id}</span>
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-1.5 h-1.5 bg-brand-green rounded-full"></div>
-                                                    <span className="text-[9px] font-bold text-gray-900 uppercase">Sincronizado</span>
+                                                    <span className="text-[9px] font-bold text-brand-navy uppercase">Sincronizado</span>
                                                 </div>
                                             </div>
                                         </div>

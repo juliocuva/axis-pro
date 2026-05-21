@@ -92,7 +92,7 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
             <div className="bg-bg-card border border-gray-400 shadow-sm rounded-industrial overflow-hidden">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-white border-b border-gray-400 shadow-sm uppercase text-[9px] font-bold text-gray-900 ">
+                        <tr className="bg-white border-b border-gray-400 shadow-sm uppercase text-[9px] font-bold text-brand-navy ">
                             <th className="p-6">Miembro / Email</th>
                             <th className="p-6">Rol Especializado</th>
                             <th className="p-6">Último Acceso</th>
@@ -101,15 +101,15 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                     </thead>
                     <tbody className="divide-y divide-white/5">
                         {isLoading ? (
-                            <tr><td colSpan={4} className="p-20 text-center text-xs text-gray-900 uppercase ">Sincronizando Nómina...</td></tr>
+                            <tr><td colSpan={4} className="p-20 text-center text-xs text-brand-navy uppercase ">Sincronizando Nómina...</td></tr>
                         ) : members.length === 0 ? (
-                            <tr><td colSpan={4} className="p-20 text-center text-xs text-gray-900 uppercase ">No hay miembros registrados en esta asociación</td></tr>
+                            <tr><td colSpan={4} className="p-20 text-center text-xs text-brand-navy uppercase ">No hay miembros registrados en esta asociación</td></tr>
                         ) : members.map(m => (
                             <tr key={m.id} className="hover:bg-white/2 transition-colors">
                                 <td className="p-6">
                                     <div className="flex flex-col">
                                         <span className="text-sm font-bold text-brand-navy uppercase">{m.full_name}</span>
-                                        <span className="text-[11px] text-gray-900 font-mono">{m.email}</span>
+                                        <span className="text-[11px] text-brand-navy font-mono">{m.email}</span>
                                     </div>
                                 </td>
                                 <td className="p-6">
@@ -125,7 +125,7 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                                 <td className="p-6 text-right">
                                     <div className="flex items-center justify-end gap-2">
                                         <div className="w-1.5 h-1.5 bg-brand-green rounded-full shadow-[0_0_8px_rgba(0,255,136,0.6)]"></div>
-                                        <span className="text-[9px] font-bold text-gray-900 uppercase ">Activo</span>
+                                        <span className="text-[9px] font-bold text-brand-navy uppercase ">Activo</span>
                                     </div>
                                 </td>
                             </tr>
@@ -143,7 +143,7 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                         </header>
                         <form onSubmit={handleRegister} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold text-gray-900 uppercase ">Nombre Completo</label>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase ">Nombre Completo</label>
                                 <input 
                                     required
                                     type="text" 
@@ -154,7 +154,7 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold text-gray-900 uppercase ">Email Corporativo</label>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase ">Email Corporativo</label>
                                 <input 
                                     required
                                     type="email" 
@@ -165,7 +165,7 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold text-gray-900 uppercase ">Rol en la Operación</label>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase ">Rol en la Operación</label>
                                 <select 
                                     className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 text-sm text-brand-navy focus:border-black outline-none appearance-none"
                                     value={newMember.role}
@@ -175,7 +175,7 @@ export default function TeamManagement({ companyId, companyName }: { companyId: 
                                 </select>
                             </div>
                             <div className="flex gap-4 pt-4">
-                                <button type="button" onClick={() => setShowRegisterModal(false)} className="flex-1 px-4 py-4 border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold text-gray-900 uppercase">Cancelar</button>
+                                <button type="button" onClick={() => setShowRegisterModal(false)} className="flex-1 px-4 py-4 border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold text-brand-navy uppercase">Cancelar</button>
                                 <button type="submit" className="flex-1 px-4 py-4 bg-brand-green text-brand-navy rounded-industrial-sm text-[11px] font-bold uppercase hover:bg-brand-green-bright">Registrar</button>
                             </div>
                         </form>

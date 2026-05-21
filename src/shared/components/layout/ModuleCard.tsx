@@ -47,7 +47,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
             {isLocked && (
                 <div className="absolute top-6 right-6 flex items-center gap-2">
                     <span className="text-[9px] font-bold text-brand-navy uppercase  bg-bg-offset px-2 py-1 rounded-md">Activación Requerida</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-900">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-navy">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                         <path d="M7 11V7a5 5 0 0110 0v4" />
                     </svg>
@@ -58,7 +58,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
 
             {isOptional && (
                 <div className="absolute top-6 right-6">
-                    <span className="bg-white text-gray-900 text-[9px] px-2 py-1 rounded-full border border-gray-400 shadow-sm font-bold  uppercase">
+                    <span className="bg-white text-brand-navy text-[9px] px-2 py-1 rounded-full border border-gray-400 shadow-sm font-bold  uppercase">
                         Opcional (Flujo B)
                     </span>
                 </div>
@@ -72,12 +72,12 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
                 </div>
             )}
 
-            <div className={`w-14 h-14 rounded-industrial-sm bg-bg-offset flex items-center justify-center mb-6 transition-all duration-500 ${!isLocked ? `${currentStyle.bg} ${currentStyle.text}` : 'text-gray-900'}`}>
+            <div className={`w-14 h-14 rounded-industrial-sm bg-bg-offset flex items-center justify-center mb-6 transition-all duration-500 ${!isLocked ? `${currentStyle.bg} ${currentStyle.text}` : 'text-brand-navy'}`}>
                 {icon}
             </div>
 
             <h3 className="text-xl font-bold mb-3">{title}</h3>
-            <p className="text-sm text-gray-900 leading-relaxed">{description}</p>
+            <p className="text-sm text-brand-navy leading-relaxed">{description}</p>
         </div>
     );
 }

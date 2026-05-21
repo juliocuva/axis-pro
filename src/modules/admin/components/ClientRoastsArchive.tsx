@@ -139,7 +139,7 @@ export default function ClientRoastsArchive({ companyId, companyName, onClose }:
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-64">
                             <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin mb-6"></div>
-                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Cargando tuestes...</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase ">Cargando tuestes...</p>
                         </div>
                     ) : roasts.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-64 opacity-50">
@@ -173,7 +173,7 @@ export default function ClientRoastsArchive({ companyId, companyName, onClose }:
                                         </td>
                                         <td className="p-4 flex items-center gap-2">
                                             <p className="text-[12px] font-medium text-gray-200 uppercase">{roast.roast_date ? new Date(roast.roast_date).toLocaleDateString() : '--'}</p>
-                                            <p className="text-[11px] text-gray-900 uppercase">{roast.process}</p>
+                                            <p className="text-[11px] text-brand-navy uppercase">{roast.process}</p>
                                         </td>
                                         <td className="p-4 text-right">
                                             <span className="text-14px font-bold text-brand-navy">{roast.green_weight || 0}</span>

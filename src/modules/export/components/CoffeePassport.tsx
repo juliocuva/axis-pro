@@ -5,6 +5,31 @@ import ExportReportButton from '@/shared/components/ui/ExportReportButton';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { QRCodeSVG } from 'qrcode.react';
 
+interface PageWrapperProps {
+    pageNum: number;
+    viewType: 'continuous' | 'paginated' | 'grid';
+    setViewType: (val: any) => void;
+    setActivePage: (val: number) => void;
+    children: React.ReactNode;
+}
+
+function PageWrapper({ pageNum, viewType, setViewType, setActivePage, children }: PageWrapperProps) {
+    if (viewType === 'grid') {
+        return (
+            <div 
+                className="grid-page-wrapper animate-in zoom-in duration-300" 
+                onClick={() => { setViewType('paginated'); setActivePage(pageNum); }}
+            >
+                <div className="grid-page-badge">PÁGINA {pageNum}</div>
+                <div className="grid-page-content">
+                    {children}
+                </div>
+            </div>
+        );
+    }
+    return <>{children}</>;
+}
+
 interface CoffeePassportProps {
     lotData: any;
     scaData?: any;
@@ -21,6 +46,10 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
     const [lot, setLot] = useState<any>(initialLotData);
     const [sca, setSca] = useState<any>(initialScaData);
     const [phys, setPhys] = useState<any>(null);
+
+    // Estados para la previsualización multipágina
+    const [viewType, setViewType] = useState<'continuous' | 'paginated' | 'grid'>('continuous');
+    const [activePage, setActivePage] = useState(1);
 
     const batchId = initialLotData?.id;
     const passportId = `AX-${initialLotData?.lot_number || '9822'}-${new Date().getFullYear()}`;
@@ -123,6 +152,10 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
 
     const today = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
 
+    const getPageClass = (pageNum: number) => {
+        if (viewType === 'paginated') return activePage === pageNum ? 'step-visible' : 'step-hidden';
+        return 'step-visible';
+    };
 
     return (
         <>
@@ -134,29 +167,169 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                     .no-print { display: none !important; }
                 }
                 .pp { font-family: 'Montserrat', sans-serif; }
+                @media screen {
+                    .step-hidden { display: none !important; }
+                    .step-visible { display: block !important; animation: stepFadeIn 0.4s ease-out; }
+                    
+                    /* Estilos para Vista Cuadrícula 2x3 */
+                    .passport-grid {
+                        display: grid !important;
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 24px !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                    }
+                    .grid-page-wrapper {
+                        position: relative !important;
+                        cursor: pointer !important;
+                        border: 2px solid transparent !important;
+                        border-radius: 16px !important;
+                        overflow: hidden !important;
+                        transition: all 0.3s ease !important;
+                        background: rgba(255, 255, 255, 0.05) !important;
+                        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+                    }
+                    .grid-page-wrapper:hover {
+                        border-color: #0C6056 !important;
+                        transform: translateY(-4px) !important;
+                        box-shadow: 0 10px 30px rgba(12, 96, 86, 0.2) !important;
+                    }
+                    .grid-page-badge {
+                        position: absolute !important;
+                        top: 12px !important;
+                        left: 12px !important;
+                        background: #0C6056 !important;
+                        color: white !important;
+                        padding: 4px 8px !important;
+                        border-radius: 8px !important;
+                        font-size: 10px !important;
+                        font-weight: 800 !important;
+                        z-index: 50 !important;
+                        text-transform: uppercase !important;
+                        letter-spacing: 0.05em !important;
+                    }
+                    .grid-page-content {
+                        transform: scale(0.48) !important;
+                        transform-origin: top left !important;
+                        width: 794px !important;
+                        height: 1123px !important;
+                    }
+                    /* Asegurar que las páginas escaladas quepan en sus contenedores */
+                    .passport-grid .grid-page-wrapper {
+                        width: 381px !important;
+                        height: 539px !important;
+                        overflow: hidden !important;
+                }
+                @keyframes stepFadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
             `}</style>
 
             <div className="fixed inset-0 z-[100] w-full h-screen overflow-y-auto bg-black/90 pp"
                 onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
 
-                {/* Control bar */}
-                <div className="no-print w-[794px] mx-auto flex justify-between items-center bg-white border border-gray-400 p-3 rounded-xl mb-6 mt-8 shadow-2xl">
-                    <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full" style={{ background: GREEN }}></span>
-                        <span className="text-[11px] font-bold text-gray-600 uppercase ">AXISONE COFFEE Passport — Vista Previa</span>
-
+                {/* Visualizer Control Bar - Premium Glassmorphic */}
+                <div className="no-print w-full max-w-[794px] mx-auto bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-2xl mt-8 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#0C6056] animate-pulse"></div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/60">
+                            Pasaporte de Café • Previsualizador
+                        </span>
                     </div>
+                    
+                    {/* Selector de Modos de Vista */}
+                    <div className="flex items-center bg-black/40 p-1.5 rounded-xl border border-white/5 gap-1">
+                        <button
+                            type="button"
+                            onClick={() => setViewType('continuous')}
+                            className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                viewType === 'continuous'
+                                    ? 'bg-[#0C6056] text-white shadow-lg'
+                                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                            }`}
+                        >
+                            Vista Continua
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setViewType('paginated')}
+                            className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                viewType === 'paginated'
+                                    ? 'bg-[#0C6056] text-white shadow-lg'
+                                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                            }`}
+                        >
+                            Vista Paginada
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setViewType('grid')}
+                            className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                viewType === 'grid'
+                                    ? 'bg-[#0C6056] text-white shadow-lg'
+                                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                            }`}
+                        >
+                            Vista Cuadrícula 2x3
+                        </button>
+                    </div>
+
+                    {/* Paginador (Solo para Vista Paginada) */}
+                    {viewType === 'paginated' && (
+                        <div className="flex items-center gap-3 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <button
+                                type="button"
+                                onClick={() => setActivePage(prev => Math.max(prev - 1, 1))}
+                                disabled={activePage === 1}
+                                className="p-1.5 rounded-lg text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+                            </button>
+                            <span className="text-[10px] font-black uppercase text-white font-mono tracking-wider min-w-[70px] text-center">
+                                Pág. {activePage} / 5
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setActivePage(prev => Math.min(prev + 1, 5))}
+                                disabled={activePage === 5}
+                                className="p-1.5 rounded-lg text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Acciones del Reporte */}
                     <div className="flex items-center gap-2">
-                        <button onClick={onClose} className="px-4 py-1.5 border border-gray-400 rounded-lg text-[11px] font-bold uppercase text-gray-600 hover:bg-white">Cerrar</button>
+                        <button 
+                            onClick={onClose} 
+                            className="px-4 py-2 border border-white/10 hover:bg-white/5 rounded-xl text-[10px] font-black uppercase text-white transition-all active:scale-95"
+                        >
+                            Cerrar
+                        </button>
                         <ExportReportButton elementId="passport-pages" fileName={`PASSPORT-${lotNum}`} />
-                        <button onClick={() => window.print()} className="px-4 py-1.5 bg-black text-brand-navy rounded-lg text-[11px] font-bold uppercase hover:bg-gray-800">Imprimir</button>
+                        <button 
+                            onClick={() => window.print()} 
+                            className="px-4 py-2 bg-[#0C6056] hover:bg-[#0C6056]/90 text-white rounded-xl text-[10px] font-black uppercase transition-all active:scale-95 border border-[#0C6056]/30 shadow-lg"
+                        >
+                            Imprimir
+                        </button>
                     </div>
                 </div>
 
-                <div id="passport-pages" className="mx-auto flex flex-col gap-8 pb-32" style={{ width: '794px' }}>
+                <div 
+                    id="passport-pages" 
+                    className={`mx-auto pb-32 ${
+                        viewType === 'grid' 
+                            ? 'passport-grid' 
+                            : 'flex flex-col gap-8 w-[794px]'
+                    }`}
+                >
 
                     {/* ══════════════ PÁGINA 1 ══════════════ */}
-                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                    <PageWrapper pageNum={1} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                        <div className={`passport-page bg-white relative overflow-hidden print:break-after-page ${getPageClass(1)}`} style={{ width: '794px', minHeight: '1123px' }}>
 
                         {/* Header */}
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-400">
@@ -180,7 +353,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                             <div className="flex justify-between items-start gap-6">
                                 <div className="flex-1">
                                     <div className="mb-3">
-                                        <span className="text-[9px] font-bold uppercase  px-2.5 py-1 rounded border border-gray-400 text-gray-900">
+                                        <span className="text-[9px] font-bold uppercase  px-2.5 py-1 rounded border border-gray-400 text-brand-navy">
                                             ● Identity Verified · Cloud-Stored Profile
                                         </span>
                                     </div>
@@ -308,7 +481,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                                             minHeight: Number(item.v || 0) > 0 ? '4px' : '2px',
                                                             backgroundColor: Number(item.v || 0) > 0 ? (item.big ? GREEN : '#64748b') : '#e2e8f0'
                                                         }}></div>
-                                                    <p className="text-[9px] font-bold text-gray-900 uppercase mt-2 leading-none">{item.m}</p>
+                                                    <p className="text-[9px] font-bold text-brand-navy uppercase mt-2 leading-none">{item.m}</p>
                                                     <p className="text-[11px] font-bold text-brand-navy mt-1 leading-none">{Number(item.v || 0).toFixed(1)}%</p>
                                                 </div>
                                             ))}
@@ -323,10 +496,12 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">{passportId}</p>
                         </div>
-                    </div>
+                        </div>
+                    </PageWrapper>
 
                     {/* ══════════════ PÁGINA 2 ══════════════ */}
-                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                    <PageWrapper pageNum={2} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                        <div className={`passport-page bg-white relative overflow-hidden print:break-after-page ${getPageClass(2)}`} style={{ width: '794px', minHeight: '1123px' }}>
 
                         {/* Header */}
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-400">
@@ -406,7 +581,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-[11px] font-bold text-brand-navy uppercase  mb-2">Trazabilidad Digital Inmutable</p>
-                                    <p className="text-[9px] font-bold text-gray-900 uppercase leading-relaxed ">
+                                    <p className="text-[9px] font-bold text-brand-navy uppercase leading-relaxed ">
                                         Certificación técnica de origen y calidad física-sensorial. Los datos han sido encriptados en la red Axis para garantizar transparencia absoluta en la cadena de suministro industrial de café.
                                     </p>
                                 </div>
@@ -425,10 +600,12 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">{passportId}-P2</p>
                         </div>
-                    </div>
+                        </div>
+                    </PageWrapper>
 
                     {/* ══════════════ PÁGINA 3: LOGÍSTICA ══════════════ */}
-                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                    <PageWrapper pageNum={3} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                        <div className={`passport-page bg-white relative overflow-hidden print:break-after-page ${getPageClass(3)}`} style={{ width: '794px', minHeight: '1123px' }}>
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-400">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
@@ -497,7 +674,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                 </div>
                                 <div>
                                     <p className="text-[11px] font-bold text-brand-navy uppercase  border-b pb-1 mb-1" style={{ borderColor: GREEN }}>Official International Manifest Release</p>
-                                    <p className="text-[9px] font-bold text-gray-900 uppercase leading-relaxed ">La cadena de custodia ha sido sellada electrónicamente bajo normativas Axis para exportación definitiva internacional.</p>
+                                    <p className="text-[9px] font-bold text-brand-navy uppercase leading-relaxed ">La cadena de custodia ha sido sellada electrónicamente bajo normativas Axis para exportación definitiva internacional.</p>
                                 </div>
                             </div>
                         </div>
@@ -506,10 +683,12 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">{passportId}-P3</p>
                         </div>
-                    </div>
+                        </div>
+                    </PageWrapper>
 
                     {/* ══════════════ PÁGINA 4: EUDR & ENVIRONMENT ══════════════ */}
-                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                    <PageWrapper pageNum={4} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                        <div className={`passport-page bg-white relative overflow-hidden print:break-after-page ${getPageClass(4)}`} style={{ width: '794px', minHeight: '1123px' }}>
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-400">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
@@ -575,7 +754,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                         ))}
                                     </div>
                                     <p className="text-[11px] font-bold text-brand-navy uppercase leading-tight">Caminata Humana Verificada</p>
-                                    <p className="text-[9px] text-gray-900 mt-1 uppercase">Validación de acelerómetro y giroscopio exitosa.</p>
+                                    <p className="text-[9px] text-brand-navy mt-1 uppercase">Validación de acelerómetro y giroscopio exitosa.</p>
                                 </div>
                                 <div className="p-6 bg-white rounded-2xl border border-gray-400">
                                     <p className="text-[9px] font-bold text-brand-navy uppercase  mb-4">EUDR Authentication Hash</p>
@@ -620,10 +799,12 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">{passportId}-P4</p>
                         </div>
-                    </div>
+                        </div>
+                    </PageWrapper>
 
                     {/* ══════════════ PÁGINA 5: GRATEFUL LEDGER (RECOGNITION) ══════════════ */}
-                    <div className="bg-white relative overflow-hidden print:break-after-page" style={{ width: '794px', minHeight: '1123px' }}>
+                    <PageWrapper pageNum={5} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                        <div className={`passport-page bg-white relative overflow-hidden print:break-after-page ${getPageClass(5)}`} style={{ width: '794px', minHeight: '1123px' }}>
                         <div className="px-10 py-5 flex justify-between items-center border-b border-gray-400">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 border-2 border-black rounded flex items-center justify-center shrink-0 overflow-hidden bg-white">
@@ -675,7 +856,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                 </h4>
                                 <div className="space-y-4">
                                     <div className="p-6 rounded-2xl border border-dashed border-gray-400 bg-white/50">
-                                        <p className="text-[14px] font-bold text-gray-800 italic leading-relaxed mb-3">
+                                        <p className="text-[14px] font-bold text-brand-navy italic leading-relaxed mb-3">
                                             "El perfil sensorial de este lote es extraordinario. Gracias por cuidar cada etapa de la fermentación. Un saludo desde Berlín."
                                         </p>
                                         <div className="flex justify-between items-center">
@@ -684,7 +865,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                         </div>
                                     </div>
                                     <div className="p-6 rounded-2xl border border-dashed border-gray-400 bg-white/50">
-                                        <p className="text-[14px] font-bold text-gray-800 italic leading-relaxed mb-3">
+                                        <p className="text-[14px] font-bold text-brand-navy italic leading-relaxed mb-3">
                                             "Increíble balance. Se nota la pasión del productor en el secado. ¡Sigan así!"
                                         </p>
                                         <div className="flex justify-between items-center">
@@ -712,7 +893,8 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">Axis Intelligence Coffee Division | Traceability Protocol Ver 2.1</p>
                             <p className="text-[7px] font-bold text-gray-300 uppercase ">{passportId}-P5</p>
                         </div>
-                    </div>
+                        </div>
+                    </PageWrapper>
 
                 </div>
             </div>

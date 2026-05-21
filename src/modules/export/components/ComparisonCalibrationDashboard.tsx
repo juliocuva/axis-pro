@@ -14,7 +14,7 @@ export default function ComparisonCalibrationDashboard() {
         <div className="space-y-12 animate-in fade-in duration-700">
             <header>
                 <h2 className="text-2xl font-bold uppercase ">Dashboard de Calibración Espectral</h2>
-                <p className="text-[11px] text-gray-900 font-bold  uppercase mt-2 opacity-70">Análisis de Correlación: Roasting vs Cupping (Estándares SCA)</p>
+                <p className="text-[11px] text-brand-navy font-bold  uppercase mt-2 opacity-70">Análisis de Correlación: Roasting vs Cupping (Estándares SCA)</p>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -33,7 +33,7 @@ export default function ComparisonCalibrationDashboard() {
                                 <div className="flex justify-between items-center mb-4">
                                     <div>
                                         <p className="text-xs font-bold text-brand-navy">Lote: {lot.id}</p>
-                                        <p className="text-[11px] text-gray-900 uppercase">{lot.notes}</p>
+                                        <p className="text-[11px] text-brand-navy uppercase">{lot.notes}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-3xl font-bold er text-brand-navy-bright">{lot.sca_score}</p>
@@ -41,7 +41,7 @@ export default function ComparisonCalibrationDashboard() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex justify-between text-[9px] uppercase text-gray-900">
+                                    <div className="flex justify-between text-[9px] uppercase text-brand-navy">
                                         <span>Consistencia vs Maestro</span>
                                         <span>{lot.consistency}%</span>
                                     </div>
@@ -54,15 +54,15 @@ export default function ComparisonCalibrationDashboard() {
                                 </div>
                                 <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-400 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
                                     <div className="text-center">
-                                        <p className="text-[9px] text-gray-900 uppercase">DTR</p>
+                                        <p className="text-[9px] text-brand-navy uppercase">DTR</p>
                                         <p className="text-xs font-bold">{lot.dtr}%</p>
                                     </div>
                                     <div className="text-center border-x border-gray-400 shadow-sm">
-                                        <p className="text-[9px] text-gray-900 uppercase">RoR Final</p>
+                                        <p className="text-[9px] text-brand-navy uppercase">RoR Final</p>
                                         <p className="text-xs font-bold">{lot.ror_end}°/min</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-[9px] text-gray-900 uppercase">Desviación</p>
+                                        <p className="text-[9px] text-brand-navy uppercase">Desviación</p>
                                         <p className="text-xs font-bold text-brand-red">±0.4°C</p>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@ export default function ComparisonCalibrationDashboard() {
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-[11px] font-bold text-gray-900 uppercase">Variables Críticas</h4>
+                                <h4 className="text-[11px] font-bold text-brand-navy uppercase">Variables Críticas</h4>
                                 <div className="flex justify-between items-center text-xs">
                                     <span className="text-brand-navy">Punto de First Crack</span>
                                     <span className="text-brand-navy font-mono">08:45</span>
@@ -105,7 +105,7 @@ export default function ComparisonCalibrationDashboard() {
                         </div>
                         <div>
                             <p className="text-xs font-bold uppercase  mb-1">Cierre del Círculo AXIS</p>
-                            <p className="text-[11px] text-gray-900 font-bold uppercase opacity-70">Validación de trazabilidad sensorial completa.</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase opacity-70">Validación de trazabilidad sensorial completa.</p>
                         </div>
                     </div>
                 </div>

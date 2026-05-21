@@ -93,7 +93,7 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
                         <span className="w-2 h-8 bg-brand-green rounded-full"></span>
                         Dashboard Ejecutivo <span className="text-brand-navy">Premium</span>
                     </h2>
-                    <p className="text-[11px] text-gray-900 mt-2 font-bold uppercase ">Client Reporting Dashboard - Inteligencia de Quinta Ola</p>
+                    <p className="text-[11px] text-brand-navy mt-2 font-bold uppercase ">Client Reporting Dashboard - Inteligencia de Quinta Ola</p>
                 </div>
                 <button className="bg-brand-green text-brand-navy px-6 py-3 rounded-industrial-sm font-bold uppercase  text-xs hover:bg-brand-green/80 transition-all flex items-center gap-2 shadow-lg shadow-brand-green/20">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
@@ -122,7 +122,7 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
                             </ResponsiveContainer>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
                                 <span className="text-4xl font-black text-brand-navy-bright">{eudrCompliance}%</span>
-                                <span className="text-[9px] uppercase font-bold text-gray-900">Listo para Europa</span>
+                                <span className="text-[9px] uppercase font-bold text-brand-navy">Listo para Europa</span>
                             </div>
                         </div>
                         <p className="text-[9px] text-brand-navy leading-relaxed mt-4 bg-white p-3 rounded-md border border-gray-400 shadow-sm">
@@ -167,7 +167,7 @@ export default function ClientPremiumDashboard({ user }: { user: any }) {
 
                         <div className="bg-bg-main p-6 rounded border border-gray-400 shadow-sm text-center my-6 flex-1 flex flex-col items-center justify-center relative overflow-hidden group-hover:border-gray-400 shadow-sm transition-all">
                             <div className="absolute inset-0 bg-gradient-to-b from-brand-green/0 to-brand-green-dark/5"></div>
-                            <span className="text-[11px] font-bold text-gray-900 uppercase  mb-2 relative z-10">Premium Logrado (vs Bolsa NY)</span>
+                            <span className="text-[11px] font-bold text-brand-navy uppercase  mb-2 relative z-10">Premium Logrado (vs Bolsa NY)</span>
                             <span className="text-5xl font-black text-brand-navy-bright er relative z-10">+${premiumValue.toFixed(2)} <span className="text-lg text-brand-navy">USD/lb</span></span>
                         </div>
 

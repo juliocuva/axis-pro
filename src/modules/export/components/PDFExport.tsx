@@ -220,7 +220,7 @@ export const PDFExportPanel: React.FC<PDFExportComponentProps> = ({
     <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-amber-600">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-800">Exportar Informe del Lote</h3>
+          <h3 className="text-lg font-bold text-brand-navy">Exportar Informe del Lote</h3>
           <p className="text-sm text-gray-600 mt-1">
             Lote #{lote.loteNumber} - {lote.origen.variedad}
           </p>

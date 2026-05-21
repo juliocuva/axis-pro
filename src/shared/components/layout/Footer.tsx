@@ -22,7 +22,7 @@ export default function Footer() {
           
           <div className="flex flex-col items-center gap-2">
             <Image 
-              src="/logo.png" 
+              src="/logo-axisone.png" 
               alt="AXISONE COFFEE Logo" 
               width={120} 
               height={40}

@@ -52,7 +52,7 @@ export default function DegassingPredictor() {
                         <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
                         Simulador de Estabilización
                     </h3>
-                    <p className="text-[11px] text-gray-900 mt-1 uppercase font-bold ">Motor Predictivo de $CO_2$</p>
+                    <p className="text-[11px] text-brand-navy mt-1 uppercase font-bold ">Motor Predictivo de $CO_2$</p>
                 </div>
 
                 <div className="space-y-6">
@@ -106,7 +106,7 @@ export default function DegassingPredictor() {
                                 <button
                                     key={temp}
                                     onClick={() => setConfig({ ...config, routeTemperature: temp })}
-                                    className={`flex-1 py-3 rounded-xl text-[9px] font-bold uppercase er transition-all border ${config.routeTemperature === temp ? 'bg-brand-green border-black text-brand-navy' : 'border-gray-400 shadow-sm text-gray-900 hover:text-brand-navy hover:bg-white'}`}
+                                    className={`flex-1 py-3 rounded-xl text-[9px] font-bold uppercase er transition-all border ${config.routeTemperature === temp ? 'bg-brand-green border-black text-brand-navy' : 'border-gray-400 shadow-sm text-brand-navy hover:text-brand-navy hover:bg-white'}`}
                                 >
                                     {temp}
                                 </button>
@@ -118,7 +118,7 @@ export default function DegassingPredictor() {
                 {result && (
                     <div className="pt-6 border-t border-gray-400 shadow-sm space-y-6">
                         <div className="text-center">
-                            <p className="text-[11px] text-gray-900 font-bold uppercase  mb-1">Días de Estabilización</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase  mb-1">Días de Estabilización</p>
                             <p className="text-6xl font-bold text-brand-navy er">{result.daysToSafety} <span className="text-lg text-brand-navy">DÍAS</span></p>
                         </div>
 
@@ -135,7 +135,7 @@ export default function DegassingPredictor() {
             {/* Visualizer Panel */}
             <div className="xl:col-span-2 bg-bg-card border border-gray-400 shadow-sm p-8 rounded-[2.5rem] shadow-2xl space-y-8 flex flex-col">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-xs font-bold text-gray-900 uppercase ">Curva de Presión Interna vs Tiempo</h3>
+                    <h3 className="text-xs font-bold text-brand-navy uppercase ">Curva de Presión Interna vs Tiempo</h3>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                             <span className="w-3 h-3 rounded-full bg-brand-green"></span>
@@ -174,12 +174,12 @@ export default function DegassingPredictor() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-gray-400 shadow-sm">
                     <div className="p-6 bg-bg-main rounded-3xl border border-gray-400 shadow-sm">
-                        <p className="text-[11px] text-gray-900 font-bold uppercase  mb-3">Fecha Recomendada</p>
+                        <p className="text-[11px] text-brand-navy font-bold uppercase  mb-3">Fecha Recomendada</p>
                         <p className="text-lg font-bold text-brand-navy">{result?.recommendedShipDate}</p>
                         <p className="text-[9px] text-brand-navy-bright font-bold uppercase mt-1">✓ Optimizada para la ruta</p>
                     </div>
                     <div className="p-6 bg-bg-main rounded-3xl border border-gray-400 shadow-sm">
-                        <p className="text-[11px] text-gray-900 font-bold uppercase  mb-3">Factor de Seguridad</p>
+                        <p className="text-[11px] text-brand-navy font-bold uppercase  mb-3">Factor de Seguridad</p>
                         <p className="text-lg font-bold text-brand-navy">{result?.safetyFactor}%</p>
                         <p className="text-[9px] text-brand-navy font-bold uppercase mt-1">Margen vs Ruptura</p>
                     </div>

@@ -309,11 +309,11 @@ export default function MasterControlCenter() {
                     </div>
                     <div className="flex gap-8">
                         <div className="text-center">
-                            <p className="text-[9px] text-gray-900 font-bold uppercase">Perfiles en Red</p>
+                            <p className="text-[9px] text-brand-navy font-bold uppercase">Perfiles en Red</p>
                             <p className="text-xl font-black text-text-main">{users.length}</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-[9px] text-gray-900 font-bold uppercase">Estado de Tabla</p>
+                            <p className="text-[9px] text-brand-navy font-bold uppercase">Estado de Tabla</p>
                             <p className={`text-[11px] font-bold uppercase ${dbError ? 'text-brand-red' : 'text-brand-navy'}`}>
                                 {dbError ? 'ERROR DE ESQUEMA' : 'ACTIVA'}
                             </p>
@@ -339,11 +339,11 @@ export default function MasterControlCenter() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-white border-b border-gray-400 shadow-sm">
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">No. Lote</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Origen / Caficultor</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Asociación</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Estado EUDR</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-right">Peso (Kg) / Acción</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">No. Lote</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Origen / Caficultor</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Asociación</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Estado EUDR</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase  text-right">Peso (Kg) / Acción</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5 font-medium">
@@ -353,7 +353,7 @@ export default function MasterControlCenter() {
                                         <td className="p-5 text-xs">
                                             <div className="flex flex-col">
                                                 <span className="text-text-main uppercase font-bold">{lot.farmer_name}</span>
-                                                <span className="text-[9px] text-gray-900 uppercase er">{lot.farm_name} • {lot.region}</span>
+                                                <span className="text-[9px] text-brand-navy uppercase er">{lot.farm_name} • {lot.region}</span>
                                             </div>
                                         </td>
                                         <td className="p-5 text-[11px] font-bold text-brand-navy uppercase">
@@ -394,11 +394,11 @@ export default function MasterControlCenter() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden">
-                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2">Asociaciones Activas</p>
+                        <p className="text-[9px] text-brand-navy font-bold uppercase  mb-2">Asociaciones Activas</p>
                         <p className="text-4xl font-black text-brand-navy er">{activeCompanies}</p>
                     </div>
                     <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden">
-                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2">Volumen Estimado (Kg)</p>
+                        <p className="text-[9px] text-brand-navy font-bold uppercase  mb-2">Volumen Estimado (Kg)</p>
                         <p className="text-4xl font-black text-text-main er">{totalVolume.toLocaleString()}</p>
                     </div>
                     <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden">
@@ -427,17 +427,17 @@ export default function MasterControlCenter() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-white border-b border-gray-400 shadow-sm">
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Organización</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Usuarios</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Lotes</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Laboratorio</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-center">Catación</th>
-                                    <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-right">Herramientas</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Organización</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase  text-center">Usuarios</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase  text-center">Lotes</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase  text-center">Laboratorio</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase  text-center">Catación</th>
+                                    <th className="p-5 text-[9px] font-bold text-brand-navy uppercase  text-right">Herramientas</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {stats.length === 0 ? (
-                                    <tr><td colSpan={6} className="p-10 text-center text-gray-900 text-[11px] font-bold uppercase ">No hay organizaciones detectadas</td></tr>
+                                    <tr><td colSpan={6} className="p-10 text-center text-brand-navy text-[11px] font-bold uppercase ">No hay organizaciones detectadas</td></tr>
                                 ) : stats.map((company) => (
                                     <tr key={company.id} className="hover:bg-white/[0.02] transition-colors">
                                         <td className="p-5">
@@ -479,24 +479,24 @@ export default function MasterControlCenter() {
                                 <span className="text-[11px] font-black uppercase ">Error de Sincronización en la Bóveda</span>
                             </div>
                             <p className="text-xs text-brand-navy">El servidor reporta: <code className="text-brand-red bg-black/40 px-2 py-1 rounded">{dbError}</code></p>
-                            <p className="text-[11px] text-gray-900 uppercase font-bold ">Esto ocurre usualmente si la tabla 'profiles' no ha sido creada. ¿Quieres que te muestre el código SQL necesario?</p>
+                            <p className="text-[11px] text-brand-navy uppercase font-bold ">Esto ocurre usualmente si la tabla 'profiles' no ha sido creada. ¿Quieres que te muestre el código SQL necesario?</p>
                         </div>
                     )}
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-white border-b border-gray-400 shadow-sm">
-                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Usuario / Email</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Asociación</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Rol</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase ">Actividad</th>
-                                <th className="p-5 text-[9px] font-bold text-gray-900 uppercase  text-right">Acción</th>
+                                <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Usuario / Email</th>
+                                <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Asociación</th>
+                                <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Rol</th>
+                                <th className="p-5 text-[9px] font-bold text-brand-navy uppercase ">Actividad</th>
+                                <th className="p-5 text-[9px] font-bold text-brand-navy uppercase  text-right">Acción</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {users.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="p-20 text-center">
-                                        <p className="text-[11px] text-gray-900 font-bold uppercase ">No hay operadores registrados en la red</p>
+                                        <p className="text-[11px] text-brand-navy font-bold uppercase ">No hay operadores registrados en la red</p>
                                         <button onClick={() => setShowAddUserModal(true)} className="mt-4 text-brand-navy text-[9px] font-bold uppercase underline">Registrar Primer Operador</button>
                                     </td>
                                 </tr>
@@ -509,7 +509,7 @@ export default function MasterControlCenter() {
                                                 {isActiveToday && <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse shadow-[0_0_8px_rgba(0,255,136,0.6)]"></div>}
                                                 <div className="flex flex-col">
                                                     <span className="text-xs font-bold text-brand-navy uppercase ">{user.full_name || 'Sin Nombre'}</span>
-                                                    <span className="text-[11px] text-gray-900 font-mono mt-1">{user.email}</span>
+                                                    <span className="text-[11px] text-brand-navy font-mono mt-1">{user.email}</span>
                                                 </div>
                                             </div>
                                         </td>
@@ -543,7 +543,7 @@ export default function MasterControlCenter() {
                                             {activeManagementId === user.id && (
                                                 <div className="absolute right-0 top-full mt-2 w-64 bg-bg-card border border-gray-400 shadow-sm rounded-industrial shadow-3xl z-[100] p-4 text-left animate-in fade-in slide-in-from-top-2 duration-300">
                                                     <div className="mb-4">
-                                                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2 px-1">Asignar Rol</p>
+                                                        <p className="text-[9px] text-brand-navy font-bold uppercase  mb-2 px-1">Asignar Rol</p>
                                                         <div className="grid grid-cols-2 gap-1.5">
                                                             {['operador', 'gerente', 'catador', 'barista', 'tostador'].map(role => (
                                                                 <button
@@ -558,7 +558,7 @@ export default function MasterControlCenter() {
                                                     </div>
 
                                                     <div className="pt-4 border-t border-gray-400 shadow-sm">
-                                                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-2 px-1">Cambiar Asociación</p>
+                                                        <p className="text-[9px] text-brand-navy font-bold uppercase  mb-2 px-1">Cambiar Asociación</p>
                                                         <select
                                                             value={user.company_id}
                                                             onChange={(e) => handleUpdateUser(user.id, { company_id: e.target.value.toUpperCase() })}
@@ -604,7 +604,7 @@ export default function MasterControlCenter() {
                                 <p className="text-[11px] text-brand-navy mb-6">{role.permissions}</p>
                             </div>
                             <div className="flex justify-between items-center border-t border-gray-400 shadow-sm pt-4">
-                                <p className="text-[9px] text-gray-900 font-mono">
+                                <p className="text-[9px] text-brand-navy font-mono">
                                     {users.filter(u => u.role?.toLowerCase() === role.name.toLowerCase()).length} USUARIOS
                                 </p>
                             </div>
@@ -620,7 +620,7 @@ export default function MasterControlCenter() {
                             <h2 className="text-2xl font-black text-text-main er uppercase mb-6 text-center">Nuevo Operador</h2>
                             <form onSubmit={handleCreateUser} className="space-y-4">
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Email</label>
+                                    <label className="text-[9px] font-bold text-brand-navy uppercase  block mb-1">Email</label>
                                     <input
                                         type="email"
                                         required
@@ -630,7 +630,7 @@ export default function MasterControlCenter() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Nombre</label>
+                                    <label className="text-[9px] font-bold text-brand-navy uppercase  block mb-1">Nombre</label>
                                     <input
                                         type="text"
                                         required
@@ -641,7 +641,7 @@ export default function MasterControlCenter() {
                                 </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Rol</label>
+                                    <label className="text-[9px] font-bold text-brand-navy uppercase  block mb-1">Rol</label>
                                     <select
                                         value={newUser.role}
                                         onChange={(e) => setNewUser({...newUser, role: e.target.value})}
@@ -651,7 +651,7 @@ export default function MasterControlCenter() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-[9px] font-bold text-gray-900 uppercase  block mb-1">Empresa</label>
+                                    <label className="text-[9px] font-bold text-brand-navy uppercase  block mb-1">Empresa</label>
                                     <select
                                         value={newUser.companyId}
                                         onChange={(e) => setNewUser({...newUser, companyId: e.target.value})}
@@ -663,7 +663,7 @@ export default function MasterControlCenter() {
                                 </div>
                             </div>
                             <div className="flex gap-4 pt-4">
-                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 px-4 py-3 border border-gray-400 shadow-sm rounded text-[11px] font-bold text-gray-900">CANCELAR</button>
+                                <button type="button" onClick={() => setShowAddUserModal(false)} className="flex-1 px-4 py-3 border border-gray-400 shadow-sm rounded text-[11px] font-bold text-brand-navy">CANCELAR</button>
                                 <button type="submit" className="flex-1 px-4 py-3 bg-brand-green text-brand-navy rounded text-[11px] font-bold">REGISTRAR</button>
                             </div>
                         </form>
@@ -677,7 +677,7 @@ export default function MasterControlCenter() {
                 <div className="bg-brand-red/5 p-6 rounded-industrial border border-brand-red/20 flex items-center justify-between">
                     <div>
                         <p className="text-text-main text-xs font-black uppercase">Registros Huérfanos Detectados: {stats.find(s => s.id === 'unassigned')?.lots || 0}</p>
-                        <p className="text-gray-900 text-[9px] uppercase mt-1">Vincular registros sin empresa a un nuevo perfil</p>
+                        <p className="text-brand-navy text-[9px] uppercase mt-1">Vincular registros sin empresa a un nuevo perfil</p>
                     </div>
                     <div className="flex gap-4">
                         <select

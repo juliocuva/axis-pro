@@ -164,13 +164,13 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                             <span className="w-1.5 h-6 bg-brand-green-bright rounded-full"></span>
                             Protocolo basado en estándares de la SCA V2.0
                         </h3>
-                        <p className="text-[11px] text-gray-900 mt-1 uppercase font-bold  flex items-center gap-2">
+                        <p className="text-[11px] text-brand-navy mt-1 uppercase font-bold  flex items-center gap-2">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                             Certificación de Especialidad Q-Grader
                         </p>
                     </div>
                     <div className="text-right">
-                        <p className="text-[11px] text-gray-900 uppercase font-bold  mb-1">Calificación Final</p>
+                        <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">Calificación Final</p>
                         <p className={`text-6xl font-bold er ${totalScore >= 84 ? 'text-brand-navy-bright' : totalScore >= 80 ? 'text-brand-navy-bright' : 'text-brand-navy'}`}>
                             {totalScore.toFixed(2)}
                         </p>
@@ -223,7 +223,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     type="button"
                                     disabled={isSubmitting || isAlreadySealed}
                                     onClick={() => setScores({ ...scores, defects_intensity: 2 })}
-                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-brand-green border-black text-brand-navy' : 'border-gray-400 shadow-sm text-gray-900'}`}
+                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-brand-green border-black text-brand-navy' : 'border-gray-400 shadow-sm text-brand-navy'}`}
                                 >
                                     TAINT (MANCHA -2)
                                 </button>
@@ -231,7 +231,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     type="button"
                                     disabled={isSubmitting || isAlreadySealed}
                                     onClick={() => setScores({ ...scores, defects_intensity: 4 })}
-                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 4 ? 'bg-brand-red border-brand-red text-brand-navy' : 'border-gray-400 shadow-sm text-gray-900'}`}
+                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 4 ? 'bg-brand-red border-brand-red text-brand-navy' : 'border-gray-400 shadow-sm text-brand-navy'}`}
                                 >
                                     FAULT (DEFECTO -4)
                                 </button>
@@ -240,7 +240,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
 
                         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold text-gray-900 uppercase  block">Catador / Q-Grader</label>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase  block">Catador / Q-Grader</label>
                                 <input
                                     type="text"
                                     value={tasterName}
@@ -250,7 +250,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[11px] font-bold text-gray-900 uppercase  block">Notas de Cata</label>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase  block">Notas de Cata</label>
                                 <input
                                     type="text"
                                     value={notes}

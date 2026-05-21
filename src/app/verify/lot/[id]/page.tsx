@@ -20,7 +20,7 @@ export default function PublicLotVerification() {
                 <header className="mb-8 text-center">
                     <h1 className="text-xl font-bold text-brand-navy  uppercase">AXISONE <span className="text-brand-navy-bright">VERIFY</span></h1>
 
-                    <p className="text-[11px] text-gray-900 uppercase  mt-2">Protocolo de Trazabilidad Pública</p>
+                    <p className="text-[11px] text-brand-navy uppercase  mt-2">Protocolo de Trazabilidad Pública</p>
                 </header>
 
                 <div className="w-full max-w-5xl">

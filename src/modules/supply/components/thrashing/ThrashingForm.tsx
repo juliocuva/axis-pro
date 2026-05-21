@@ -303,7 +303,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <span className="w-2 h-2 bg-brand-green rounded-full"></span>
                         Análisis de Granulometría (Mallas)
                     </h4>
-                    <span className="text-[9px] text-gray-900 font-bold uppercase ">Distribución de Almendra (%)</span>
+                    <span className="text-[9px] text-brand-navy font-bold uppercase ">Distribución de Almendra (%)</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                     {[
@@ -315,7 +315,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         { id: 'menores', label: 'Menores' }
                     ].map(m => (
                         <div key={m.id} className="space-y-1">
-                            <label className="text-[9px] font-bold text-gray-900 uppercase block text-center ">{m.label}</label>
+                            <label className="text-[9px] font-bold text-brand-navy uppercase block text-center ">{m.label}</label>
                             <NumericInput
                                 label=""
                                 value={formData.sieveAnalysis[m.id as keyof typeof formData.sieveAnalysis]}
@@ -338,7 +338,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             <div className="p-4 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">
                 <div className="flex flex-col">
                     <span className="text-[11px] font-bold text-brand-navy-bright uppercase ">Projection de Almendra Esperada:</span>
-                    <span className="text-[9px] text-gray-900 uppercase">(Basado en coeficientes de conversión: {PROCESS_PARAMS[formData.processType]?.conversion})</span>
+                    <span className="text-[9px] text-brand-navy uppercase">(Basado en coeficientes de conversión: {PROCESS_PARAMS[formData.processType]?.conversion})</span>
                 </div>
                 <span className="text-2xl font-bold text-brand-navy-bright font-mono animate-pulse">
                     ≈ {stats.theoreticalAlmond.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
@@ -427,7 +427,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
                         {/* Reporte de Eficiencia */}
                         <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial space-y-4 relative group overflow-hidden">
-                            <h4 className="text-[11px] font-bold text-gray-900 uppercase  flex items-center gap-2">
+                            <h4 className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
                                 Reporte de Eficiencia de Trilla
                             </h4>
@@ -450,7 +450,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                                 </div>
                                 <div className="flex justify-between items-center text-[11px] uppercase">
                                     <span className="text-brand-navy">Merma Teórica:</span>
-                                    <span className="text-gray-900 font-mono">
+                                    <span className="text-brand-navy font-mono">
                                         {PROCESS_PARAMS[formData.processType]?.shrinkageMin}-{PROCESS_PARAMS[formData.processType]?.shrinkageMax}%
                                     </span>
                                 </div>

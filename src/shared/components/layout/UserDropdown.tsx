@@ -39,14 +39,14 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
             >
                 <div className="text-right hidden sm:block">
                     <p className="text-[11px] font-bold text-brand-navy uppercase er leading-none">{user.name}</p>
-                    <p className="text-[9px] text-gray-900 font-bold uppercase  mt-1">Clase A Operador</p>
+                    <p className="text-[9px] text-brand-navy font-bold uppercase  mt-1">Clase A Operador</p>
                 </div>
                 <div className="w-9 h-9 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex items-center justify-center text-brand-navy-bright font-bold text-xs shadow-inner uppercase">
                     {initials}
                 </div>
                 <svg
                     width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
-                    className={`text-gray-900 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                    className={`text-brand-navy transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                 >
                     <path d="M6 9l6 6 6-6" />
                 </svg>
@@ -55,7 +55,7 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
             {isOpen && (
                 <div className="absolute right-0 mt-3 w-64 bg-bg-card border border-gray-400 shadow-sm rounded-industrial p-4 shadow-3xl z-[100] animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-xl">
                     <div className="px-4 py-3 border-b border-gray-400 shadow-sm mb-2">
-                        <p className="text-[9px] text-gray-900 font-bold uppercase  mb-1">Sesión Activa</p>
+                        <p className="text-[9px] text-brand-navy font-bold uppercase  mb-1">Sesión Activa</p>
                         <p className="text-[11px] font-bold text-brand-navy truncate">{user.email}</p>
                     </div>
 

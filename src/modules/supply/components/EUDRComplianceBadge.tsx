@@ -29,7 +29,7 @@ export default function EUDRComplianceBadge({ lotData, status, className = "" }:
                 </div>
                 <div>
                     <h4 className="text-[11px] font-black text-brand-navy uppercase ">Destino: Europa (EUDR)</h4>
-                    <p className="text-[9px] text-gray-900 font-bold uppercase  mt-0.5">
+                    <p className="text-[9px] text-brand-navy font-bold uppercase  mt-0.5">
                         {hasPolygon ? '✓ Polígono Georreferenciado' : '⚠ Falta Mapeo de Polígono'}
                     </p>
                 </div>

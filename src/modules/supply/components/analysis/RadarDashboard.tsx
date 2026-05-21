@@ -254,7 +254,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                     <span className="text-4xl font-black">!</span>
                 </div>
                 <h1 className="text-3xl font-black uppercase er">Acceso Denegado</h1>
-                <p className="text-gray-900 uppercase text-xs  mt-2">Esta terminal requiere credenciales de Alta Gerencia FNC / AXIS ADMIN.</p>
+                <p className="text-brand-navy uppercase text-xs  mt-2">Esta terminal requiere credenciales de Alta Gerencia FNC / AXIS ADMIN.</p>
             </div>
         );
     }

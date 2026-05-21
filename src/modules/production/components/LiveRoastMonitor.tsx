@@ -152,7 +152,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                         </div>
                         <div>
                             <h3 className="text-xl font-bold text-brand-navy uppercase ">Lote Sellado</h3>
-                            <p className="text-[9px] text-gray-800 uppercase font-bold ">VINCULADO A BLOCKCHAIN DE ORIGEN</p>
+                            <p className="text-[9px] text-brand-navy uppercase font-bold ">VINCULADO A BLOCKCHAIN DE ORIGEN</p>
                         </div>
                     </div>
                     <button onClick={prepareNextBatch} className="px-6 py-2.5 bg-brand-green text-brand-navy font-bold rounded-xl uppercase  text-[9px] shadow-lg hover:bg-brand-green-bright transition-all">Siguiente Turno</button>
@@ -164,21 +164,21 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                         <polyline fill="none" stroke="#22c55e" strokeWidth="1" points={generatePoints(btHistory, 250)} />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <p className="text-[7px] text-brand-navy font-bold uppercase  group-hover:text-gray-900 transition-colors">Spectral Signature Archive</p>
+                        <p className="text-[7px] text-brand-navy font-bold uppercase  group-hover:text-brand-navy transition-colors">Spectral Signature Archive</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 relative z-10">
                     <div className="p-4 bg-white rounded-2xl border border-gray-400 shadow-sm">
-                        <p className="text-[9px] text-gray-800 uppercase font-bold mb-1">Tiempo</p>
+                        <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Tiempo</p>
                         <p className="text-xl font-bold text-brand-navy">{Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}</p>
                     </div>
                     <div className="p-4 bg-white rounded-2xl border border-gray-400 shadow-sm">
-                        <p className="text-[9px] text-gray-800 uppercase font-bold mb-1">Masa</p>
+                        <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Masa</p>
                         <p className="text-xl font-bold text-brand-navy">14.8%</p>
                     </div>
                     <div className="p-4 bg-white rounded-2xl border border-gray-400 shadow-sm">
-                        <p className="text-[9px] text-gray-800 uppercase font-bold mb-1">Repetibilidad</p>
+                        <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Repetibilidad</p>
                         <p className="text-xl font-bold text-brand-navy-bright">98.2%</p>
                     </div>
                 </div>
@@ -201,7 +201,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                         <div className={`w-2 h-2 rounded-full ${isRoasting ? 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-white'}`}></div>
                         <h2 className="text-xl font-bold uppercase  text-brand-navy">Análisis de Termografía en Vivo</h2>
                     </div>
-                    <p className="text-[9px] text-gray-800 font-bold uppercase  ml-5">Sincronización de Onda de Calor Infrarroja (AXIS-CORE)</p>
+                    <p className="text-[9px] text-brand-navy font-bold uppercase  ml-5">Sincronización de Onda de Calor Infrarroja (AXIS-CORE)</p>
                 </div>
                 <div className="bg-white border border-gray-400 shadow-sm px-6 py-3 rounded-2xl flex items-center gap-6">
                     {alert && (
@@ -211,7 +211,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                         </div>
                     )}
                     <div className="border-l border-gray-400 shadow-sm pl-6">
-                        <p className="text-[9px] text-gray-800 uppercase font-bold  mb-1">Status Emisiones</p>
+                        <p className="text-[9px] text-brand-navy uppercase font-bold  mb-1">Status Emisiones</p>
                         <div className="flex gap-1">
                             {[1, 2, 3, 4, 5].map(i => <div key={i} className={`w-3 h-1 rounded-full ${isRoasting ? 'bg-brand-green-bright animate-pulse' : 'bg-white'}`} style={{ animationDelay: `${i * 0.1}s` }}></div>)}
                         </div>
@@ -223,7 +223,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-3xl relative overflow-hidden shadow-xl group">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-green to-brand-green-dark opacity-30"></div>
-                    <p className="text-[9px] text-gray-800 font-bold uppercase  mb-2">Temp. Bean (BT)</p>
+                    <p className="text-[9px] text-brand-navy font-bold uppercase  mb-2">Temp. Bean (BT)</p>
                     <p className={`text-2xl font-bold er transition-colors ${alert?.type === 'critical' ? 'text-red-500' : alert?.type === 'warning' ? 'text-brand-navy' : 'text-brand-navy'}`}>{currentTemp.toFixed(1)}°</p>
                     <div className="mt-3 h-1 bg-white rounded-full overflow-hidden">
                         <div className={`h-full shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all ${alert?.type === 'critical' ? 'bg-red-500' : alert?.type === 'warning' ? 'bg-brand-green' : 'bg-brand-green/80'}`} style={{ width: `${(currentTemp / 250) * 100}%` }}></div>
@@ -232,7 +232,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
 
                 <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-3xl relative overflow-hidden shadow-xl">
                     <div className="absolute top-0 left-0 w-full h-1 bg-white opacity-10"></div>
-                    <p className="text-[9px] text-gray-800 font-bold uppercase  mb-2">Cronómetro Telemetría</p>
+                    <p className="text-[9px] text-brand-navy font-bold uppercase  mb-2">Cronómetro Telemetría</p>
                     <p className="text-2xl font-bold text-brand-navy er">
                         {Math.floor(elapsedTime / 60).toString().padStart(2, '0')}:{(elapsedTime % 60).toString().padStart(2, '0')}
                     </p>
@@ -282,30 +282,30 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                                 </h4>
                                 <div className="grid grid-cols-3 gap-6">
                                     <div className="space-y-1">
-                                        <p className="text-[7px] text-gray-800 uppercase font-bold">Charge Temp</p>
+                                        <p className="text-[7px] text-brand-navy uppercase font-bold">Charge Temp</p>
                                         <p className="text-sm font-bold text-brand-navy">205°C ± 2°</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[7px] text-gray-800 uppercase font-bold">Initial Gas</p>
+                                        <p className="text-[7px] text-brand-navy uppercase font-bold">Initial Gas</p>
                                         <p className="text-sm font-bold text-brand-navy">75% (HP)</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[7px] text-gray-800 uppercase font-bold">Airflow P1</p>
+                                        <p className="text-[7px] text-brand-navy uppercase font-bold">Airflow P1</p>
                                         <p className="text-sm font-bold text-brand-navy">50% (PWM)</p>
                                     </div>
                                 </div>
-                                <p className="text-[9px] text-gray-800 mt-2">Basado en humedad del {lotData?.moisture_pct || '11.5'}% y proceso {lotData?.process || 'Lavado'}.</p>
+                                <p className="text-[9px] text-brand-navy mt-2">Basado en humedad del {lotData?.moisture_pct || '11.5'}% y proceso {lotData?.process || 'Lavado'}.</p>
                             </div>
                         </div>
                     ) : (
                         <div className="flex items-center gap-6 flex-1">
-                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 ${copilotData?.actionCode === 'INCREASE_GAS' ? 'bg-white border border-gray-400 shadow-sm text-brand-navy-bright ring-2 ring-blue-500/40 animate-pulse' : copilotData?.actionCode === 'DECREASE_GAS' ? 'bg-red-600/20 text-red-400 ring-2 ring-red-500/40 animate-pulse' : 'bg-white text-gray-800'}`}>
+                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 ${copilotData?.actionCode === 'INCREASE_GAS' ? 'bg-white border border-gray-400 shadow-sm text-brand-navy-bright ring-2 ring-blue-500/40 animate-pulse' : copilotData?.actionCode === 'DECREASE_GAS' ? 'bg-red-600/20 text-red-400 ring-2 ring-red-500/40 animate-pulse' : 'bg-white text-brand-navy'}`}>
                                 {copilotData?.actionCode === 'INCREASE_GAS' ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 5v14M5 12l7-7 7 7" /></svg> :
                                     copilotData?.actionCode === 'DECREASE_GAS' ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M12 19V5M19 12l-7 7-7-7" /></svg> :
                                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" /></svg>}
                             </div>
                             <div>
-                                <h4 className="text-[9px] font-bold text-gray-800 uppercase  mb-2 flex items-center gap-2">
+                                <h4 className="text-[9px] font-bold text-brand-navy uppercase  mb-2 flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-brand-green-bright animate-pulse"></span>
                                     Asistente de Curva Espectral AXIS
                                 </h4>
@@ -319,7 +319,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
 
                 {copilotData && (
                     <div className="w-full lg:w-80 space-y-5 relative z-10">
-                        <div className="flex justify-between items-center text-[11px] font-bold uppercase  text-gray-800">
+                        <div className="flex justify-between items-center text-[11px] font-bold uppercase  text-brand-navy">
                             <span>Sincronía Térmica</span>
                             <span className={copilotData.isSincronized ? 'text-brand-navy-bright' : 'text-brand-navy'}>
                                 {copilotData.isSincronized ? 'OPTIMAL WAVE' : `±${Math.abs(copilotData.tempDiff).toFixed(1)}°C DELTA`}
@@ -384,7 +384,7 @@ export default function LiveRoastMonitor({ lotData, masterProfile, user }: LiveR
                     <div className="flex justify-between items-center mb-6 relative z-10 px-4">
                         <div className="flex gap-8">
                             <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-brand-green-bright shadow-[0_0_10px_rgba(0,255,136,0.6)]"></span> <span className="text-[9px] font-bold uppercase  text-brand-navy">Beam Temp (BT)</span></div>
-                            <div className="flex items-center gap-2"><span className="w-2 h-2 border border-dashed border-gray-400 shadow-sm rounded-full"></span> <span className="text-[9px] font-bold uppercase  text-gray-800">Master Ghost Profile</span></div>
+                            <div className="flex items-center gap-2"><span className="w-2 h-2 border border-dashed border-gray-400 shadow-sm rounded-full"></span> <span className="text-[9px] font-bold uppercase  text-brand-navy">Master Ghost Profile</span></div>
                         </div>
 
                         <div className="flex gap-3">

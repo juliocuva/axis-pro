@@ -39,7 +39,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-bg-card border border-gray-400 shadow-sm p-4 rounded-industrial-sm shadow-2xl backdrop-blur-md min-w-[180px]">
-                <p className="text-xs font-mono text-gray-900 mb-3 flex justify-between">
+                <p className="text-xs font-mono text-brand-navy mb-3 flex justify-between">
                     <span>TIEMPO</span>
                     <span>{label}</span>
                 </p>
@@ -144,7 +144,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                             Análisis Espectral de Tostión
                         </h3>
                     </div>
-                    <p className="text-[11px] text-gray-900 font-bold uppercase  ml-5">
+                    <p className="text-[11px] text-brand-navy font-bold uppercase  ml-5">
                         {isLive ? 'Monitoreo de Termografía Infrarroja en Vivo' : 'Análisis Post-Proceso de Curva de Calor'}
                     </p>
                 </div>
@@ -161,7 +161,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                     </select>
 
                     <div className="bg-bg-card border border-gray-400 shadow-sm px-6 py-3 rounded-industrial-sm flex flex-col items-center">
-                        <p className="text-[9px] text-gray-900 uppercase font-bold  mb-1">Carga Sensorial</p>
+                        <p className="text-[9px] text-brand-navy uppercase font-bold  mb-1">Carga Sensorial</p>
                         <p className="text-xl font-bold text-brand-navy leading-none">{selectedRoast?.sca_score || '88.5'}</p>
                     </div>
                     <div className="bg-white border border-gray-400 shadow-sm px-6 py-3 rounded-industrial-sm flex flex-col items-center">
@@ -182,7 +182,7 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                 <div className="flex flex-wrap justify-between gap-8 mb-10 relative z-10">
                     <div className="flex gap-12">
                         <div className="space-y-1">
-                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Tiempo de Tueste</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase ">Tiempo de Tueste</p>
                             <p className="text-4xl font-bold text-brand-navy er">
                                 {(() => {
                                     const duration = selectedRoast?.duration_seconds || (chartData.length > 0 ? (() => {
@@ -199,21 +199,21 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
                                     })() : 552);
                                     return `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`;
                                 })()}
-                                <span className="text-xs text-gray-900 ml-2">min</span>
+                                <span className="text-xs text-brand-navy ml-2">min</span>
                             </p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Temp. Final</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase ">Temp. Final</p>
                             <p className="text-4xl font-bold text-brand-navy-bright er">
                                 {selectedRoast?.final_temp || (chartData.length > 0 ? chartData[chartData.length - 1].temp : '202.4')}
-                                <span className="text-xs text-gray-900 ml-2">°C</span>
+                                <span className="text-xs text-brand-navy ml-2">°C</span>
                             </p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[11px] text-gray-900 font-bold uppercase ">Masa Resultante</p>
+                            <p className="text-[11px] text-brand-navy font-bold uppercase ">Masa Resultante</p>
                             <p className="text-4xl font-bold text-brand-navy er">
                                 {selectedRoast ? selectedRoast.roasted_weight : '29.8'}
-                                <span className="text-xs text-gray-900 ml-2">KG</span>
+                                <span className="text-xs text-brand-navy ml-2">KG</span>
                             </p>
                         </div>
                     </div>
@@ -354,23 +354,23 @@ export default function RoastCurveAnalysis({ isLive = false, batchId }: { isLive
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial-sm relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green/80 opacity-50"></div>
-                    <p className="text-[11px] text-gray-900 font-bold uppercase  mb-2">Punto de Giro (TP)</p>
-                    <p className="text-2xl font-bold text-brand-navy ">01:00 <span className="text-xs text-gray-900 ml-1">95°C</span></p>
+                    <p className="text-[11px] text-brand-navy font-bold uppercase  mb-2">Punto de Giro (TP)</p>
+                    <p className="text-2xl font-bold text-brand-navy ">01:00 <span className="text-xs text-brand-navy ml-1">95°C</span></p>
                 </div>
                 <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-50"></div>
-                    <p className="text-[11px] text-gray-900 font-bold uppercase  mb-2">Primer Crack (FC)</p>
-                    <p className="text-2xl font-bold text-brand-navy-bright ">09:00 <span className="text-xs text-gray-900 ml-1">202°C</span></p>
+                    <p className="text-[11px] text-brand-navy font-bold uppercase  mb-2">Primer Crack (FC)</p>
+                    <p className="text-2xl font-bold text-brand-navy-bright ">09:00 <span className="text-xs text-brand-navy ml-1">202°C</span></p>
                 </div>
                 <div className="bg-bg-card border border-gray-400 shadow-sm p-6 rounded-industrial-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-green opacity-50"></div>
                     <p className="text-[11px] text-brand-navy font-bold uppercase  mb-2">Energy Stability</p>
-                    <p className="text-2xl font-bold text-brand-navy ">98.2<span className="text-xs text-gray-900 ml-1">%</span></p>
+                    <p className="text-2xl font-bold text-brand-navy ">98.2<span className="text-xs text-brand-navy ml-1">%</span></p>
                 </div>
                 <div className="bg-brand-red/5 border border-brand-red/10 p-6 rounded-industrial-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-red opacity-50"></div>
                     <p className="text-[11px] text-brand-red font-bold uppercase  mb-2">Development</p>
-                    <p className="text-2xl font-bold text-brand-navy ">18.5<span className="text-xs text-gray-900 ml-1">%</span></p>
+                    <p className="text-2xl font-bold text-brand-navy ">18.5<span className="text-xs text-brand-navy ml-1">%</span></p>
                 </div>
             </div>
         </div>

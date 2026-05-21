@@ -26,21 +26,21 @@ export default function GratefulModule({ user, selectedLot }: GratefulModuleProp
                     <div className="w-12 h-12 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center mb-4">
                         <span className="text-brand-navy font-black">★</span>
                     </div>
-                    <p className="text-[11px] text-gray-900 uppercase font-bold  mb-1">Alchemy Score</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">Alchemy Score</p>
                     <p className="text-3xl font-black text-brand-navy">4.92</p>
                 </div>
                 <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-3xl flex flex-col items-center text-center">
                     <div className="w-12 h-12 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center mb-4">
                         <span className="text-brand-navy font-black">❤</span>
                     </div>
-                    <p className="text-[11px] text-gray-900 uppercase font-bold  mb-1">Gratitud Global</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">Gratitud Global</p>
                     <p className="text-3xl font-black text-brand-navy">128</p>
                 </div>
                 <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-3xl flex flex-col items-center text-center">
                     <div className="w-12 h-12 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center mb-4">
                         <span className="text-brand-navy font-black">$</span>
                     </div>
-                    <p className="text-[11px] text-gray-900 uppercase font-bold  mb-1">Bonos (USD)</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">Bonos (USD)</p>
                     <p className="text-3xl font-black text-brand-navy">+$450.00</p>
                 </div>
             </div>
@@ -75,7 +75,7 @@ export default function GratefulModule({ user, selectedLot }: GratefulModuleProp
                             <div key={rec.id} className="p-5 rounded-2xl bg-white/2 border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm transition-all">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="p-6 rounded-2xl border border-dashed border-gray-400 bg-white/50">
-                                        <p className="text-[14px] font-bold text-gray-800 italic leading-relaxed mb-3">
+                                        <p className="text-[14px] font-bold text-brand-navy italic leading-relaxed mb-3">
                                             "El perfil sensorial de este lote es extraordinario. Gracias por cuidar cada etapa de la fermentación. Un saludo desde Berlín."
                                         </p>
                                         <div className="flex justify-between items-center">
@@ -112,7 +112,7 @@ export default function GratefulModule({ user, selectedLot }: GratefulModuleProp
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-lg font-black text-brand-navy uppercase leading-tight er">Portal de Educación AXIS</h4>
-                            <p className="text-[9px] text-gray-900 uppercase font-bold leading-relaxed max-w-[220px]">
+                            <p className="text-[9px] text-brand-navy uppercase font-bold leading-relaxed max-w-[220px]">
                                 Este código lleva al consumidor a la data técnica completa. Al final del recorrido, podrá activar su bono de excelencia.
                             </p>
                         </div>

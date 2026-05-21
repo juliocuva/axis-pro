@@ -52,7 +52,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     };
 
     const variantStyles = {
-        default: 'border-gray-400 shadow-sm bg-white text-carbon focus:border-black',
+        default: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
         industrial: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
         blue: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
         red: 'border-brand-red/50 bg-white text-brand-red focus:border-brand-red',
@@ -100,7 +100,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         }
                         onChange(val);
                     }}
-                    className={`block w-full border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-carbon/40 placeholder:font-medium`}
+                    className={`block w-full border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-brand-navy/40 placeholder:font-medium`}
                 />
                 <div
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"

@@ -16,98 +16,93 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             const element = document.getElementById(elementId);
             if (!element) return;
 
-            // Almacenar estilos originales y de padres críticos
-            const originalStyle = element.style.cssText;
-            const parent = element.parentElement;
-            const originalParentStyle = parent ? parent.style.cssText : '';
+            // 1. Crear un contenedor temporal en el body (fuera de modales fijos/con scroll)
+            const tempContainer = document.createElement('div');
+            tempContainer.id = 'axis-passport-temp-container';
+            tempContainer.style.cssText = `
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 794px !important;
+                height: auto !important;
+                overflow: hidden !important;
+                display: block !important;
+                background: white !important;
+                z-index: -99999 !important;
+            `;
 
-            // Forzar un estado de visualización limpio para la captura
-            // 1. Desactivar transiciones para evitar frames intermedios
-            element.style.transition = 'none';
+            // 2. Clonar el elemento completo
+            const clonedElement = element.cloneNode(true) as HTMLElement;
+            clonedElement.id = `${elementId}-clone`;
+            clonedElement.style.cssText = `
+                width: 794px !important;
+                height: auto !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            `;
 
-            // 2. Forzar ancho industrial (proporción A4/Carta ideal)
-            element.style.width = '750px';
-            element.style.maxWidth = '750px';
-            element.style.minWidth = '750px';
-            element.style.marginLeft = '0';
-            element.style.marginRight = '0';
-            element.style.position = 'relative';
-            element.style.left = '0';
-            element.style.top = '0';
-            element.style.margin = '0';
-            element.style.transform = 'none';
+            tempContainer.appendChild(clonedElement);
+            document.body.appendChild(tempContainer);
 
-            // 3. Relax parent constraints to avoid clipping
-            if (parent) {
-                parent.style.display = 'block';
-                parent.style.overflow = 'visible';
-                parent.style.maxWidth = 'none';
-                parent.style.width = 'auto';
-                parent.style.padding = '0';
-                parent.style.margin = '0';
-            }
+            // Asegurarnos de que todas las páginas clonadas y gráficos estén visibles y listos
+            const pages = clonedElement.querySelectorAll('.certificate-page, .passport-page, div[style*="1123px"], div[style*="1056px"]');
+            pages.forEach((pageEl: any) => {
+                pageEl.style.setProperty('display', 'block', 'important');
+                pageEl.style.setProperty('visibility', 'visible', 'important');
+                pageEl.style.setProperty('opacity', '1', 'important');
+                pageEl.style.setProperty('position', 'relative', 'important');
+                pageEl.style.setProperty('margin', '0 0 20px 0', 'important');
+                // Neutralizar clases de ocultación
+                pageEl.classList.remove('step-hidden');
+                pageEl.classList.add('step-visible');
+            });
 
-            // Pequeño delay para asegurar que el DOM se ajuste al nuevo ancho
-            await new Promise(r => setTimeout(r, 500));
+            // Pequeño delay para asegurar que el DOM clonado esté listo
+            await new Promise(r => setTimeout(r, 200));
 
-            const canvas = await html2canvas(element, {
+            const canvas = await html2canvas(clonedElement, {
                 scale: 2,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
-                windowWidth: 1200,
+                windowWidth: 794,
+                x: 0,
+                y: 0,
                 scrollX: 0,
                 scrollY: 0,
-                onclone: (clonedDoc, element) => {
-                    // Force the element to stay at 750px regardless of windowWidth
-                    element.style.width = '750px';
-                    element.style.minWidth = '750px';
-                    element.style.maxWidth = '750px';
-                    
-                    // Fix for flex-row issues in html2canvas
-                    const flexContainers = element.querySelectorAll('.flex');
-                    flexContainers.forEach((container: any) => {
-                        if (container.className.includes('md:flex-row') || container.className.includes('lg:flex-row')) {
-                            container.style.flexDirection = 'row';
-                        }
-                    });
-                    const itemsToHide = clonedDoc.querySelectorAll('.no-export');
-                    itemsToHide.forEach((el: any) => el.style.display = 'none');
-                    
-                    // Remueve explícitamente elementos que rompen html2canvas
-                    const badElements = clonedDoc.querySelectorAll('[data-html2canvas-ignore="true"]');
-                    badElements.forEach((el: any) => el.remove());
-
+                onclone: (clonedDoc, clonedEl) => {
                     // Force charts to have non-zero dimensions
-                    // Force charts to have non-zero dimensions
-                    const charts = clonedDoc.querySelectorAll('.recharts-responsive-container');
+                    const charts = clonedEl.querySelectorAll('.recharts-responsive-container');
                     charts.forEach((chart: any) => {
-                        chart.style.width = '800px';
+                        chart.style.width = '750px';
                         chart.style.height = '400px';
                         chart.style.visibility = 'visible';
                         chart.style.opacity = '1';
                     });
 
-                    // Remove filters and complex SVG patterns that crash html2canvas
-                    const filters = clonedDoc.querySelectorAll('filter, mask, pattern');
-                    filters.forEach((el: any) => el.parentNode?.removeChild(el));
-
                     // Hide elements with blur classes which often break canvas
-                    const blurElements = clonedDoc.querySelectorAll('[class*="blur-"]');
+                    const blurElements = clonedEl.querySelectorAll('[class*="blur-"]');
                     blurElements.forEach((el: any) => {
                         el.style.filter = 'none';
                         el.style.backdropFilter = 'none';
                     });
                     
+                    // Remove filters and complex SVG patterns that crash html2canvas
+                    const filters = clonedEl.querySelectorAll('filter, mask, pattern');
+                    filters.forEach((el: any) => el.parentNode?.removeChild(el));
+
                     // Remove radial gradients that can cause createPattern errors
-                    const radialElements = clonedDoc.querySelectorAll('[style*="radial-gradient"]');
+                    const radialElements = clonedEl.querySelectorAll('[style*="radial-gradient"]');
                     radialElements.forEach((el: any) => {
                         el.style.backgroundImage = 'none';
                     });
 
                     // FATAL ERROR PREVENTION: Strip any element that has explicit 0 width/height avoiding createPattern error
-                    const allNodes = clonedDoc.querySelectorAll('svg, canvas, img');
+                    const allNodes = clonedEl.querySelectorAll('svg, canvas, img');
                     allNodes.forEach((node: any) => {
                         const w = node.getAttribute('width');
                         const h = node.getAttribute('height');
@@ -120,9 +115,8 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                 }
             });
 
-            // Restaurar estilos inmediatamente
-            element.style.cssText = originalStyle;
-            if (parent) parent.style.cssText = originalParentStyle;
+            // Eliminar el clon temporal del body inmediatamente
+            document.body.removeChild(tempContainer);
 
             // En vez de generar un PDF, lo descargamos como Imagen de Alta Calidad (solicitud del usuario)
             const imgData = canvas.toDataURL('image/jpeg', 0.90);

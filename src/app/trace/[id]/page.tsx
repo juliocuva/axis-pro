@@ -47,7 +47,7 @@ export default function TraceabilityStoryPage() {
             </header>
 
             <div className="max-w-md w-full bg-bg-main border border-gray-200 shadow-sm rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white rounded-full flex items-center justify-center text-[9px] font-mono text-gray-900 uppercase z-20">Secure Token Verifier</div>
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-6 bg-white rounded-full flex items-center justify-center text-[9px] font-mono text-brand-navy uppercase z-20">Secure Token Verifier</div>
 
                 <div className="h-64 relative overflow-hidden">
                     <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=3540&auto=format&fit=crop" className="w-full h-full object-cover grayscale" alt="Farm" />
@@ -67,15 +67,15 @@ export default function TraceabilityStoryPage() {
 
                     <div className="grid grid-cols-3 gap-4 py-6 border-y border-gray-200 shadow-sm">
                         <div className="text-center">
-                            <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Proceso</p>
+                            <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Proceso</p>
                             <p className="text-xs font-bold uppercase text-brand-navy">{story?.process || 'Natural'}</p>
                         </div>
                         <div className="text-center border-x border-gray-200 shadow-sm">
-                            <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Puntaje</p>
+                            <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Puntaje</p>
                             <p className="text-xs font-bold text-brand-navy-bright">{story?.sensoryScore || 87.5} pts (Basado en estándares SCA)</p>
                         </div>
                         <div className="text-center">
-                            <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Tueste</p>
+                            <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Tueste</p>
                             <p className="text-xs font-bold uppercase text-brand-navy">Perfil Oro</p>
                         </div>
                     </div>
