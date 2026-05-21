@@ -87,7 +87,7 @@ const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, 
         <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
         {label}
       </label>
-      <span className="text-black font-mono font-bold text-sm bg-white border border-gray-400 shadow-sm px-2 py-0.5 rounded">{value}</span>
+      <span className="text-brand-navy font-mono font-bold text-sm bg-white border border-gray-400 shadow-sm px-2 py-0.5 rounded">{value}</span>
     </div>
     <div className="relative h-6 flex items-center">
       <input
@@ -127,7 +127,7 @@ interface DescriptorOption {
 
 const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }: { label: string, options: (string | DescriptorOption)[], selected: string[], onToggle: (val: string) => void, disabled?: boolean }) => (
     <div className="space-y-2">
-        <label className="text-[11px] font-bold text-black font-black uppercase ">{label}</label>
+        <label className="text-[11px] font-bold text-brand-navy font-black uppercase ">{label}</label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 border-l border-gray-400 pl-4">
             {options.map((opt, idx) => {
                 const isString = typeof opt === 'string';
@@ -146,7 +146,7 @@ const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }
                             <div className={`w-3.5 h-3.5 border flex-shrink-0 transition-all flex items-center justify-center ${selected.includes(mainLabel) ? 'bg-black border-black shadow-[0_0_8px_rgba(0,166,81,0.4)]' : 'border-black'}`}>
                                 {selected.includes(mainLabel) && <svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" className="w-2.5 h-2.5"><path d="M20 6L9 17l-5-5" /></svg>}
                             </div>
-                            <span className={`text-[11px] font-bold uppercase  ${selected.includes(mainLabel) ? 'text-black' : 'text-black font-black'}`}>{mainLabel}</span>
+                            <span className={`text-[11px] font-bold uppercase  ${selected.includes(mainLabel) ? 'text-brand-navy' : 'text-brand-navy font-black'}`}>{mainLabel}</span>
                         </button>
                         
                         {/* SUB-CATEGORÍAS */}
@@ -163,7 +163,7 @@ const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }
                                         <div className={`w-3 h-3 border flex-shrink-0 transition-all flex items-center justify-center ${selected.includes(sub) ? 'bg-black/70 border-black' : 'border-black'}`}>
                                             {selected.includes(sub) && <svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" className="w-2 h-2"><path d="M20 6L9 17l-5-5" /></svg>}
                                         </div>
-                                        <span className={`text-[11px] font-medium uppercase  ${selected.includes(sub) ? 'text-black' : 'text-black font-black'}`}>{sub}</span>
+                                        <span className={`text-[11px] font-medium uppercase  ${selected.includes(sub) ? 'text-brand-navy' : 'text-brand-navy font-black'}`}>{sub}</span>
                                     </button>
                                 ))}
                             </div>
@@ -185,7 +185,7 @@ const SCAExtrinsicSection = ({
     onToggle: (key: string) => void; onInfoChange: (val: string) => void; disabled?: boolean;
 }) => (
     <div className="flex flex-col border-r border-gray-400 last:border-r-0">
-        <div className="bg-brand-green text-black px-4 py-2">
+        <div className="bg-brand-green text-brand-navy px-4 py-2">
             <h4 className="text-[10px] font-black uppercase tracking-widest">{title}</h4>
         </div>
         <div className="flex flex-1">
@@ -203,17 +203,17 @@ const SCAExtrinsicSection = ({
                             )}
                         </div>
                         <span className={`text-[10px] font-bold uppercase leading-tight ${
-                            item.indent ? 'text-black/60 font-medium' : 'text-black'
+                            item.indent ? 'text-brand-navy/60 font-medium' : 'text-brand-navy'
                         }`}>{item.label}</span>
                     </button>
                 ))}
             </div>
             <div className="w-[280px] p-3 flex flex-col gap-1">
-                <p className="text-[8px] font-bold text-black/50 uppercase leading-tight">{infoLabel}</p>
+                <p className="text-[8px] font-bold text-brand-navy/50 uppercase leading-tight">{infoLabel}</p>
                 <textarea
                     value={info} disabled={disabled}
                     onChange={(e) => onInfoChange(e.target.value)}
-                    className={`flex-1 bg-white border border-gray-200 rounded px-2 py-1.5 text-[10px] text-black outline-none resize-none focus:border-black min-h-[80px] ${
+                    className={`flex-1 bg-white border border-gray-200 rounded px-2 py-1.5 text-[10px] text-brand-navy outline-none resize-none focus:border-black min-h-[80px] ${
                         disabled ? 'cursor-not-allowed opacity-60' : ''
                     }`}
                     placeholder="..."
@@ -238,8 +238,8 @@ const QualityScale = ({ label, value, onChange, disabled }: { label: string, val
           onClick={() => onChange(num)}
           className={`w-7 h-7 rounded-full border text-[11px] font-bold transition-all flex items-center justify-center
             ${value === num 
-              ? 'bg-brand-green border-black text-black font-black scale-110 shadow-sm' 
-              : disabled ? 'border-gray-400 bg-white text-black font-black cursor-not-allowed' : 'border-gray-400 bg-white text-black hover:border-black'}`}
+              ? 'bg-brand-green border-black text-brand-navy font-black scale-110 shadow-sm' 
+              : disabled ? 'border-gray-400 bg-white text-brand-navy font-black cursor-not-allowed' : 'border-gray-400 bg-white text-brand-navy hover:border-black'}`}
         >
           {num}
         </button>
@@ -569,7 +569,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
 
       {isLoading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-industrial">
-          <p className="text-black font-black uppercase  text-black animate-pulse">Sincronizando con AXIS Cloud...</p>
+          <p className="text-brand-navy font-black uppercase  text-brand-navy animate-pulse">Sincronizando con AXIS Cloud...</p>
         </div>
       )}
 
@@ -577,13 +577,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
       <div className="flex gap-3 mb-10 w-full">
             <button
                 onClick={() => setActiveTab('intrinsic')}
-                className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'intrinsic' ? 'bg-brand-green border-transparent text-black' : 'bg-white border-gray-400 text-black'}`}
+                className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'intrinsic' ? 'bg-brand-green border-transparent text-brand-navy' : 'bg-white border-gray-400 text-brand-navy'}`}
             >
                 1. Evaluación Sensorial y Afectiva (CVA)
             </button>
             <button
                 onClick={() => setActiveTab('extrinsic')}
-                className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'extrinsic' ? 'bg-brand-green border-transparent text-black' : 'bg-white border-gray-400 text-black'}`}
+                className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'extrinsic' ? 'bg-brand-green border-transparent text-brand-navy' : 'bg-white border-gray-400 text-brand-navy'}`}
             >
                 2. Evaluación Extrínseca
             </button>
@@ -595,8 +595,8 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-6">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-green shadow-[0_0_15px_rgba(0,166,81,0.3)]"></div>
                 <header className="flex justify-between items-center border-b border-black/20 pb-4">
-                    <h3 className="text-[11px] font-bold text-black font-black uppercase ">PARTE 1: Evaluación Descriptiva</h3>
-                    <span className="text-[9px] font-bold text-black uppercase ">Intensidad (0-15)</span>
+                    <h3 className="text-[11px] font-bold text-brand-navy font-black uppercase ">PARTE 1: Evaluación Descriptiva</h3>
+                    <span className="text-[9px] font-bold text-brand-navy uppercase ">Intensidad (0-15)</span>
                 </header>
 
                 <div className="space-y-16">
@@ -700,8 +700,8 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-6">
                 <div className="absolute top-0 right-0 w-1.5 h-full bg-black-bright shadow-[0_0_15px_rgba(255,255,255,0.2)]"></div>
                 <header className="flex justify-between items-center border-b border-black/20 pb-4">
-                    <h3 className="text-[11px] font-bold text-black uppercase ">PARTE 2: Evaluación Afectiva</h3>
-                    <span className="text-[9px] font-bold text-black uppercase ">Calidad (1-9)</span>
+                    <h3 className="text-[11px] font-bold text-brand-navy uppercase ">PARTE 2: Evaluación Afectiva</h3>
+                    <span className="text-[9px] font-bold text-brand-navy uppercase ">Calidad (1-9)</span>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
@@ -719,10 +719,10 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 {/* DEFECTOS */}
                 <div className="mt-auto pt-8 border-t border-black/20 grid grid-cols-2 gap-8">
                     <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-black uppercase  block">Tazas Uniformes / Defectuosas</label>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  block">Tazas Uniformes / Defectuosas</label>
                         <div className="flex gap-6">
                             <div className="flex flex-col items-center gap-1">
-                                <span className="text-[9px] text-black font-black uppercase ">Uniformes</span>
+                                <span className="text-[9px] text-brand-navy font-black uppercase ">Uniformes</span>
                                 <div className="relative group">
                                     <input 
                                         type="number" 
@@ -730,13 +730,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                         value={data.defects.nonUniformCups} 
                                         onChange={(e) => setData({...data, defects: {...data.defects, nonUniformCups: parseInt(e.target.value)}})} 
                                         disabled={isAlreadySealed}
-                                        className="w-20 h-20 bg-white border-2 border-black rounded-2xl text-3xl text-center font-black text-black font-black outline-none focus:border-black focus:bg-white transition-all appearance-none cursor-pointer" 
+                                        className="w-20 h-20 bg-white border-2 border-black rounded-2xl text-3xl text-center font-black text-brand-navy font-black outline-none focus:border-black focus:bg-white transition-all appearance-none cursor-pointer" 
                                     />
-                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center text-[9px] font-bold text-black font-black">U</div>
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-black rounded-full flex items-center justify-center text-[9px] font-bold text-brand-navy font-black">U</div>
                                 </div>
                             </div>
                             <div className="flex flex-col items-center gap-1">
-                                <span className="text-[9px] text-black font-black uppercase ">Defectuosas</span>
+                                <span className="text-[9px] text-brand-navy font-black uppercase ">Defectuosas</span>
                                 <div className="relative group">
                                     <input 
                                         type="number" 
@@ -746,7 +746,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                         disabled={isAlreadySealed}
                                         className="w-20 h-20 bg-white border-2 border-black rounded-2xl text-3xl text-center font-black text-brand-red outline-none focus:border-brand-red focus:bg-brand-red/5 transition-all appearance-none cursor-pointer" 
                                     />
-                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-brand-red rounded-full flex items-center justify-center text-[9px] font-bold text-black font-black">D</div>
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-brand-red rounded-full flex items-center justify-center text-[9px] font-bold text-brand-navy font-black">D</div>
                                 </div>
                             </div>
                         </div>
@@ -766,7 +766,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={() => setActiveTab('extrinsic')}
-                        className="bg-white hover:bg-white border border-gray-400 shadow-sm text-black border border-gray-400 shadow-sm px-10 py-5 rounded-2xl text-[11px] font-bold uppercase  flex items-center gap-4 transition-all group"
+                        className="bg-white hover:bg-white border border-gray-400 shadow-sm text-brand-navy border border-gray-400 shadow-sm px-10 py-5 rounded-2xl text-[11px] font-bold uppercase  flex items-center gap-4 transition-all group"
                     >
                         Continuar con Evaluación Extrínseca
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-1 transition-transform">
@@ -795,7 +795,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
 
           {/* N° DE MUESTRA */}
           <div className="flex items-stretch border border-gray-400 rounded-xl overflow-hidden">
-            <div className="bg-brand-green text-black text-[11px] font-black uppercase px-6 py-4 whitespace-nowrap tracking-widest flex items-center">
+            <div className="bg-brand-green text-brand-navy text-[11px] font-black uppercase px-6 py-4 whitespace-nowrap tracking-widest flex items-center">
               N° DE MUESTRA
             </div>
             <input
@@ -803,7 +803,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
               value={data.extrinsicSCA.sampleNumber}
               disabled={isAlreadySealed || isReadOnly}
               onChange={(e) => setData({...data, extrinsicSCA: {...data.extrinsicSCA, sampleNumber: e.target.value}})}
-              className="flex-1 bg-white px-6 py-4 text-xs font-bold text-black outline-none border-l border-gray-400"
+              className="flex-1 bg-white px-6 py-4 text-xs font-bold text-brand-navy outline-none border-l border-gray-400"
               placeholder="Ingrese el número de muestra..."
             />
           </div>
@@ -911,7 +911,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 disabled={isAlreadySealed || isReadOnly}
               />
               <div className="p-4 bg-white flex items-center justify-center">
-                <p className="text-[9px] font-bold text-black/40 uppercase text-center">Campos adicionales disponibles<br />en el módulo de Protocolo Alquimia</p>
+                <p className="text-[9px] font-bold text-brand-navy/40 uppercase text-center">Campos adicionales disponibles<br />en el módulo de Protocolo Alquimia</p>
               </div>
             </div>
           </div>
@@ -923,7 +923,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
               disabled={isSaving || !isExtrinsicFilled}
               className={`w-full py-5 rounded-2xl font-black uppercase text-xs transition-all flex items-center justify-center gap-3 ${
                 isExtrinsicFilled
-                  ? 'bg-brand-green hover:bg-brand-green-bright text-black shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'
+                  ? 'bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'
                   : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
               }`}
             >
@@ -942,7 +942,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
       {/* FOOTER: RADAR Y SELLADO */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial flex flex-col items-center gap-6">
-                <h4 className="text-[11px] font-bold text-black uppercase ">Huella Biometría Sensorial</h4>
+                <h4 className="text-[11px] font-bold text-brand-navy uppercase ">Huella Biometría Sensorial</h4>
                 <div className="w-full h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
@@ -960,19 +960,19 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     </ResponsiveContainer>
                 </div>
                 <div className="text-center">
-                    <p className="text-[11px] text-black uppercase font-bold  mb-1">LAB Score Final</p>
-                    <p className="text-5xl font-black text-black font-black er">{totalScore.toFixed(2)}</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">LAB Score Final</p>
+                    <p className="text-5xl font-black text-brand-navy font-black er">{totalScore.toFixed(2)}</p>
                 </div>
             </div>
 
             <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm flex flex-col gap-6">
                 <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-black uppercase  block">Catador Principal</label>
-                    <input type="text" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none focus:border-black" />
+                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">Catador Principal</label>
+                    <input type="text" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none focus:border-black" />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-black uppercase  block">Notas de Laboratorio</label>
-                    <textarea rows={4} value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-black font-black outline-none resize-none focus:border-black" placeholder="Escriba aquí los descriptores finales..." />
+                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">Notas de Laboratorio</label>
+                    <textarea rows={4} value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none resize-none focus:border-black" placeholder="Escriba aquí los descriptores finales..." />
                 </div>
                 {/* ADVERTENCIA SI EXTRÍNSECO INCOMPLETO */}
                 {!isAlreadySealed && !isReadOnly && !isExtrinsicFilled && (
@@ -990,7 +990,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 <button
                     onClick={handleSave}
                     disabled={isSaving || isAlreadySealed || isReadOnly || !isExtrinsicFilled}
-                    className={`w-full py-6 rounded-2xl font-black uppercase  text-xs transition-all flex items-center justify-center gap-4 ${isAlreadySealed ? 'bg-brand-green text-black border border-gray-400 shadow-sm cursor-default' : isReadOnly ? 'bg-white text-black border border-gray-400 shadow-sm cursor-not-allowed' : !isExtrinsicFilled ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : 'bg-brand-green hover:bg-brand-green-bright text-black shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'}`}
+                    className={`w-full py-6 rounded-2xl font-black uppercase  text-xs transition-all flex items-center justify-center gap-4 ${isAlreadySealed ? 'bg-brand-green text-brand-navy border border-gray-400 shadow-sm cursor-default' : isReadOnly ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-not-allowed' : !isExtrinsicFilled ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : 'bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'}`}
                 >
                     {isAlreadySealed ? (
                         <>

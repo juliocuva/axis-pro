@@ -13,7 +13,7 @@ html {
     --text-main: 15, 20, 18; /* Deep Carbon */
     --text-offset: 74, 85, 83; /* Slate Grey */
     --border-main: 194, 211, 205; /* Sage */
-    --axis-green: 0, 96, 86; /* #0C6056 - The Signature Color */
+    --axis-green: 0, 96, 86; /* #006056 - The Signature Color */
     --axis-green-rgb: 0, 96, 86;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);

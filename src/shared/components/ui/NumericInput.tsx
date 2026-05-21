@@ -53,18 +53,18 @@ export const NumericInput: React.FC<NumericInputProps> = ({
 
     const variantStyles = {
         default: 'border-gray-400 shadow-sm bg-white text-carbon focus:border-black',
-        industrial: 'border-gray-400 shadow-sm bg-white text-black focus:border-black',
-        blue: 'border-gray-400 shadow-sm bg-white text-black focus:border-black',
+        industrial: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
+        blue: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
         red: 'border-brand-red/50 bg-white text-brand-red focus:border-brand-red',
-        orange: 'border-gray-400 shadow-sm bg-white text-black focus:border-black'
+        orange: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black'
     };
 
     const arrowColor = {
-        default: 'text-black',
-        industrial: 'text-black',
-        blue: 'text-black-bright',
+        default: 'text-brand-navy',
+        industrial: 'text-brand-navy',
+        blue: 'text-brand-navy-bright',
         red: 'text-brand-red',
-        orange: 'text-black-bright'
+        orange: 'text-brand-navy-bright'
     };
 
     return (
@@ -125,7 +125,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         </button>
                     </div>
                     {unit && (
-                        <span className="text-black font-black text-[11px] er w-4 text-center">{unit}</span>
+                        <span className="text-brand-navy font-black text-[11px] er w-4 text-center">{unit}</span>
                     )}
                 </div>
             </div>

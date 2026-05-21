@@ -55,8 +55,8 @@ export default function ViewMaster() {
                     <img src="/logo.png" alt="Logo" className="h-6 w-auto opacity-40" />
                 </div>
                 <div className="flex items-center gap-6">
-                    <span className="text-[11px] font-bold text-black/20 uppercase ">{currentIndex + 1} / {slides.length}</span>
-                    <Link href="/" className="px-3 py-1 bg-white hover:bg-white rounded text-[9px] font-bold uppercase  text-black/40 transition-all">Salir</Link>
+                    <span className="text-[11px] font-bold text-brand-navy/20 uppercase ">{currentIndex + 1} / {slides.length}</span>
+                    <Link href="/" className="px-3 py-1 bg-white hover:bg-white rounded text-[9px] font-bold uppercase  text-brand-navy/40 transition-all">Salir</Link>
                 </div>
             </header>
 
@@ -107,7 +107,7 @@ export default function ViewMaster() {
                     overflow: hidden !important; 
                 }
                 
-                .text-black { color: #0C6056; }
+                .text-brand-navy { color: #0C6056; }
                 .bg-brand-green { background-color: #0C6056; }
                 
                 ::-webkit-scrollbar { display: none; }

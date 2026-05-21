@@ -38,12 +38,12 @@ export default function TraceabilityStoryPage() {
                     <img src="/tatama.png" alt="Asociación Tatama" className="w-full h-full object-contain" />
                 </div>
                 <div className="flex items-center justify-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center text-black">
+                    <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center text-brand-navy">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                     </div>
-                    <h1 className="text-xl font-bold text-black  uppercase">AXISONE <span className="text-black-bright">VERIFY</span></h1>
+                    <h1 className="text-xl font-bold text-brand-navy  uppercase">AXISONE <span className="text-brand-navy-bright">VERIFY</span></h1>
                 </div>
-                <p className="text-[11px] text-black uppercase  font-bold">Archivo generado para la Asociación Tatama</p>
+                <p className="text-[11px] text-brand-navy uppercase  font-bold">Archivo generado para la Asociación Tatama</p>
             </header>
 
             <div className="max-w-md w-full bg-bg-main border border-gray-200 shadow-sm rounded-[3rem] overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-500">
@@ -58,9 +58,9 @@ export default function TraceabilityStoryPage() {
                     <header>
                         <div className="flex justify-between items-start">
                             <h3 className="text-3xl font-bold uppercase er leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
-                            <span className="bg-white border border-gray-200 shadow-sm text-black text-[11px] font-bold px-3 py-1 rounded-full uppercase border border-gray-200 shadow-sm">Lote {story?.roast?.batch_id_label || id}</span>
+                            <span className="bg-white border border-gray-200 shadow-sm text-brand-navy text-[11px] font-bold px-3 py-1 rounded-full uppercase border border-gray-200 shadow-sm">Lote {story?.roast?.batch_id_label || id}</span>
                         </div>
-                        <p className="text-xs text-black mt-6 leading-relaxed font-medium">
+                        <p className="text-xs text-brand-navy mt-6 leading-relaxed font-medium">
                             Este café fue cultivado en la finca <strong>{story?.farm || 'Alejandría'}</strong> a {story?.height || '1.850 msnm'}.
                         </p>
                     </header>
@@ -68,20 +68,20 @@ export default function TraceabilityStoryPage() {
                     <div className="grid grid-cols-3 gap-4 py-6 border-y border-gray-200 shadow-sm">
                         <div className="text-center">
                             <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Proceso</p>
-                            <p className="text-xs font-bold uppercase text-black">{story?.process || 'Natural'}</p>
+                            <p className="text-xs font-bold uppercase text-brand-navy">{story?.process || 'Natural'}</p>
                         </div>
                         <div className="text-center border-x border-gray-200 shadow-sm">
                             <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Puntaje</p>
-                            <p className="text-xs font-bold text-black-bright">{story?.sensoryScore || 87.5} pts (Basado en estándares SCA)</p>
+                            <p className="text-xs font-bold text-brand-navy-bright">{story?.sensoryScore || 87.5} pts (Basado en estándares SCA)</p>
                         </div>
                         <div className="text-center">
                             <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Tueste</p>
-                            <p className="text-xs font-bold uppercase text-black">Perfil Oro</p>
+                            <p className="text-xs font-bold uppercase text-brand-navy">Perfil Oro</p>
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        <h4 className="text-[11px] font-bold uppercase  text-black-bright">Notas Catadas</h4>
+                        <h4 className="text-[11px] font-bold uppercase  text-brand-navy-bright">Notas Catadas</h4>
                         <div className="flex flex-wrap gap-2 text-[9px]">
                             {story?.notes?.map((note: string) => (
                                 <span key={note} className="px-3 py-1 bg-white rounded-full border border-gray-200 shadow-sm font-bold uppercase">{note}</span>
@@ -94,14 +94,14 @@ export default function TraceabilityStoryPage() {
                         </div>
                     </div>
 
-                    <div className="p-6 bg-white border border-gray-200 shadow-sm text-black rounded-3xl space-y-2">
-                        <h4 className="text-[11px] font-bold uppercase  text-black-bright">Recomendación Tatama</h4>
+                    <div className="p-6 bg-white border border-gray-200 shadow-sm text-brand-navy rounded-3xl space-y-2">
+                        <h4 className="text-[11px] font-bold uppercase  text-brand-navy-bright">Recomendación Tatama</h4>
                         <p className="text-[11px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                     </div>
 
                     <button
                         onClick={() => window.location.href = '/'}
-                        className="w-full py-4 bg-white hover:bg-white text-black hover:text-black border border-gray-200 shadow-sm rounded-2xl text-[11px] font-bold uppercase  transition-all"
+                        className="w-full py-4 bg-white hover:bg-white text-brand-navy hover:text-brand-navy border border-gray-200 shadow-sm rounded-2xl text-[11px] font-bold uppercase  transition-all"
                     >
                         Ver Más Productos
                     </button>

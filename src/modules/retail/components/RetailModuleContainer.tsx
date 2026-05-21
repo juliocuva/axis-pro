@@ -34,7 +34,7 @@ export default function RetailModuleContainer({ user }: RetailModuleContainerPro
             <header className="flex flex-wrap items-center justify-between gap-6 border-b border-gray-400 shadow-sm pb-8">
                 <div>
                     <h2 className="text-3xl font-bold  uppercase">4: Retail Connect</h2>
-                    <p className="text-[11px] text-black font-bold  uppercase mt-2 opacity-70">
+                    <p className="text-[11px] text-brand-navy font-bold  uppercase mt-2 opacity-70">
                         "De la Tostia a la Taza: El Cierre del Círculo Comercial"
                     </p>
                 </div>
@@ -45,8 +45,8 @@ export default function RetailModuleContainer({ user }: RetailModuleContainerPro
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-6 py-3 rounded-xl text-[11px] font-bold transition-all uppercase  flex items-center gap-2 ${activeTab === tab
-                                ? 'bg-brand-green text-black shadow-lg shadow-brand-green/20'
-                                : 'text-gray-900 hover:text-black'
+                                ? 'bg-brand-green text-brand-navy shadow-lg shadow-brand-green/20'
+                                : 'text-gray-900 hover:text-brand-navy'
                                 }`}
                         >
                             {tab === 'archive' && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>}
@@ -141,7 +141,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                             <span className="w-2 h-2 rounded-full bg-brand-green"></span>
                             Stock de Producto Terminado
                         </h3>
-                        <button onClick={loadData} className="text-gray-900 hover:text-black transition-colors">
+                        <button onClick={loadData} className="text-gray-900 hover:text-brand-navy transition-colors">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>
                         </button>
                     </div>
@@ -157,15 +157,15 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                             inventory.map((item) => (
                                 <div key={item.id} className="p-6 bg-bg-main border border-gray-400 shadow-sm rounded-industrial-sm flex items-center justify-between group hover:border-gray-400 shadow-sm transition-all">
                                     <div className="flex gap-4 items-center">
-                                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-black-bright font-bold text-xs uppercase">
+                                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-brand-navy-bright font-bold text-xs uppercase">
                                             {item.unit_size_grams}g
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <p className="text-xs font-bold uppercase">SKU: {item.sku}</p>
-                                                {item.metadata?.is_external && <span className="text-[7px] bg-white border border-gray-400 shadow-sm text-black-bright px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
+                                                {item.metadata?.is_external && <span className="text-[7px] bg-white border border-gray-400 shadow-sm text-brand-navy-bright px-1.5 py-0.5 rounded-full font-bold uppercase">Externo</span>}
                                             </div>
-                                            <p className="text-[11px] text-black font-bold uppercase  flex items-center gap-2 mt-1">
+                                            <p className="text-[11px] text-brand-navy font-bold uppercase  flex items-center gap-2 mt-1">
                                                 {item.roast_batches?.coffee_purchase_inventory?.varietal || 'Variedad'} |
                                                 {item.roast_batches?.coffee_purchase_inventory?.coffee_type || item.metadata?.process || 'Proceso'} |
                                                 Roasted: {item.roast_batches?.roast_date ? new Date(item.roast_batches.roast_date).toLocaleDateString() : 'N/A'}
@@ -174,7 +174,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-3xl font-bold er leading-none">{item.total_grams_available.toLocaleString()} <span className="text-[11px] text-gray-900 font-bold">G</span></p>
-                                        <p className="text-[11px] font-bold text-black mt-1 uppercase ">
+                                        <p className="text-[11px] font-bold text-brand-navy mt-1 uppercase ">
                                             {Math.floor(item.total_grams_available / item.unit_size_grams)} Bolsas Est.
                                         </p>
                                     </div>
@@ -187,8 +187,8 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                 {showPackager ? (
                     <form onSubmit={handlePackage} className="bg-gradient-to-br from-brand-green/40 to-bg-card border border-gray-400 shadow-sm rounded-industrial p-10 space-y-6 animate-in slide-in-from-top-4 duration-500">
                         <div className="flex justify-between items-center mb-4">
-                            <h4 className="text-xl font-bold uppercase  text-black">Ingreso de Producto al Retail</h4>
-                            <button type="button" onClick={() => setShowPackager(false)} className="text-gray-900 hover:text-black">✕</button>
+                            <h4 className="text-xl font-bold uppercase  text-brand-navy">Ingreso de Producto al Retail</h4>
+                            <button type="button" onClick={() => setShowPackager(false)} className="text-gray-900 hover:text-brand-navy">✕</button>
                         </div>
 
                         {/* Selector de Origen */}
@@ -196,14 +196,14 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                             <button
                                 type="button"
                                 onClick={() => setSourceType('internal')}
-                                className={`flex-1 py-2 text-[11px] font-bold uppercase rounded-lg transition-all ${sourceType === 'internal' ? 'bg-brand-green text-black' : 'text-gray-900 hover:text-black'}`}
+                                className={`flex-1 py-2 text-[11px] font-bold uppercase rounded-lg transition-all ${sourceType === 'internal' ? 'bg-brand-green text-brand-navy' : 'text-gray-900 hover:text-brand-navy'}`}
                             >
                                 Producción AXIS (Interno)
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setSourceType('external')}
-                                className={`flex-1 py-2 text-[11px] font-bold uppercase rounded-lg transition-all ${sourceType === 'external' ? 'bg-brand-green text-black' : 'text-gray-900 hover:text-black'}`}
+                                className={`flex-1 py-2 text-[11px] font-bold uppercase rounded-lg transition-all ${sourceType === 'external' ? 'bg-brand-green text-brand-navy' : 'text-gray-900 hover:text-brand-navy'}`}
                             >
                                 Roaster Aliado (Externo)
                             </button>
@@ -225,7 +225,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                                 <option key={b.id} value={b.id}>{b.batch_id_label} - {b.process} ({b.roasted_weight}kg)</option>
                                             ))}
                                         </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-brand-navy transition-colors">
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                         </div>
                                     </div>
@@ -267,7 +267,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                                 <option value="Honey">Honey</option>
                                                 <option value="Anaeróbico">Anaeróbico</option>
                                             </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-brand-navy transition-colors">
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                             </div>
                                         </div>
@@ -309,7 +309,7 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                                         <option value="500">500g</option>
                                         <option value="1000">1000g</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-brand-navy transition-colors">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                     </div>
                                 </div>
@@ -317,11 +317,11 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
 
                             <div className="col-span-2 p-4 bg-white border border-gray-400 shadow-sm rounded-xl flex justify-between items-center">
                                 <div>
-                                    <p className="text-[11px] font-bold text-black-bright uppercase ">Control de Masa Total (CMT)</p>
+                                    <p className="text-[11px] font-bold text-brand-navy-bright uppercase ">Control de Masa Total (CMT)</p>
                                     <p className="text-[9px] text-gray-900 uppercase mt-1">Masa neta que ingresará al inventario global</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xl font-bold text-black">{(packData.unitsProduced * packData.unitSizeGrams / 1000).toFixed(2)} KG</p>
+                                    <p className="text-xl font-bold text-brand-navy">{(packData.unitsProduced * packData.unitSizeGrams / 1000).toFixed(2)} KG</p>
                                     <p className="text-[11px] text-gray-900 font-bold">({(packData.unitsProduced * packData.unitSizeGrams).toLocaleString()} G)</p>
                                 </div>
                             </div>
@@ -339,12 +339,12 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                     <div className="bg-gradient-to-r from-brand-green/20 to-transparent border border-gray-400 shadow-sm rounded-industrial p-8">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h4 className="text-xl font-bold uppercase  text-black">Gestión Multi-Origen</h4>
+                                <h4 className="text-xl font-bold uppercase  text-brand-navy">Gestión Multi-Origen</h4>
                                 <p className="text-[11px] text-gray-900 font-bold uppercase opacity-60 mt-1">Registra producción propia o café de aliados comerciales</p>
                             </div>
                             <button
                                 onClick={() => setShowPackager(true)}
-                                className="px-6 py-3 bg-brand-green hover:bg-brand-green text-black rounded-xl text-[11px] font-bold uppercase transition-all shadow-xl shadow-brand-green/20 hover:scale-105"
+                                className="px-6 py-3 bg-brand-green hover:bg-brand-green text-brand-navy rounded-xl text-[11px] font-bold uppercase transition-all shadow-xl shadow-brand-green/20 hover:scale-105"
                             >
                                 Registrar Entrada
                             </button>
@@ -355,10 +355,10 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
 
             {/* HISTORIAL - ALTURA SINCRONIZADA CON SECCIONES DEL FORMULARIO */}
             <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-industrial flex flex-col relative overflow-hidden group h-[780px]">
-                <h3 className="text-[11px] font-bold text-black-bright uppercase  border-b border-gray-400 shadow-sm pb-4">Alertas de Frescura AI</h3>
+                <h3 className="text-[11px] font-bold text-brand-navy-bright uppercase  border-b border-gray-400 shadow-sm pb-4">Alertas de Frescura AI</h3>
                 <div className="space-y-6">
                     <div className="p-6 bg-white border border-gray-400 shadow-sm rounded-industrial-sm">
-                        <p className="text-[11px] text-black uppercase font-bold mb-2">✓ Calidad Óptima</p>
+                        <p className="text-[11px] text-brand-navy uppercase font-bold mb-2">✓ Calidad Óptima</p>
                         <p className="text-xs leading-relaxed text-gray-300">
                             95% de su inventario se encuentra en la ventana de frescura ideal (7-21 días post-tueste).
                         </p>
@@ -368,11 +368,11 @@ function InventoryManager({ user, inventory, isLoading, loadData }: {
                         <p className="text-[11px] text-gray-900 uppercase mb-4">Métricas de Empaque (Mes)</p>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-bg-main rounded-xl border border-gray-400 shadow-sm text-center">
-                                <p className="text-2xl font-bold er text-black">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 250 ? curr.units_produced : 0), 0) || 182}</p>
+                                <p className="text-2xl font-bold er text-brand-navy">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 250 ? curr.units_produced : 0), 0) || 182}</p>
                                 <p className="text-[9px] text-gray-600 font-bold uppercase">Bolsas 250g</p>
                             </div>
                             <div className="p-4 bg-bg-main rounded-xl border border-gray-400 shadow-sm text-center">
-                                <p className="text-2xl font-bold er text-black">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 500 ? curr.units_produced : 0), 0) || 54}</p>
+                                <p className="text-2xl font-bold er text-brand-navy">{inventory.reduce((acc, curr) => acc + (curr.unit_size_grams === 500 ? curr.units_produced : 0), 0) || 54}</p>
                                 <p className="text-[9px] text-gray-600 font-bold uppercase">Bolsas 500g</p>
                             </div>
                         </div>
@@ -401,13 +401,13 @@ function LabelGenerator() {
                         <input type="text" placeholder="Asociación Tatama" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 mt-1 outline-none font-bold" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <button type="button" className="py-4 bg-white hover:bg-white text-black rounded-xl text-xs font-bold uppercase">Vista Previa</button>
-                        <button type="button" className="py-4 bg-brand-green hover:bg-brand-green text-black rounded-xl text-xs font-bold uppercase">Imprimir (Zebra/PDF)</button>
+                        <button type="button" className="py-4 bg-white hover:bg-white text-brand-navy rounded-xl text-xs font-bold uppercase">Vista Previa</button>
+                        <button type="button" className="py-4 bg-brand-green hover:bg-brand-green text-brand-navy rounded-xl text-xs font-bold uppercase">Imprimir (Zebra/PDF)</button>
                     </div>
                 </form>
             </div>
 
-            <div className="flex flex-col items-center justify-center bg-white p-12 rounded-industrial text-black">
+            <div className="flex flex-col items-center justify-center bg-white p-12 rounded-industrial text-brand-navy">
                 <div className="w-full aspect-[3/4] border-4 border-black p-8 flex flex-col justify-between relative">
                     <div className="space-y-2">
                         <h4 className="text-4xl font-bold uppercase leading-tight">AxIs<br />CoFfeE</h4>
@@ -501,9 +501,9 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                             <header>
                                 <div className="flex justify-between items-start">
                                     <h3 className="text-3xl font-bold uppercase er leading-none">{story?.producer?.split(' ')[0] || 'Asociación'}<br />{story?.producer?.split(' ')[1] || 'Tatama'}</h3>
-                                    <span className="bg-white border border-gray-400 shadow-sm text-black text-[11px] font-bold px-3 py-1 rounded-full uppercase border border-gray-400 shadow-sm">Lote {story?.roast?.batch_id_label || searchBatch}</span>
+                                    <span className="bg-white border border-gray-400 shadow-sm text-brand-navy text-[11px] font-bold px-3 py-1 rounded-full uppercase border border-gray-400 shadow-sm">Lote {story?.roast?.batch_id_label || searchBatch}</span>
                                 </div>
-                                <p className="text-xs text-black mt-6 leading-relaxed font-medium">
+                                <p className="text-xs text-brand-navy mt-6 leading-relaxed font-medium">
                                     Este café fue cultivado en la finca <strong>{story?.farm || 'Alejandría'}</strong> a {story?.height || '1.850 msnm'}.
                                 </p>
                             </header>
@@ -511,20 +511,20 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                             <div className="grid grid-cols-3 gap-4 py-6 border-y border-gray-400 shadow-sm">
                                 <div className="text-center">
                                     <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Proceso</p>
-                                    <p className="text-xs font-bold uppercase text-black">{story?.process || 'Natural'}</p>
+                                    <p className="text-xs font-bold uppercase text-brand-navy">{story?.process || 'Natural'}</p>
                                 </div>
                                 <div className="text-center border-x border-gray-400 shadow-sm">
                                     <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Puntaje</p>
-                                    <p className="text-xs font-bold text-black-bright">{story?.sensoryScore || 87.5} pts (basado en estándares de la SCA)</p>
+                                    <p className="text-xs font-bold text-brand-navy-bright">{story?.sensoryScore || 87.5} pts (basado en estándares de la SCA)</p>
                                 </div>
                                 <div className="text-center">
                                     <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Tueste</p>
-                                    <p className="text-xs font-bold uppercase text-black">Perfil Oro</p>
+                                    <p className="text-xs font-bold uppercase text-brand-navy">Perfil Oro</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-[11px] font-bold uppercase  text-black-bright">Notas Catadas</h4>
+                                <h4 className="text-[11px] font-bold uppercase  text-brand-navy-bright">Notas Catadas</h4>
                                 <div className="flex flex-wrap gap-2 text-[9px]">
                                     {story?.notes?.map((note: string) => (
                                         <span key={note} className="px-3 py-1 bg-white rounded-full border border-gray-400 shadow-sm font-bold uppercase">{note}</span>
@@ -537,12 +537,12 @@ function TraceabilityPreview({ user }: { user: { companyId: string } | null }) {
                                 </div>
                             </div>
 
-                            <div className="p-6 bg-white border border-gray-400 shadow-sm text-black rounded-3xl space-y-2">
-                                <h4 className="text-[11px] font-bold uppercase  text-black-bright">Recomendación Tatama</h4>
+                            <div className="p-6 bg-white border border-gray-400 shadow-sm text-brand-navy rounded-3xl space-y-2">
+                                <h4 className="text-[11px] font-bold uppercase  text-brand-navy-bright">Recomendación Tatama</h4>
                                 <p className="text-[11px] font-bold uppercase leading-relaxed">Muele fino para V60: Ratio 1:15 con agua a 92°C para resaltar la acidez dinámica de este lote.</p>
                             </div>
 
-                            <button className="w-full py-4 bg-white hover:bg-white text-black hover:text-black border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold uppercase  transition-all">Ver Telemetría Roaster</button>
+                            <button className="w-full py-4 bg-white hover:bg-white text-brand-navy hover:text-brand-navy border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold uppercase  transition-all">Ver Telemetría Roaster</button>
                         </>
                     )}
                 </div>
@@ -609,28 +609,28 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
         <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
-                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Ventas (Total Masa)</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-2 font-mono">Ventas (Total Masa)</p>
                     <h4 className="text-3xl font-bold er">
                         {sales.reduce((acc, curr) => acc + (Number(curr.grams_deducted) || 0), 0).toFixed(1)}
-                        <span className="text-xs text-black-bright ml-2 font-mono">G</span>
+                        <span className="text-xs text-brand-navy-bright ml-2 font-mono">G</span>
                     </h4>
                 </div>
                 <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
-                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Ingresos Netos</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-2 font-mono">Ingresos Netos</p>
                     <h4 className="text-3xl font-bold er">
                         ${sales.reduce((acc, curr) => acc + (Number(curr.total_sale_cop) || 0), 0).toLocaleString()}
-                        <span className="text-xs text-black-bright ml-1">COP</span>
+                        <span className="text-xs text-brand-navy-bright ml-1">COP</span>
                     </h4>
                 </div>
                 <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
-                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Ticket Promedio Masa</p>
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-2 font-mono">Ticket Promedio Masa</p>
                     <h4 className="text-3xl font-bold er">
                         {sales.length > 0 ? (sales.reduce((acc, curr) => acc + (Number(curr.grams_deducted) || 0), 0) / sales.length).toFixed(0) : 0}g
                     </h4>
                 </div>
                 <div className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
-                    <p className="text-[11px] text-black uppercase font-bold  mb-2 font-mono">Merma Molienda</p>
-                    <h4 className="text-3xl font-bold er text-black">
+                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-2 font-mono">Merma Molienda</p>
+                    <h4 className="text-3xl font-bold er text-brand-navy">
                         {sales.filter(s => s.delivery_type === 'molido').reduce((acc, curr) => acc + (Number(curr.grams_deducted) * 0.01), 0).toFixed(1)}g
                     </h4>
                 </div>
@@ -662,7 +662,7 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                                         </option>
                                     ))}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-brand-navy transition-colors">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                 </div>
                             </div>
@@ -699,14 +699,14 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                                 <button
                                     type="button"
                                     onClick={() => setSaleForm({ ...saleForm, deliveryType: 'grano' })}
-                                    className={`py-4 rounded-xl text-[11px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'grano' ? 'bg-brand-green border-black text-black shadow-lg' : 'bg-bg-main border-gray-400 shadow-sm text-gray-900'}`}
+                                    className={`py-4 rounded-xl text-[11px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'grano' ? 'bg-brand-green border-black text-brand-navy shadow-lg' : 'bg-bg-main border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     En Grano
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setSaleForm({ ...saleForm, deliveryType: 'molido' })}
-                                    className={`py-4 rounded-xl text-[11px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'molido' ? 'bg-brand-green border-black text-black shadow-lg' : 'bg-bg-main border-gray-400 shadow-sm text-gray-900'}`}
+                                    className={`py-4 rounded-xl text-[11px] font-bold uppercase transition-all border ${saleForm.deliveryType === 'molido' ? 'bg-brand-green border-black text-brand-navy shadow-lg' : 'bg-bg-main border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     Molido (+1%)
                                 </button>
@@ -716,7 +716,7 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                         <button
                             type="submit"
                             disabled={isSubmitting || !saleForm.inventoryId}
-                            className="w-full py-6 bg-white hover:bg-brand-green text-black hover:text-black font-bold rounded-xl text-xs uppercase  transition-all shadow-2xl disabled:opacity-30"
+                            className="w-full py-6 bg-white hover:bg-brand-green text-brand-navy hover:text-brand-navy font-bold rounded-xl text-xs uppercase  transition-all shadow-2xl disabled:opacity-30"
                         >
                             {isSubmitting ? 'SINCRONIZANDO VENTA...' : 'PROCEDER A DESPACHO'}
                         </button>
@@ -735,20 +735,20 @@ function SalesDashboard({ user, inventory, onSaleComplete }: {
                             sales.map(sale => (
                                 <div key={sale.id} className="group p-6 bg-bg-main/50 border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm rounded-2xl flex items-center justify-between transition-all">
                                     <div className="flex gap-5">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sale.delivery_type === 'molido' ? 'bg-white text-black-bright' : 'bg-white text-black-bright'}`}>
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sale.delivery_type === 'molido' ? 'bg-white text-brand-navy-bright' : 'bg-white text-brand-navy-bright'}`}>
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-xs font-bold text-black uppercase ">SKU: {sale.retail_inventory?.sku}</p>
+                                            <p className="text-xs font-bold text-brand-navy uppercase ">SKU: {sale.retail_inventory?.sku}</p>
                                             <p className="text-[11px] text-gray-900 font-bold uppercase mt-1">
                                                 Canal: {sale.sale_channel} | {sale.delivery_type === 'molido' ? 'Despacho Molido' : 'Grano Entero'}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-bold text-black er leading-none">${Number(sale.total_sale_cop).toLocaleString()}</p>
+                                        <p className="text-lg font-bold text-brand-navy er leading-none">${Number(sale.total_sale_cop).toLocaleString()}</p>
                                         <p className="text-[11px] text-brand-red-bright font-bold mt-1 uppercase er">-{Number(sale.grams_deducted).toFixed(1)}g</p>
                                     </div>
                                 </div>

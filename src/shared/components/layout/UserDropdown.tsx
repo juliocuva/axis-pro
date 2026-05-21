@@ -38,10 +38,10 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
                 className="flex items-center gap-3 p-1.5 pl-4 pr-2 bg-bg-offset border border-border-main rounded-industrial-sm hover:border-gray-400 shadow-sm transition-all group"
             >
                 <div className="text-right hidden sm:block">
-                    <p className="text-[11px] font-bold text-black uppercase er leading-none">{user.name}</p>
+                    <p className="text-[11px] font-bold text-brand-navy uppercase er leading-none">{user.name}</p>
                     <p className="text-[9px] text-gray-900 font-bold uppercase  mt-1">Clase A Operador</p>
                 </div>
-                <div className="w-9 h-9 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex items-center justify-center text-black-bright font-bold text-xs shadow-inner uppercase">
+                <div className="w-9 h-9 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex items-center justify-center text-brand-navy-bright font-bold text-xs shadow-inner uppercase">
                     {initials}
                 </div>
                 <svg
@@ -56,13 +56,13 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
                 <div className="absolute right-0 mt-3 w-64 bg-bg-card border border-gray-400 shadow-sm rounded-industrial p-4 shadow-3xl z-[100] animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-xl">
                     <div className="px-4 py-3 border-b border-gray-400 shadow-sm mb-2">
                         <p className="text-[9px] text-gray-900 font-bold uppercase  mb-1">Sesión Activa</p>
-                        <p className="text-[11px] font-bold text-black truncate">{user.email}</p>
+                        <p className="text-[11px] font-bold text-brand-navy truncate">{user.email}</p>
                     </div>
 
                     <div className="space-y-1">
                         <button
                             onClick={() => { onOpenUpdates(); setIsOpen(false); }}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white rounded-industrial-sm text-[11px] font-bold uppercase  text-black hover:text-black transition-all group"
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white rounded-industrial-sm text-[11px] font-bold uppercase  text-brand-navy hover:text-brand-navy transition-all group"
                         >
                             <div className="relative">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
@@ -73,7 +73,7 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
 
                         <button
                             onClick={() => { onOpenManual(); setIsOpen(false); }}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white rounded-industrial-sm text-[11px] font-bold uppercase  text-black hover:text-black transition-all"
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white rounded-industrial-sm text-[11px] font-bold uppercase  text-brand-navy hover:text-brand-navy transition-all"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>
                             Manual de Operación
@@ -91,10 +91,10 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
                     </div>
 
                     <div className="mt-4 px-4 py-3 bg-white rounded-industrial-sm border border-gray-400 shadow-sm">
-                        <p className="text-[9px] text-black font-bold uppercase  mb-1">Estado de Red</p>
+                        <p className="text-[9px] text-brand-navy font-bold uppercase  mb-1">Estado de Red</p>
                         <div className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                            <p className="text-[9px] text-black font-mono">AXIS-PRO Sincronizado</p>
+                            <p className="text-[9px] text-brand-navy font-mono">AXIS-PRO Sincronizado</p>
                         </div>
                     </div>
                 </div>

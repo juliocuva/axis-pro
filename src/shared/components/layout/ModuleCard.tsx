@@ -21,14 +21,14 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
         'brand-green': {
             border: 'hover:border-gray-400 shadow-sm',
             bg: 'group-hover:bg-white',
-            text: 'text-black-bright',
+            text: 'text-brand-navy-bright',
             shadow: 'hover:shadow-brand-green/20',
             glow: 'bg-brand-green-bright shadow-[0_0_25px_rgba(0,255,136,0.6)]'
         },
         'gray-500': {
             border: 'hover:border-gray-500/30',
             bg: 'group-hover:bg-white0/10',
-            text: 'text-black',
+            text: 'text-brand-navy',
             shadow: 'hover:shadow-gray-500/20',
             glow: 'bg-white0 shadow-[0_0_25px_rgba(156,163,175,0.6)]'
         }
@@ -46,7 +46,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
 
             {isLocked && (
                 <div className="absolute top-6 right-6 flex items-center gap-2">
-                    <span className="text-[9px] font-bold text-black uppercase  bg-bg-offset px-2 py-1 rounded-md">Activación Requerida</span>
+                    <span className="text-[9px] font-bold text-brand-navy uppercase  bg-bg-offset px-2 py-1 rounded-md">Activación Requerida</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-900">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                         <path d="M7 11V7a5 5 0 0110 0v4" />
@@ -66,7 +66,7 @@ export default function ModuleCard({ title, description, icon, status, onClick, 
 
             {isRecommended && (
                 <div className="absolute top-6 right-6">
-                    <span className="bg-white border border-gray-400 shadow-sm text-black-bright text-[9px] px-2 py-1 rounded-full border border-gray-400 shadow-sm font-bold  uppercase animate-pulse">
+                    <span className="bg-white border border-gray-400 shadow-sm text-brand-navy-bright text-[9px] px-2 py-1 rounded-full border border-gray-400 shadow-sm font-bold  uppercase animate-pulse">
                         Sugerido para Exp.
                     </span>
                 </div>

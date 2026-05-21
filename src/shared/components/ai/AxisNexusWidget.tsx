@@ -76,7 +76,7 @@ export default function AxisNexusWidget() {
                 <div className="flex flex-col items-end gap-2 animate-in slide-in-from-bottom-5 duration-500 fade-in">
                     <div className="bg-bg-card border border-gray-400 shadow-sm px-4 py-2 rounded-full shadow-2xl flex items-center gap-3 relative mr-2 mb-2">
                         <div className="absolute right-0 -mr-2 w-3 h-3 bg-brand-green rounded-full animate-ping"></div>
-                        <p className="text-[11px] font-bold uppercase  text-black">Auditor <span className="text-black">Anexo</span> Activo</p>
+                        <p className="text-[11px] font-bold uppercase  text-brand-navy">Auditor <span className="text-brand-navy">Anexo</span> Activo</p>
                     </div>
 
                     <button
@@ -84,7 +84,7 @@ export default function AxisNexusWidget() {
                         className="w-16 h-16 bg-bg-card rounded-full border border-gray-400 shadow-sm flex items-center justify-center shadow-[0_0_30px_rgba(0,223,154,0.15)] hover:shadow-[0_0_40px_rgba(0,223,154,0.3)] hover:scale-105 transition-all group overflow-hidden relative"
                     >
                         <div className="absolute inset-0 bg-brand-green opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-black group-hover:scale-110 transition-transform duration-300">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-brand-navy group-hover:scale-110 transition-transform duration-300">
                             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                             <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                             <line x1="12" y1="22.08" x2="12" y2="12"></line>
@@ -101,18 +101,18 @@ export default function AxisNexusWidget() {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-3xl pointer-events-none transition-all group-hover:bg-white"></div>
                         <div className="flex items-center gap-4 relative z-10">
                             <div className="w-10 h-10 rounded bg-white flex items-center justify-center border border-gray-400 shadow-sm shadow-[0_0_15px_rgba(0,223,154,0.1)]">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-black">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-brand-navy">
                                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                                     <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                                     <line x1="12" y1="22.08" x2="12" y2="12"></line>
                                 </svg>
                             </div>
                             <div>
-                                <h3 className="text-black font-black uppercase er text-lg leading-tight">ANEXO</h3>
-                                <p className="text-[9px] text-black-bright font-mono uppercase ">Auditor Bot Inmutable</p>
+                                <h3 className="text-brand-navy font-black uppercase er text-lg leading-tight">ANEXO</h3>
+                                <p className="text-[9px] text-brand-navy-bright font-mono uppercase ">Auditor Bot Inmutable</p>
                             </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="p-2 bg-white hover:bg-white rounded-full text-black hover:text-black transition-colors relative z-10">
+                        <button onClick={() => setIsOpen(false)} className="p-2 bg-white hover:bg-white rounded-full text-brand-navy hover:text-brand-navy transition-colors relative z-10">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                         </button>
                     </div>
@@ -133,7 +133,7 @@ export default function AxisNexusWidget() {
                                     className={`
                                         p-4 rounded-2xl text-sm leading-relaxed
                                         ${msg.sender === 'user'
-                                            ? 'bg-brand-green text-black border border-black-bright rounded-tr-sm ml-auto font-medium shadow-[0_5px_15px_rgba(0,223,154,0.15)]'
+                                            ? 'bg-brand-green text-brand-navy border border-black-bright rounded-tr-sm ml-auto font-medium shadow-[0_5px_15px_rgba(0,223,154,0.15)]'
                                             : 'bg-white border border-gray-400 shadow-sm text-gray-200 rounded-tl-sm shadow-xl'
                                         }
                                     `}
@@ -163,7 +163,7 @@ export default function AxisNexusWidget() {
                                 <button
                                     key={i}
                                     onClick={() => handleSend(prompt)}
-                                    className="text-[9px] font-bold uppercase  text-black border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm hover:text-black bg-white px-3 py-2 rounded-full transition-all text-left"
+                                    className="text-[9px] font-bold uppercase  text-brand-navy border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm hover:text-brand-navy bg-white px-3 py-2 rounded-full transition-all text-left"
                                 >
                                     {prompt}
                                 </button>
@@ -185,13 +185,13 @@ export default function AxisNexusWidget() {
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 placeholder="Instruye al Auditor Anexo..."
-                                className="flex-1 bg-transparent border-none text-xs text-black px-3 py-3 outline-none placeholder:text-gray-600 font-medium"
+                                className="flex-1 bg-transparent border-none text-xs text-brand-navy px-3 py-3 outline-none placeholder:text-gray-600 font-medium"
                                 disabled={isTyping}
                             />
                             <button
                                 type="submit"
                                 disabled={!inputValue.trim() || isTyping}
-                                className="p-3 bg-brand-green text-black rounded font-bold hover:bg-brand-green-bright disabled:opacity-30 transition-colors"
+                                className="p-3 bg-brand-green text-brand-navy rounded font-bold hover:bg-brand-green-bright disabled:opacity-30 transition-colors"
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                             </button>

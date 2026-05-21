@@ -127,7 +127,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                 <div className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
                     <div className="w-full max-w-2xl bg-bg-card rounded-3xl overflow-hidden relative shadow-2xl border border-gray-400 shadow-sm">
                         <div className="absolute top-4 right-4 z-50">
-                            <button onClick={() => setShowMappingModal(false)} className="bg-black/50 text-black w-10 h-10 rounded-full flex items-center justify-center border border-gray-400 shadow-sm">✕</button>
+                            <button onClick={() => setShowMappingModal(false)} className="bg-black/50 text-brand-navy w-10 h-10 rounded-full flex items-center justify-center border border-gray-400 shadow-sm">✕</button>
                         </div>
                         <div className="max-h-[90vh] overflow-y-auto">
                             <EUDRGeoreference 
@@ -142,13 +142,13 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
 
             <form onSubmit={handleSubmit} className="space-y-8">
                 {status && (
-                    <div className={`p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 border ${status.type === 'success' ? 'bg-white border-gray-400 shadow-sm text-black-bright' : 'bg-brand-red/5 border-brand-red/20 text-brand-red-bright'}`}>
+                    <div className={`p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 border ${status.type === 'success' ? 'bg-white border-gray-400 shadow-sm text-brand-navy-bright' : 'bg-brand-red/5 border-brand-red/20 text-brand-red-bright'}`}>
                         <div className="font-bold uppercase text-[11px] ">{status.message}</div>
                         {status.type === 'success' && (
                             <button
                                 type="button"
                                 onClick={() => setShowPassport(true)}
-                                className="bg-brand-green text-black px-6 py-2 rounded-xl text-[11px] font-bold uppercase  hover:bg-brand-green-bright transition-all"
+                                className="bg-brand-green text-brand-navy px-6 py-2 rounded-xl text-[11px] font-bold uppercase  hover:bg-brand-green-bright transition-all"
                             >
                                 Ver Pasaporte Digital
                             </button>
@@ -158,7 +158,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <section className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl">
-                        <h3 className="text-black-bright text-[11px] font-bold uppercase  mb-6 flex items-center gap-2">
+                        <h3 className="text-brand-navy-bright text-[11px] font-bold uppercase  mb-6 flex items-center gap-2">
                             <span className="w-1 h-4 bg-brand-green rounded-full"></span>
                             Control de Calidad (Verde)
                         </h3>
@@ -241,7 +241,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                     <section className="bg-bg-card border border-gray-400 shadow-sm p-8 rounded-3xl relative overflow-hidden flex flex-col justify-start">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-[80px] rounded-full"></div>
                         <div>
-                            <h3 className="text-black-bright text-[11px] font-bold uppercase  mb-6 border-b border-gray-400 shadow-sm pb-2">Asistente Aduanero Inmutable</h3>
+                            <h3 className="text-brand-navy-bright text-[11px] font-bold uppercase  mb-6 border-b border-gray-400 shadow-sm pb-2">Asistente Aduanero Inmutable</h3>
 
                             {formData.targetMarket === 'europa' && (
                                 <div className="p-5 rounded-2xl bg-white border border-gray-400 shadow-sm space-y-3 animate-in fade-in zoom-in duration-300">
@@ -250,10 +250,10 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                             <div className="w-8 h-8 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center">
                                                 <span className="w-2.5 h-2.5 rounded-full bg-brand-green animate-pulse"></span>
                                             </div>
-                                            <span className="text-sm font-bold text-black-bright uppercase er">ALERTA LEGAL: EUROPA (EUDR)</span>
+                                            <span className="text-sm font-bold text-brand-navy-bright uppercase er">ALERTA LEGAL: EUROPA (EUDR)</span>
                                         </div>
                                         {isEudrNonCompliant() && (
-                                            <span className="bg-brand-red text-black text-[9px] font-bold px-2 py-1 rounded-md animate-pulse uppercase">
+                                            <span className="bg-brand-red text-brand-navy text-[9px] font-bold px-2 py-1 rounded-md animate-pulse uppercase">
                                                 RECHAZO ADUANA
                                             </span>
                                         )}
@@ -262,7 +262,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                         Detectado destino dentro de la UE. El Reglamento 2023/1115 exige comprobación estricta de deforestación cero. El pasaporte generado <strong>incluirá obligatoriamente los Polígonos WGS84 de las fincas de origen</strong>.
                                     </p>
                                     <div className="p-4 bg-white rounded-2xl border border-gray-400 shadow-sm mt-3">
-                                        <p className="text-[9px] text-black/50 font-black uppercase leading-tight ">
+                                        <p className="text-[9px] text-brand-navy/50 font-black uppercase leading-tight ">
                                             NOTA DE AUDITORÍA: POR CONDICIONES DE ORDEN PÚBLICO Y SEGURIDAD EN ZONA, SE VALIDA METODOLOGÍA SENSORIAL MÓVIL (IMU) COMO ALTERNATIVA SOBERANA AL USO DE DRONES.
                                         </p>
                                     </div>
@@ -273,7 +273,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                                 <p className="text-[11px] text-brand-red-bright font-black uppercase ">
                                                     BLOQUEO DE EMISIÓN: FALTA MAPA POLIGONAL
                                                 </p>
-                                                <p className="text-[9px] text-black/50 font-bold uppercase leading-tight">
+                                                <p className="text-[9px] text-brand-navy/50 font-bold uppercase leading-tight">
                                                     El área ({selectedLot?.farm_size_hectares} ha) requiere georeferencia sensorial para cumplir con la Regulación Europea.
                                                 </p>
                                             </div>
@@ -281,7 +281,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                             <button 
                                                 type="button"
                                                 onClick={() => setShowMappingModal(true)}
-                                                className="w-full bg-brand-green text-black py-4 rounded-xl font-black uppercase text-[11px]  shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
+                                                className="w-full bg-brand-green text-brand-navy py-4 rounded-xl font-black uppercase text-[11px]  shadow-lg shadow-brand-green/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
                                                 Iniciar Caminata Digital Ahora
@@ -297,7 +297,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                         <div className="w-8 h-8 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center">
                                             <span className="w-2.5 h-2.5 rounded-full bg-brand-green/80 animate-pulse"></span>
                                         </div>
-                                        <span className="text-sm font-bold text-black-bright uppercase er">NORMATIVA FDA / FSMA</span>
+                                        <span className="text-sm font-bold text-brand-navy-bright uppercase er">NORMATIVA FDA / FSMA</span>
                                     </div>
                                     <p className="text-[11px] text-gray-200/70 font-bold uppercase leading-relaxed ">
                                         Destino Norteamérica. El pasaporte priorizará el registro inmutable de Eventos de Custodia y los controles de bioseguridad (humedad) para evitar retenciones de la FDA por riesgo biológico o Bioterrorismo.
@@ -311,9 +311,9 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                                         <div className="w-8 h-8 rounded-full bg-white border border-gray-400 shadow-sm flex items-center justify-center">
                                             <span className="w-2.5 h-2.5 rounded-full bg-brand-green-bright"></span>
                                         </div>
-                                        <span className="text-sm font-bold text-black-bright uppercase er">PROTOCOLO ESTÁNDAR GLOBAL</span>
+                                        <span className="text-sm font-bold text-brand-navy-bright uppercase er">PROTOCOLO ESTÁNDAR GLOBAL</span>
                                     </div>
-                                    <p className="text-[11px] text-black/70 font-bold uppercase leading-relaxed ">
+                                    <p className="text-[11px] text-brand-navy/70 font-bold uppercase leading-relaxed ">
                                         Destino con regulaciones mixtas. El pasaporte emitirá el certificado base inmutable garantizando autenticidad de origen WGS84 y trazabilidad física unificada.
                                     </p>
                                 </div>
@@ -322,8 +322,8 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                             <div className="mt-6 p-4 rounded-xl bg-black/40 border border-gray-400 shadow-sm">
                                 <span className="text-[9px] text-gray-900 uppercase font-bold  block mb-2">Bioseguridad del Lote</span>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[11px] font-bold text-black uppercase">{formData.moistureContent}% Humedad</span>
-                                    <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-md ${formData.moistureContent > 12.5 ? 'bg-brand-red border-brand-red text-black' : 'bg-white text-black border border-gray-400 shadow-sm'}`}>
+                                    <span className="text-[11px] font-bold text-brand-navy uppercase">{formData.moistureContent}% Humedad</span>
+                                    <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-md ${formData.moistureContent > 12.5 ? 'bg-brand-red border-brand-red text-brand-navy' : 'bg-white text-brand-navy border border-gray-400 shadow-sm'}`}>
                                         {formData.moistureContent > 12.5 ? 'Riesgo Biológico Aduana' : 'Límite Seguro (Transporte Marítimo)'}
                                     </span>
                                 </div>
@@ -333,11 +333,11 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                         <div className="mt-8 flex gap-4">
                             <div className="flex-1 p-3 bg-white/2 rounded-xl border border-gray-400 shadow-sm text-center">
                                 <p className="text-[9px] text-gray-600 uppercase font-bold">Transporte</p>
-                                <p className="text-[11px] text-black font-bold uppercase">{formData.transportType}</p>
+                                <p className="text-[11px] text-brand-navy font-bold uppercase">{formData.transportType}</p>
                             </div>
                             <div className="flex-1 p-3 bg-white/2 rounded-xl border border-gray-400 shadow-sm text-center">
                                 <p className="text-[9px] text-gray-600 uppercase font-bold">Certificado</p>
-                                <p className="text-[11px] text-black font-bold uppercase">Axis A-1</p>
+                                <p className="text-[11px] text-brand-navy font-bold uppercase">Axis A-1</p>
                             </div>
                         </div>
                     </section>
@@ -346,7 +346,7 @@ export default function GreenExportForm({ user }: { user: { companyId: string } 
                 <button
                     type="submit"
                     disabled={isSubmitting || isEudrNonCompliant() || !selectedLotId}
-                    className="w-full bg-brand-green hover:bg-brand-green-bright text-black font-bold py-4 rounded-2xl transition-all shadow-xl shadow-brand-green/20 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:bg-gray-700 disabled:shadow-none text-[11px] uppercase "
+                    className="w-full bg-brand-green hover:bg-brand-green-bright text-brand-navy font-bold py-4 rounded-2xl transition-all shadow-xl shadow-brand-green/20 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:bg-gray-700 disabled:shadow-none text-[11px] uppercase "
                 >
                     {isSubmitting ? 'GENERANDO EN LA NUBE...' :
                         isEudrNonCompliant() ? 'REVISIÓN EUDR OBLIGATORIA' :

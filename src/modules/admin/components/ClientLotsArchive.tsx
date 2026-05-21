@@ -112,12 +112,12 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                 <header className="p-8 border-b border-gray-400 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center bg-black/40 gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <span className="px-2 py-1 bg-white border border-gray-400 shadow-sm text-black-bright text-[9px] font-bold uppercase  rounded-sm border border-gray-400 shadow-sm">
+                            <span className="px-2 py-1 bg-white border border-gray-400 shadow-sm text-brand-navy-bright text-[9px] font-bold uppercase  rounded-sm border border-gray-400 shadow-sm">
                                 Archivo Confidencial
                             </span>
-                            <span className="text-[11px] text-black font-mono">LOTES DE INVENTARIO</span>
+                            <span className="text-[11px] text-brand-navy font-mono">LOTES DE INVENTARIO</span>
                         </div>
-                        <h2 className="text-3xl font-bold text-black er uppercase">{companyName}</h2>
+                        <h2 className="text-3xl font-bold text-brand-navy er uppercase">{companyName}</h2>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full md:w-auto">
@@ -125,7 +125,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                             <select
                                 value={filterMonth}
                                 onChange={(e) => setFilterMonth(e.target.value)}
-                                className="bg-black/50 border border-gray-400 shadow-sm text-black rounded-industrial-sm px-4 py-2.5 text-[11px] font-bold uppercase  outline-none focus:border-black ring-0 transition-all appearance-none pr-10"
+                                className="bg-black/50 border border-gray-400 shadow-sm text-brand-navy rounded-industrial-sm px-4 py-2.5 text-[11px] font-bold uppercase  outline-none focus:border-black ring-0 transition-all appearance-none pr-10"
                                 style={{ backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2300df9a' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`, backgroundPosition: 'right 10px center', backgroundRepeat: 'no-repeat', backgroundSize: '16px 16px' }}
                             >
                                 <option value="all">TODOS LOS MESES</option>
@@ -141,7 +141,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                             </select>
                         )}
 
-                        <button onClick={onClose} className="px-5 py-2.5 bg-white hover:bg-white text-black border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold uppercase  transition-all group flex items-center justify-center gap-2 whitespace-nowrap">
+                        <button onClick={onClose} className="px-5 py-2.5 bg-white hover:bg-white text-brand-navy border border-gray-400 shadow-sm rounded-industrial-sm text-[11px] font-bold uppercase  transition-all group flex items-center justify-center gap-2 whitespace-nowrap">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:rotate-90 transition-transform">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -162,19 +162,19 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                             <svg className="w-16 h-16 text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                             </svg>
-                            <p className="text-[12px] text-black font-bold uppercase ">No hay lotes registrados para este cliente</p>
+                            <p className="text-[12px] text-brand-navy font-bold uppercase ">No hay lotes registrados para este cliente</p>
                         </div>
                     ) : (
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-white border-b border-gray-400 shadow-sm">
-                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Lote ID</th>
-                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Productor / Origen</th>
-                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Variedad / Proceso</th>
-                                    <th className="p-4 text-[11px] font-bold text-black uppercase ">Volumen</th>
-                                    <th className="p-4 text-[11px] font-bold text-black uppercase  text-center">Estado</th>
-                                    <th className="p-4 text-[11px] font-bold text-black uppercase  text-right">Fecha Entrada</th>
-                                    <th className="p-4 text-[11px] font-bold text-black uppercase  text-right">Acciones</th>
+                                    <th className="p-4 text-[11px] font-bold text-brand-navy uppercase ">Lote ID</th>
+                                    <th className="p-4 text-[11px] font-bold text-brand-navy uppercase ">Productor / Origen</th>
+                                    <th className="p-4 text-[11px] font-bold text-brand-navy uppercase ">Variedad / Proceso</th>
+                                    <th className="p-4 text-[11px] font-bold text-brand-navy uppercase ">Volumen</th>
+                                    <th className="p-4 text-[11px] font-bold text-brand-navy uppercase  text-center">Estado</th>
+                                    <th className="p-4 text-[11px] font-bold text-brand-navy uppercase  text-right">Fecha Entrada</th>
+                                    <th className="p-4 text-[11px] font-bold text-brand-navy uppercase  text-right">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -184,7 +184,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                                             <div className="flex items-center gap-3">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-brand-green/50 group-hover:bg-brand-green mt-1"></div>
                                                 <div>
-                                                    <p className="text-[12px] font-bold text-black uppercase ">{lot.lot_number || 'S/N'}</p>
+                                                    <p className="text-[12px] font-bold text-brand-navy uppercase ">{lot.lot_number || 'S/N'}</p>
                                                     <p className="text-[9px] text-gray-600 font-mono er mt-1 truncate w-24">{lot.id}</p>
                                                 </div>
                                             </div>
@@ -199,21 +199,21 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-end gap-1">
-                                                <span className="text-14px font-bold text-black">{lot.net_weight || 0}</span>
+                                                <span className="text-14px font-bold text-brand-navy">{lot.net_weight || 0}</span>
                                                 <span className="text-[9px] text-gray-900 mb-0.5">kg</span>
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`inline-block px-3 py-1 text-[9px] font-bold uppercase  rounded-full border ${lot.status === 'purchased' ? 'bg-white text-black-bright border-gray-400 shadow-sm' :
-                                                lot.status === 'thrashed' ? 'bg-white text-black-bright border-gray-400 shadow-sm' :
-                                                    lot.status === 'completed' ? 'bg-white text-black-bright border-gray-400 shadow-sm' :
-                                                        'bg-white0/10 text-black border-gray-500/20'
+                                            <span className={`inline-block px-3 py-1 text-[9px] font-bold uppercase  rounded-full border ${lot.status === 'purchased' ? 'bg-white text-brand-navy-bright border-gray-400 shadow-sm' :
+                                                lot.status === 'thrashed' ? 'bg-white text-brand-navy-bright border-gray-400 shadow-sm' :
+                                                    lot.status === 'completed' ? 'bg-white text-brand-navy-bright border-gray-400 shadow-sm' :
+                                                        'bg-white0/10 text-brand-navy border-gray-500/20'
                                                 }`}>
                                                 {lot.status || 'N/A'}
                                             </span>
                                         </td>
                                         <td className="p-4 text-right">
-                                            <p className="text-[11px] text-black font-mono">
+                                            <p className="text-[11px] text-brand-navy font-mono">
                                                 {new Date(lot.created_at).toLocaleDateString('es-CO')}
                                             </p>
                                         </td>
@@ -236,7 +236,7 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
 
                                                 <button
                                                     onClick={() => setSelectedLotId(lot.id)}
-                                                    className="px-3 py-1.5 bg-white hover:bg-white border border-gray-400 shadow-sm text-black border border-gray-400 shadow-sm rounded text-[9px] font-bold uppercase  transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    className="px-3 py-1.5 bg-white hover:bg-white border border-gray-400 shadow-sm text-brand-navy border border-gray-400 shadow-sm rounded text-[9px] font-bold uppercase  transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                                                     disabled={lot.status !== 'completed'}
                                                 >
                                                     Certificado
@@ -251,24 +251,24 @@ export default function ClientLotsArchive({ companyId, companyName, onClose }: C
 
                     {totalPages > 1 && (
                         <div className="mt-8 flex justify-between items-center bg-black/20 p-4 rounded-industrial border border-gray-400 shadow-sm">
-                            <p className="text-[11px] text-black font-bold uppercase  hidden sm:block">
+                            <p className="text-[11px] text-brand-navy font-bold uppercase  hidden sm:block">
                                 Mostrando {(currentPage - 1) * LOTS_PER_PAGE + 1} - {Math.min(currentPage * LOTS_PER_PAGE, filteredLots.length)} de {filteredLots.length}
                             </p>
                             <div className="flex gap-2 w-full sm:w-auto justify-center">
                                 <button
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage === 1}
-                                    className="px-4 py-2 bg-white text-black disabled:opacity-30 rounded-full text-[11px] font-bold uppercase  hover:bg-white transition-all border border-gray-400 shadow-sm"
+                                    className="px-4 py-2 bg-white text-brand-navy disabled:opacity-30 rounded-full text-[11px] font-bold uppercase  hover:bg-white transition-all border border-gray-400 shadow-sm"
                                 >
                                     Anterior
                                 </button>
-                                <span className="px-5 py-2 flex items-center text-[11px] text-black-bright font-bold  bg-white rounded-full border border-gray-400 shadow-sm">
+                                <span className="px-5 py-2 flex items-center text-[11px] text-brand-navy-bright font-bold  bg-white rounded-full border border-gray-400 shadow-sm">
                                     Página {currentPage} de {totalPages}
                                 </span>
                                 <button
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                     disabled={currentPage === totalPages}
-                                    className="px-4 py-2 bg-white text-black disabled:opacity-30 rounded-full text-[11px] font-bold uppercase  hover:bg-white transition-all border border-gray-400 shadow-sm"
+                                    className="px-4 py-2 bg-white text-brand-navy disabled:opacity-30 rounded-full text-[11px] font-bold uppercase  hover:bg-white transition-all border border-gray-400 shadow-sm"
                                 >
                                     Siguiente
                                 </button>

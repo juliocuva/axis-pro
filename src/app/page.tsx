@@ -192,21 +192,21 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-bg-main p-8 transition-colors duration-400">
-            <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-gray-200 shadow-sm pb-8">
+            <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-brand-gray/50 shadow-sm pb-8">
                 <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-gray-200 shadow-sm transition-all">
+                        <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-gray/50 shadow-sm transition-all">
                             <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xl font-bold text-black uppercase tracking-widest">AXIS ONE <span className="text-brand-green">PRO</span></span>
-                            <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.3em] mt-1">Industrial Supply Chain</span>
+                            <span className="text-xl font-bold text-brand-navy uppercase tracking-widest">AXIS ONE <span className="text-brand-green">PRO</span></span>
+                            <span className="text-[10px] font-black text-brand-navy/40 uppercase tracking-[0.3em] mt-1">Industrial Supply Chain</span>
                         </div>
                     </div>
                 </div>
 
                 <nav className="flex items-center gap-4">
-                    <div className="w-px h-8 bg-gray-200 mx-2"></div>
+                    <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
 
                     <button
                         onClick={() => setShowPurchaseForm(true)}
@@ -218,7 +218,7 @@ export default function Home() {
 
                     <button
                         onClick={() => setShowSyncModal(true)}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-bg-offset text-black border border-border-main rounded-industrial-sm text-[10px] font-black uppercase transition-all hover:bg-white hover:border-black active:scale-95 shadow-sm"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-bg-offset text-brand-navy border border-border-main rounded-industrial-sm text-[10px] font-black uppercase transition-all hover:bg-white hover:border-black active:scale-95 shadow-sm"
                         title="Buscar y Sincronizar Lotes"
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -236,12 +236,12 @@ export default function Home() {
                         </button>
                     )}
 
-                    <div className="w-px h-8 bg-gray-200 mx-2"></div>
+                    <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
 
                     <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden shadow-sm">
                         <button
                             onClick={() => { setView('supply'); setShowCloudVault(false); }}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view !== 'master' && !showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-black/40 hover:text-black'}`}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view !== 'master' && !showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
                             Operaciones
@@ -250,7 +250,7 @@ export default function Home() {
                         {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
                             <button
                                 onClick={() => { setView('master'); setShowCloudVault(false); }}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view === 'master' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-black/40 hover:text-black'}`}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view === 'master' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
                                 title="Panel de Gobernanza Global"
                             >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -260,7 +260,7 @@ export default function Home() {
                         
                         <button
                             onClick={() => setShowCloudVault(true)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-black/40 hover:text-black'}`}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
                             title="Archivo Maestro de Procesos"
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
@@ -268,7 +268,7 @@ export default function Home() {
                         </button>
                     </div>
 
-                    <div className="w-px h-8 bg-gray-200 mx-2"></div>
+                    <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
 
                     <button
                         onClick={toggleTheme}
@@ -276,11 +276,11 @@ export default function Home() {
                         title={theme === 'dark' ? 'Modo Luz' : 'Modo Oscuro'}
                     >
                         {theme === 'dark' ? (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black group-hover:rotate-12 transition-transform">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-navy group-hover:rotate-12 transition-transform">
                                 <circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                             </svg>
                         ) : (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-black group-hover:-rotate-12 transition-transform">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-navy group-hover:-rotate-12 transition-transform">
                                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                             </svg>
                         )}
@@ -348,25 +348,25 @@ export default function Home() {
             {/* MODAL DE ACTUALIZACIONES / MENSAJES DEL SISTEMA */}
             {showUpdates && (
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/90 backdrop-blur-3xl animate-in fade-in duration-500">
-                    <div className="bg-bg-card border border-gray-200 shadow-sm w-full max-w-xl rounded-industrial p-10 shadow-3xl relative overflow-hidden">
+                    <div className="bg-bg-card border border-brand-gray/50 shadow-sm w-full max-w-xl rounded-industrial p-10 shadow-3xl relative overflow-hidden">
                         <div className="flex justify-between items-center mb-10">
-                            <h3 className="text-2xl font-bold text-black uppercase er">Centro de Mensajes</h3>
-                            <button onClick={() => setShowUpdates(false)} className="text-gray-900 hover:text-black transition-all">
+                            <h3 className="text-2xl font-bold text-brand-navy uppercase er">Centro de Mensajes</h3>
+                            <button onClick={() => setShowUpdates(false)} className="text-brand-navy/90 hover:text-brand-navy transition-all">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
 
                         <div className="space-y-6">
-                            <div className="p-6 bg-white border border-gray-200 shadow-sm rounded-industrial-sm relative overflow-hidden">
-                                <div className="absolute top-0 right-0 bg-brand-green text-black px-3 py-1 text-[9px] font-bold uppercase rounded-bl-xl">Nuevo</div>
-                                <h4 className="text-[11px] font-bold text-black-bright uppercase  mb-2">Nueva Versión Core V2.0.4</h4>
-                                <p className="text-xs text-black leading-relaxed">
-                                    Hemos optimizado el motor de predicción de desgasificación para granos Honey y Natural. La precisión ha aumentado en un <span className="text-black">12.4%</span>.
+                            <div className="p-6 bg-white border border-brand-gray/50 shadow-sm rounded-industrial-sm relative overflow-hidden">
+                                <div className="absolute top-0 right-0 bg-brand-green text-brand-navy px-3 py-1 text-[9px] font-bold uppercase rounded-bl-xl">Nuevo</div>
+                                <h4 className="text-[11px] font-bold text-brand-navy-bright uppercase  mb-2">Nueva Versión Core V2.0.4</h4>
+                                <p className="text-xs text-brand-navy leading-relaxed">
+                                    Hemos optimizado el motor de predicción de desgasificación para granos Honey y Natural. La precisión ha aumentado en un <span className="text-brand-navy">12.4%</span>.
                                 </p>
                             </div>
 
-                            <div className="p-6 bg-white/2 border border-gray-200 shadow-sm rounded-industrial-sm opacity-60">
-                                <h4 className="text-[11px] font-bold text-gray-900 uppercase  mb-2">Mantenimiento Programado</h4>
+                            <div className="p-6 bg-white/2 border border-brand-gray/50 shadow-sm rounded-industrial-sm opacity-60">
+                                <h4 className="text-[11px] font-bold text-brand-navy/90 uppercase  mb-2">Mantenimiento Programado</h4>
                                 <p className="text-xs text-gray-700 leading-relaxed">
                                     El próximo domingo a las 02:00 AM (COT) se realizará una actualización de los servidores AXIS. El sistema estará fuera de línea por 15 minutos.
                                 </p>
@@ -375,7 +375,7 @@ export default function Home() {
 
                         <button
                             onClick={() => setShowUpdates(false)}
-                            className="w-full mt-10 bg-white hover:bg-white text-black font-bold py-4 rounded-xl transition-all uppercase  text-[9px] border border-gray-200 shadow-sm"
+                            className="w-full mt-10 bg-white hover:bg-white text-brand-navy font-bold py-4 rounded-xl transition-all uppercase  text-[9px] border border-brand-gray/50 shadow-sm"
                         >
                             ENTENDIDO, VOLVER Al CORE
                         </button>
@@ -399,22 +399,22 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto">
                         <div className="flex justify-between items-center mb-12">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-white rounded-industrial-sm flex items-center justify-center text-black-bright">
+                                <div className="w-12 h-12 bg-white rounded-industrial-sm flex items-center justify-center text-brand-navy-bright">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
                                 </div>
                                 <div>
                                     <h2 className="text-4xl font-bold uppercase er">Portal en la Nube AXIS</h2>
-                                    <p className="text-[11px] text-gray-900 font-bold uppercase  mt-1">Acceso Centralizado a Archivos de Confianza</p>
+                                    <p className="text-[11px] text-brand-navy/90 font-bold uppercase  mt-1">Acceso Centralizado a Archivos de Confianza</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setShowCloudVault(false)}
-                                className="w-14 h-14 bg-white hover:bg-white rounded-full flex items-center justify-center text-black transition-all border border-gray-200 shadow-sm"
+                                className="w-14 h-14 bg-white hover:bg-white rounded-full flex items-center justify-center text-brand-navy transition-all border border-brand-gray/50 shadow-sm"
                             >
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
-                        <div className="bg-bg-card border border-gray-200 shadow-sm rounded-industrial p-12">
+                        <div className="bg-bg-card border border-brand-gray/50 shadow-sm rounded-industrial p-12">
                             <CloudVault user={user} />
                         </div>
                     </div>
@@ -428,7 +428,7 @@ export default function Home() {
                     <div className="max-w-5xl mx-auto">
                         <div className="flex justify-between items-center mb-8">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-brand-green rounded-industrial-sm flex items-center justify-center text-black">
+                                <div className="w-12 h-12 bg-brand-green rounded-industrial-sm flex items-center justify-center text-brand-navy">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                                 </div>
                                 <div>
@@ -443,7 +443,7 @@ export default function Home() {
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
-                        <div className="bg-white border border-gray-200 shadow-sm rounded-industrial p-2 md:p-10">
+                        <div className="bg-white border border-brand-gray/50 shadow-sm rounded-industrial p-2 md:p-10">
                             <PurchaseForm 
                                 user={user} 
                                 onPurchaseComplete={() => {
@@ -464,7 +464,7 @@ export default function Home() {
                             {/* Cabecera del Portal */}
                             <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-bg-offset border border-border-main rounded-industrial-sm flex items-center justify-center text-black shadow-sm">
+                                    <div className="w-12 h-12 bg-bg-offset border border-border-main rounded-industrial-sm flex items-center justify-center text-brand-navy shadow-sm">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green animate-spin-slow"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                                     </div>
                                     <div>
@@ -579,7 +579,7 @@ export default function Home() {
                                                     </div>
 
                                                     {/* Flecha de Selección */}
-                                                    <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-brand-green group-hover:text-black flex items-center justify-center text-white/60 transition-all">
+                                                    <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-brand-green group-hover:text-brand-navy flex items-center justify-center text-white/60 transition-all">
                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="rotate-180"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                                     </div>
                                                 </div>

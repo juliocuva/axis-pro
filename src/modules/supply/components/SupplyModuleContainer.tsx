@@ -79,7 +79,7 @@ export default function SupplyModuleContainer({
                     >
                         {selectedLot && activeTab !== 'archive' && (
                             <div className="flex items-center gap-4 bg-white border border-gray-400 shadow-sm px-6 py-3 rounded-industrial animate-in fade-in slide-in-from-right-4 duration-500">
-                                <span className="text-[11px] font-black text-black uppercase">{selectedLot.farmer_name} | {selectedLot.lot_number}</span>
+                                <span className="text-[11px] font-black text-brand-navy uppercase">{selectedLot.farmer_name} | {selectedLot.lot_number}</span>
                                 <button 
                                     onClick={() => setShowCertificate(true)} 
                                     className="text-[11px] font-bold text-white bg-black px-4 py-1.5 rounded-full hover:bg-gray-900 transition-all shadow-sm"
@@ -101,7 +101,7 @@ export default function SupplyModuleContainer({
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex-1 min-w-[80px] py-3 rounded-lg text-[11px] font-bold uppercase  transition-all ${activeTab === tab.id ? 'bg-brand-green border-transparent text-black' : 'bg-white border-gray-400 text-black hover:border-black'}`}
+                                className={`flex-1 min-w-[80px] py-3 rounded-lg text-[11px] font-bold uppercase  transition-all ${activeTab === tab.id ? 'bg-brand-green border-transparent text-brand-navy' : 'bg-white border-gray-400 text-brand-navy hover:border-black'}`}
                             >
                                 {tab.label}
                             </button>
@@ -118,7 +118,7 @@ export default function SupplyModuleContainer({
                                 <div className="space-y-2">
                                     <h3 className="text-lg font-bold text-carbon uppercase ">Requiere Selección de Lote</h3>
                                     <p className="text-xs text-gray-600 max-w-xs mx-auto uppercase  leading-relaxed">
-                                        Por favor, selecciona un lote del <span className="text-black font-black">Historial de Flujo</span> en la parte inferior para cargar los datos técnicos.
+                                        Por favor, selecciona un lote del <span className="text-brand-navy font-black">Historial de Flujo</span> en la parte inferior para cargar los datos técnicos.
                                     </p>
                                 </div>
                                 <button 

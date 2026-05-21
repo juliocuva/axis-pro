@@ -158,8 +158,8 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     <div className="w-full max-w-4xl animate-in zoom-in-95 duration-500">
                         <header className="flex justify-between items-center mb-8 px-4">
                             <div>
-                                <h3 className="text-3xl font-black text-black uppercase er">Perfil de Tueste</h3>
-                                <p className="text-[11px] text-black font-bold uppercase  mt-1">{selectedItem.label} • Telemetría Auditable</p>
+                                <h3 className="text-3xl font-black text-brand-navy uppercase er">Perfil de Tueste</h3>
+                                <p className="text-[11px] text-brand-navy font-bold uppercase  mt-1">{selectedItem.label} • Telemetría Auditable</p>
                             </div>
                             <button onClick={() => { setSelectedItem(null); setViewMode(null); }} className="p-3 bg-white rounded-full hover:bg-white transition-colors">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -169,21 +169,21 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         <footer className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
                                 <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Carga Verde</p>
-                                <p className="text-lg font-bold text-black">{selectedItem.raw.green_weight} KG</p>
+                                <p className="text-lg font-bold text-brand-navy">{selectedItem.raw.green_weight} KG</p>
                              </div>
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
                                 <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Café Tostado</p>
-                                <p className="text-lg font-bold text-black">{selectedItem.raw.roasted_weight} KG</p>
+                                <p className="text-lg font-bold text-brand-navy">{selectedItem.raw.roasted_weight} KG</p>
                              </div>
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
                                 <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Merma</p>
-                                <p className="text-lg font-bold text-black">
+                                <p className="text-lg font-bold text-brand-navy">
                                     {(((selectedItem.raw.green_weight - selectedItem.raw.roasted_weight)/selectedItem.raw.green_weight)*100).toFixed(2)}%
                                 </p>
                              </div>
                              <div className="bg-white p-4 rounded-xl border border-gray-400 shadow-sm">
                                 <p className="text-[9px] text-gray-900 uppercase font-bold mb-1">Fecha</p>
-                                <p className="text-lg font-bold text-black-bright">{selectedItem.raw.roast_date}</p>
+                                <p className="text-lg font-bold text-brand-navy-bright">{selectedItem.raw.roast_date}</p>
                              </div>
                         </footer>
                     </div>
@@ -209,13 +209,13 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
 
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900 group-focus-within:text-black transition-colors">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-900 group-focus-within:text-brand-navy transition-colors">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                             </div>
                             <input 
                                 type="text" 
                                 placeholder="Buscar por Nombre del Caficultor o Lote (Ej: Londoño)..." 
-                                className="w-full bg-bg-card border border-gray-400 shadow-sm rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-black uppercase outline-none focus:border-black transition-all"
+                                className="w-full bg-bg-card border border-gray-400 shadow-sm rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-brand-navy uppercase outline-none focus:border-black transition-all"
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                             />
@@ -226,7 +226,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                 <button
                                     key={n}
                                     onClick={() => { setItemsPerPage(n); setCurrentPage(1); }}
-                                    className={`px-3 py-2 rounded-lg text-[9px] font-bold transition-all ${itemsPerPage === n ? 'bg-white text-black-bright' : 'text-gray-600 hover:text-black'}`}
+                                    className={`px-3 py-2 rounded-lg text-[9px] font-bold transition-all ${itemsPerPage === n ? 'bg-white text-brand-navy-bright' : 'text-gray-600 hover:text-brand-navy'}`}
                                 >
                                     {n}
                                 </button>
@@ -245,7 +245,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                             setCurrentPage(1); 
                                         }
                                     }}
-                                    className={`px-6 py-2 rounded-xl text-[9px] font-bold uppercase  transition-all ${filterType === t || (t === 'AUDIT' && showAuditModal) ? 'bg-brand-green text-black' : 'text-gray-900 hover:text-black'}`}
+                                    className={`px-6 py-2 rounded-xl text-[9px] font-bold uppercase  transition-all ${filterType === t || (t === 'AUDIT' && showAuditModal) ? 'bg-brand-green text-brand-navy' : 'text-gray-900 hover:text-brand-navy'}`}
                                 >
                                     {t === 'ALL' ? 'Todo' : t === 'EXPORT' ? 'Exports' : t === 'LOTE' ? 'Lotes' : 'Auditoría'}
                                 </button>
@@ -286,14 +286,14 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                     <tr key={item.id} className="hover:bg-white/2 transition-colors group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black-bright">
+                                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-brand-navy-bright">
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                                                 </div>
-                                                <span className="text-xs font-bold text-black">{item.type}</span>
+                                                <span className="text-xs font-bold text-brand-navy">{item.type}</span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className="text-sm font-mono text-black group-hover:text-black transition-colors uppercase">{item.label}</span>
+                                            <span className="text-sm font-mono text-brand-navy group-hover:text-brand-navy transition-colors uppercase">{item.label}</span>
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-1.5">
@@ -313,14 +313,14 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                     </span>
                                                 )}
                                                 {item.type === 'EXPORT' && (
-                                                    <span className="ml-2 text-[9px] font-bold text-black-bright uppercase">Export</span>
+                                                    <span className="ml-2 text-[9px] font-bold text-brand-navy-bright uppercase">Export</span>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
                                             <span className="text-xs font-bold text-gray-900">{item.date}</span>
                                             {item.type === 'EXPORT' && (
-                                              <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-white border border-gray-400 shadow-sm text-black border border-gray-400 shadow-sm' : 'bg-white border border-gray-400 shadow-sm text-black-bright border border-gray-400 shadow-sm'}`}>
+                                              <span className={`ml-3 text-[9px] font-bold uppercase px-2 py-1 rounded-md ${item.raw.status === 'FINALIZADA' ? 'bg-white border border-gray-400 shadow-sm text-brand-navy border border-gray-400 shadow-sm' : 'bg-white border border-gray-400 shadow-sm text-brand-navy-bright border border-gray-400 shadow-sm'}`}>
                                                   {item.raw.status === 'FINALIZADA' ? 'Inmutable' : 'Borrador'}
                                               </span>
                                             )}
@@ -330,7 +330,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                 {item.type === 'EXPORT' && item.raw.status !== 'FINALIZADA' ? (
                                                     <button
                                                         onClick={() => setSealerItem(item)}
-                                                        className="px-6 py-2 bg-white text-black-bright hover:bg-brand-green hover:text-black rounded-xl text-[11px] font-bold uppercase  border border-gray-400 shadow-sm transition-all"
+                                                        className="px-6 py-2 bg-white text-brand-navy-bright hover:bg-brand-green hover:text-brand-navy rounded-xl text-[11px] font-bold uppercase  border border-gray-400 shadow-sm transition-all"
                                                     >
                                                         Sellar Embarque
                                                     </button>
@@ -344,7 +344,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                             openReport(item);
                                                         }
                                                     }}
-                                                    className={`px-6 py-2 rounded-xl text-[11px] font-bold uppercase  border transition-all disabled:opacity-30 ${item.type === 'EXPORT' && item.raw.status === 'FINALIZADA' ? 'bg-brand-green text-black hover:bg-brand-green-bright border-black' : 'bg-white hover:bg-brand-green hover:text-black border-gray-400 shadow-sm'}`}
+                                                    className={`px-6 py-2 rounded-xl text-[11px] font-bold uppercase  border transition-all disabled:opacity-30 ${item.type === 'EXPORT' && item.raw.status === 'FINALIZADA' ? 'bg-brand-green text-brand-navy hover:bg-brand-green-bright border-black' : 'bg-white hover:bg-brand-green hover:text-brand-navy border-gray-400 shadow-sm'}`}
                                                     disabled={item.step < 4 && item.raw.status !== 'Tostado' && item.type !== 'EXPORT'}
                                                 >
                                                     {item.type === 'EXPORT' || item.type === 'TOSTION' || item.step === 4 ? 'Visualizar' : 'En Proceso'}
@@ -359,8 +359,8 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     
                     <div className="bg-white/2 border-t border-gray-400 shadow-sm p-6 flex justify-between items-center bg-black/20">
                         <div className="space-y-1">
-                            <p className="text-[11px] text-black font-bold uppercase ">
-                                Mostrando <span className="text-black">{indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredHistory.length)}</span> de <span className="text-black-bright">{filteredHistory.length}</span> registros
+                            <p className="text-[11px] text-brand-navy font-bold uppercase ">
+                                Mostrando <span className="text-brand-navy">{indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredHistory.length)}</span> de <span className="text-brand-navy-bright">{filteredHistory.length}</span> registros
                             </p>
                             {searchTerm && <p className="text-[9px] text-gray-600 uppercase">Filtro activo: "{searchTerm}"</p>}
                         </div>
@@ -395,7 +395,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         <div className="relative z-10 flex flex-col h-full justify-between">
                             <div className="space-y-4">
                                 <h4 className="text-[11px] font-bold text-gray-900 uppercase ">Analytics Export</h4>
-                                <p className="text-xl font-bold text-black ">Reporte Consolidado Mensual</p>
+                                <p className="text-xl font-bold text-brand-navy ">Reporte Consolidado Mensual</p>
                                 <p className="text-xs text-gray-900 leading-relaxed uppercase font-bold ">Genera un PDF con todos los movimientos del mes, puntajes basados en estándares de la SCA promedio y yield de trilla acumulado.</p>
                             </div>
                             <button className="mt-8 w-full py-4 border border-gray-400 shadow-sm rounded-2xl text-[11px] font-bold uppercase  hover:bg-white transition-all">Sincronizar Reporte Completo</button>
@@ -406,11 +406,11 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                         <div className="absolute bottom-0 left-0 w-32 h-32 bg-white blur-3xl rounded-full"></div>
                         <div className="relative z-10 flex h-full items-center justify-between">
                             <div className="space-y-2">
-                                <h4 className="text-[11px] font-bold text-black uppercase ">Ready for Print</h4>
-                                <p className="text-xl font-bold text-black ">Vista de Impresión Unificada</p>
-                                <p className="text-xs text-black/70 uppercase font-bold  leading-relaxed">Configurado para papel certificado 250g.</p>
+                                <h4 className="text-[11px] font-bold text-brand-navy uppercase ">Ready for Print</h4>
+                                <p className="text-xl font-bold text-brand-navy ">Vista de Impresión Unificada</p>
+                                <p className="text-xs text-brand-navy/70 uppercase font-bold  leading-relaxed">Configurado para papel certificado 250g.</p>
                             </div>
-                            <div className="w-16 h-16 bg-brand-green text-black rounded-2xl flex items-center justify-center shadow-xl shadow-brand-green/20 group-hover:scale-110 transition-transform">
+                            <div className="w-16 h-16 bg-brand-green text-brand-navy rounded-2xl flex items-center justify-center shadow-xl shadow-brand-green/20 group-hover:scale-110 transition-transform">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z" /></svg>
                             </div>
                         </div>
@@ -425,10 +425,10 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                     <div className="w-full max-w-4xl bg-bg-card border border-gray-400 shadow-sm rounded-industrial shadow-3xl relative z-10 overflow-hidden flex flex-col max-h-[80vh]">
                         <header className="p-8 border-b border-gray-400 shadow-sm flex justify-between items-center bg-white/2">
                             <div>
-                                <h3 className="text-xl font-bold text-black uppercase er">Bóveda de Trazabilidad In-Situ</h3>
-                                <p className="text-[11px] text-black font-bold uppercase  mt-1">Registros de validación y georreferenciación en tiempo real</p>
+                                <h3 className="text-xl font-bold text-brand-navy uppercase er">Bóveda de Trazabilidad In-Situ</h3>
+                                <p className="text-[11px] text-brand-navy font-bold uppercase  mt-1">Registros de validación y georreferenciación en tiempo real</p>
                             </div>
-                            <button onClick={() => setShowAuditModal(false)} className="text-gray-900 hover:text-black transition-colors">
+                            <button onClick={() => setShowAuditModal(false)} className="text-gray-900 hover:text-brand-navy transition-colors">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                             </button>
                         </header>
@@ -441,11 +441,11 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                         <div key={log.id} className="p-5 bg-white/2 border border-gray-400 shadow-sm rounded-2xl flex justify-between items-center group hover:bg-white transition-all">
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-3">
-                                                    <span className="px-2 py-0.5 bg-white text-black-bright text-[9px] font-bold rounded uppercase border border-gray-400 shadow-sm">{log.eudr_status || 'CAPTURED'}</span>
-                                                    <span className="text-sm font-bold text-black uppercase">{log.farm_name}</span>
+                                                    <span className="px-2 py-0.5 bg-white text-brand-navy-bright text-[9px] font-bold rounded uppercase border border-gray-400 shadow-sm">{log.eudr_status || 'CAPTURED'}</span>
+                                                    <span className="text-sm font-bold text-brand-navy uppercase">{log.farm_name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-4 text-[11px] text-gray-900 font-bold uppercase ">
-                                                    <span className="text-black-bright">{log.email}</span>
+                                                    <span className="text-brand-navy-bright">{log.email}</span>
                                                     <span>•</span>
                                                     <span>{new Date(log.verified_at).toLocaleString()}</span>
                                                 </div>
@@ -468,7 +468,7 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                                                                 document.body.removeChild(a);
                                                                 URL.revokeObjectURL(url);
                                                             }}
-                                                            className="text-[9px] bg-white text-black hover:bg-brand-green hover:text-black px-2 py-0.5 rounded transition-all font-bold uppercase"
+                                                            className="text-[9px] bg-white text-brand-navy hover:bg-brand-green hover:text-brand-navy px-2 py-0.5 rounded transition-all font-bold uppercase"
                                                         >
                                                             Descargar GeoJSON
                                                         </button>

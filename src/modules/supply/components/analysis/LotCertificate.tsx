@@ -293,7 +293,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                 <div className="flex justify-between items-end">
                     <div className="space-y-1">
                         <p className="text-[10px] font-black uppercase text-[#0C6056] tracking-widest">Auditoría en Curso</p>
-                        <p className="text-xl font-black text-black uppercase">{loadingMessage}</p>
+                        <p className="text-xl font-black text-brand-navy uppercase">{loadingMessage}</p>
                     </div>
                     <p className="text-2xl font-black text-[#0C6056]">{loadingProgress}%</p>
                 </div>
@@ -312,7 +312,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     ))}
                 </div>
             </div>
-            <p className="text-[9px] font-bold text-black/40 uppercase tracking-[0.2em]">AxisOne Coffee • Digital Passport Protocol v3.0</p>
+            <p className="text-[9px] font-bold text-brand-navy/40 uppercase tracking-[0.2em]">AxisOne Coffee • Digital Passport Protocol v3.0</p>
         </div>
     );
 
@@ -321,7 +321,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-4">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" /></svg>
             </div>
-            <h3 className="text-xl font-black uppercase text-black">Lote No Encontrado</h3>
+            <h3 className="text-xl font-black uppercase text-brand-navy">Lote No Encontrado</h3>
             <p className="text-xs text-gray-900 uppercase font-bold max-w-xs">El identificador de este lote no existe en el sistema de trazabilidad de AxisOne o ha sido restringido por seguridad.</p>
             <button onClick={onClose} className="mt-8 px-8 py-3 bg-[#0C6056] text-white rounded-xl text-xs font-bold uppercase">Volver al Inicio</button>
         </div>
@@ -460,7 +460,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
 
                     {/* Contenedor Maestro para Exportación */}
-                    <div id="lot-certificate-area" className="w-[816px] mx-auto space-y-8 print:space-y-0 print:m-0 text-black font-medium">
+                    <div id="lot-certificate-area" className="w-[816px] mx-auto space-y-8 print:space-y-0 print:m-0 text-brand-navy font-medium">
 
                         {/* HOJA 1: ETAPA 01 (INGRESO) & ETAPA 02 (TRILLA) */}
                         <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${isStepMode && (activeStep !== 1 && activeStep !== 2) ? 'step-hidden' : 'step-visible'}`}
@@ -474,17 +474,17 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         <img src="/logo.png" alt="AXISONE" className="w-full h-full object-contain" />
                                     </div>
                                     <div>
-                                        <h1 className="uppercase leading-none text-xl font-black text-black er">
+                                        <h1 className="uppercase leading-none text-xl font-black text-brand-navy er">
                                             CERTIFICADO <span className="text-[#0C6056]">ADN DEL CAFÉ</span>
                                         </h1>
                                         <p className="uppercase mt-2 text-[#0C6056] text-[11px] font-bold ">
                                             AUDITADO POR: {associationData?.full_name || 'AXISONE COFFEE'}
                                         </p>
-                                        <p className="text-black/40 text-[9px] font-medium uppercase mt-1">Integridad Técnica • Origen a Taza • Etapas 01-06</p>
+                                        <p className="text-brand-navy/40 text-[9px] font-medium uppercase mt-1">Integridad Técnica • Origen a Taza • Etapas 01-06</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="uppercase text-black/30 text-[9px] font-bold ">ID de Lote</p>
+                                    <p className="uppercase text-brand-navy/30 text-[9px] font-bold ">ID de Lote</p>
                                     <p className="mt-1 text-[#0C6056] text-xl font-black er">{lotData?.lot_number || 'LOTE-AXIS'}</p>
                                 </div>
                             </div>
@@ -493,16 +493,16 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="p-6 space-y-5">
                                 <div className="flex justify-between items-center border-b border-[#1A1A1A]/10 pb-4">
                                     <h2 className="uppercase flex items-center gap-4 text-xs font-bold text-[#1A1A1A] ">
-                                        <span className="w-6 h-6 rounded-full bg-[#0C6056] text-black flex items-center justify-center text-[11px] shadow-sm">01</span>
+                                        <span className="w-6 h-6 rounded-full bg-[#0C6056] text-brand-navy flex items-center justify-center text-[11px] shadow-sm">01</span>
                                         ETAPA 01: INGRESO Y ORIGEN
                                     </h2>
-                                    <span className="text-[9px] font-bold text-black/30 uppercase ">Recepción de Materia Prima</span>
+                                    <span className="text-[9px] font-bold text-brand-navy/30 uppercase ">Recepción de Materia Prima</span>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-12">
                                     <div className="space-y-6">
                                         <div className="group">
-                                            <p className="text-black text-[9px] font-bold uppercase  mb-1 group-hover:text-[#0C6056] transition-colors">Productor / Responsable</p>
+                                            <p className="text-brand-navy text-[9px] font-bold uppercase  mb-1 group-hover:text-[#0C6056] transition-colors">Productor / Responsable</p>
                                             <p className="uppercase text-xl font-black ">{lotData?.farmer_name || 'Independiente'}</p>
                                             <div className="flex gap-4 mt-1">
                                                 {lotData?.process_data?.sica_id && (
@@ -518,16 +518,16 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             </div>
                                         </div>
                                         <div className="group">
-                                            <p className="text-black text-[9px] font-bold uppercase  mb-1">Unidad Productiva (Finca)</p>
+                                            <p className="text-brand-navy text-[9px] font-bold uppercase  mb-1">Unidad Productiva (Finca)</p>
                                             <p className="uppercase text-xl font-black ">{lotData?.farm_name || '---'}</p>
                                         </div>
                                         <div className="grid grid-cols-2 gap-6">
                                             <div>
-                                                <p className="text-black text-[9px] font-bold uppercase  mb-1">Departamento / Municipio</p>
+                                                <p className="text-brand-navy text-[9px] font-bold uppercase  mb-1">Departamento / Municipio</p>
                                                 <p className="uppercase font-black text-sm">{lotData?.region || 'Huila'} / {lotData?.municipality || '---'}</p>
                                             </div>
                                             <div>
-                                                <p className="text-black text-[9px] font-bold uppercase  mb-1">Altitud Media</p>
+                                                <p className="text-brand-navy text-[9px] font-bold uppercase  mb-1">Altitud Media</p>
                                                 <p className="uppercase font-black text-sm">{lotData?.altitude || '1650'} MSNM</p>
                                             </div>
                                         </div>
@@ -536,7 +536,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     <div className="space-y-6">
                                         <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-6 rounded-2xl shadow-inner relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-24 h-24 bg-[#0C6056]/5 rounded-full -mr-12 -mt-12"></div>
-                                            <p className="text-black text-[9px] font-bold uppercase  mb-2">Validación Criptográfica EUDR</p>
+                                            <p className="text-brand-navy text-[9px] font-bold uppercase  mb-2">Validación Criptográfica EUDR</p>
                                             <p className="text-[11px] font-mono font-bold mt-1 text-[#0C6056] break-all">
                                                 {ddsReference || passportData.eudrHash || 'PENDING SUBMISSION'}
                                             </p>
@@ -549,11 +549,11 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         </div>
                                         <div className="grid grid-cols-2 gap-6 px-2">
                                             <div>
-                                                <p className="text-black text-[9px] font-bold uppercase  mb-1">Peso Ingreso</p>
+                                                <p className="text-brand-navy text-[9px] font-bold uppercase  mb-1">Peso Ingreso</p>
                                                 <p className="text-lg font-black">{lotData?.purchase_weight || '0'} <span className="text-xs font-bold">KG</span></p>
                                             </div>
                                             <div>
-                                                <p className="text-black text-[9px] font-bold uppercase  mb-1">Variedad Semilla</p>
+                                                <p className="text-brand-navy text-[9px] font-bold uppercase  mb-1">Variedad Semilla</p>
                                                 <p className="text-lg font-black uppercase er">{lotData?.variety || 'Caturra'}</p>
                                             </div>
                                         </div>
@@ -565,10 +565,10 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="p-6 pt-0 space-y-5 flex-1">
                                 <div className="flex justify-between items-center border-b border-[#1A1A1A]/10 pb-4">
                                     <h2 className="uppercase flex items-center gap-4 text-xs font-bold text-[#1A1A1A] ">
-                                        <span className="w-6 h-6 rounded-full bg-[#0C6056] text-black flex items-center justify-center text-[11px] shadow-sm">02</span>
+                                        <span className="w-6 h-6 rounded-full bg-[#0C6056] text-brand-navy flex items-center justify-center text-[11px] shadow-sm">02</span>
                                         ETAPA 02: TRILLA Y TRANSFORMACIÓN
                                     </h2>
-                                    <span className="text-[9px] font-bold text-black uppercase ">Procesamiento Industrial</span>
+                                    <span className="text-[9px] font-bold text-brand-navy uppercase ">Procesamiento Industrial</span>
                                 </div>
 
                                 <div className="grid grid-cols-4 gap-4">
@@ -579,8 +579,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         { label: 'Merma Real', val: lotData?.purchase_weight && lotData?.thrashed_weight ? (((lotData.purchase_weight - lotData.thrashed_weight) / lotData.purchase_weight) * 100).toFixed(1) : '--', unit: '%' }
                                     ].map((item, i) => (
                                         <div key={i} className="bg-white border border-gray-400 p-6 rounded-2xl text-center group transition-all">
-                                            <p className="text-black/40 text-[9px] font-bold uppercase  mb-4">{item.label}</p>
-                                            <p className="text-2xl font-black text-black er mb-1">{item.val}</p>
+                                            <p className="text-brand-navy/40 text-[9px] font-bold uppercase  mb-4">{item.label}</p>
+                                            <p className="text-2xl font-black text-brand-navy er mb-1">{item.val}</p>
                                             <p className="text-[9px] font-bold text-[#0C6056] ">{item.unit}</p>
                                         </div>
                                     ))}
@@ -592,8 +592,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0C6056" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                                         </div>
                                         <div>
-                                            <p className="text-black/30 text-[9px] font-bold uppercase mb-0.5">Protocolo de Preparación</p>
-                                            <p className="text-[11px] font-bold uppercase text-black">
+                                            <p className="text-brand-navy/30 text-[9px] font-bold uppercase mb-0.5">Protocolo de Preparación</p>
+                                            <p className="text-[11px] font-bold uppercase text-brand-navy">
                                                 {lotData?.process_data?.preparation_protocol === 'EP' ? 'European Prep (EP) - Especialidad' :
                                                  lotData?.process_data?.preparation_protocol === 'American' ? 'American Prep - Comercial Plus' :
                                                  lotData?.process_data?.preparation_protocol === 'Zero Defect' ? 'Zero Defect - Microlote Oro' :
@@ -608,14 +608,14 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0C6056" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                                         </div>
                                         <div>
-                                            <p className="text-black/30 text-[9px] font-bold uppercase mb-0.5">Método de Selección</p>
-                                            <p className="text-[11px] font-bold uppercase text-black">{lotData?.process_data?.sorting_method || 'Máquina Selectora Óptica'}</p>
+                                            <p className="text-brand-navy/30 text-[9px] font-bold uppercase mb-0.5">Método de Selección</p>
+                                            <p className="text-[11px] font-bold uppercase text-brand-navy">{lotData?.process_data?.sorting_method || 'Máquina Selectora Óptica'}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="h-[200px] relative bg-white border border-black/5 rounded-[24px] p-5 flex flex-col shadow-inner">
-                                    <p className="text-[9px] font-bold uppercase text-black/40 mb-8  border-l-2 border-[#0C6056] pl-4">Distribución Granulométrica (Sieve Analysis)</p>
+                                    <p className="text-[9px] font-bold uppercase text-brand-navy/40 mb-8  border-l-2 border-[#0C6056] pl-4">Distribución Granulométrica (Sieve Analysis)</p>
                                     <div className="flex-1 w-full flex justify-center">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={screenData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }} barCategoryGap="35%">
@@ -631,7 +631,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     <div className="grid grid-cols-8 gap-0 mt-6 pt-4 border-t border-black/5">
                                         {screenData.map((d, i) => (
                                             <div key={i} className="text-center">
-                                                <p className="text-[11px] font-bold text-black">{Number(d.val).toFixed(1)}%</p>
+                                                <p className="text-[11px] font-bold text-brand-navy">{Number(d.val).toFixed(1)}%</p>
                                             </div>
                                         ))}
                                     </div>
@@ -664,7 +664,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     <div className="p-6 pt-2 space-y-3">
                                         <div className="flex justify-between items-center border-b border-[#1A1A1A]/10 pb-3">
                                             <h2 className="uppercase flex items-center gap-3 text-xs font-bold text-[#1A1A1A]">
-                                                <span className="w-6 h-6 rounded-full bg-[#0C6056] text-black flex items-center justify-center text-[9px] font-black">SCA</span>
+                                                <span className="w-6 h-6 rounded-full bg-[#0C6056] text-brand-navy flex items-center justify-center text-[9px] font-black">SCA</span>
                                                 ATRIBUTOS EXTRÍNSECOS — SCA CVA v3.0
                                             </h2>
                                             <span className="text-[9px] font-bold text-[#0C6056] font-mono uppercase">N° {ext.sampleNumber || '---'}</span>
@@ -674,30 +674,30 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="border border-[#1A1A1A]/10 rounded-xl overflow-hidden">
                                                 <div className="bg-[#0C6056] px-3 py-1.5">
-                                                    <p className="text-[9px] font-black uppercase text-black tracking-widest">Cultivo</p>
+                                                    <p className="text-[9px] font-black uppercase text-brand-navy tracking-widest">Cultivo</p>
                                                 </div>
                                                 <div className="p-3 space-y-1">
                                                     {cultivoItems.map(label => (
                                                         <div key={label} className="flex items-center gap-2">
                                                             <div className="w-1 h-1 bg-[#0C6056] rounded-full flex-shrink-0"/>
-                                                            <span className="text-[9px] font-bold uppercase text-black">{label}</span>
+                                                            <span className="text-[9px] font-bold uppercase text-brand-navy">{label}</span>
                                                         </div>
                                                     ))}
-                                                    {ext.cultivo?.info && <p className="text-[9px] text-black/50 leading-relaxed mt-1.5 italic border-t border-black/5 pt-1.5">{ext.cultivo.info}</p>}
+                                                    {ext.cultivo?.info && <p className="text-[9px] text-brand-navy/50 leading-relaxed mt-1.5 italic border-t border-black/5 pt-1.5">{ext.cultivo.info}</p>}
                                                 </div>
                                             </div>
                                             <div className="border border-[#1A1A1A]/10 rounded-xl overflow-hidden">
                                                 <div className="bg-[#0C6056] px-3 py-1.5">
-                                                    <p className="text-[9px] font-black uppercase text-black tracking-widest">Procesamiento</p>
+                                                    <p className="text-[9px] font-black uppercase text-brand-navy tracking-widest">Procesamiento</p>
                                                 </div>
                                                 <div className="p-3 space-y-1">
                                                     {procItems.map(label => (
                                                         <div key={label} className="flex items-center gap-2">
                                                             <div className="w-1 h-1 bg-[#0C6056] rounded-full flex-shrink-0"/>
-                                                            <span className="text-[9px] font-bold uppercase text-black">{label}</span>
+                                                            <span className="text-[9px] font-bold uppercase text-brand-navy">{label}</span>
                                                         </div>
                                                     ))}
-                                                    {ext.procesamiento?.info && <p className="text-[9px] text-black/50 leading-relaxed mt-1.5 italic border-t border-black/5 pt-1.5">{ext.procesamiento.info}</p>}
+                                                    {ext.procesamiento?.info && <p className="text-[9px] text-brand-navy/50 leading-relaxed mt-1.5 italic border-t border-black/5 pt-1.5">{ext.procesamiento.info}</p>}
                                                 </div>
                                             </div>
                                         </div>
@@ -706,21 +706,21 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="border border-[#1A1A1A]/10 rounded-xl overflow-hidden">
                                                 <div className="bg-[#0C6056] px-3 py-1.5">
-                                                    <p className="text-[9px] font-black uppercase text-black tracking-widest">Comercio</p>
+                                                    <p className="text-[9px] font-black uppercase text-brand-navy tracking-widest">Comercio</p>
                                                 </div>
                                                 <div className="p-3 space-y-1">
                                                     {comercioItems.map(label => (
                                                         <div key={label} className="flex items-center gap-2">
                                                             <div className="w-1 h-1 bg-[#0C6056] rounded-full flex-shrink-0"/>
-                                                            <span className="text-[9px] font-bold uppercase text-black">{label}</span>
+                                                            <span className="text-[9px] font-bold uppercase text-brand-navy">{label}</span>
                                                         </div>
                                                     ))}
-                                                    {ext.comercio?.info && <p className="text-[9px] text-black/50 leading-relaxed mt-1.5 italic border-t border-black/5 pt-1.5">{ext.comercio.info}</p>}
+                                                    {ext.comercio?.info && <p className="text-[9px] text-brand-navy/50 leading-relaxed mt-1.5 italic border-t border-black/5 pt-1.5">{ext.comercio.info}</p>}
                                                 </div>
                                             </div>
                                             <div className="border border-[#1A1A1A]/10 rounded-xl overflow-hidden">
                                                 <div className="bg-[#0C6056] px-3 py-1.5">
-                                                    <p className="text-[9px] font-black uppercase text-black tracking-widest">Certificaciones</p>
+                                                    <p className="text-[9px] font-black uppercase text-brand-navy tracking-widest">Certificaciones</p>
                                                 </div>
                                                 <div className="p-3">
                                                     <div className="flex flex-wrap gap-1.5 mb-2">
@@ -728,7 +728,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                                             <span key={label} className="px-2 py-0.5 bg-[#0C6056]/10 border border-[#0C6056]/20 rounded-full text-[8px] font-black text-[#0C6056] uppercase">{label}</span>
                                                         ))}
                                                     </div>
-                                                    {ext.certificaciones?.info && <p className="text-[9px] text-black/50 leading-relaxed italic border-t border-black/5 pt-1.5">{ext.certificaciones.info}</p>}
+                                                    {ext.certificaciones?.info && <p className="text-[9px] text-brand-navy/50 leading-relaxed italic border-t border-black/5 pt-1.5">{ext.certificaciones.info}</p>}
                                                 </div>
                                             </div>
                                         </div>
@@ -739,7 +739,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                                 <span className="text-[#0C6056] text-lg leading-none">★</span>
                                                 <div>
                                                     <p className="text-[8px] font-black text-[#0C6056] uppercase mb-0.5">Premios y Reconocimientos</p>
-                                                    <p className="text-[9px] text-black/70 leading-relaxed">{ext.otro.info}</p>
+                                                    <p className="text-[9px] text-brand-navy/70 leading-relaxed">{ext.otro.info}</p>
                                                 </div>
                                             </div>
                                         )}
@@ -749,8 +749,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                             {/* Footer Hoja 1 */}
                             <div className="mt-auto px-6 py-4 flex justify-between items-center border-t border-gray-400 bg-white">
-                                <p className="text-black/30 text-[9px] font-bold uppercase ">INDUSTRIAL STANDARDIZATION • ETAPAS 01-02 • INDUSTRIAL VERIFICATION</p>
-                                <p className="text-black/60 text-[9px] font-bold ">PÁGINA 01 DE 04</p>
+                                <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">INDUSTRIAL STANDARDIZATION • ETAPAS 01-02 • INDUSTRIAL VERIFICATION</p>
+                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 01 DE 04</p>
                             </div>
                         </div>
 
@@ -764,7 +764,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="flex items-center gap-4">
                                     <img src="/logo.png" alt="AXISONE" className="h-8 w-auto" />
                                     <span className="h-4 w-px bg-black/20"></span>
-                                    <p className="uppercase text-black/80 text-[11px] font-bold ">Stage 03 & 04: Lab & Roast Intelligence</p>
+                                    <p className="uppercase text-brand-navy/80 text-[11px] font-bold ">Stage 03 & 04: Lab & Roast Intelligence</p>
                                 </div>
                                 <p className="text-[11px] font-bold text-[#0C6056] uppercase er">{lotData?.lot_number}</p>
                             </div>
@@ -773,23 +773,23 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             <div className="p-6 space-y-5">
                                 <div className="flex justify-between items-center border-b border-[#1A1A1A]/10 pb-4">
                                     <h2 className="uppercase flex items-center gap-4 text-sm font-black text-[#1A1A1A] ">
-                                        <span className="w-8 h-8 rounded-full bg-[#0C6056] text-black flex items-center justify-center text-xs shadow-lg">03</span>
+                                        <span className="w-8 h-8 rounded-full bg-[#0C6056] text-brand-navy flex items-center justify-center text-xs shadow-lg">03</span>
                                         ETAPA 03: LABORATORIO FÍSICO Y FISICOQUÍMICO
                                     </h2>
-                                    <span className="text-[9px] font-bold text-black uppercase ">Control de Calidad Analítico</span>
+                                    <span className="text-[9px] font-bold text-brand-navy uppercase ">Control de Calidad Analítico</span>
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-6 rounded-2xl text-center shadow-sm">
-                                        <p className="text-black text-[9px] font-bold uppercase mb-2">Humedad Final</p>
+                                        <p className="text-brand-navy text-[9px] font-bold uppercase mb-2">Humedad Final</p>
                                         <p className="text-2xl font-black">{physicalData?.moisture_pct || '--'} <span className="text-sm">%</span></p>
                                     </div>
                                     <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-6 rounded-2xl text-center shadow-sm">
-                                        <p className="text-black text-[9px] font-bold uppercase mb-2">Actividad de Agua</p>
+                                        <p className="text-brand-navy text-[9px] font-bold uppercase mb-2">Actividad de Agua</p>
                                         <p className="text-2xl font-black">{physicalData?.water_activity || '--'} <span className="text-sm">aw</span></p>
                                     </div>
                                     <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-6 rounded-2xl text-center shadow-sm">
-                                        <p className="text-black text-[9px] font-bold uppercase mb-2">Densidad Aparente</p>
+                                        <p className="text-brand-navy text-[9px] font-bold uppercase mb-2">Densidad Aparente</p>
                                         <p className="text-2xl font-black">{physicalData?.density_gl || '--'} <span className="text-sm">g/L</span></p>
                                     </div>
                                 </div>
@@ -813,10 +813,10 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="p-6 pt-0 space-y-5 flex-1">
                                     <div className="flex justify-between items-center border-b border-[#1A1A1A]/10 pb-4">
                                         <h2 className="uppercase flex items-center gap-4 text-xs font-bold text-[#1A1A1A] ">
-                                            <span className="w-6 h-6 rounded-full bg-[#0C6056] text-black flex items-center justify-center text-[11px] shadow-sm">04</span>
+                                            <span className="w-6 h-6 rounded-full bg-[#0C6056] text-brand-navy flex items-center justify-center text-[11px] shadow-sm">04</span>
                                             ETAPA 04: TOSTIÓN E INTELIGENCIA TÉRMICA
                                         </h2>
-                                        <span className="text-[9px] font-bold text-black uppercase ">Perfilamiento de Tueste Industrial</span>
+                                        <span className="text-[9px] font-bold text-brand-navy uppercase ">Perfilamiento de Tueste Industrial</span>
                                     </div>
 
                                     <div className="grid grid-cols-3 gap-6">
@@ -826,8 +826,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             { label: 'Roast Master', val: 'JULIO UVA', sub: 'AXIS-ID #0092' }
                                         ].map((item, i) => (
                                             <div key={i} className="bg-white border border-gray-400 p-6 rounded-2xl text-center shadow-sm">
-                                                <p className="text-black/40 text-[9px] font-bold uppercase  mb-2">{item.label}</p>
-                                                <p className="text-xl font-black uppercase  text-black">{item.val}</p>
+                                                <p className="text-brand-navy/40 text-[9px] font-bold uppercase  mb-2">{item.label}</p>
+                                                <p className="text-xl font-black uppercase  text-brand-navy">{item.val}</p>
                                                 <p className="text-[11px] font-bold text-[#0C6056] mt-1 ">{item.sub}</p>
                                             </div>
                                         ))}
@@ -852,8 +852,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                             {/* Footer Hoja 2 */}
                             <div className="mt-auto px-10 py-8 flex justify-between items-center border-t border-gray-400 bg-white">
-                                <p className="text-black/30 text-[9px] font-bold uppercase ">INDUSTRIAL STANDARDIZATION • ETAPAS 03-04 • INDUSTRIAL VERIFICATION</p>
-                                <p className="text-black/60 text-[9px] font-bold ">PÁGINA 02 DE 04</p>
+                                <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">INDUSTRIAL STANDARDIZATION • ETAPAS 03-04 • INDUSTRIAL VERIFICATION</p>
+                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 02 DE 04</p>
                             </div>
                         </div>
 
@@ -867,23 +867,23 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="flex items-center gap-4">
                                     <img src="/logo.png" alt="AXISONE" className="h-8 w-auto" />
                                     <span className="h-4 w-px bg-black/20"></span>
-                                    <p className="uppercase text-black/80 text-[11px] font-bold ">Stage 05: Sensory Verdict</p>
+                                    <p className="uppercase text-brand-navy/80 text-[11px] font-bold ">Stage 05: Sensory Verdict</p>
                                 </div>
                             </div>
 
                             <div className="p-6 space-y-6 flex-1 flex flex-col">
                                 <div className="flex justify-between items-center border-b border-gray-400 pb-4">
                                     <h2 className="uppercase flex items-center gap-4 text-sm font-black text-[#1A1A1A] ">
-                                        <span className="w-8 h-8 rounded-full bg-[#0C6056] text-black flex items-center justify-center text-xs shadow-lg">05</span>
+                                        <span className="w-8 h-8 rounded-full bg-[#0C6056] text-brand-navy flex items-center justify-center text-xs shadow-lg">05</span>
                                         ETAPA 05: EVALUACIÓN SENSORIAL Y AFECTIVA (CVA)
                                     </h2>
-                                    <span className="text-[9px] font-bold text-black/40 uppercase ">Análisis Organoléptico Profesional</span>
+                                    <span className="text-[9px] font-bold text-brand-navy/40 uppercase ">Análisis Organoléptico Profesional</span>
                                 </div>
 
                                 <div className="flex flex-col items-center flex-1">
                                     <div className="w-full h-[300px] relative">
                                         <div className="absolute top-0 right-0 z-20 bg-white/95 backdrop-blur-md border border-[#1A1A1A]/10 p-6 rounded-[24px] shadow-2xl">
-                                            <p className="text-[9px] font-bold uppercase text-black mb-4 ">SCA Attributes</p>
+                                            <p className="text-[9px] font-bold uppercase text-brand-navy mb-4 ">SCA Attributes</p>
                                             <div className="space-y-2">
                                                 {scaRadarData.map((d, i) => (
                                                     <div key={i} className="flex justify-between gap-12 text-[11px] border-b border-[#1A1A1A]/5 pb-1">
@@ -903,7 +903,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     </div>
 
                                     <div className="mt-8 p-10 bg-white border-2 border-[#0C6056] rounded-[32px] w-full text-center relative shadow-sm group overflow-hidden">
-                                        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#0C6056] text-black px-10 py-2 rounded-full text-[9px] font-bold uppercase  shadow-sm -mt-3.5 z-10">
+                                        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#0C6056] text-brand-navy px-10 py-2 rounded-full text-[9px] font-bold uppercase  shadow-sm -mt-3.5 z-10">
                                             AXIS LAB SCORE
                                         </div>
                                         <p className="text-8xl font-black text-[#1A1A1A] er leading-none mt-4 relative z-10">
@@ -936,7 +936,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         ))}
                                     </div>
 
-                                    <div className="mt-8 p-6 bg-white border-l-4 border-[#0C6056] rounded-xl w-full italic text-xs text-black/70 leading-relaxed shadow-sm">
+                                    <div className="mt-8 p-6 bg-white border-l-4 border-[#0C6056] rounded-xl w-full italic text-xs text-brand-navy/70 leading-relaxed shadow-sm">
                                         <span className="text-[9px] font-bold block mb-2 uppercase  text-[#0C6056] not-italic">Notas del Catador Master:</span>
                                         "{lotData?.sca_cupping?.[0]?.notes || scaData?.notes || 'Perfil sensorial balanceado con complejidad vibrante característica de su origen protegido.'}"
                                     </div>
@@ -945,8 +945,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
 
                             {/* Footer Hoja 3 */}
                             <div className="mt-auto px-6 py-4 flex justify-between items-center border-t border-gray-400 bg-white">
-                                <p className="text-black/30 text-[9px] font-bold uppercase ">INTEGRIDAD TÉCNICA • ETAPA 04-05 • VERIFICACIÓN INDUSTRIAL</p>
-                                <p className="text-black/60 text-[9px] font-bold ">PÁGINA 03 DE 04</p>
+                                <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">INTEGRIDAD TÉCNICA • ETAPA 04-05 • VERIFICACIÓN INDUSTRIAL</p>
+                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 03 DE 04</p>
                             </div>
                         </div>
 
@@ -960,35 +960,35 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 <div className="flex items-center gap-4">
                                     <img src="/logo.png" alt="AXISONE" className="h-8 w-auto" />
                                     <span className="h-4 w-px bg-black/20"></span>
-                                    <p className="uppercase text-black/80 text-[11px] font-bold ">Etapa 06: ADN Final y Sello de Integridad</p>
+                                    <p className="uppercase text-brand-navy/80 text-[11px] font-bold ">Etapa 06: ADN Final y Sello de Integridad</p>
                                 </div>
                             </div>
 
                             <div className="p-8 space-y-8 flex-1 flex flex-col justify-center">
                                 <div className="text-center space-y-4">
-                                    <h2 className="text-7xl font-black text-black uppercase er leading-none">ADN DEL CAFÉ</h2>
+                                    <h2 className="text-7xl font-black text-brand-navy uppercase er leading-none">ADN DEL CAFÉ</h2>
                                     <p className="text-[12px] font-black text-[#0C6056] uppercase ">Protocolo de Certificación Técnica AXISONE</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-8">
                                     <div className="bg-white border border-black/5 p-8 rounded-[40px] space-y-6 shadow-sm">
-                                        <h3 className="text-sm font-black uppercase text-black">Resumen de Trazabilidad</h3>
+                                        <h3 className="text-sm font-black uppercase text-brand-navy">Resumen de Trazabilidad</h3>
                                         <div className="space-y-4">
                                             <div className="flex justify-between border-b border-black/5 pb-2">
-                                                <span className="text-[10px] uppercase font-bold text-black/40">Origen Verificado</span>
-                                                <span className="text-[10px] uppercase font-black text-black">CONFIRMADO</span>
+                                                <span className="text-[10px] uppercase font-bold text-brand-navy/40">Origen Verificado</span>
+                                                <span className="text-[10px] uppercase font-black text-brand-navy">CONFIRMADO</span>
                                             </div>
                                             <div className="flex justify-between border-b border-black/5 pb-2">
-                                                <span className="text-[10px] uppercase font-bold text-black/40">Pureza de Trilla</span>
-                                                <span className="text-[10px] uppercase font-black text-black">{lotData?.yield_percentage || '100'}%</span>
+                                                <span className="text-[10px] uppercase font-bold text-brand-navy/40">Pureza de Trilla</span>
+                                                <span className="text-[10px] uppercase font-black text-brand-navy">{lotData?.yield_percentage || '100'}%</span>
                                             </div>
                                             <div className="flex justify-between border-b border-black/5 pb-2">
-                                                <span className="text-[10px] uppercase font-bold text-black/40">Integridad Térmica</span>
-                                                <span className="text-[10px] uppercase font-black text-black">ESTABLE</span>
+                                                <span className="text-[10px] uppercase font-bold text-brand-navy/40">Integridad Térmica</span>
+                                                <span className="text-[10px] uppercase font-black text-brand-navy">ESTABLE</span>
                                             </div>
                                             <div className="flex justify-between border-b border-black/5 pb-2">
-                                                <span className="text-[10px] uppercase font-bold text-black/40">Puntaje SCA Final</span>
-                                                <span className="text-[10px] uppercase font-black text-black">{scaData?.total_score || '---'} PTS</span>
+                                                <span className="text-[10px] uppercase font-bold text-brand-navy/40">Puntaje SCA Final</span>
+                                                <span className="text-[10px] uppercase font-black text-brand-navy">{scaData?.total_score || '---'} PTS</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1003,32 +1003,70 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                             />
                                         </div>
                                         <p className="text-[9px] font-black text-[#0C6056] uppercase">Firma Digital de Proceso</p>
-                                        <p className="text-[8px] font-mono text-black/30 break-all">{inventoryId.toUpperCase()}</p>
+                                        <p className="text-[8px] font-mono text-brand-navy/30 break-all">{inventoryId.toUpperCase()}</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-[#0C6056]/5 border-2 border-[#0C6056]/20 p-10 rounded-[50px] relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#0C6056]/5 rounded-full -mr-16 -mt-16"></div>
-                                    <h4 className="text-xl font-black text-black uppercase er mb-4">Declaración de Autenticidad</h4>
-                                    <p className="text-xs text-black/70 leading-relaxed uppercase font-bold">
-                                        Este documento certifica que el lote referenciado ha sido monitoreado mediante el protocolo AXISONE de extremo a extremo. Los datos de geolocalización, rendimiento industrial, curvas de tueste y evaluación sensorial han sido capturados in-situ, garantizando la integridad inmutable de la información presentada.
-                                    </p>
-                                    <div className="mt-8 flex justify-between items-end">
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-black uppercase">{user?.name || 'ADMINISTRADOR DE SISTEMA'}</p>
-                                            <p className="text-[9px] font-bold text-[#0C6056] uppercase">Firma del Responsable Técnico</p>
+                                {lotData?.process_data?.anotacion_especial || lotData?.process_data?.metadata_validacion_sistema?.anotacion_especial ? (
+                                    <div className="bg-gradient-to-br from-[#0C6056]/10 to-[#D4AF37]/5 border-2 border-[#D4AF37]/40 p-10 rounded-[50px] relative overflow-hidden shadow-inner">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
+                                        
+                                        <div className="flex flex-col gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#B3922E] text-[10px] font-black tracking-widest uppercase">
+                                                    <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse"></span>
+                                                    ★ PROTOCOLO DE COMPETENCIA WCE VERIFICADO
+                                                </div>
+                                            </div>
+
+                                            <h4 className="text-xl font-black text-brand-navy uppercase tracking-tight">
+                                                Resolución Técnica de Competencia Mundial
+                                            </h4>
+
+                                            <p className="text-[11.5px] text-brand-navy leading-relaxed font-bold border-l-4 border-[#D4AF37] pl-4 uppercase tracking-wide">
+                                                {lotData?.process_data?.anotacion_especial || lotData?.process_data?.metadata_validacion_sistema?.anotacion_especial}
+                                            </p>
+
+                                            <p className="text-[9px] text-[#0C6056] font-extrabold uppercase mt-2">
+                                                * ESTE LOTE CUENTA CON UN PERFIL SENSORIAL REGISTRADO BAJO LOS ESTÁNDARES MÁS ALTOS DE LA SCA Y CAPTURADO EN TIEMPO REAL POR AXISONE.
+                                            </p>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-black text-black uppercase">{new Date().toLocaleDateString()}</p>
-                                            <p className="text-[9px] font-bold text-black/30 uppercase">Fecha de Emisión</p>
+
+                                        <div className="mt-8 flex justify-between items-end">
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-black text-brand-navy uppercase">{user?.name || 'MASTER COFFEE AUDITOR'}</p>
+                                                <p className="text-[9px] font-bold text-[#0C6056] uppercase">Firma del Evaluador de Especialidad</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-brand-navy uppercase">{new Date().toLocaleDateString()}</p>
+                                                <p className="text-[9px] font-bold text-[#D4AF37] uppercase font-extrabold">Fecha de Emisión</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="bg-[#0C6056]/5 border-2 border-[#0C6056]/20 p-10 rounded-[50px] relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#0C6056]/5 rounded-full -mr-16 -mt-16"></div>
+                                        <h4 className="text-xl font-black text-brand-navy uppercase er mb-4">Declaración de Autenticidad</h4>
+                                        <p className="text-xs text-brand-navy/70 leading-relaxed uppercase font-bold">
+                                            Este documento certifica que el lote referenciado ha sido monitoreado mediante el protocolo AXISONE de extremo a extremo. Los datos de geolocalización, rendimiento industrial, curvas de tueste y evaluación sensorial han sido capturados in-situ, garantizando la integridad inmutable de la información presentada.
+                                        </p>
+                                        <div className="mt-8 flex justify-between items-end">
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-black text-brand-navy uppercase">{user?.name || 'ADMINISTRADOR DE SISTEMA'}</p>
+                                                <p className="text-[9px] font-bold text-[#0C6056] uppercase">Firma del Responsable Técnico</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-brand-navy uppercase">{new Date().toLocaleDateString()}</p>
+                                                <p className="text-[9px] font-bold text-brand-navy/30 uppercase">Fecha de Emisión</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="mt-auto px-10 py-8 flex justify-between items-center border-t border-gray-400 bg-white">
-                                <p className="text-black/30 text-[9px] font-bold uppercase ">ADN DEL CAFÉ • ETAPA FINAL • AXISONE MASTER CERTIFICATE</p>
-                                <p className="text-black/60 text-[9px] font-bold ">PÁGINA 04 DE 04</p>
+                                <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">ADN DEL CAFÉ • ETAPA FINAL • AXISONE MASTER CERTIFICATE</p>
+                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 04 DE 04</p>
                             </div>
                         </div>
 
@@ -1038,7 +1076,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     <div className="w-full flex justify-end gap-6 no-export mt-12 p-8 bg-[#1A1A1A] border border-[#1A1A1A] rounded-[32px] shadow-2xl print:hidden">
                         <button
                             onClick={downloadQRCode}
-                            className="px-8 py-5 bg-white hover:bg-white text-black rounded-2xl text-[11px] font-bold uppercase  transition-all flex items-center justify-center gap-3 border border-gray-400 shadow-sm active:scale-95"
+                            className="px-8 py-5 bg-white hover:bg-white text-brand-navy rounded-2xl text-[11px] font-bold uppercase  transition-all flex items-center justify-center gap-3 border border-gray-400 shadow-sm active:scale-95"
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                             Descargar QR
@@ -1115,7 +1153,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-10 py-5 bg-white hover:bg-red-500/20 text-black rounded-2xl text-[11px] font-bold uppercase  transition-all border border-gray-400 shadow-sm active:scale-95"
+                            className="px-10 py-5 bg-white hover:bg-red-500/20 text-brand-navy rounded-2xl text-[11px] font-bold uppercase  transition-all border border-gray-400 shadow-sm active:scale-95"
                         >
                             Cerrar
                         </button>

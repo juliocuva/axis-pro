@@ -151,7 +151,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/60 backdrop-blur-sm rounded-industrial">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[11px] font-bold uppercase  text-black-bright animate-pulse">Sincronizando con AXIS Cloud...</p>
+                        <p className="text-[11px] font-bold uppercase  text-brand-navy-bright animate-pulse">Sincronizando con AXIS Cloud...</p>
                     </div>
                 </div>
             )}
@@ -171,7 +171,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                     </div>
                     <div className="text-right">
                         <p className="text-[11px] text-gray-900 uppercase font-bold  mb-1">Calificación Final</p>
-                        <p className={`text-6xl font-bold er ${totalScore >= 84 ? 'text-black-bright' : totalScore >= 80 ? 'text-black-bright' : 'text-black'}`}>
+                        <p className={`text-6xl font-bold er ${totalScore >= 84 ? 'text-brand-navy-bright' : totalScore >= 80 ? 'text-brand-navy-bright' : 'text-brand-navy'}`}>
                             {totalScore.toFixed(2)}
                         </p>
                     </div>
@@ -188,8 +188,8 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                         {CATEGORIES.map(cat => (
                             <div key={cat.id} className="bg-bg-main/50 p-5 rounded-industrial-sm border border-gray-400 shadow-sm flex flex-col gap-4 group hover:border-gray-400 shadow-sm transition-all">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-[11px] font-bold text-black uppercase ">{cat.label}</label>
-                                    <span className="text-black-bright font-mono text-lg font-bold">{(scores[cat.id] || 0).toFixed(2)}</span>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase ">{cat.label}</label>
+                                    <span className="text-brand-navy-bright font-mono text-lg font-bold">{(scores[cat.id] || 0).toFixed(2)}</span>
                                 </div>
                                 <input
                                     type="range" min="6" max="10" step="0.25" value={scores[cat.id] || 7.5}
@@ -212,7 +212,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                         type="button"
                                         disabled={isSubmitting || isAlreadySealed}
                                         onClick={() => setScores({ ...scores, defects_score: num })}
-                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-black' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'}`}
+                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${scores.defects_score === num ? 'bg-brand-red border-brand-red text-brand-navy' : 'border-brand-red/20 text-brand-red/50 hover:bg-brand-red/10'}`}
                                     >
                                         {num}
                                     </button>
@@ -223,7 +223,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     type="button"
                                     disabled={isSubmitting || isAlreadySealed}
                                     onClick={() => setScores({ ...scores, defects_intensity: 2 })}
-                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-brand-green border-black text-black' : 'border-gray-400 shadow-sm text-gray-900'}`}
+                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 2 ? 'bg-brand-green border-black text-brand-navy' : 'border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     TAINT (MANCHA -2)
                                 </button>
@@ -231,7 +231,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                                     type="button"
                                     disabled={isSubmitting || isAlreadySealed}
                                     onClick={() => setScores({ ...scores, defects_intensity: 4 })}
-                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 4 ? 'bg-brand-red border-brand-red text-black' : 'border-gray-400 shadow-sm text-gray-900'}`}
+                                    className={`flex-1 py-1 px-2 rounded text-[9px] font-bold transition-all border ${scores.defects_intensity === 4 ? 'bg-brand-red border-brand-red text-brand-navy' : 'border-gray-400 shadow-sm text-gray-900'}`}
                                 >
                                     FAULT (DEFECTO -4)
                                 </button>
@@ -266,7 +266,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                     <button
                         type={isAlreadySealed ? "button" : "submit"}
                         disabled={isSubmitting || isAlreadySealed}
-                        className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl ${isAlreadySealed ? 'bg-white border border-gray-400 shadow-sm text-black border border-gray-400 shadow-sm cursor-not-allowed opacity-100' : 'bg-white hover:bg-brand-green-bright text-black hover:text-black disabled:opacity-30'}`}
+                        className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl ${isAlreadySealed ? 'bg-white border border-gray-400 shadow-sm text-brand-navy border border-gray-400 shadow-sm cursor-not-allowed opacity-100' : 'bg-white hover:bg-brand-green-bright text-brand-navy hover:text-brand-navy disabled:opacity-30'}`}
                     >
                         {isAlreadySealed ? (
                             <>
@@ -313,7 +313,7 @@ export default function SCACuppingForm({ inventoryId, onCuppingComplete, user }:
                         </ResponsiveContainer>
                     </div>
                     <div className="pb-4 text-center space-y-3 relative z-10">
-                        <span className={`px-6 py-2 rounded-full text-[11px] font-bold uppercase  border shadow-xl ${totalScore >= 85 ? 'bg-white border border-gray-400 shadow-sm text-black-bright border-gray-400 shadow-sm' : 'bg-white border border-gray-400 shadow-sm text-black-bright border-gray-400 shadow-sm'}`}>
+                        <span className={`px-6 py-2 rounded-full text-[11px] font-bold uppercase  border shadow-xl ${totalScore >= 85 ? 'bg-white border border-gray-400 shadow-sm text-brand-navy-bright border-gray-400 shadow-sm' : 'bg-white border border-gray-400 shadow-sm text-brand-navy-bright border-gray-400 shadow-sm'}`}>
                             {totalScore >= 85 ? '✓ SPECIALTY COFFEE' : '✓ PREMIUM GRADE'}
                         </span>
                         <div className="pt-4 border-t border-gray-400 shadow-sm w-full">

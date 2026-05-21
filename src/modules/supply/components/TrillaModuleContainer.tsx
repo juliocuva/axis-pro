@@ -73,19 +73,19 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
             {/* ENCABEZADO */}
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 pb-6 border-b border-gray-400 shadow-sm">
                 <div>
-                    <h2 className="text-3xl font-black uppercase er text-black">Planta & Trilla</h2>
+                    <h2 className="text-3xl font-black uppercase er text-brand-navy">Planta & Trilla</h2>
                     <p className="text-[11px] text-gray-900 font-bold uppercase  mt-1">Control de Mermas y Rendimiento</p>
                 </div>
 
                 {/* SELECTOR DE LOTE */}
                 <div className="w-full sm:w-auto min-w-[300px]">
-                    <label className="text-[9px] text-black font-bold uppercase  mb-1.5 block">Lote en Línea de Proceso</label>
+                    <label className="text-[9px] text-brand-navy font-bold uppercase  mb-1.5 block">Lote en Línea de Proceso</label>
                     <div className="relative group/select">
                         <select
                             value={selectedLotId}
                             onChange={handleLotChange}
                             disabled={isLoading}
-                            className="w-full bg-white border border-gray-400 shadow-sm text-black text-xs py-3.5 px-4 rounded-industrial appearance-none focus:outline-none focus:border-black cursor-pointer font-bold uppercase  transition-all hover:bg-white"
+                            className="w-full bg-white border border-gray-400 shadow-sm text-brand-navy text-xs py-3.5 px-4 rounded-industrial appearance-none focus:outline-none focus:border-black cursor-pointer font-bold uppercase  transition-all hover:bg-white"
                         >
                             {isLoading ? (
                                 <option>Cargando Lotes...</option>
@@ -95,14 +95,14 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
                                 availableLots.map(lot => {
                                     const isThrashed = lot.status === 'thrashed' || lot.status === 'completed' || lot.coffee_type === 'excelso';
                                     return (
-                                        <option key={lot.id} value={lot.id} className="bg-bg-card text-black">
+                                        <option key={lot.id} value={lot.id} className="bg-bg-card text-brand-navy">
                                             {isThrashed ? '[TRILLADO / ORO] ' : '[PERGAMINO PENDIENTE] '} - {lot.lot_number || 'LOTE'} ({lot.purchase_weight}kg)
                                         </option>
                                     );
                                 })
                             )}
                         </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-black transition-colors">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-900 group-hover/select:text-brand-navy transition-colors">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
                         </div>
                     </div>
@@ -111,11 +111,11 @@ export default function TrillaModuleContainer({ user }: { user: any }) {
 
             {selectedLotId ? (
                 availableLots.find(l => l.id === selectedLotId)?.coffee_type === 'excelso' ? (
-                    <div className="h-64 bg-white border border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-4 text-black p-6 text-center">
+                    <div className="h-64 bg-white border border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-4 text-brand-navy p-6 text-center">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>
                         <div>
-                            <p className="text-xl uppercase font-bold  text-black-bright mb-2">Ingreso Finalizado (Café Oro)</p>
-                            <p className="text-[11px] text-black/70 font-bold uppercase  max-w-md">Este lote fue registrado originalmente como Café Excelso (Oro). No requiere pasar por el proceso industrial de trilla ni cálculo de mermas.</p>
+                            <p className="text-xl uppercase font-bold  text-brand-navy-bright mb-2">Ingreso Finalizado (Café Oro)</p>
+                            <p className="text-[11px] text-brand-navy/70 font-bold uppercase  max-w-md">Este lote fue registrado originalmente como Café Excelso (Oro). No requiere pasar por el proceso industrial de trilla ni cálculo de mermas.</p>
                         </div>
                     </div>
                 ) : (

@@ -14,7 +14,7 @@ export default function ModuleHeader({ title, subtitle, children }: ModuleHeader
             <div className="flex items-center gap-5">
                 <span className="w-2 h-14 bg-black rounded-full"></span>
                 <div>
-                    <h1 className="text-4xl font-black text-black uppercase ">{title}</h1>
+                    <h1 className="text-4xl font-black text-brand-navy uppercase ">{title}</h1>
                     <p className="text-[11px] text-gray-500 font-bold uppercase  mt-2 tracking-tight">{subtitle}</p>
                 </div>
             </div>

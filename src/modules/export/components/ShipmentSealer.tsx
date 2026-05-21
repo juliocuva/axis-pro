@@ -140,11 +140,11 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                         <div>
                             <div className="flex items-center gap-3 mb-2">
                                 <span className="w-2.5 h-2.5 rounded-full bg-brand-green-bright animate-pulse"></span>
-                                <h2 className="text-xl font-black text-black uppercase er">Sello Inmutable de Embarque</h2>
+                                <h2 className="text-xl font-black text-brand-navy uppercase er">Sello Inmutable de Embarque</h2>
                             </div>
                             <p className="text-[11px] text-gray-900 font-bold uppercase ">Convirtiendo Borrador en Certificado Final • Lote: {lotId}</p>
                         </div>
-                        <button onClick={onClose} className="text-gray-900 hover:text-black transition-all bg-white w-10 h-10 rounded-xl flex items-center justify-center border border-gray-400 shadow-sm hover:bg-white">
+                        <button onClick={onClose} className="text-gray-900 hover:text-brand-navy transition-all bg-white w-10 h-10 rounded-xl flex items-center justify-center border border-gray-400 shadow-sm hover:bg-white">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                     </div>
@@ -162,7 +162,7 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                 {/* Formulario */}
                 <div className="p-8 pb-12">
                     {status && (
-                        <div className={`p-6 rounded-2xl flex items-start gap-4 mb-8 border ${status.type === 'success' ? 'bg-white border-gray-400 shadow-sm text-black-bright shadow-[0_0_30px_rgba(0,255,136,0.1)]' : 'bg-brand-red/10 border-brand-red/20 text-brand-red-bright'}`}>
+                        <div className={`p-6 rounded-2xl flex items-start gap-4 mb-8 border ${status.type === 'success' ? 'bg-white border-gray-400 shadow-sm text-brand-navy-bright shadow-[0_0_30px_rgba(0,255,136,0.1)]' : 'bg-brand-red/10 border-brand-red/20 text-brand-red-bright'}`}>
                             <div className="mt-1">
                                 {status.type === 'success' ? (
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
@@ -174,8 +174,8 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                                 {status.message}
                                 {status.type === 'success' && status.emails && (
                                     <div className="mt-4 p-4 bg-black/40 rounded-xl border border-gray-400 shadow-sm flex flex-col gap-2">
-                                        <div className="flex items-center gap-2 text-[9px] text-black opacity-90"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg> TRANSMITIENDO PASAPORTE WGS84</div>
-                                        <div className="text-[9px] font-mono text-black break-all">{status.emails.split(',').map(e => `[SUCCESS] Payload delivered to: ${e.trim()}`).join('\n')}</div>
+                                        <div className="flex items-center gap-2 text-[9px] text-brand-navy opacity-90"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg> TRANSMITIENDO PASAPORTE WGS84</div>
+                                        <div className="text-[9px] font-mono text-brand-navy break-all">{status.emails.split(',').map(e => `[SUCCESS] Payload delivered to: ${e.trim()}`).join('\n')}</div>
                                     </div>
                                 )}
                             </div>
@@ -186,24 +186,24 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                         <div className="grid grid-cols-1 grid-rows-1">
                             {/* PASO 1: Ingreso */}
                             <div className={`col-start-1 row-start-1 space-y-6 transition-all duration-500 ${step === 1 ? 'opacity-100 translate-x-0 z-10 relative' : 'opacity-0 -translate-x-10 pointer-events-none absolute w-full'}`}>
-                                <h3 className="text-black-bright text-[11px] font-bold uppercase  flex items-center gap-3 border-b border-gray-400 shadow-sm pb-3">
+                                <h3 className="text-brand-navy-bright text-[11px] font-bold uppercase  flex items-center gap-3 border-b border-gray-400 shadow-sm pb-3">
                                     <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span> 1. Validación de Ingreso en Puerto
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Timestamp de Arribo</label>
-                                        <input type="datetime-local" value={checkin.timestamp} onChange={e => setCheckin({...checkin, timestamp: e.target.value})} className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black focus:border-black outline-none" />
+                                        <input type="datetime-local" value={checkin.timestamp} onChange={e => setCheckin({...checkin, timestamp: e.target.value})} className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy focus:border-black outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">ID Validador / Operario</label>
-                                        <input type="text" value={checkin.validatorId} onChange={e => setCheckin({...checkin, validatorId: e.target.value})} placeholder="Ej: OP-743B" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black uppercase focus:border-black outline-none" />
+                                        <input type="text" value={checkin.validatorId} onChange={e => setCheckin({...checkin, validatorId: e.target.value})} placeholder="Ej: OP-743B" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy uppercase focus:border-black outline-none" />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <div className="flex justify-between items-end mb-1">
                                             <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Geolocalización del Escaneo</label>
-                                            <button type="button" onClick={getLocation} className="text-[9px] text-black-bright hover:text-gray-300 uppercase  font-bold flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/></svg> Capturar GPS</button>
+                                            <button type="button" onClick={getLocation} className="text-[9px] text-brand-navy-bright hover:text-gray-300 uppercase  font-bold flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/></svg> Capturar GPS</button>
                                         </div>
-                                        <input type="text" value={checkin.location} onChange={e => setCheckin({...checkin, location: e.target.value})} placeholder="Ej: 3.879541, -77.025482 (Buenaventura)" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black font-mono focus:border-black outline-none" />
+                                        <input type="text" value={checkin.location} onChange={e => setCheckin({...checkin, location: e.target.value})} placeholder="Ej: 3.879541, -77.025482 (Buenaventura)" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy font-mono focus:border-black outline-none" />
                                     </div>
                                     <div className="md:col-span-2 flex items-center gap-4 bg-white/2 p-4 rounded-xl border border-gray-400 shadow-sm mt-2">
                                         <input type="checkbox" id="match" checked={checkin.matchConfirmed} onChange={e => setCheckin({...checkin, matchConfirmed: e.target.checked})} className="w-5 h-5 accent-black" />
@@ -211,13 +211,13 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                                     </div>
                                 </div>
                                 <div className="pt-4 text-right">
-                                    <button onClick={() => setStep(2)} disabled={!checkin.location || !checkin.validatorId || !checkin.matchConfirmed} className="px-8 py-4 bg-brand-green text-black hover:bg-brand-green-bright font-bold uppercase text-[11px]  rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-black flex items-center gap-3 ml-auto">Continuar Fase 2 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
+                                    <button onClick={() => setStep(2)} disabled={!checkin.location || !checkin.validatorId || !checkin.matchConfirmed} className="px-8 py-4 bg-brand-green text-brand-navy hover:bg-brand-green-bright font-bold uppercase text-[11px]  rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-brand-navy flex items-center gap-3 ml-auto">Continuar Fase 2 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
                                 </div>
                             </div>
 
                             {/* PASO 2: Seguridad */}
                             <div className={`col-start-1 row-start-1 space-y-6 transition-all duration-500 ${step === 2 ? 'opacity-100 translate-x-0 z-10 relative' : step > 2 ? 'opacity-0 -translate-x-10 pointer-events-none absolute w-full' : 'opacity-0 translate-x-10 pointer-events-none absolute w-full'}`}>
-                                <h3 className="text-black-bright text-[11px] font-bold uppercase  flex items-center gap-3 border-b border-gray-400 shadow-sm pb-3">
+                                <h3 className="text-brand-navy-bright text-[11px] font-bold uppercase  flex items-center gap-3 border-b border-gray-400 shadow-sm pb-3">
                                     <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span> 2. Seguridad de Embalaje (Precintado)
                                 </h3>
                                 <p className="text-[11px] text-gray-900 uppercase  leading-relaxed">Paso crítico para blindaje legal. Estos datos se cifrarán de inmediato.</p>
@@ -225,42 +225,42 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Número de Contenedor</label>
-                                        <input type="text" value={security.containerNumber} onChange={e => setSecurity({...security, containerNumber: e.target.value.toUpperCase()})} placeholder="Ej: MSKU1234567" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black uppercase font-mono  focus:border-black outline-none" />
+                                        <input type="text" value={security.containerNumber} onChange={e => setSecurity({...security, containerNumber: e.target.value.toUpperCase()})} placeholder="Ej: MSKU1234567" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy uppercase font-mono  focus:border-black outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Número de Precinto (Seal)</label>
-                                        <input type="text" value={security.sealNumber} onChange={e => setSecurity({...security, sealNumber: e.target.value.toUpperCase()})} placeholder="Ej: SEAL-88992211" className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black-bright font-bold uppercase font-mono  focus:border-black outline-none placeholder:text-black/30" />
+                                        <input type="text" value={security.sealNumber} onChange={e => setSecurity({...security, sealNumber: e.target.value.toUpperCase()})} placeholder="Ej: SEAL-88992211" className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy-bright font-bold uppercase font-mono  focus:border-black outline-none placeholder:text-brand-navy/30" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Número de Sacos (Bultos)</label>
-                                        <input type="number" value={security.sacksCount || ''} onChange={e => setSecurity({...security, sacksCount: parseInt(e.target.value) || 0})} placeholder="Ej: 280" className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black-bright font-bold uppercase font-mono  focus:border-black outline-none placeholder:text-black/30" />
+                                        <input type="number" value={security.sacksCount || ''} onChange={e => setSecurity({...security, sacksCount: parseInt(e.target.value) || 0})} placeholder="Ej: 280" className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy-bright font-bold uppercase font-mono  focus:border-black outline-none placeholder:text-brand-navy/30" />
                                     </div>
                                 </div>
                                 <div className="mt-4 p-4 rounded-xl border border-dashed border-gray-400 shadow-sm bg-white/2 flex flex-col items-center justify-center py-8">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-900 mb-3"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                    <p className="text-[11px] text-black font-bold uppercase  text-center">Evidencia Fotográfica (Opcional)<br/><span className="text-[9px] font-medium tracking-wide lowercase mt-1 block">Sube una foto del precinto cerrado. (Max 5MB)</span></p>
+                                    <p className="text-[11px] text-brand-navy font-bold uppercase  text-center">Evidencia Fotográfica (Opcional)<br/><span className="text-[9px] font-medium tracking-wide lowercase mt-1 block">Sube una foto del precinto cerrado. (Max 5MB)</span></p>
                                 </div>
                                 
                                 <div className="pt-4 flex justify-between">
-                                    <button onClick={() => setStep(1)} className="px-6 py-4 bg-transparent text-gray-900 hover:text-black font-bold uppercase text-[11px]  rounded-xl transition-all uppercase border border-gray-400 shadow-sm">Atrás</button>
-                                    <button onClick={() => setStep(3)} disabled={!security.containerNumber || !security.sealNumber || security.sacksCount <= 0} className="px-8 py-4 bg-brand-green text-black hover:bg-brand-green/80 font-bold uppercase text-[11px]  rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-black flex items-center gap-3">Continuar Fase 3 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
+                                    <button onClick={() => setStep(1)} className="px-6 py-4 bg-transparent text-gray-900 hover:text-brand-navy font-bold uppercase text-[11px]  rounded-xl transition-all uppercase border border-gray-400 shadow-sm">Atrás</button>
+                                    <button onClick={() => setStep(3)} disabled={!security.containerNumber || !security.sealNumber || security.sacksCount <= 0} className="px-8 py-4 bg-brand-green text-brand-navy hover:bg-brand-green/80 font-bold uppercase text-[11px]  rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-brand-navy flex items-center gap-3">Continuar Fase 3 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg></button>
                                 </div>
                             </div>
 
                             {/* PASO 3: Cierre */}
                             <div className={`col-start-1 row-start-1 space-y-6 transition-all duration-500 ${step === 3 ? 'opacity-100 translate-x-0 z-10 relative' : 'opacity-0 translate-x-10 pointer-events-none absolute w-full'}`}>
-                                <h3 className="text-black-bright text-[11px] font-bold uppercase  flex items-center gap-3 border-b border-gray-400 shadow-sm pb-3">
+                                <h3 className="text-brand-navy-bright text-[11px] font-bold uppercase  flex items-center gap-3 border-b border-gray-400 shadow-sm pb-3">
                                     <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span> 3. Cierre de Ciclo en Buque
                                 </h3>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Vessel Name & Voyage</label>
-                                        <input type="text" value={closure.vesselName} onChange={e => setClosure({...closure, vesselName: e.target.value.toUpperCase()})} placeholder="Ej: MSC GULSUN 102E" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black uppercase font-bold focus:border-black outline-none" />
+                                        <input type="text" value={closure.vesselName} onChange={e => setClosure({...closure, vesselName: e.target.value.toUpperCase()})} placeholder="Ej: MSC GULSUN 102E" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy uppercase font-bold focus:border-black outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Tipo de BL</label>
-                                        <select value={closure.blType || 'Master BL'} onChange={e => setClosure({...closure, blType: e.target.value})} className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black uppercase font-mono focus:border-black outline-none appearance-none">
+                                        <select value={closure.blType || 'Master BL'} onChange={e => setClosure({...closure, blType: e.target.value})} className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy uppercase font-mono focus:border-black outline-none appearance-none">
                                             <option value="Master BL">Master BL (Naviera a FF)</option>
                                             <option value="House BL">House BL (FF a Consignatario)</option>
                                             <option value="Direct BL">Direct BL (Naviera a Cliente)</option>
@@ -268,35 +268,35 @@ export default function ShipmentSealer({ exportId, lotId, baseHash, onClose, onS
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Bill of Lading (BL)</label>
-                                        <input type="text" value={closure.bolNumber} onChange={e => setClosure({...closure, bolNumber: e.target.value.toUpperCase()})} placeholder="Ej: BOL-8900445" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black uppercase font-mono focus:border-black outline-none" />
+                                        <input type="text" value={closure.bolNumber} onChange={e => setClosure({...closure, bolNumber: e.target.value.toUpperCase()})} placeholder="Ej: BOL-8900445" className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy uppercase font-mono focus:border-black outline-none" />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Consignee (Destinatario Final / Título de Propiedad)</label>
-                                        <input type="text" value={closure.consignee || ''} onChange={e => setClosure({...closure, consignee: e.target.value.toUpperCase()})} placeholder="Ej: STUMPTOWN COFFEE ROASTERS INC." className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black uppercase font-bold focus:border-black outline-none" />
+                                        <input type="text" value={closure.consignee || ''} onChange={e => setClosure({...closure, consignee: e.target.value.toUpperCase()})} placeholder="Ej: STUMPTOWN COFFEE ROASTERS INC." className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy uppercase font-bold focus:border-black outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1">Estimated Time of Arrival (ETA)</label>
-                                        <input type="date" value={closure.eta} onChange={e => setClosure({...closure, eta: e.target.value})} className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black  focus:border-black outline-none" />
+                                        <input type="date" value={closure.eta} onChange={e => setClosure({...closure, eta: e.target.value})} className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy  focus:border-black outline-none" />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <div className="flex justify-between items-end mb-1">
                                             <label className="text-[9px] font-bold text-gray-900 uppercase  pl-1 flex items-center gap-2"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="3"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> Distribución Automática (Emails)</label>
-                                            <span className="text-[9px] bg-white border border-gray-400 shadow-sm text-black px-2 py-0.5 rounded border border-gray-400 shadow-sm uppercase  font-bold">Activo</span>
+                                            <span className="text-[9px] bg-white border border-gray-400 shadow-sm text-brand-navy px-2 py-0.5 rounded border border-gray-400 shadow-sm uppercase  font-bold">Activo</span>
                                         </div>
-                                        <input type="text" value={closure.notifyEmails} onChange={e => setClosure({...closure, notifyEmails: e.target.value})} placeholder="Ej: aduana@puerto.gov, cliente@import.com" className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-black-bright font-mono focus:border-black outline-none placeholder:text-black/30" />
+                                        <input type="text" value={closure.notifyEmails} onChange={e => setClosure({...closure, notifyEmails: e.target.value})} placeholder="Ej: aduana@puerto.gov, cliente@import.com" className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-sm text-brand-navy-bright font-mono focus:border-black outline-none placeholder:text-brand-navy/30" />
                                     </div>
                                 </div>
 
                                 <div className="mt-8 p-6 bg-white border border-gray-400 shadow-sm rounded-2xl relative">
-                                    <div className="absolute -top-3 left-6 px-3 py-1 bg-brand-green text-black text-[9px] font-bold  uppercase rounded">ACCIÓN CRÍTICA</div>
-                                    <p className="text-[11px] font-bold text-black-bright uppercase  leading-relaxed mt-2 text-center">
+                                    <div className="absolute -top-3 left-6 px-3 py-1 bg-brand-green text-brand-navy text-[9px] font-bold  uppercase rounded">ACCIÓN CRÍTICA</div>
+                                    <p className="text-[11px] font-bold text-brand-navy-bright uppercase  leading-relaxed mt-2 text-center">
                                         Al presionar este botón, se realizará una concatenación criptográfica: Hash Original + Datos Puerto. El informe quedará INMUTABLE y el estado pasará a "FINALIZADA".
                                     </p>
                                 </div>
                                 
                                 <div className="pt-4 flex justify-between">
-                                    <button onClick={() => setStep(2)} className="px-6 py-4 bg-transparent text-gray-900 hover:text-black font-bold uppercase text-[11px]  rounded-xl transition-all border border-gray-400 shadow-sm" disabled={isSubmitting}>Atrás</button>
-                                    <button onClick={handleSeal} disabled={!closure.vesselName || !closure.bolNumber || !closure.eta || isSubmitting} className="px-8 py-4 bg-brand-green text-black hover:bg-brand-green-bright font-black uppercase text-[11px]  rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-black flex items-center gap-3 shadow-[0_0_20px_rgba(0,255,136,0.3)] min-w-[300px] justify-center">
+                                    <button onClick={() => setStep(2)} className="px-6 py-4 bg-transparent text-gray-900 hover:text-brand-navy font-bold uppercase text-[11px]  rounded-xl transition-all border border-gray-400 shadow-sm" disabled={isSubmitting}>Atrás</button>
+                                    <button onClick={handleSeal} disabled={!closure.vesselName || !closure.bolNumber || !closure.eta || isSubmitting} className="px-8 py-4 bg-brand-green text-brand-navy hover:bg-brand-green-bright font-black uppercase text-[11px]  rounded-xl transition-all disabled:opacity-50 disabled:bg-gray-700 disabled:text-brand-navy flex items-center gap-3 shadow-[0_0_20px_rgba(0,255,136,0.3)] min-w-[300px] justify-center">
                                         {isSubmitting ? (
                                             loadingStep === 1 ? 'SELLANDO HASH EN DB...' : 'TRANSMITIENDO A ADUANAS...'
                                         ) : 'SELLAR INFORME DEFINITIVO'}

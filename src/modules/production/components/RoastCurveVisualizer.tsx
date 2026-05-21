@@ -18,7 +18,7 @@ export default function RoastCurveVisualizer({ data, title = "Telemetría Térmi
     if (!data || data.length === 0) {
         return (
             <div className="w-full h-[300px] border border-dashed border-gray-400 shadow-sm rounded-industrial flex items-center justify-center bg-white">
-                <p className="text-[11px] text-black font-bold uppercase ">Sin datos de telemetría disponibles</p>
+                <p className="text-[11px] text-brand-navy font-bold uppercase ">Sin datos de telemetría disponibles</p>
             </div>
         );
     }
@@ -31,8 +31,8 @@ export default function RoastCurveVisualizer({ data, title = "Telemetría Térmi
         <div className="w-full bg-white border border-gray-400 shadow-sm p-8 rounded-industrial space-y-6">
             <header className="flex justify-between items-center mb-4">
                 <div>
-                    <h3 className="text-xs font-bold text-black uppercase ">{title}</h3>
-                    <p className="text-[11px] text-black-bright font-mono uppercase mt-1">Sincronizado vía Axis Telemetry Engine</p>
+                    <h3 className="text-xs font-bold text-brand-navy uppercase ">{title}</h3>
+                    <p className="text-[11px] text-brand-navy-bright font-mono uppercase mt-1">Sincronizado vía Axis Telemetry Engine</p>
                 </div>
                 <div className="flex gap-4">
                     <div className="flex items-center gap-2">
@@ -104,18 +104,18 @@ export default function RoastCurveVisualizer({ data, title = "Telemetría Térmi
 
             <footer className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-400 shadow-sm">
                 <div className="text-center">
-                    <p className="text-[9px] text-black font-bold uppercase mb-1">Máxima BT</p>
-                    <p className="text-lg font-bold text-black er">{Math.max(...data.map(p => p.bt)).toFixed(1)}°C</p>
+                    <p className="text-[9px] text-brand-navy font-bold uppercase mb-1">Máxima BT</p>
+                    <p className="text-lg font-bold text-brand-navy er">{Math.max(...data.map(p => p.bt)).toFixed(1)}°C</p>
                 </div>
                 <div className="text-center border-x border-gray-400 shadow-sm">
-                    <p className="text-[9px] text-black font-bold uppercase mb-1">Tiempo Total</p>
-                    <p className="text-lg font-bold text-black er">
+                    <p className="text-[9px] text-brand-navy font-bold uppercase mb-1">Tiempo Total</p>
+                    <p className="text-lg font-bold text-brand-navy er">
                         {Math.floor(data[data.length-1].t / 60)}:{(data[data.length-1].t % 60).toString().padStart(2, '0')}
                     </p>
                 </div>
                 <div className="text-center">
-                    <p className="text-[9px] text-black font-bold uppercase mb-1">RoR Promedio</p>
-                    <p className="text-lg font-bold text-black-bright er">12.5 <span className="text-[11px]">/m</span></p>
+                    <p className="text-[9px] text-brand-navy font-bold uppercase mb-1">RoR Promedio</p>
+                    <p className="text-lg font-bold text-brand-navy-bright er">12.5 <span className="text-[11px]">/m</span></p>
                 </div>
             </footer>
         </div>

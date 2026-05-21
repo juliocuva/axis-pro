@@ -213,7 +213,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             <div className="w-16 h-16 border-4 border-gray-400 shadow-sm rounded-full"></div>
                             <div className="absolute top-0 left-0 w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                        <p className="text-[11px] font-bold uppercase  text-black-bright animate-pulse">Sincronizando Laboratorio AXIS...</p>
+                        <p className="text-[11px] font-bold uppercase  text-brand-navy-bright animate-pulse">Sincronizando Laboratorio AXIS...</p>
                     </div>
                 </div>
             )}
@@ -289,10 +289,10 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-gray-400 shadow-sm pb-6">
                         <div className="space-y-1">
-                            <h4 className="text-[11px] font-bold text-black-bright uppercase ">Instrumento: Granulometría</h4>
-                            <p className="text-xl font-bold text-black ">Sieve Distribution Profile</p>
+                            <h4 className="text-[11px] font-bold text-brand-navy-bright uppercase ">Instrumento: Granulometría</h4>
+                            <p className="text-xl font-bold text-brand-navy ">Sieve Distribution Profile</p>
                         </div>
-                        <div className={`flex flex-col items-end gap-1 text-black`}>
+                        <div className={`flex flex-col items-end gap-1 text-brand-navy`}>
                             <span className="text-[9px] font-bold uppercase opacity-60">Balance de Masa</span>
                             <div className="flex items-center gap-3">
                                 <span className="text-3xl font-black er leading-none">{screenSum.toFixed(1)}%</span>
@@ -370,7 +370,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="text-4xl font-black py-4 text-black"
+                                inputClassName="text-4xl font-black py-4 text-brand-navy"
                                 unit="PTS"
                             />
                             <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
@@ -383,7 +383,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="text-4xl font-black py-4 text-black"
+                                inputClassName="text-4xl font-black py-4 text-brand-navy"
                                 unit="PTS"
                             />
                             <p className="text-[9px] text-gray-900 font-bold uppercase  leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>
@@ -392,7 +392,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
 
                     <div className="md:col-span-4 bg-white border border-gray-400 shadow-sm p-10 rounded-[2.5rem] flex flex-col justify-center gap-6">
                         <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-black uppercase  block">Descriptor Visual: Color</label>
+                            <label className="text-[11px] font-bold text-brand-navy uppercase  block">Descriptor Visual: Color</label>
                             <div className="relative group">
                                 <select
                                     value={formData.grainColor}
@@ -406,7 +406,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                     <option value="AMARILLENTO">Amarillento (Aging)</option>
                                     <option value="MARRON">Marrón (Damaged)</option>
                                 </select>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-black">
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
                                 </div>
                             </div>
@@ -419,7 +419,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 formData.grainColor === 'AMARILLENTO' ? 'bg-[#F0E68C]' : 'bg-[#8B4513]'
                             }`}></div>
                             <div className="flex-1">
-                                <p className="text-[9px] font-bold text-black uppercase ">Previsualización Cromática</p>
+                                <p className="text-[9px] font-bold text-brand-navy uppercase ">Previsualización Cromática</p>
                                 <p className="text-[9px] text-gray-900 uppercase mt-0.5">Basado en Patrones SCA Agtron</p>
                             </div>
                         </div>
@@ -433,11 +433,11 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                         disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid || isReadOnly}
                         className={`w-full font-black py-8 rounded-[2rem] transition-all flex items-center justify-center gap-6 group uppercase  text-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
                             isAlreadyAnalyzed 
-                            ? 'bg-white text-black border border-gray-400 shadow-sm cursor-default' 
+                            ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-default' 
                             : isReadOnly 
                             ? 'bg-white text-gray-900 border border-gray-400 shadow-sm cursor-not-allowed' 
                             : isScreenValid 
-                            ? 'bg-brand-green hover:bg-brand-green-bright text-black shadow-brand-green/20 hover:shadow-brand-green/40' 
+                            ? 'bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-brand-green/20 hover:shadow-brand-green/40' 
                             : 'bg-white text-gray-900 cursor-not-allowed border border-gray-400 shadow-sm opacity-50'
                         }`}
                     >

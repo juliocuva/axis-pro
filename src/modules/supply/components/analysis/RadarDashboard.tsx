@@ -249,7 +249,7 @@ export default function RadarDashboard({ user }: { user: any }) {
 
     if (!hasAccess) {
         return (
-            <div className="flex flex-col items-center justify-center h-screen bg-black text-black p-10">
+            <div className="flex flex-col items-center justify-center h-screen bg-black text-brand-navy p-10">
                 <div className="w-20 h-20 border-4 border-red-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
                     <span className="text-4xl font-black">!</span>
                 </div>
@@ -708,7 +708,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                             <div className="flex gap-4">
                                 <button 
                                     onClick={() => setShowShareModal(false)}
-                                    className="flex-1 py-4 text-[11px] font-black uppercase text-gray-500 hover:text-black transition-all font-bold"
+                                    className="flex-1 py-4 text-[11px] font-black uppercase text-gray-500 hover:text-brand-navy transition-all font-bold"
                                 >
                                     Cancelar
                                 </button>
