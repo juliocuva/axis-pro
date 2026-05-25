@@ -16,6 +16,10 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             const element = document.getElementById(elementId);
             if (!element) return;
 
+            // Activar clase global y atributo temporal para saltarse visualizadores condicionales/ocultos
+            element.setAttribute('data-exporting', 'true');
+            document.body.classList.add('exporting');
+
             // 1. Crear un contenedor temporal en el body (fuera de modales fijos/con scroll)
             const tempContainer = document.createElement('div');
             tempContainer.id = 'axis-passport-temp-container';
@@ -34,6 +38,11 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
             // 2. Clonar el elemento completo
             const clonedElement = element.cloneNode(true) as HTMLElement;
             clonedElement.id = `${elementId}-clone`;
+
+            // Quitar clases de cuadrícula y asegurar diseño vertical estándar para la exportación de páginas
+            clonedElement.classList.remove('certificate-grid', 'passport-grid');
+            clonedElement.classList.add('flex', 'flex-col', 'gap-8');
+
             clonedElement.style.cssText = `
                 width: 794px !important;
                 height: auto !important;
@@ -54,6 +63,8 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                 pageEl.style.setProperty('visibility', 'visible', 'important');
                 pageEl.style.setProperty('opacity', '1', 'important');
                 pageEl.style.setProperty('position', 'relative', 'important');
+                pageEl.style.setProperty('height', 'auto', 'important');
+                pageEl.style.setProperty('overflow', 'visible', 'important');
                 pageEl.style.setProperty('margin', '0 0 20px 0', 'important');
                 // Neutralizar clases de ocultación
                 pageEl.classList.remove('step-hidden');
@@ -155,6 +166,12 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
         } catch (error) {
             console.error('Error generating Image:', error);
             if (btn) btn.innerText = 'ERROR AL GENERAR';
+        } finally {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.removeAttribute('data-exporting');
+            }
+            document.body.classList.remove('exporting');
         }
     };
 

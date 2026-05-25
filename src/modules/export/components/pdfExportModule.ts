@@ -79,9 +79,17 @@ export const exportarInformeLotePDF = async (
   
   if (element) {
     try {
+      // Activar clase global y atributo temporal para saltarse visualizadores condicionales/ocultos
+      element.setAttribute('data-exporting', 'true');
+      document.body.classList.add('exporting');
+
       // 1. Clonar el elemento de forma temporal para limpiarlo y preparar las páginas
       const clonedElement = element.cloneNode(true) as HTMLElement;
       
+      // Quitar clases de cuadrícula y asegurar diseño vertical estándar para la exportación de páginas
+      clonedElement.classList.remove('certificate-grid', 'passport-grid');
+      clonedElement.classList.add('w-[816px]', 'space-y-8');
+
       // Remover barras de control interactivo, botones y elementos no imprimibles en el clon
       const interactiveElements = clonedElement.querySelectorAll('.no-print, .no-export, button, select');
       interactiveElements.forEach(el => el.remove());
@@ -96,6 +104,9 @@ export const exportarInformeLotePDF = async (
         pageEl.style.setProperty('margin', '0 0 20px 0', 'important');
         pageEl.style.setProperty('box-shadow', 'none', 'important');
         pageEl.style.setProperty('border', 'none', 'important');
+        pageEl.style.setProperty('height', '1056px', 'important');
+        pageEl.style.setProperty('overflow', 'visible', 'important');
+        pageEl.style.setProperty('pointer-events', 'auto', 'important');
         
         // Quitar clases responsivas o de paso oculto
         pageEl.classList.remove('step-hidden');
@@ -141,6 +152,9 @@ export const exportarInformeLotePDF = async (
       return;
     } catch (error) {
       console.error('Error al generar PDF en el servidor. Intentando fallback básico...', error);
+    } finally {
+      element.removeAttribute('data-exporting');
+      document.body.classList.remove('exporting');
     }
   }
 

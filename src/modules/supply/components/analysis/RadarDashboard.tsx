@@ -139,6 +139,8 @@ export default function RadarDashboard({ user }: { user: any }) {
     // Filtros Avanzados
     const [filterVariety, setFilterVariety] = useState('ALL');
     const [filterProcess, setFilterProcess] = useState('ALL');
+    const [filterPreset, setFilterPreset] = useState<'ALL' | 'SIMULACION' | 'COMPETENCIA'>('ALL');
+
     // Vista: ORIGEN (Colombia), LOGISTICA (Puertos), CONSUMO (Escaneos Deep)
     const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO'>('ORIGEN');
     const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
@@ -322,6 +324,13 @@ export default function RadarDashboard({ user }: { user: any }) {
                 }
                 .leaflet-container {
                     background: #f4f5f7 !important;
+                    cursor: crosshair !important;
+                }
+                .leaflet-interactive {
+                    cursor: pointer !important;
+                }
+                .leaflet-dragging .leaflet-container {
+                    cursor: grabbing !important;
                 }
                 /* Preserve CartoDB's native high-contrast light-gray style for sharp text and borders */
                 .sidebar-scroll::-webkit-scrollbar {
@@ -391,23 +400,24 @@ export default function RadarDashboard({ user }: { user: any }) {
                     <div>
                         <h4 className="text-[9px] font-black uppercase text-brand-green tracking-wider mb-3">Preestablecidos</h4>
                         <div className="grid grid-cols-2 gap-2">
-                            {[
-                                { label: 'Exotic Gold', var: 'GEISHA', proc: 'HONEY' },
-                                { label: 'Regional', var: 'ALL', proc: 'NATURAL' },
-                                { label: 'High Vol', var: 'CASTILLO', proc: 'LAVADO' },
-                                { label: 'Reset', var: 'ALL', proc: 'ALL' }
-                            ].map((preset, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => {
-                                        setFilterVariety(preset.var);
-                                        setFilterProcess(preset.proc);
-                                    }}
-                                    className="text-left px-3 py-2 rounded-lg bg-white border border-gray-200 hover:border-brand-green hover:bg-brand-green/5 transition-all group"
-                                >
-                                    <p className="text-[9px] font-black text-neutral-700 group-hover:text-brand-green uppercase tracking-wide">{preset.label}</p>
-                                </button>
-                            ))}
+                            <button
+                                onClick={() => setFilterPreset('SIMULACION')}
+                                className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'SIMULACION' ? 'bg-brand-green border-brand-green text-white' : 'bg-white border-gray-200 text-neutral-700 hover:border-brand-green hover:bg-brand-green/5'}`}
+                            >
+                                <p className="text-[9px] font-black uppercase tracking-wide">Simulación</p>
+                            </button>
+                            <button
+                                onClick={() => setFilterPreset('COMPETENCIA')}
+                                className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'COMPETENCIA' ? 'bg-brand-green border-brand-green text-white' : 'bg-white border-gray-200 text-neutral-700 hover:border-brand-green hover:bg-brand-green/5'}`}
+                            >
+                                <p className="text-[9px] font-black uppercase tracking-wide">Competencia</p>
+                            </button>
+                            <button
+                                onClick={() => setFilterPreset('ALL')}
+                                className={`col-span-2 text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'ALL' ? 'bg-brand-green border-brand-green text-white' : 'bg-white border-gray-200 text-neutral-700 hover:border-brand-green hover:bg-brand-green/5'}`}
+                            >
+                                <p className="text-[9px] font-black uppercase tracking-wide">Mostrar Todos</p>
+                            </button>
                         </div>
                     </div>
 
@@ -524,6 +534,11 @@ export default function RadarDashboard({ user }: { user: any }) {
                         {lots
                           .filter(lot => filterVariety === 'ALL' || lot.variety?.toUpperCase() === filterVariety)
                           .filter(lot => filterProcess === 'ALL' || lot.process?.toUpperCase()?.includes(filterProcess))
+                          .filter(lot => {
+                              if (filterPreset === 'SIMULACION') return lot.is_simulated === true || lot.lot_number?.includes('SIM-');
+                              if (filterPreset === 'COMPETENCIA') return lot.lot_number?.includes('WCE-HUILA-');
+                              return true;
+                          })
                           .map((lot, index) => {
                             const { lat, lon } = getLotCoordinates(lot, index);
                             
@@ -666,21 +681,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                     </MapContainer>
                 )}
 
-                {/* Overlays de Interfaz (HUD) */}
-                <div className="absolute top-8 right-8 z-[1000] flex flex-col gap-4">
-                    <div className="bg-white/95 backdrop-blur-md border border-gray-200/80 p-4 rounded-2xl flex items-center gap-6 shadow-lg">
-                        <div className="text-right">
-                            <p className="text-[9px] text-gray-400 font-black uppercase ">Global Status</p>
-                            <p className="text-[11px] font-black text-brand-green uppercase tracking-wider">Operational Hub Active</p>
-                        </div>
-                        <div className="h-8 w-px bg-gray-200"></div>
-                        <div className="flex gap-2">
-                            {['UTC', 'BOG', 'AMS', 'NYC'].map(tz => (
-                                <div key={tz} className="text-[9px] font-black text-gray-600 px-2 py-1 border border-gray-200 rounded bg-gray-50 shadow-sm">{tz}</div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                {/* Overlays de Interfaz (HUD) Eliminados según requerimiento */}
 
 
 

@@ -30,9 +30,8 @@ export async function POST(request: Request) {
                         /* Ensure the pages retain correct page-break definitions */
                         .passport-page, .certificate-page {
                             width: 794px !important;
-                            height: 1123px !important;
                             min-height: 1123px !important;
-                            max-height: 1123px !important;
+                            max-height: none !important;
                             page-break-after: always !important;
                             break-after: page !important;
                             position: relative !important;
@@ -41,7 +40,7 @@ export async function POST(request: Request) {
                             padding: 0 !important;
                             background: white !important;
                             color: black !important;
-                            overflow: hidden !important;
+                            overflow: visible !important;
                         }
                         /* Neutralize dark elements and ensure print-ready vector styles */
                         .no-print, .no-export {

@@ -398,6 +398,20 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
         return 'step-visible';
     };
 
+    const getPageStyle = (pageNum: number) => {
+        const isVisible = viewType !== 'paginated' || activePage === pageNum;
+        return {
+            width: '816px',
+            minHeight: '1056px',
+            borderColor: '#0C6056',
+            display: 'flex',
+            visibility: isVisible ? 'visible' : 'hidden',
+            height: isVisible ? '1056px' : '0',
+            overflow: isVisible ? 'visible' : 'hidden',
+            pointerEvents: isVisible ? 'auto' : 'none',
+        } as React.CSSProperties;
+    };
+
     return (
         <>
              <style jsx global>{`
@@ -413,8 +427,28 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     }
                 }
                 @media screen {
-                    .step-hidden { display: none !important; }
+                    .step-hidden {
+                        visibility: hidden !important;
+                        height: 0 !important;
+                        overflow: hidden !important;
+                        opacity: 0 !important;
+                        pointer-events: none !important;
+                        position: absolute !important;
+                    }
+                    body.exporting .step-hidden, [data-exporting="true"] .step-hidden {
+                        display: flex !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        height: auto !important;
+                        position: relative !important;
+                        pointer-events: auto !important;
+                    }
                     .step-visible { display: flex !important; animation: stepFadeIn 0.4s ease-out; }
+                    .certificate-page {
+                        min-height: 1056px !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                    }
 
                     /* Estilos para Vista Cuadrícula 2x2 */
                     .certificate-grid {
@@ -506,9 +540,8 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     }
                     .certificate-page {
                         width: 816px !important;
-                        height: 1056px !important;
                         min-height: 1056px !important;
-                        max-height: 1056px !important;
+                        max-height: none !important;
                         page-break-after: always !important;
                         break-after: page !important;
                         border: none !important;
@@ -518,9 +551,15 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         position: relative !important;
                         background: white !important;
                         color: black !important;
-                        overflow: hidden !important;
+                        overflow: visible !important;
                         -webkit-print-color-adjust: exact !important; 
                         print-color-adjust: exact !important; 
+                    }
+                    .step-hidden {
+                        display: flex !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        height: auto !important;
                     }
                     .no-print, .no-export, .print\:hidden {
                         display: none !important;
@@ -624,7 +663,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         {/* HOJA 1: ETAPA 01 (INGRESO) & ETAPA 02 (TRILLA) */}
                         <PageWrapper pageNum={1} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
                             <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(1)}`}
-                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                                style={getPageStyle(1)}>
 
                             {/* Header Premium */}
                             <div className="bg-white px-10 py-8 flex justify-between items-center border-b-4 border-[#0C6056] relative overflow-hidden">
@@ -915,7 +954,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         {/* HOJA 2: ETAPA 03 (LABORATORIO) & ETAPA 04 (CATACIÓN) */}
                         <PageWrapper pageNum={2} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
                             <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(2)}`}
-                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                                style={getPageStyle(2)}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
@@ -1016,7 +1055,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         {/* HOJA 3: ETAPA 05 (TOSTIÓN) */}
                         <PageWrapper pageNum={3} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
                             <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl ${getPageClass(3)}`}
-                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                                style={getPageStyle(3)}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
@@ -1106,7 +1145,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         {/* HOJA 4: ADN FINAL Y CERTIFICACIÓN */}
                         <PageWrapper pageNum={4} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
                             <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl mb-8 print:mb-0 print:shadow-none print:break-after-page ${getPageClass(4)}`}
-                                style={{ width: '816px', minHeight: '1056px', borderColor: '#0C6056' }}>
+                                style={getPageStyle(4)}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">

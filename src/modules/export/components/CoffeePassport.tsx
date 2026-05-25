@@ -164,12 +164,38 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                 @media print {
                     @page { size: A4; margin: 0 !important; }
                     body { margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                    .step-hidden {
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        height: auto !important;
+                    }
                     .no-print { display: none !important; }
                 }
                 .pp { font-family: 'Montserrat', sans-serif; }
                 @media screen {
-                    .step-hidden { display: none !important; }
+                    .step-hidden {
+                        visibility: hidden !important;
+                        height: 0 !important;
+                        overflow: hidden !important;
+                        opacity: 0 !important;
+                        pointer-events: none !important;
+                        position: absolute !important;
+                    }
+                    body.exporting .step-hidden, [data-exporting="true"] .step-hidden {
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        height: auto !important;
+                        position: relative !important;
+                        pointer-events: auto !important;
+                    }
                     .step-visible { display: block !important; animation: stepFadeIn 0.4s ease-out; }
+                    .passport-page {
+                        min-height: 1123px !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                    }
                     
                     /* Estilos para Vista Cuadrícula 2x3 */
                     .passport-grid {
