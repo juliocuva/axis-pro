@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ModuleHeader from '@/shared/components/ui/ModuleHeader';
+import { useLanguage } from '@/shared/context/LanguageContext';
 import { supabase } from '@/shared/lib/supabase';
 import { processThrashingAction } from '../../actions/thrashing';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
@@ -21,6 +22,7 @@ interface ThrashingFormProps {
 }
 
 export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashingComplete, user, isReadOnly }: ThrashingFormProps) {
+    const { t } = useLanguage();
     const PROCESS_PARAMS: Record<string, { shrinkageMin: number; shrinkageMax: number; conversion: number; frMin: number; frMax: number }> = {
         'Lavado': { shrinkageMin: 18.0, shrinkageMax: 20.0, conversion: 0.81, frMin: 88, frMax: 94 },
         'Semilavado': { shrinkageMin: 19.0, shrinkageMax: 21.0, conversion: 0.80, frMin: 90, frMax: 96 },
@@ -216,7 +218,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-white backdrop-blur-sm rounded-industrial">
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[11px] font-bold uppercase  text-brand-navy animate-pulse">Recuperando datos de trilla...</p>
+                        <p className="text-[11px] font-bold uppercase  text-brand-navy animate-pulse">t('thrashingForm', 'recuperando') || 'Loading milling data...'</p>
                     </div>
                 </div>
             )}
@@ -225,7 +227,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
                 <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">1. Tipo de Proceso</label>
+                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'processType')}</label>
                     <div className="relative group/select">
                         <select
                             value={formData.processType}
@@ -243,14 +245,14 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">2. Peso Inicial (KG)</label>
+                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'initialWeight')}</label>
                     <div className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 font-bold text-brand-navy flex justify-between items-center shadow-inner transition-all">
                         <span>{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
                         <span className="text-[9px] opacity-60 uppercase font-black ">Parchment</span>
                     </div>
                 </div>
                 <NumericInput
-                    label="3. % Humedad Ingreso"
+                    label="t('thrashingForm', 'humidity')"
                     value={formData.humidity}
                     onChange={(val) => setFormData({ ...formData, humidity: val })}
                     step={0.1}
@@ -262,7 +264,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10 mt-2">
                 <div className="space-y-2 col-span-3">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">4. Protocolo de Preparación</label>
+                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'preparationProtocol')}</label>
                     <div className="relative group/select">
                         <select
                             value={formData.preparationProtocol}
@@ -281,7 +283,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             </div>
 
             <div className="space-y-2 relative z-10 mt-4">
-                <label className="text-[11px] font-bold text-brand-navy uppercase  block">5. Método de Selección</label>
+                <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'sortingMethod')}</label>
                 <div className="relative group/select">
                     <select
                         value={formData.sortingMethod}
@@ -301,9 +303,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 <div className="flex items-center justify-between">
                     <h4 className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2">
                         <span className="w-2 h-2 bg-brand-green rounded-full"></span>
-                        Análisis de Granulometría (Mallas)
+                        {t('thrashingForm', 'sieveAnalysis')}
                     </h4>
-                    <span className="text-[9px] text-brand-navy font-bold uppercase ">Distribución de Almendra (%)</span>
+                    <span className="text-[9px] text-brand-navy font-bold uppercase ">{t('thrashingForm', 'sieveTip')}</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                     {[
@@ -337,8 +339,8 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             {/* Output Automático: Proyección */}
             <div className="p-4 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">
                 <div className="flex flex-col">
-                    <span className="text-[11px] font-bold text-brand-navy-bright uppercase ">Projection de Almendra Esperada:</span>
-                    <span className="text-[9px] text-brand-navy uppercase">(Basado en coeficientes de conversión: {PROCESS_PARAMS[formData.processType]?.conversion})</span>
+                    <span className="text-[11px] font-bold text-brand-navy-bright uppercase ">{t('thrashingForm', 'expectedAlmond')}</span>
+                    <span className="text-[9px] text-brand-navy uppercase">({t('thrashingForm', 'conversionTip')} {PROCESS_PARAMS[formData.processType]?.conversion})</span>
                 </div>
                 <span className="text-2xl font-bold text-brand-navy-bright font-mono animate-pulse">
                     ≈ {stats.theoreticalAlmond.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
@@ -402,7 +404,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-white border-black shadow-[0_0_30px_rgba(0,223,154,0.15)]' : 'bg-white border-gray-400 shadow-sm'}`}>
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`text-[11px] font-bold uppercase  ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-navy/70' : 'text-brand-navy'}`}>Factor de Rendimiento ($FR$)</span>
+                                <span className={`text-[11px] font-bold uppercase  ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-navy/70' : 'text-brand-navy'}`}>{t('thrashingForm', 'yieldFactor')}</span>
                             </div>
                             <span className={`text-7xl font-bold font-mono er ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-navy-bright' : 'text-brand-navy-bright'}`}>
                                 {stats.yieldFactor.toFixed(2)}
@@ -410,7 +412,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             <div className="mt-4 flex items-center gap-3">
                                 <div className={`w-2.5 h-2.5 rounded-full ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green-bright animate-pulse' : 'bg-brand-green/80'}`}></div>
                                 <p className={`text-[11px] uppercase font-bold  ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-navy' : 'text-brand-navy'}`}>
-                                    Meta {formData.processType}: {PROCESS_PARAMS[formData.processType]?.frMin}-{PROCESS_PARAMS[formData.processType]?.frMax}
+                                    {t('thrashingForm', 'target')} {formData.processType}: {PROCESS_PARAMS[formData.processType]?.frMin}-{PROCESS_PARAMS[formData.processType]?.frMax}
                                 </p>
                             </div>
                             <div className="mt-6 text-[11px] text-brand-navy leading-relaxed text-center px-4">
@@ -421,7 +423,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                                 ) : (
                                     <span className="text-brand-navy font-bold  block mb-1">CALIDAD ESTÁNDAR DENTRO DE META</span>
                                 )}
-                                Un factor menor indica que se requiere <strong className="text-brand-navy">menos</strong> materia prima para obtener 70kg de excelso, lo que representa mayor rentabilidad.
+                                {t('thrashingForm', 'yieldTip')}<strong className="text-brand-navy">menos</strong> materia prima para obtener 70kg de excelso, lo que representa mayor rentabilidad.
                             </div>
                         </div>
 
@@ -429,27 +431,27 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial space-y-4 relative group overflow-hidden">
                             <h4 className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
-                                Reporte de Eficiencia de Trilla
+                                {t('thrashingForm', 'efficiencyReport')}
                             </h4>
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center text-[11px] uppercase">
-                                    <span className="text-brand-navy">Masa Ingresada:</span>
+                                    <span className="text-brand-navy">{t('thrashingForm', 'inputMass')}</span>
                                     <span className="text-brand-navy font-mono">{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG</span>
                                 </div>
                                 <div className="flex justify-between items-center text-[11px] uppercase">
-                                    <span className="text-brand-navy">Masa Obtenida (Verde):</span>
+                                    <span className="text-brand-navy">{t('thrashingForm', 'outputMass')}</span>
                                     <span className={`font-mono font-bold ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-brand-navy-bright' : 'text-brand-navy-bright'}`}>
                                         {stats.almondWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center text-[11px] uppercase border-t border-gray-400 shadow-sm pt-2">
-                                    <span className="text-brand-navy">Merma Real:</span>
+                                    <span className="text-brand-navy">{t('thrashingForm', 'realLoss')}</span>
                                     <span className={`font-mono font-bold ${warning ? 'text-brand-navy-bright' : 'text-brand-navy'}`}>
                                         {stats.lossPct.toFixed(1)}%
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center text-[11px] uppercase">
-                                    <span className="text-brand-navy">Merma Teórica:</span>
+                                    <span className="text-brand-navy">{t('thrashingForm', 'theoreticalLoss')}</span>
                                     <span className="text-brand-navy font-mono">
                                         {PROCESS_PARAMS[formData.processType]?.shrinkageMin}-{PROCESS_PARAMS[formData.processType]?.shrinkageMax}%
                                     </span>
@@ -469,7 +471,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 ) : (
                     <div className="h-48 border border-dashed border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-3 opacity-30">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M12 20V10M18 20V4M6 20v-4" /></svg>
-                        <p className="text-[11px] uppercase font-bold  text-center">Esperando entrada de salida real<br />para generar Reporte de Eficiencia...</p>
+                        <p className="text-[11px] uppercase font-bold  text-center"><span dangerouslySetInnerHTML={{ __html: t('thrashingForm', 'waitingOutput') }} /></p>
                     </div>
                 )}
 
@@ -485,7 +487,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         </div>
                     ) : isAlreadyThrashed ? (
                         <>
-                            PROCESO DE TRILLA SELLADO
+                            {t('thrashingForm', 'sealing')}
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                 <polyline points="22 4 12 14.01 9 11.01" />
@@ -493,7 +495,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         </>
                     ) : (
                         <>
-                            VINCULAR RESULTADOS DE TRILLA
+                            {t('thrashingForm', 'submit')}
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
                                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                                 <polyline points="17 21 17 13 7 13 7 21" />

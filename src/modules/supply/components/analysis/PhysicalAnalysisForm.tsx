@@ -5,6 +5,7 @@ import { supabase } from '@/shared/lib/supabase';
 import { submitPhysicalAnalysis } from '../../actions/analysis';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
 import EUDRComplianceBadge from '../EUDRComplianceBadge';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 interface PhysicalAnalysisFormProps {
     inventoryId: string;
@@ -20,6 +21,7 @@ interface PhysicalAnalysisFormProps {
 }
 
 export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'internal', onAnalysisComplete, user, isReadOnly }: PhysicalAnalysisFormProps) {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         moisture: 11.5,
         waterActivity: 0.58,
@@ -234,7 +236,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
                         <NumericInput
-                            label="Humedad (%)"
+                            label={t('physicalAnalysisForm', 'moisture')}
                             value={formData.moisture}
                             onChange={(val) => setFormData({ ...formData, moisture: val })}
                             step={0.01}
@@ -244,14 +246,14 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             unit="%"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-bold uppercase text-brand-navy ">Rango Ideal: 10.0 - 12.0%</span>
+                            <span className="text-[9px] font-bold uppercase text-brand-navy ">{t('physicalAnalysisForm', 'moistureRange')}</span>
                             <div className={`w-2 h-2 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
 
                     <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
                         <NumericInput
-                            label="Actividad de Agua (aw)"
+                            label={t('physicalAnalysisForm', 'waterActivity')}
                             value={formData.waterActivity}
                             onChange={(val) => setFormData({ ...formData, waterActivity: val })}
                             step={0.001}
@@ -260,14 +262,14 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             inputClassName="text-5xl font-black py-6 er"
                         />
                         <div className="mt-4 flex items-center justify-between">
-                            <span className="text-[9px] font-bold uppercase text-brand-navy ">Norma Export: ≤ 0.70</span>
+                            <span className="text-[9px] font-bold uppercase text-brand-navy ">{t('physicalAnalysisForm', 'waterActivityRange')}</span>
                             <div className={`w-2 h-2 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
 
                     <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
                         <NumericInput
-                            label="Densidad (g/L)"
+                            label={t('physicalAnalysisForm', 'density')}
                             value={formData.density}
                             onChange={(val) => setFormData({ ...formData, density: val })}
                             step={1}
@@ -289,11 +291,11 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-gray-400 shadow-sm pb-6">
                         <div className="space-y-1">
-                            <h4 className="text-[11px] font-bold text-brand-navy-bright uppercase ">Instrumento: Granulometría</h4>
-                            <p className="text-xl font-bold text-brand-navy ">Sieve Distribution Profile</p>
+                            <h4 className="text-[11px] font-bold text-brand-navy-bright uppercase ">{t('physicalAnalysisForm', 'sieveTitle')}</h4>
+                            <p className="text-xl font-bold text-brand-navy ">{t('physicalAnalysisForm', 'sieveSubtitle')}</p>
                         </div>
                         <div className={`flex flex-col items-end gap-1 text-brand-navy`}>
-                            <span className="text-[9px] font-bold uppercase opacity-60">Balance de Masa</span>
+                            <span className="text-[9px] font-bold uppercase opacity-60">{t('physicalAnalysisForm', 'massBalance')}</span>
                             <div className="flex items-center gap-3">
                                 <span className="text-3xl font-black er leading-none">{screenSum.toFixed(1)}%</span>
                                 {!isReadOnly && !isAlreadyAnalyzed && (
@@ -320,11 +322,11 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                         className="p-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all flex items-center gap-2 text-[8px] font-bold uppercase animate-pulse shadow-lg"
                                     >
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
-                                        Sincronizar Trilla
+                                        {t('physicalAnalysisForm', 'syncMilling')}
                                     </button>
                                 )}
                             </div>
-                            {!isScreenValid && <span className="text-[9px] font-bold uppercase">Ajuste Requerido (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
+                            {!isScreenValid && <span className="text-[9px] font-bold uppercase">{t('physicalAnalysisForm', 'adjustRequired')} (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
                         </div>
                     </div>
 
@@ -364,7 +366,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white border border-gray-400 shadow-sm p-10 rounded-[2.5rem]">
                         <div className="space-y-4">
                             <NumericInput
-                                label="Defectos Primarios"
+                                label={t('physicalAnalysisForm', 'primaryDefects')}
                                 value={formData.defects.primary}
                                 onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, primary: val } })}
                                 step={0.01}
@@ -373,11 +375,11 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 inputClassName="text-4xl font-black py-4 text-brand-navy"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">Granos negros, agrios, materia extraña, hongos.</p>
+                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">{t('physicalAnalysisForm', 'primaryDefectsTip')}</p>
                         </div>
                         <div className="space-y-4">
                             <NumericInput
-                                label="Defectos Secundarios"
+                                label={t('physicalAnalysisForm', 'secondaryDefects')}
                                 value={formData.defects.secondary}
                                 onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, secondary: val } })}
                                 step={0.01}
@@ -386,13 +388,13 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 inputClassName="text-4xl font-black py-4 text-brand-navy"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">Quebrados, inmaduros, picados, pergaminos.</p>
+                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">{t('physicalAnalysisForm', 'secondaryDefectsTip')}</p>
                         </div>
                     </div>
 
                     <div className="md:col-span-4 bg-white border border-gray-400 shadow-sm p-10 rounded-[2.5rem] flex flex-col justify-center gap-6">
                         <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-brand-navy uppercase  block">Descriptor Visual: Color</label>
+                            <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('physicalAnalysisForm', 'colorDescriptor')}</label>
                             <div className="relative group">
                                 <select
                                     value={formData.grainColor}
@@ -419,8 +421,8 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 formData.grainColor === 'AMARILLENTO' ? 'bg-[#F0E68C]' : 'bg-[#8B4513]'
                             }`}></div>
                             <div className="flex-1">
-                                <p className="text-[9px] font-bold text-brand-navy uppercase ">Previsualización Cromática</p>
-                                <p className="text-[9px] text-brand-navy uppercase mt-0.5">Basado en Patrones SCA Agtron</p>
+                                <p className="text-[9px] font-bold text-brand-navy uppercase ">{t('physicalAnalysisForm', 'chromaticPreview')}</p>
+                                <p className="text-[9px] text-brand-navy uppercase mt-0.5">{t('physicalAnalysisForm', 'basedAgtron')}</p>
                             </div>
                         </div>
                     </div>
@@ -452,18 +454,18 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                     <polyline points="22 4 12 14.01 9 11.01" />
                                 </svg>
-                                <span>REGISTRO LAB INMUTABLE Y VERIFICADO</span>
+                                <span>{t('physicalAnalysisForm', 'analyzed')}</span>
                             </>
                         ) : !isScreenValid ? (
                             <>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                                 </svg>
-                                <span>CORREGIR BALANCE DE GRANULOMETRÍA</span>
+                                <span>{t('physicalAnalysisForm', 'correctSieve')}</span>
                             </>
                         ) : (
                             <>
-                                <span>SELLAR ANÁLISIS FÍSICO</span>
+                                <span>{t('physicalAnalysisForm', 'submit')}</span>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-2 transition-transform">
                                     <path d="M5 12h14M12 5l7 7-7 7" />
                                 </svg>

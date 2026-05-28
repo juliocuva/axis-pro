@@ -13,13 +13,16 @@ import GratefulModule from '@/modules/supply/components/GratefulModule';
 import RadarDashboard from '@/modules/supply/components/analysis/RadarDashboard';
 import CloudVault from '@/modules/export/components/CloudVault';
 import PurchaseForm from '@/modules/supply/components/PurchaseForm';
+import StatsDashboard from '@/modules/admin/components/StatsDashboard';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 export default function Home() {
+    const { t, language, setLanguage } = useLanguage();
     const [user, setUser] = useState<{ name: string, email: string, companyId: string, role?: string } | null>(null);
-    const [view, setView] = useState<'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar'>('supply');
+    const [view, setView] = useState<'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar' | 'stats'>('supply');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -192,20 +195,43 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-bg-main p-8 transition-colors duration-400">
-            <header className="mb-12 flex justify-between items-center flex-wrap gap-6 border-b border-brand-gray/50 shadow-sm pb-8">
-                <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
+            <header className="mb-12 flex flex-col gap-6 border-b border-brand-gray/50 shadow-sm pb-8">
+                <div className="flex justify-between items-center w-full pl-8 pr-4">
+                    <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-gray/50 shadow-sm transition-all">
+                                <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-3xl font-black text-brand-navy uppercase tracking-[0.2em]">COLOMBIA</span>
+                            </div>
+                        </div>
+                    </div>
                     <div className="flex items-center gap-4">
-                        <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-gray/50 shadow-sm transition-all">
-                            <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
+                        <div className="flex bg-white/50 rounded-full p-1 border border-brand-gray/50 shadow-sm">
+                            <button 
+                                onClick={() => setLanguage('en')}
+                                className={`px-3 py-1 rounded-full text-[10px] font-black transition-all ${language === 'en' ? 'bg-brand-navy text-white shadow-sm' : 'text-brand-navy/50 hover:text-brand-navy'}`}
+                            >
+                                EN
+                            </button>
+                            <button 
+                                onClick={() => setLanguage('es')}
+                                className={`px-3 py-1 rounded-full text-[10px] font-black transition-all ${language === 'es' ? 'bg-brand-navy text-white shadow-sm' : 'text-brand-navy/50 hover:text-brand-navy'}`}
+                            >
+                                ES
+                            </button>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-xl font-bold text-brand-navy uppercase tracking-widest">AXIS ONE <span className="text-brand-green">PRO</span></span>
-                            <span className="text-[10px] font-black text-brand-navy/40 uppercase tracking-[0.3em] mt-1">Industrial Supply Chain</span>
-                        </div>
+                        <UserDropdown
+                            user={user}
+                            onLogout={() => setUser(null)}
+                            onOpenManual={() => setShowFunctionalDocs(true)}
+                            onOpenUpdates={() => setShowUpdates(true)}
+                        />
                     </div>
                 </div>
 
-                <nav className="flex items-center gap-4">
+                <nav className="flex items-center justify-center gap-4 flex-wrap w-full">
                     <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
 
                     <button
@@ -213,26 +239,26 @@ export default function Home() {
                         className="flex items-center gap-2 px-6 py-2.5 bg-brand-green text-white rounded-industrial-sm text-[10px] font-black uppercase transition-all shadow-lg shadow-brand-green/20 hover:scale-105 active:scale-95"
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                        Nuevo Lote
+                        {t('nav', 'newLot')}
                     </button>
 
                     <button
                         onClick={() => setShowSyncModal(true)}
                         className="flex items-center gap-2 px-6 py-2.5 bg-bg-offset text-brand-navy border border-border-main rounded-industrial-sm text-[10px] font-black uppercase transition-all hover:bg-white hover:border-black active:scale-95 shadow-sm"
-                        title="Buscar y Sincronizar Lotes"
+                        title={t('nav', 'syncLots')}
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                        Sincronizar Lotes
+                        {t('nav', 'syncLots')}
                     </button>
 
                     {user?.email?.toLowerCase() === 'juliocuva@gmail.com' && (
                         <button
                             onClick={() => setView('radar')}
                             className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all active:scale-95 shadow-sm border ${view === 'radar' ? 'bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/20' : 'bg-brand-green/10 text-brand-green border-brand-green/30 hover:bg-brand-green hover:text-white'}`}
-                            title="Ver Radar de Trazabilidad"
+                            title={t('nav', 'radar')}
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M12 12l5-5"/></svg>
-                            Ver Radar
+                            {t('nav', 'radar')}
                         </button>
                     )}
 
@@ -244,54 +270,43 @@ export default function Home() {
                             className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view !== 'master' && !showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
-                            Operaciones
+                            {t('nav', 'operations')}
                         </button>
 
                         {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
                             <button
                                 onClick={() => { setView('master'); setShowCloudVault(false); }}
                                 className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view === 'master' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
-                                title="Panel de Gobernanza Global"
+                                title={t('nav', 'governance')}
                             >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                Gobernanza
+                                {t('nav', 'governance')}
+                            </button>
+                        )}
+                        
+                        {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
+                            <button
+                                onClick={() => { setView('stats'); setShowCloudVault(false); }}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view === 'stats' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
+                                title={t('nav', 'statistics')}
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                                {t('nav', 'statistics')}
                             </button>
                         )}
                         
                         <button
                             onClick={() => setShowCloudVault(true)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
-                            title="Archivo Maestro de Procesos"
+                            title={t('nav', 'archive')}
                         >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-                            Archivo
+                            {t('nav', 'archive')}
                         </button>
                     </div>
 
                     <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
 
-                    <button
-                        onClick={toggleTheme}
-                        className="w-11 h-11 rounded-industrial-sm bg-bg-offset border border-border-main flex items-center justify-center hover:bg-white transition-all group shadow-sm"
-                        title={theme === 'dark' ? 'Modo Luz' : 'Modo Oscuro'}
-                    >
-                        {theme === 'dark' ? (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-navy group-hover:rotate-12 transition-transform">
-                                <circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                            </svg>
-                        ) : (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-navy group-hover:-rotate-12 transition-transform">
-                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                            </svg>
-                        )}
-                    </button>
-
-                    <UserDropdown
-                        user={user}
-                        onLogout={() => setUser(null)}
-                        onOpenManual={() => setShowFunctionalDocs(true)}
-                        onOpenUpdates={() => setShowUpdates(true)}
-                    />
                 </nav>
             </header>
 
@@ -388,6 +403,12 @@ export default function Home() {
             {view === 'master' && (
                 <div className="max-w-7xl mx-auto py-10">
                     <MasterControlCenter />
+                </div>
+            )}
+
+            {view === 'stats' && (
+                <div className="max-w-7xl mx-auto py-10">
+                    <StatsDashboard user={user} />
                 </div>
             )}
 

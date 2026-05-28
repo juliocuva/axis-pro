@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import ExportReportButton from '@/shared/components/ui/ExportReportButton';
+
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -334,7 +334,28 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                         >
                             Cerrar
                         </button>
-                        <ExportReportButton elementId="passport-pages" fileName={`PASSPORT-${lotNum}`} />
+                        <button
+                            type="button"
+                            onClick={async (e) => {
+                                const btn = e.currentTarget.querySelector('span');
+                                const originalText = btn?.innerText || '';
+                                if (btn) btn.innerText = 'PROCESANDO PDF...';
+                                try {
+                                    // Use the existing app/verify/[id]/page.tsx which renders CoffeePassport
+                                    // But since we want to print it cleanly, we might need a dedicated passport print route,
+                                    // however for now, fallback to standard window.print() if no SSR passport route exists.
+                                    window.print(); 
+                                } catch (err) {
+                                    console.error(err);
+                                } finally {
+                                    if (btn) btn.innerText = originalText;
+                                }
+                            }}
+                            className="px-8 py-4 bg-white hover:bg-white border border-gray-400 shadow-sm text-brand-navy-bright font-bold rounded-2xl transition-all flex items-center justify-center gap-3 group shadow-xl"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:translate-y-0.5 transition-transform"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+                            <span>IMPRIMIR PASAPORTE</span>
+                        </button>
                         <button 
                             onClick={() => window.print()} 
                             className="px-4 py-2 bg-[#0C6056] hover:bg-[#0C6056]/90 text-white rounded-xl text-[10px] font-black uppercase transition-all active:scale-95 border border-[#0C6056]/30 shadow-lg"

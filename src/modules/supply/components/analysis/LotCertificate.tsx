@@ -8,9 +8,7 @@ import {
     BarChart, Bar, XAxis, YAxis, Tooltip, Cell,
     LineChart, Line, CartesianGrid, ReferenceLine, AreaChart, Area
 } from 'recharts';
-import ExportReportButton from '@/shared/components/ui/ExportReportButton';
-import { PDFExportButton } from '@/modules/export/components/PDFExport';
-import { LotData as PDFLotData } from '@/modules/export/components/pdfExportModule';
+
 import { QRCodeSVG } from 'qrcode.react';
 
 interface LotCertificateProps {
@@ -22,6 +20,9 @@ interface LotCertificateProps {
         companyId: string;
         role?: string;
     } | null;
+    isExportMode?: boolean;
+    pagesToPrint?: number[];
+    onLoaded?: () => void;
 }
 
 interface PageWrapperProps {
@@ -49,7 +50,7 @@ function PageWrapper({ pageNum, viewType, setViewType, setActivePage, children }
     return <>{children}</>;
 }
 
-export default function LotCertificate({ inventoryId, onClose, user }: LotCertificateProps) {
+export default function LotCertificate({ inventoryId, onClose, user, isExportMode = false, pagesToPrint = [1, 2, 3, 4], onLoaded }: LotCertificateProps) {
     const [lotData, setLotData] = useState<any>(null);
     const [physicalData, setPhysicalData] = useState<any>(null);
     const [scaData, setScaData] = useState<any>(null);
@@ -66,6 +67,32 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     const [activePage, setActivePage] = useState(1);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [loadingMessage, setLoadingMessage] = useState('Iniciando auditoría digital...');
+
+    // Estados para la inclusión/exclusión de páginas
+    const [showPage1, setShowPage1] = useState(isExportMode ? pagesToPrint.includes(1) : true);
+    const [showPage2, setShowPage2] = useState(isExportMode ? pagesToPrint.includes(2) : true);
+    const [showPage3, setShowPage3] = useState(isExportMode ? pagesToPrint.includes(3) : true);
+    const [showPage4, setShowPage4] = useState(isExportMode ? pagesToPrint.includes(4) : true);
+
+    const activePagesList = [showPage1, showPage2, showPage3, showPage4];
+    const totalPages = activePagesList.filter(Boolean).length;
+
+    const getPageNum = (pageId: number) => {
+        let num = 0;
+        if (pageId >= 1 && showPage1) num++;
+        if (pageId >= 2 && showPage2) num++;
+        if (pageId >= 3 && showPage3) num++;
+        if (pageId >= 4 && showPage4) num++;
+        return num;
+    };
+
+    // Asegurar que activePage no exceda el número total de páginas activas
+    useEffect(() => {
+        if (activePage > totalPages) {
+            setActivePage(Math.max(1, totalPages));
+        }
+    }, [totalPages, activePage]);
+
 
     const passportData = scaData?.cva_descriptive?.extrinsic || {
         eudrHash: 'PENDING EUDR VALIDATION',
@@ -302,6 +329,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             console.error("Error fetching certificate data:", err);
         } finally {
             setLoading(false);
+            if (onLoaded) onLoaded();
         }
     };
 
@@ -394,12 +422,12 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
     const isAxisCertifiedTech = pData.ph_inicial && pData.ph_final && pData.brix_inicial && pData.temperatura_masa_max && pData.duracion_fermentacion_horas;
 
     const getPageClass = (pageNum: number) => {
-        if (viewType === 'paginated') return activePage === pageNum ? 'step-visible' : 'step-hidden';
+        if (viewType === 'paginated') return activePage === getPageNum(pageNum) ? 'step-visible' : 'step-hidden';
         return 'step-visible';
     };
 
     const getPageStyle = (pageNum: number) => {
-        const isVisible = viewType !== 'paginated' || activePage === pageNum;
+        const isVisible = viewType !== 'paginated' || activePage === getPageNum(pageNum);
         return {
             width: '816px',
             minHeight: '1056px',
@@ -505,43 +533,50 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     to { opacity: 1; transform: translateY(0); }
                 }
                 @media print {
-                    /* Ocultar absolutamente todo en el DOM */
-                    body * {
-                        visibility: hidden !important;
-                    }
-                    /* Mostrar única y exclusivamente el área del certificado */
-                    #lot-certificate-area, #lot-certificate-area * {
-                        visibility: visible !important;
-                    }
-                    /* Posicionar el certificado al inicio absoluto de la página */
-                    #lot-certificate-area {
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        width: 816px !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        box-shadow: none !important;
-                        border: none !important;
-                    }
-                    @page { 
-                        size: letter portrait; 
-                        margin: 0 !important; 
-                    }
-                    body, html { 
+                    body, html, main { 
                         margin: 0 !important; 
                         padding: 0 !important;
                         background: white !important;
                         color: black !important;
                         overflow: visible !important;
                         height: auto !important;
+                        display: block !important;
                         -webkit-print-color-adjust: exact !important; 
                         print-color-adjust: exact !important; 
                     }
+                    @page { 
+                        size: letter portrait; 
+                        margin: 0 !important; 
+                    }
+                        ${isExportMode ? `
+                            footer, nav, header { display: none !important; }
+                        ` : `
+                            /* Ocultar absolutamente todo en el DOM */
+                            body * {
+                                visibility: hidden !important;
+                            }
+                            /* Mostrar única y exclusivamente el área del certificado */
+                            #lot-certificate-area, #lot-certificate-area * {
+                                visibility: visible !important;
+                            }
+                            /* Posicionar el certificado al inicio absoluto de la página */
+                            #lot-certificate-area {
+                                position: absolute !important;
+                                left: 0 !important;
+                                top: 0 !important;
+                                width: 816px !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                box-shadow: none !important;
+                                border: none !important;
+                            }
+                        `}
                     .certificate-page {
                         width: 816px !important;
                         min-height: 1056px !important;
                         max-height: none !important;
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
                         page-break-after: always !important;
                         break-after: page !important;
                         border: none !important;
@@ -555,11 +590,13 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                         -webkit-print-color-adjust: exact !important; 
                         print-color-adjust: exact !important; 
                     }
-                    .step-hidden {
+                    .step-hidden, .step-visible {
                         display: flex !important;
                         visibility: visible !important;
                         opacity: 1 !important;
-                        height: auto !important;
+                        height: 1056px !important;
+                        min-height: 1056px !important;
+                        overflow: visible !important;
                     }
                     .no-print, .no-export, .print\:hidden {
                         display: none !important;
@@ -579,6 +616,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
             <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
 
                     {/* Visualizer Control Bar - Premium Glassmorphic */}
+                    {!isExportMode && (
                     <div className="w-full max-w-[816px] bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-2xl no-print">
                         <div className="flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full bg-[#0C6056] animate-pulse"></div>
@@ -624,6 +662,67 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             </button>
                         </div>
 
+                        {/* Selector de Páginas a Incluir */}
+                        <div className="flex items-center bg-black/40 p-1.5 rounded-xl border border-white/5 gap-3 flex-wrap">
+                            <span className="text-[9px] font-black uppercase text-white/50 tracking-wider pl-2">Páginas:</span>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-[10px] font-bold text-white/80 hover:text-white transition-all select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={showPage1}
+                                    onChange={(e) => {
+                                        if (totalPages > 1 || !showPage1) {
+                                            setShowPage1(e.target.checked);
+                                            setActivePage(1);
+                                        }
+                                    }}
+                                    className="w-3.5 h-3.5 accent-[#0C6056] cursor-pointer rounded bg-white/10 border-white/20"
+                                />
+                                Origen y Trilla
+                            </label>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-[10px] font-bold text-white/80 hover:text-white transition-all select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={showPage2}
+                                    onChange={(e) => {
+                                        if (totalPages > 1 || !showPage2) {
+                                            setShowPage2(e.target.checked);
+                                            setActivePage(1);
+                                        }
+                                    }}
+                                    className="w-3.5 h-3.5 accent-[#0C6056] cursor-pointer rounded bg-white/10 border-white/20"
+                                />
+                                Lab y Tostión
+                            </label>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-[10px] font-bold text-white/80 hover:text-white transition-all select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={showPage3}
+                                    onChange={(e) => {
+                                        if (totalPages > 1 || !showPage3) {
+                                            setShowPage3(e.target.checked);
+                                            setActivePage(1);
+                                        }
+                                    }}
+                                    className="w-3.5 h-3.5 accent-[#0C6056] cursor-pointer rounded bg-white/10 border-white/20"
+                                />
+                                Catación SCA
+                            </label>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-[10px] font-bold text-white/80 hover:text-white transition-all select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={showPage4}
+                                    onChange={(e) => {
+                                        if (totalPages > 1 || !showPage4) {
+                                            setShowPage4(e.target.checked);
+                                            setActivePage(1);
+                                        }
+                                    }}
+                                    className="w-3.5 h-3.5 accent-[#0C6056] cursor-pointer rounded bg-white/10 border-white/20"
+                                />
+                                ADN y QR
+                            </label>
+                        </div>
+
                         {/* Paginador (Solo para Vista Paginada) */}
                         {viewType === 'paginated' && (
                             <div className="flex items-center gap-3 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -636,12 +735,12 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
                                 </button>
                                 <span className="text-[10px] font-black uppercase text-white font-mono tracking-wider min-w-[70px] text-center">
-                                    Pág. {activePage} / 4
+                                    Pág. {activePage} / {totalPages}
                                 </span>
                                 <button
                                     type="button"
-                                    onClick={() => setActivePage(prev => Math.min(prev + 1, 4))}
-                                    disabled={activePage === 4}
+                                    onClick={() => setActivePage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={activePage === totalPages}
                                     className="p-1.5 rounded-lg text-white hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
                                 >
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
@@ -649,6 +748,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             </div>
                         )}
                     </div>
+                    )}
 
                     {/* Contenedor Maestro para Exportación */}
                     <div 
@@ -661,9 +761,10 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                     >
 
                         {/* HOJA 1: ETAPA 01 (INGRESO) & ETAPA 02 (TRILLA) */}
-                        <PageWrapper pageNum={1} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
-                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(1)}`}
-                                style={getPageStyle(1)}>
+                        {showPage1 && (
+                            <PageWrapper pageNum={1} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                                <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(1)}`}
+                                    style={getPageStyle(1)}>
 
                             {/* Header Premium */}
                             <div className="bg-white px-10 py-8 flex justify-between items-center border-b-4 border-[#0C6056] relative overflow-hidden">
@@ -946,15 +1047,22 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 );
                             })()}
 
-                            </div>
-                        </PageWrapper>
+                                    {/* Footer Hoja 1 */}
+                                    <div className="mt-auto px-10 py-6 flex justify-between items-center border-t border-gray-400 bg-white">
+                                        <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">ADN DEL CAFÉ • ETAPA 01-02 • AXISONE MASTER CERTIFICATE</p>
+                                        <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA {getPageNum(1)} DE {totalPages}</p>
+                                    </div>
+                                </div>
+                            </PageWrapper>
+                        )}
 
                         {viewType !== 'grid' && <div className="w-full h-8 print:hidden"></div>}
 
                         {/* HOJA 2: ETAPA 03 (LABORATORIO) & ETAPA 04 (CATACIÓN) */}
-                        <PageWrapper pageNum={2} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
-                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(2)}`}
-                                style={getPageStyle(2)}>
+                        {showPage2 && (
+                            <PageWrapper pageNum={2} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                                <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none print:break-after-page shadow-2xl ${getPageClass(2)}`}
+                                    style={getPageStyle(2)}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
@@ -1046,16 +1154,22 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 </div>
                             </div>
 
-                            {/* Footer Hoja 2 */}
-                            </div>
-                        </PageWrapper>
+                                    {/* Footer Hoja 2 */}
+                                    <div className="mt-auto px-10 py-6 flex justify-between items-center border-t border-gray-400 bg-white">
+                                        <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">ADN DEL CAFÉ • ETAPA 03-04 • AXISONE MASTER CERTIFICATE</p>
+                                        <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA {getPageNum(2)} DE {totalPages}</p>
+                                    </div>
+                                </div>
+                            </PageWrapper>
+                        )}
 
                         {viewType !== 'grid' && <div className="w-full h-8 print:hidden"></div>}
 
                         {/* HOJA 3: ETAPA 05 (TOSTIÓN) */}
-                        <PageWrapper pageNum={3} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
-                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl ${getPageClass(3)}`}
-                                style={getPageStyle(3)}>
+                        {showPage3 && (
+                            <PageWrapper pageNum={3} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                                <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl ${getPageClass(3)}`}
+                                    style={getPageStyle(3)}>
 
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
@@ -1137,17 +1251,24 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 </div>
                             </div>
 
-                            </div>
-                        </PageWrapper>
+                                    {/* Footer Hoja 3 */}
+                                    <div className="mt-auto px-10 py-6 flex justify-between items-center border-t border-gray-400 bg-white">
+                                        <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">ADN DEL CAFÉ • ETAPA 05 • AXISONE MASTER CERTIFICATE</p>
+                                        <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA {getPageNum(3)} DE {totalPages}</p>
+                                    </div>
+                                </div>
+                            </PageWrapper>
+                        )}
 
                         {viewType !== 'grid' && <div className="w-full h-8 print:hidden"></div>}
 
                         {/* HOJA 4: ADN FINAL Y CERTIFICACIÓN */}
-                        <PageWrapper pageNum={4} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
-                            <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl mb-8 print:mb-0 print:shadow-none print:break-after-page ${getPageClass(4)}`}
-                                style={getPageStyle(4)}>
+                        {showPage4 && (
+                            <PageWrapper pageNum={4} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
+                                <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl mb-8 print:mb-0 print:shadow-none print:break-after-page ${getPageClass(4)}`}
+                                    style={getPageStyle(4)}>
 
-                            <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
+                            <div className="bg-white px-10 py-4 flex justify-between items-center border-b-4 border-[#0C6056]">
                                 <div className="flex items-center gap-4">
                                     <img src="/logo.png" alt="AXISONE" className="h-8 w-auto" />
                                     <span className="h-4 w-px bg-black/20"></span>
@@ -1155,14 +1276,14 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 </div>
                             </div>
 
-                            <div className="p-8 space-y-8 flex-1 flex flex-col justify-center">
+                            <div className="p-6 space-y-6 flex-1 flex flex-col justify-center">
                                 <div className="text-center space-y-4">
                                     <h2 className="text-7xl font-black text-brand-navy uppercase er leading-none">ADN DEL CAFÉ</h2>
                                     <p className="text-[12px] font-black text-[#0C6056] uppercase ">Protocolo de Certificación Técnica AXISONE</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-8">
-                                    <div className="bg-white border border-black/5 p-8 rounded-[40px] space-y-6 shadow-sm">
+                                    <div className="bg-white border border-black/5 p-6 rounded-[24px] space-y-4 shadow-sm">
                                         <h3 className="text-sm font-black uppercase text-brand-navy">Resumen de Trazabilidad</h3>
                                         <div className="space-y-4">
                                             <div className="flex justify-between border-b border-black/5 pb-2">
@@ -1184,7 +1305,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         </div>
                                     </div>
 
-                                    <div className="bg-white border border-black/5 p-8 rounded-[40px] flex flex-col items-center justify-center text-center space-y-4 shadow-sm">
+                                    <div className="bg-white border border-black/5 p-6 rounded-[24px] flex flex-col items-center justify-center text-center space-y-3 shadow-sm">
                                         <div className="qr-container p-4 bg-white border border-black/10 rounded-3xl shadow-inner">
                                             <QRCodeSVG
                                                 value={`https://axisone.coffee/verify/${inventoryId}`}
@@ -1199,7 +1320,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 </div>
 
                                 {lotData?.process_data?.anotacion_especial || lotData?.process_data?.metadata_validacion_sistema?.anotacion_especial ? (
-                                    <div className="bg-gradient-to-br from-[#0C6056]/10 to-[#D4AF37]/5 border-2 border-[#D4AF37]/40 p-10 rounded-[50px] relative overflow-hidden shadow-inner">
+                                    <div className="bg-gradient-to-br from-[#0C6056]/10 to-[#D4AF37]/5 border-2 border-[#D4AF37]/40 p-6 rounded-[24px] relative overflow-hidden shadow-inner">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 rounded-full -mr-16 -mt-16 pointer-events-none"></div>
                                         
                                         <div className="flex flex-col gap-4">
@@ -1235,7 +1356,7 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="bg-[#0C6056]/5 border-2 border-[#0C6056]/20 p-10 rounded-[50px] relative overflow-hidden">
+                                    <div className="bg-[#0C6056]/5 border-2 border-[#0C6056]/20 p-6 rounded-[24px] relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-[#0C6056]/5 rounded-full -mr-16 -mt-16"></div>
                                         <h4 className="text-xl font-black text-brand-navy uppercase er mb-4">Declaración de Autenticidad</h4>
                                         <p className="text-xs text-brand-navy/70 leading-relaxed uppercase font-bold">
@@ -1255,16 +1376,18 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                                 )}
                             </div>
 
-                            <div className="mt-auto px-10 py-8 flex justify-between items-center border-t border-gray-400 bg-white">
+                            <div className="mt-auto px-10 py-4 flex justify-between items-center border-t border-gray-400 bg-white">
                                 <p className="text-brand-navy/30 text-[9px] font-bold uppercase ">ADN DEL CAFÉ • ETAPA FINAL • AXISONE MASTER CERTIFICATE</p>
-                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA 04 DE 04</p>
+                                <p className="text-brand-navy/60 text-[9px] font-bold ">PÁGINA {getPageNum(4)} DE {totalPages}</p>
                             </div>
                         </div>
                     </PageWrapper>
+                )}
 
                     </div>
 
                     {/* Panel de Control Inferior */}
+                    {!isExportMode && (
                     <div className="w-full flex justify-end gap-6 no-export mt-12 p-8 bg-[#1A1A1A] border border-[#1A1A1A] rounded-[32px] shadow-2xl print:hidden">
                         <button
                             onClick={downloadQRCode}
@@ -1274,82 +1397,65 @@ export default function LotCertificate({ inventoryId, onClose, user }: LotCertif
                             Descargar QR
                         </button>
 
-                        <PDFExportButton
-                            lote={{
-                                loteNumber: lotData?.lot_number || inventoryId,
-                                origen: {
-                                    productor: lotData?.farmer_name || 'Independiente',
-                                    finca: lotData?.farm_name || '---',
-                                    region: lotData?.region || 'Huila',
-                                    municipality: lotData?.municipality || '---',
-                                    altitud: lotData?.altitude || '1650',
-                                    variedad: lotData?.variety || 'Caturra',
-                                },
-                                procesamiento: {
-                                    tipoProceso: lotData?.process ? (lotData.process.charAt(0).toUpperCase() + lotData.process.slice(1)) : '--',
-                                    metodoSecado: lotData?.process_data?.tipo_secado || '--',
-                                    tiempoSecado: lotData?.process_data?.duracion_secado || '--',
-                                    pesoIngreso: lotData?.purchase_weight || 0,
-                                    pesoExcelso: lotData?.thrashed_weight || 0,
-                                    rendimiento: lotData?.thrashing_yield || 0,
-                                    protocoloPreparacion: lotData?.process_data?.preparation_protocol || 'EP',
-                                    metodoSeleccion: lotData?.process_data?.sorting_method || 'Máquina Selectora Óptica',
-                                },
-                                analisisFisico: {
-                                    humedad: physicalData?.moisture_pct || 0,
-                                    densidad: physicalData?.density_gl || 0,
-                                    actividadAgua: physicalData?.water_activity || 0,
-                                    defectosPrimarios: physicalData?.defects_count?.primary ?? 0,
-                                    defectosSecundarios: physicalData?.defects_count?.secondary ?? 0,
-                                    distribucionMallas: {
-                                        m18: physicalData?.screen_size_distribution?.size18 || lotData?.process_data?.sieve_analysis?.m18 || 0,
-                                        m17: physicalData?.screen_size_distribution?.size17 || lotData?.process_data?.sieve_analysis?.m17 || 0,
-                                        m16: physicalData?.screen_size_distribution?.size16 || lotData?.process_data?.sieve_analysis?.m16 || 0,
-                                        m15: physicalData?.screen_size_distribution?.size15 || lotData?.process_data?.sieve_analysis?.m15 || 0,
-                                        m14: physicalData?.screen_size_distribution?.size14 || lotData?.process_data?.sieve_analysis?.caracol || 0,
-                                        m13: physicalData?.screen_size_distribution?.size13 || 0,
-                                        m12: physicalData?.screen_size_distribution?.size12 || 0,
-                                        under12: physicalData?.screen_size_distribution?.under12 || lotData?.process_data?.sieve_analysis?.menores || 0,
-                                    }
-                                },
-                                cupping: scaData ? {
-                                    puntajeTotal: scaData.total_score || 0,
-                                    notas: scaData.notes || '',
-                                    atributos: {
-                                        fragancia: scaData.fragrance_aroma || 0,
-                                        sabor: scaData.flavor || 0,
-                                        residual: scaData.aftertaste || 0,
-                                        acidez: scaData.acidity || 0,
-                                        cuerpo: scaData.body || 0,
-                                        balance: scaData.balance || 0,
-                                        global: scaData.overall || 0,
-                                    }
-                                } : undefined,
-                                certificacion: {
-                                    estado: tracesStatus === 'certified' ? 'CERTIFIED' : 'VALIDATED',
-                                    validadoTecnicamente: !!physicalData,
-                                    eudrHash: ddsReference || passportData.eudrHash
+                        <button
+                            type="button"
+                            onClick={async (e) => {
+                                const btn = e.currentTarget.querySelector('span');
+                                const originalText = btn?.innerText || '';
+                                if (btn) btn.innerText = 'PROCESANDO PDF...';
+                                try {
+                                    const activePages = [1, 2, 3, 4].filter(p => eval(`showPage${p}`));
+                                    const pagesQuery = activePages.join(',');
+                                    const printUrl = `${window.location.origin}/export/certificate/${inventoryId}?pages=${pagesQuery}`;
+                                    
+                                    const response = await fetch('/api/pdf/generate', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ url: printUrl, fileName: `Certificado-Lote-${inventoryId}` })
+                                    });
+                                    if (!response.ok) throw new Error('API request failed');
+                                    const blob = await response.blob();
+                                    const url = URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = `Certificado-Lote-${inventoryId}.pdf`;
+                                    link.click();
+                                } catch (err) {
+                                    console.error(err);
+                                    window.print(); // Fallback
+                                } finally {
+                                    if (btn) btn.innerText = originalText;
                                 }
-                            } as PDFLotData}
-                        />
+                            }}
+                            className="px-10 py-5 bg-[#0C6056] hover:bg-[#0C6056]/90 text-white rounded-2xl text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 border border-[#0C6056]/30"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
+                            <span>Generar PDF Alta Calidad</span>
+                        </button>
 
                         <button
                             type="button"
-                            onClick={() => window.print()}
-                            className="px-10 py-5 bg-[#0C6056] hover:bg-[#0C6056]/90 text-white rounded-2xl text-[11px] font-bold uppercase  transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 border border-[#0C6056]/30"
+                            onClick={() => {
+                                const activePagesList = [showPage1, showPage2, showPage3, showPage4];
+                                const activePages = [1, 2, 3, 4].filter((_, idx) => activePagesList[idx]);
+                                const pagesQuery = activePages.join(',');
+                                const printUrl = `/export/certificate/${inventoryId}?pages=${pagesQuery}&autoPrint=true`;
+                                window.open(printUrl, '_blank');
+                            }}
+                            className="px-10 py-5 bg-white text-[#0C6056] border border-[#0C6056] hover:bg-[#0C6056]/10 rounded-2xl text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-3 shadow-sm active:scale-95"
                         >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
-                            Generar PDF / Imprimir
+                            Imprimir (Local)
                         </button>
 
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-10 py-5 bg-white hover:bg-red-500/20 text-brand-navy rounded-2xl text-[11px] font-bold uppercase  transition-all border border-gray-400 shadow-sm active:scale-95"
+                            className="px-10 py-5 bg-white hover:bg-red-500/20 text-brand-navy rounded-2xl text-[11px] font-bold uppercase transition-all border border-gray-400 shadow-sm active:scale-95"
                         >
                             Cerrar
                         </button>
                     </div>
+                    )}
                 </div>
         </>
     );

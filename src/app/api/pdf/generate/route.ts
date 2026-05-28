@@ -2,63 +2,11 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
     try {
-        const { htmlContent, fileName } = await request.json();
+        const { url, fileName } = await request.json();
 
-        if (!htmlContent) {
-            return NextResponse.json({ error: 'Missing HTML content' }, { status: 400 });
+        if (!url) {
+            return NextResponse.json({ error: 'Missing source URL' }, { status: 400 });
         }
-
-        // Wrap the HTML elements in a clean, fully styled document template
-        const fullHtml = `
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <meta charset="utf-8">
-                    <title>${fileName || 'Informe AxisOne'}</title>
-                    <script src="https://cdn.tailwindcss.com"></script>
-                    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
-                    <style>
-                        body {
-                            font-family: 'Montserrat', sans-serif;
-                            margin: 0;
-                            padding: 0;
-                            background: white !important;
-                            color: black !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        /* Ensure the pages retain correct page-break definitions */
-                        .passport-page, .certificate-page {
-                            width: 794px !important;
-                            min-height: 1123px !important;
-                            max-height: none !important;
-                            page-break-after: always !important;
-                            break-after: page !important;
-                            position: relative !important;
-                            box-sizing: border-box !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            background: white !important;
-                            color: black !important;
-                            overflow: visible !important;
-                        }
-                        /* Neutralize dark elements and ensure print-ready vector styles */
-                        .no-print, .no-export {
-                            display: none !important;
-                            visibility: hidden !important;
-                        }
-                        svg, canvas, img {
-                            max-width: 100% !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div style="width: 794px; margin: 0 auto;">
-                        ${htmlContent}
-                    </div>
-                </body>
-            </html>
-        `;
 
         const apiKey = process.env.PDFSHIFT_API_KEY || '';
         
@@ -72,11 +20,12 @@ export async function POST(request: Request) {
                 'Authorization': authHeader
             },
             body: JSON.stringify({
-                source: fullHtml,
+                source: url,
                 sandbox: !apiKey, // Uses sandbox mode (free, unlimited) if no Vercel environment API key is defined
                 margin: '0',
                 format: 'A4',
-                orientation: 'portrait'
+                orientation: 'portrait',
+                print_background: true
             })
         });
 

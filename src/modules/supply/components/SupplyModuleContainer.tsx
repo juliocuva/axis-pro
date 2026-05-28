@@ -11,6 +11,7 @@ import TeamManagement from '@/shared/components/admin/TeamManagement';
 import RoastIntelligenceContainer from '@/modules/production/components/RoastIntelligenceContainer';
 import { supabase } from '@/shared/lib/supabase';
 import ModuleHeader from '@/shared/components/ui/ModuleHeader';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 interface SupplyModuleContainerProps {
     user: { email: string, name: string, companyId: string, role?: string } | null;
@@ -33,6 +34,7 @@ export default function SupplyModuleContainer({
     fetchRecentLots,
     onOpenSyncModal
 }: SupplyModuleContainerProps) {
+    const { t } = useLanguage();
     const [showCertificate, setShowCertificate] = useState(false);
     const [sidebarMode, setSidebarMode] = useState<'recent' | 'archive'>('recent');
 
@@ -69,11 +71,11 @@ export default function SupplyModuleContainer({
                 <div className="flex-1 space-y-8">
                     <ModuleHeader 
                         title={
-                            activeTab === 'purchase' ? 'Registro de Origen' :
-                            activeTab === 'thrashing' ? 'Trilla Industrial' :
-                            activeTab === 'analysis' ? 'Laboratorio Físico' :
-                            activeTab === 'cupping' ? 'Catación y Evaluación Sensorial' : 
-                            activeTab === 'roast' ? 'Tostión Inteligente' : 'Configuración de Equipo'
+                            activeTab === 'purchase' ? t('moduleHeaders', 'purchase') :
+                            activeTab === 'thrashing' ? t('moduleHeaders', 'thrashing') :
+                            activeTab === 'analysis' ? t('moduleHeaders', 'analysis') :
+                            activeTab === 'cupping' ? t('moduleHeaders', 'cupping') : 
+                            activeTab === 'roast' ? t('moduleHeaders', 'roast') : t('moduleHeaders', 'team')
                         }
                         subtitle="AXISONE COFFEE COLOMBIA • SISTEMA DE TRAZABILIDAD INDUSTRIAL"
                     >
@@ -92,11 +94,11 @@ export default function SupplyModuleContainer({
 
                     <nav className="flex flex-wrap bg-transparent p-0 mb-8">
                         {[
-                            { id: 'purchase', label: '01. Origen' },
-                            { id: 'thrashing', label: '02. Trilla' },
-                            { id: 'analysis', label: '03. Lab' },
-                            { id: 'roast', label: '04. Tostión' },
-                            { id: 'cupping', label: '05. Catación' }
+                            { id: 'purchase', label: t('tabs', 'origin') },
+                            { id: 'thrashing', label: t('tabs', 'thrashing') },
+                            { id: 'analysis', label: t('tabs', 'lab') },
+                            { id: 'roast', label: t('tabs', 'roast') },
+                            { id: 'cupping', label: t('tabs', 'cupping') }
                         ].map(tab => (
                             <button
                                 key={tab.id}

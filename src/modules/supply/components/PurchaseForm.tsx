@@ -6,6 +6,7 @@ import { createCoffeePurchase, updateCoffeePurchase } from '../actions/purchase'
 import { supabase } from '@/shared/lib/supabase';
 import EUDRGeoreference from './EUDRGeoreference';
 import EUDRComplianceBadge from './EUDRComplianceBadge';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 
 const COFFEE_VARIETIES_BASE: string[] = [
@@ -51,6 +52,7 @@ interface PurchaseFormProps {
 }
 
 export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, isReadOnly }: PurchaseFormProps) {
+    const { t } = useLanguage();
     const [dynamicVarieties, setDynamicVarieties] = useState<string[]>(COFFEE_VARIETIES_BASE);
     const [customVariety, setCustomVariety] = useState('');
     const [customRegion, setCustomRegion] = useState('');
@@ -502,9 +504,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 <path d="M20 6L9 17l-5-5" />
                             </svg>
                         </div>
-                        <h3 className="text-2xl font-bold text-brand-navy uppercase er">Lote Registrado</h3>
+                        <h3 className="text-2xl font-bold text-brand-navy uppercase er">{t('purchaseForm', 'draftSuccess')}</h3>
                         <p className="text-brand-navy leading-relaxed text-sm">
-                            Identificador <span className="text-brand-navy font-mono font-bold">{formData.lotNumber}</span> ha sido persistido exitosamente en el Core de <span className="text-brand-navy font-bold">Axis Coffee Pro</span>.
+                            Identificador <span className="text-brand-navy font-mono font-bold">{formData.lotNumber}</span> has been successfully persisted in Axis Coffee Pro core..
                         </p>
                         <div className="flex flex-col gap-3">
                             <button
@@ -514,7 +516,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 }}
                                 className="w-full bg-brand-green hover:bg-brand-green/90 text-white font-bold py-5 rounded-industrial-sm transition-all uppercase  text-sm shadow-lg shadow-brand-green/20"
                             >
-                                Nuevo Lote (Limpiar Todo)
+                                {t('purchaseForm', 'buttonNewLot')}
                             </button>
                             <button
                                 type="button"
@@ -542,7 +544,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 }}
                                 className="w-full bg-white hover:bg-carbon/10 text-brand-navy font-bold py-4 rounded-industrial-sm transition-all border border-gray-400 shadow-sm uppercase  text-[11px]"
                             >
-                                Conservar Productor (Mantener a {formData.farmerName.split(' ')[0] || 'Elena'})
+                                {t('purchaseForm', 'keepProducer')} (Mantener a {formData.farmerName.split(' ')[0] || 'Elena'})
                             </button>
                         </div>
                     </div>
@@ -582,7 +584,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                     <section className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
                         <h3 className="text-brand-navy font-bold flex items-center gap-2 mb-6">
                             <span className="w-1.5 h-6 bg-black rounded-full"></span>
-                            Datos Principales de Origen
+                            {t('purchaseForm', 'title')}
                         </h3>
 
 
@@ -592,12 +594,12 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl group-hover:bg-black/20 transition-all pointer-events-none"></div>
                                 <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-3">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></svg>
-                                    Asistente Anexus: Auto-Completar SICA / Cédula
+                                    {t('purchaseForm', 'sicaHelper')}
                                 </label>
                                 <div className="flex flex-col sm:flex-row items-stretch gap-3">
                                     <input
                                         type="text"
-                                        placeholder="Ej. Cédula Cafetera (1109417355) o Scanner OCR"
+                                        placeholder={t('purchaseForm', 'sicaPlaceholder')}
                                         value={formData.sicaId}
                                         onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
                                         onKeyDown={(e) => {
@@ -620,18 +622,18 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         {isSearchingSica ? (
                                             <span className="flex items-center gap-2">
                                                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"></path></svg>
-                                                Extrayendo...
+                                                {t('purchaseForm', 'searching')}
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-2">
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                                                Buscar Productor
+                                                {t('purchaseForm', 'searchFarmer')}
                                             </span>
                                         )}
                                     </button>
                                 </div>
                                 <p className="text-[11px] text-brand-navy uppercase  mt-2 font-mono">
-                                    Demo: Digita "1081492345" (Luisa Fernanda) para ver extracción de lotes del mapa georreferenciado.
+                                    {t('purchaseForm', 'demoTip')}
                                 </p>
                             </div>
 
@@ -639,7 +641,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 <div className="md:col-span-3 bg-white border border-gray-400 shadow-sm p-6 rounded-industrial animate-in zoom-in-95 duration-500 mb-6">
                                     <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-3">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                                        Selección de Lote Específico (Cruce de Mapa)
+                                        {t('purchaseForm', 'specificLot')}
                                     </label>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                                         {availableLots.map(lot => (
@@ -655,14 +657,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         ))}
                                     </div>
                                     <p className="text-[9px] text-brand-navy uppercase  mt-4 font-bold">
-                                        * Al seleccionar un lote, se cruzarán los datos con Global Forest Watch para validación EUDR.
+                                        {t('purchaseForm', 'lotCrossTip')}
                                     </p>
                                 </div>
                             )}
 
                             <div className="md:col-span-3 my-2 border-t border-gray-400 shadow-sm pt-6 relative">
                                 <div className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-bg-main px-4 flex items-center gap-3">
-                                    <span className="text-[11px] font-bold text-brand-navy uppercase ">Directorio de Confianza (Modo Concierge)</span>
+                                    <span className="text-[11px] font-bold text-brand-navy uppercase ">{t('purchaseForm', 'directory')}</span>
                                 </div>
                                 
                                 <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar scroll-smooth">
@@ -680,20 +682,20 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             <p className="text-[9px] text-brand-navy uppercase er mt-1 truncate">{f.farm_name} • {f.region}</p>
                                         </button>
                                     )) : (
-                                        <div className="w-full text-center py-4 text-[9px] text-brand-navy uppercase ">Inicia tu primer registro para construir tu directorio</div>
+                                        <div className="w-full text-center py-4 text-[9px] text-brand-navy uppercase ">{t('purchaseForm', 'noFarmers')}</div>
                                     )}
                                 </div>
                             </div>
                             
                             <div className="md:col-span-3 mt-2 relative py-2">
                                 <span className="text-[11px] font-bold text-brand-green uppercase ">
-                                    Identificación Individual de Lote
+                                    {t('purchaseForm', 'individualLotId')}
                                 </span>
                             </div>
                             <div className="md:col-span-1">
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Cédula SICA
+                                    {t('purchaseForm', 'sicaId')}
                                 </label>
                                 <input
                                     type="text"
@@ -707,7 +709,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div className="md:col-span-2">
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Caficultor (Productor)
+                                    {t('purchaseForm', 'farmerName')}
                                 </label>
                                 <input
                                     type="text"
@@ -722,7 +724,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div className="md:col-span-1">
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Celular del Productor
+                                    {t('purchaseForm', 'farmerPhone')}
                                 </label>
                                 <input
                                     type="tel"
@@ -732,13 +734,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none text-brand-navy font-bold"
                                     disabled={isSubmitting}
                                 />
-                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase ">Esencial para el programa Grateful Ledger.</p>
+                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase ">{t('purchaseForm', 'phoneTip')}</p>
                             </div>
 
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Nombre de la Finca
+                                    {t('purchaseForm', 'farmName')}
                                 </label>
                                 <input
                                     type="text"
@@ -752,7 +754,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             </div>
                             <div>
                                 <NumericInput
-                                    label="Altura (msnm)"
+                                    label={t('purchaseForm', 'altitude')}
                                     value={formData.altitude}
                                     onChange={(val) => setFormData({ ...formData, altitude: val })}
                                     min={800}
@@ -762,12 +764,12 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     inputClassName="font-bold"
                                     unit="M"
                                 />
-                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase">Rango: 800 - 2500 msnm</p>
+                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase">{t('purchaseForm', 'altitudeTip')}</p>
                             </div>
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    # Lote
+                                    {t('purchaseForm', 'lotNum')}
                                 </label>
                                 <input
                                     type="text"
@@ -785,7 +787,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial-sm h-full flex flex-col justify-center">
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-2">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Tamaño de la Finca (Hectáreas) *
+                                    {t('purchaseForm', 'farmSize')}
                                 </label>
                                 <input
                                     type="number"
@@ -796,18 +798,18 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 focus:border-black outline-none text-brand-navy font-bold text-lg"
                                     disabled={isSubmitting}
                                 />
-                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase ">Utilizado para requerimiento EUDR (≥ 4 He).</p>
+                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase ">{t('purchaseForm', 'farmSizeTip')}</p>
                             </div>
 
                             <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial-sm h-full flex flex-col justify-center">
                                 <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-2">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
-                                    Vínculo de Ubicación Smart (Maps)
+                                    {t('purchaseForm', 'gpsLink')}
                                 </label>
                                 <div className="flex gap-2 w-full mt-1">
                                     <input
                                         type="text"
-                                        placeholder="Pegue aquí el enlace..."
+                                        placeholder={t('purchaseForm', 'gpsPlaceholder')}
                                         className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 focus:border-black outline-none text-xs text-brand-navy"
                                         value={smartLinkText}
                                         onChange={(e) => setSmartLinkText(e.target.value)}
@@ -836,9 +838,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
                                         }}
                                         className="bg-brand-green hover:bg-brand-green/90 text-white border border-brand-green shadow-sm transition-colors px-4 py-3 rounded-industrial-sm text-[11px] font-bold uppercase  whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-                                        title="Extraer GPS"
+                                        title="{t('purchaseForm', 'gpsExtract')}"
                                     >
-                                        Extraer GPS
+                                        {t('purchaseForm', 'gpsExtract')}
                                     </button>
                                 </div>
                             </div>
@@ -848,8 +850,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div className="bg-white border border-gray-400 shadow-sm rounded-industrial-sm p-4 mb-6 flex items-start gap-3">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c6056" strokeWidth="2" className="mt-0.5 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                                 <div>
-                                    <h4 className="text-sm font-bold text-brand-navy uppercase ">Requisito EUDR Detectado</h4>
-                                    <p className="text-[11px] text-brand-navy mt-1 uppercase">Debido al tamaño de la finca (≥ 4 hectáreas), este lote requerirá georreferenciación EUDR para su exportación. El polígono se asignará directamente en el Aduanero.</p>
+                                    <h4 className="text-sm font-bold text-brand-navy uppercase ">{t('purchaseForm', 'eudrDetected') || 'EUDR Requirement Detected'}</h4>
+                                    <p className="text-[11px] text-brand-navy mt-1 uppercase">{t('purchaseForm', 'eudrAlert')}</p>
                                 </div>
                             </div>
                         )}
@@ -857,7 +859,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Latitud
+                                    {t('purchaseForm', 'latitude')}
                                 </label>
                                 <input
                                     type="number"
@@ -872,7 +874,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Longitud
+                                    {t('purchaseForm', 'longitude')}
                                 </label>
                                 <input
                                     type="number"
@@ -890,7 +892,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Departamento
+                                    {t('purchaseForm', 'region')}
                                 </label>
                                 <select
                                     required
@@ -909,7 +911,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 {formData.region === 'Otro' && (
                                     <input
                                         type="text"
-                                        placeholder="Especificar Departamento"
+                                        placeholder="Especificar {t('purchaseForm', 'region')}"
                                         value={customRegion}
                                         onChange={(e) => setCustomRegion(e.target.value)}
                                         className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
@@ -921,7 +923,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Municipio
+                                    {t('purchaseForm', 'municipality')}
                                 </label>
                                 <select
                                     required
@@ -940,7 +942,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 {formData.municipality === 'Otro' && (
                                     <input
                                         type="text"
-                                        placeholder="Especificar Municipio"
+                                        placeholder="Especificar {t('purchaseForm', 'municipality')}"
                                         value={customMunicipality}
                                         onChange={(e) => setCustomMunicipality(e.target.value)}
                                         className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
@@ -1003,7 +1005,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             </div>
 
                             <div>
-                                <label className="text-[11px] font-bold text-brand-navy uppercase  block mb-2">Destino Exclusivo del Lote</label>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase  block mb-2">{t('purchaseForm', 'destination')}</label>
                                 <div className="w-full py-4 px-4 rounded-industrial-sm flex items-center justify-between border bg-white border-gray-400 shadow-sm text-brand-navy shadow-inner">
                                     <span className="text-sm font-bold uppercase  flex items-center gap-2">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
@@ -1076,9 +1078,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-gray-400 shadow-sm">
-                            {/* Fecha de Compra */}
+                            {/* {t('purchaseForm', 'purchaseDate')} */}
                             <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial flex flex-col justify-center">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase  mb-2 block">Fecha de Compra</label>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase  mb-2 block">{t('purchaseForm', 'purchaseDate')}</label>
                                 <div className="relative group/date">
                                     <input
                                         type="date"

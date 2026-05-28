@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 
 import Footer from '@/shared/components/layout/Footer';
+import { LanguageProvider } from '@/shared/context/LanguageContext';
 
 const montserrat = Montserrat({
     subsets: ["latin"],
@@ -18,6 +19,9 @@ export const metadata: Metadata = {
     description: "Sistema Avanzado de Control Operacional para Tostadoras",
     icons: {
         icon: "/logo ico.png",
+    },
+    verification: {
+        google: "so77i51nRuLTdq59AMqldJAocC2g-58d1Bi0JHNU670",
     }
 };
 
@@ -45,7 +49,9 @@ export default function RootLayout({
             </head>
             <body className={`${montserrat.className} flex flex-col min-h-screen bg-bg-main text-text-main`}>
                 <main className="flex-1 flex flex-col">
-                    {children}
+                    <LanguageProvider>
+                        {children}
+                    </LanguageProvider>
                 </main>
                 <Footer />
                 <Analytics />

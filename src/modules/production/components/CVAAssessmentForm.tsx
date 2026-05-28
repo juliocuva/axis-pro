@@ -8,6 +8,7 @@ import {
     PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer
 } from 'recharts';
 import EUDRComplianceBadge from '@/modules/supply/components/EUDRComplianceBadge';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 // Tipos de datos basados en el standard SCA CVA v2
 interface CVAData {
@@ -249,6 +250,7 @@ const QualityScale = ({ label, value, onChange, disabled }: { label: string, val
 );
 
 export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave, onCuppingComplete, isReadOnly }: CVAAssessmentFormProps) {
+  const { t } = useLanguage();
   const resolvedCompanyId = companyId || user?.companyId || '';
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -579,13 +581,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 onClick={() => setActiveTab('intrinsic')}
                 className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'intrinsic' ? 'bg-brand-green border-transparent text-brand-navy' : 'bg-white border-gray-400 text-brand-navy'}`}
             >
-                1. Evaluación Sensorial y Afectiva (CVA)
+                {t('cuppingForm', 'descTab')}
             </button>
             <button
                 onClick={() => setActiveTab('extrinsic')}
                 className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'extrinsic' ? 'bg-brand-green border-transparent text-brand-navy' : 'bg-white border-gray-400 text-brand-navy'}`}
             >
-                2. Evaluación Extrínseca
+                {t('cuppingForm', 'extTab')}
             </button>
       </div>
 
@@ -595,19 +597,19 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-6">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-green shadow-[0_0_15px_rgba(0,166,81,0.3)]"></div>
                 <header className="flex justify-between items-center border-b border-black/20 pb-4">
-                    <h3 className="text-[11px] font-bold text-brand-navy font-black uppercase ">PARTE 1: Evaluación Descriptiva</h3>
-                    <span className="text-[9px] font-bold text-brand-navy uppercase ">Intensidad (0-15)</span>
+                    <h3 className="text-[11px] font-bold text-brand-navy font-black uppercase ">{t('cuppingForm', 'descriptiveHeader')}</h3>
+                    <span className="text-[9px] font-bold text-brand-navy uppercase ">{t('cuppingForm', 'intensityLabel')}</span>
                 </header>
 
                 <div className="space-y-16">
                     {/* AROMA / FRAGANCIA */}
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <IntensitySlider label="Fragancia" value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
-                            <IntensitySlider label="Aroma" value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'fragrance')} value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'aroma')} value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                         </div>
                         <DescriptiveMarkerGroup 
-                            label="Notas de Fragancia / Aroma"
+                            label="{t('cuppingForm', 'fragranceAromaNotes')}"
                             options={[
                                 { label: 'Floral' },
                                 { label: 'Afrutado', subOptions: ['Bayas', 'Frutas deshidratadas', 'Cítricos'] },
@@ -628,12 +630,12 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     {/* SABOR / SABOR RESIDUAL */}
                     <div className="space-y-6 pt-6 border-t border-black/20">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <IntensitySlider label="Sabor" value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
-                            <IntensitySlider label="Sabor Residual" value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'flavor')} value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'aftertaste')} value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <DescriptiveMarkerGroup 
-                                label="Notas de Sabor"
+                                label="{t('cuppingForm', 'flavorNotes')}"
                                 options={[
                                     { label: 'Floral' },
                                     { label: 'Afrutado', subOptions: ['Bayas', 'Frutas deshidratadas', 'Cítricos'] },
@@ -647,7 +649,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                 disabled={isAlreadySealed}
                             />
                             <DescriptiveMarkerGroup 
-                                label="Gustos Predominantes"
+                                label="{t('cuppingForm', 'predominantGusts')}"
                                 options={['Salado', 'Ácido', 'Dulce', 'Amargo', 'Umami']}
                                 selected={data.descriptive.predominantGusts}
                                 onToggle={toggleGust}
@@ -660,9 +662,9 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     <div className="space-y-6 pt-6 border-t border-black/20">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-6">
-                                <IntensitySlider label="Acidez" value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                                <IntensitySlider label={t('cuppingForm', 'acidity')} value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                                 <DescriptiveMarkerGroup 
-                                    label="Carácter de Acidez"
+                                    label="{t('cuppingForm', 'acidityCharacter')}"
                                     options={['Cítrica', 'Málica', 'Fosfórica', 'Acética', 'Láctica', 'Vibrante', 'Compleja']}
                                     selected={data.descriptive.descriptors.acidity}
                                     onToggle={(v) => toggleDescriptor('acidity', v)}
@@ -670,9 +672,9 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                 />
                             </div>
                             <div className="space-y-6">
-                                <IntensitySlider label="Dulzor" value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                                <IntensitySlider label={t('cuppingForm', 'sweetness')} value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                                 <DescriptiveMarkerGroup 
-                                    label="Carácter de Dulzor"
+                                    label="{t('cuppingForm', 'sweetnessCharacter')}"
                                     options={['Miel', 'Azúcar Moreno', 'Jarabe', 'Melaza', 'Floral', 'Frutal']}
                                     selected={data.descriptive.descriptors.sweetness}
                                     onToggle={(v) => toggleDescriptor('sweetness', v)}
@@ -684,9 +686,9 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
 
                     {/* CUERPO */}
                     <div className="space-y-6 pt-6 border-t border-black/20">
-                        <IntensitySlider label="Sensación en Boca (Cuerpo)" value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                        <IntensitySlider label="{t('cuppingForm', 'mouthfeel')}" value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                         <DescriptiveMarkerGroup 
-                            label="Textura y Sensación"
+                            label="{t('cuppingForm', 'mouthfeelCharacter')}"
                             options={['Áspero', 'Aceitoso', 'Suave', 'Astringente', 'Metálico', 'Cremoso', 'Sedoso', 'Almibarado']}
                             selected={data.descriptive.descriptors.mouthfeel}
                             onToggle={(v) => toggleDescriptor('mouthfeel', v)}
@@ -700,29 +702,29 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-6">
                 <div className="absolute top-0 right-0 w-1.5 h-full bg-black-bright shadow-[0_0_15px_rgba(255,255,255,0.2)]"></div>
                 <header className="flex justify-between items-center border-b border-black/20 pb-4">
-                    <h3 className="text-[11px] font-bold text-brand-navy uppercase ">PARTE 2: Evaluación Afectiva</h3>
-                    <span className="text-[9px] font-bold text-brand-navy uppercase ">Calidad (1-9)</span>
+                    <h3 className="text-[11px] font-bold text-brand-navy uppercase ">{t('cuppingForm', 'affectiveHeader')}</h3>
+                    <span className="text-[9px] font-bold text-brand-navy uppercase ">{t('cuppingForm', 'qualityLabel')}</span>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
                     <QualityScale label="Fragancia / Aroma" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Sabor" value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Sabor Residual" value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Acidez" value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isAlreadySealed} />
-                    <QualityScale label="Dulzor" value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isAlreadySealed} />
+                    <QualityScale label={t('cuppingForm', 'flavor')} value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isAlreadySealed} />
+                    <QualityScale label={t('cuppingForm', 'aftertaste')} value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isAlreadySealed} />
+                    <QualityScale label={t('cuppingForm', 'acidity')} value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isAlreadySealed} />
+                    <QualityScale label={t('cuppingForm', 'sweetness')} value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label="Cuerpo" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)} disabled={isAlreadySealed} />
                     <div className="md:col-span-2 pt-6 border-t border-black">
-                        <QualityScale label="IMPRESIÓN GLOBAL" value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
+                        <QualityScale label="{t('cuppingForm', 'overallImpression')}" value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
                     </div>
                 </div>
 
                 {/* DEFECTOS */}
                 <div className="mt-auto pt-8 border-t border-black/20 grid grid-cols-2 gap-8">
                     <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  block">Tazas Uniformes / Defectuosas</label>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('cuppingForm', 'uniformCups')}</label>
                         <div className="flex gap-6">
                             <div className="flex flex-col items-center gap-1">
-                                <span className="text-[9px] text-brand-navy font-black uppercase ">Uniformes</span>
+                                <span className="text-[9px] text-brand-navy font-black uppercase ">{t('cuppingForm', 'uniformLabel')}</span>
                                 <div className="relative group">
                                     <input 
                                         type="number" 
@@ -736,7 +738,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                 </div>
                             </div>
                             <div className="flex flex-col items-center gap-1">
-                                <span className="text-[9px] text-brand-navy font-black uppercase ">Defectuosas</span>
+                                <span className="text-[9px] text-brand-navy font-black uppercase ">{t('cuppingForm', 'defectiveLabel')}</span>
                                 <div className="relative group">
                                     <input 
                                         type="number" 
@@ -752,7 +754,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                         </div>
                     </div>
                     <DescriptiveMarkerGroup 
-                        label="Defectos"
+                        label="{t('cuppingForm', 'defectsLabel')}"
                         options={['Mohoso', 'Fenólico', 'Papa', 'Fermento', 'Químico', 'Tierra']}
                         selected={data.defects.type}
                         onToggle={toggleDefectType}
@@ -768,7 +770,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                         onClick={() => setActiveTab('extrinsic')}
                         className="bg-white hover:bg-white border border-gray-400 shadow-sm text-brand-navy border border-gray-400 shadow-sm px-10 py-5 rounded-2xl text-[11px] font-bold uppercase  flex items-center gap-4 transition-all group"
                     >
-                        Continuar con Evaluación Extrínseca
+                        {t('cuppingForm', 'continueExtrinsic')}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-1 transition-transform">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
@@ -793,10 +795,10 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             </div>
           )}
 
-          {/* N° DE MUESTRA */}
+          {/* {t('cuppingForm', 'sampleNumber')} */}
           <div className="flex items-stretch border border-gray-400 rounded-xl overflow-hidden">
             <div className="bg-brand-green text-brand-navy text-[11px] font-black uppercase px-6 py-4 whitespace-nowrap tracking-widest flex items-center">
-              N° DE MUESTRA
+              {t('cuppingForm', 'sampleNumber')}
             </div>
             <input
               type="text"
@@ -854,7 +856,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             </div>
           </div>
 
-          {/* COMERCIO + CERTIFICACIONES */}
+          {/* COMERCIO + {t('cuppingForm', 'certificaciones')} */}
           <div className="border border-gray-400 overflow-hidden rounded-xl">
             <div className="grid grid-cols-2 divide-x divide-gray-400">
               <SCAExtrinsicSection

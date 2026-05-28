@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import ClientPerformanceReport from './ClientPerformanceReport';
 import ClientLotsArchive from './ClientLotsArchive';
+import { useLanguage } from '@/shared/context/LanguageContext';
 import ClientRoastsArchive from './ClientRoastsArchive';
 
 export default function MasterControlCenter() {
+    const { t } = useLanguage();
     const [stats, setStats] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -453,7 +455,7 @@ export default function MasterControlCenter() {
                                         <td className="p-5 text-center text-xs font-bold text-brand-navy">{company.physical}</td>
                                         <td className="p-5 text-center text-xs font-bold text-brand-navy-bright">{company.cupping}</td>
                                         <td className="p-5 text-right flex justify-end gap-2">
-                                            <button onClick={() => setReportCompany(company)} className="text-[9px] font-bold bg-white hover:bg-white text-brand-navy px-3 py-1.5 rounded uppercase  border border-gray-400 shadow-sm transition-all">Reporte</button>
+                                            <button onClick={() => setReportCompany(company)} className="text-[9px] font-bold bg-white hover:bg-white text-brand-navy px-3 py-1.5 rounded uppercase  border border-gray-400 shadow-sm transition-all">{t('tabs', 'reports')}</button>
                                             <button onClick={() => setShowLotsCompany(company)} className="text-[9px] font-bold bg-white hover:bg-white border border-gray-400 shadow-sm text-brand-navy px-3 py-1.5 rounded uppercase  border border-gray-400 shadow-sm transition-all">Lotes</button>
                                         </td>
                                     </tr>
