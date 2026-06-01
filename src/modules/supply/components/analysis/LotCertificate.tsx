@@ -418,202 +418,29 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
         { time: 8, beanTemp: 205, airTemp: 215, ror: 6 },
     ];
 
-    const pData = lotData?.process_data || {};
-    const isAxisCertifiedTech = pData.ph_inicial && pData.ph_final && pData.brix_inicial && pData.temperatura_masa_max && pData.duracion_fermentacion_horas;
+            const pData = lotData?.process_data || {};
+            const isAxisCertifiedTech = pData.ph_inicial && pData.ph_final && pData.brix_inicial && pData.temperatura_masa_max && pData.duracion_fermentacion_horas;
 
-    const getPageClass = (pageNum: number) => {
-        if (viewType === 'paginated') return activePage === getPageNum(pageNum) ? 'step-visible' : 'step-hidden';
-        return 'step-visible';
-    };
+            const getPageClass = (pageNum: number) => {
+                if (viewType === 'paginated') return activePage === getPageNum(pageNum) ? 'step-visible' : 'step-hidden';
+                return 'step-visible';
+            };
 
-    const getPageStyle = (pageNum: number) => {
-        const isVisible = viewType !== 'paginated' || activePage === getPageNum(pageNum);
-        return {
-            width: '816px',
-            minHeight: '1056px',
-            borderColor: '#0C6056',
-            display: 'flex',
-            visibility: isVisible ? 'visible' : 'hidden',
-            height: isVisible ? '1056px' : '0',
-            overflow: isVisible ? 'visible' : 'hidden',
-            pointerEvents: isVisible ? 'auto' : 'none',
-        } as React.CSSProperties;
-    };
+            const getPageStyle = (pageNum: number) => {
+                const isVisible = viewType !== 'paginated' || activePage === getPageNum(pageNum);
+                return {
+                    width: '816px',
+                    minHeight: '1056px',
+                    borderColor: '#0C6056',
+                    display: isVisible ? 'flex' : 'none',
+                    flexDirection: 'column',
+                    background: 'white',
+                } as React.CSSProperties;
+            };
 
-    return (
-        <>
-             <style jsx global>{`
-                @media (max-width: 768px) {
-                    .lot-certificate-area {
-                        transform: scale(calc(100vw / 780px));
-                        transform-origin: top left;
-                        width: 816px !important;
-                    }
-                    .no-export {
-                        width: 100% !important;
-                        flex-direction: column;
-                    }
-                }
-                @media screen {
-                    .step-hidden {
-                        visibility: hidden !important;
-                        height: 0 !important;
-                        overflow: hidden !important;
-                        opacity: 0 !important;
-                        pointer-events: none !important;
-                        position: absolute !important;
-                    }
-                    body.exporting .step-hidden, [data-exporting="true"] .step-hidden {
-                        display: flex !important;
-                        visibility: visible !important;
-                        opacity: 1 !important;
-                        height: auto !important;
-                        position: relative !important;
-                        pointer-events: auto !important;
-                    }
-                    .step-visible { display: flex !important; animation: stepFadeIn 0.4s ease-out; }
-                    .certificate-page {
-                        min-height: 1056px !important;
-                        max-height: none !important;
-                        overflow: visible !important;
-                    }
-
-                    /* Estilos para Vista Cuadrícula 2x2 */
-                    .certificate-grid {
-                        display: grid !important;
-                        grid-template-columns: repeat(2, 1fr) !important;
-                        gap: 24px !important;
-                        width: 100% !important;
-                        max-width: 100% !important;
-                    }
-                    .grid-page-wrapper {
-                        position: relative !important;
-                        cursor: pointer !important;
-                        border: 2px solid transparent !important;
-                        border-radius: 16px !important;
-                        overflow: hidden !important;
-                        transition: all 0.3s ease !important;
-                        background: rgba(255, 255, 255, 0.05) !important;
-                        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
-                    }
-                    .grid-page-wrapper:hover {
-                        border-color: #0C6056 !important;
-                        transform: translateY(-4px) !important;
-                        box-shadow: 0 10px 30px rgba(12, 96, 86, 0.2) !important;
-                    }
-                    .grid-page-badge {
-                        position: absolute !important;
-                        top: 12px !important;
-                        left: 12px !important;
-                        background: #0C6056 !important;
-                        color: white !important;
-                        padding: 4px 8px !important;
-                        border-radius: 8px !important;
-                        font-size: 10px !important;
-                        font-weight: 800 !important;
-                        z-index: 50 !important;
-                        text-transform: uppercase !important;
-                        letter-spacing: 0.05em !important;
-                    }
-                    .grid-page-content {
-                        transform: scale(0.48) !important;
-                        transform-origin: top left !important;
-                        width: 816px !important;
-                        height: 1056px !important;
-                    }
-                    /* Asegurar que las páginas escaladas quepan en sus contenedores */
-                    .certificate-grid .grid-page-wrapper {
-                        width: 392px !important;
-                        height: 507px !important;
-                        overflow: hidden !important;
-                    }
-                }
-                @keyframes stepFadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @media print {
-                    body, html, main { 
-                        margin: 0 !important; 
-                        padding: 0 !important;
-                        background: white !important;
-                        color: black !important;
-                        overflow: visible !important;
-                        height: auto !important;
-                        display: block !important;
-                        -webkit-print-color-adjust: exact !important; 
-                        print-color-adjust: exact !important; 
-                    }
-                    @page { 
-                        size: letter portrait; 
-                        margin: 0 !important; 
-                    }
-                        ${isExportMode ? `
-                            footer, nav, header { display: none !important; }
-                        ` : `
-                            /* Ocultar absolutamente todo en el DOM */
-                            body * {
-                                visibility: hidden !important;
-                            }
-                            /* Mostrar única y exclusivamente el área del certificado */
-                            #lot-certificate-area, #lot-certificate-area * {
-                                visibility: visible !important;
-                            }
-                            /* Posicionar el certificado al inicio absoluto de la página */
-                            #lot-certificate-area {
-                                position: absolute !important;
-                                left: 0 !important;
-                                top: 0 !important;
-                                width: 816px !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
-                                box-shadow: none !important;
-                                border: none !important;
-                            }
-                        `}
-                    .certificate-page {
-                        width: 816px !important;
-                        min-height: 1056px !important;
-                        max-height: none !important;
-                        page-break-inside: avoid !important;
-                        break-inside: avoid !important;
-                        page-break-after: always !important;
-                        break-after: page !important;
-                        border: none !important;
-                        box-shadow: none !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        position: relative !important;
-                        background: white !important;
-                        color: black !important;
-                        overflow: visible !important;
-                        -webkit-print-color-adjust: exact !important; 
-                        print-color-adjust: exact !important; 
-                    }
-                    .step-hidden, .step-visible {
-                        display: flex !important;
-                        visibility: visible !important;
-                        opacity: 1 !important;
-                        height: 1056px !important;
-                        min-height: 1056px !important;
-                        overflow: visible !important;
-                    }
-                    .no-print, .no-export, .print\:hidden {
-                        display: none !important;
-                        visibility: hidden !important;
-                    }
-                    * { 
-                        -webkit-print-color-adjust: exact !important; 
-                        print-color-adjust: exact !important; 
-                        scrollbar-width: none !important;
-                        -ms-overflow-style: none !important;
-                    }
-                    ::-webkit-scrollbar {
-                        display: none !important;
-                    }
-                }
-            `}</style>
-            <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10">
+            return (
+                <>
+                    <div className="flex flex-col items-center w-full max-w-4xl mx-auto space-y-8 pb-10 print:p-0 print:m-0 print:space-y-0">
 
                     {/* Visualizer Control Bar - Premium Glassmorphic */}
                     {!isExportMode && (
@@ -1265,7 +1092,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                         {/* HOJA 4: ADN FINAL Y CERTIFICACIÓN */}
                         {showPage4 && (
                             <PageWrapper pageNum={4} viewType={viewType} setViewType={setViewType} setActivePage={setActivePage}>
-                                <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl mb-8 print:mb-0 print:shadow-none print:break-after-page ${getPageClass(4)}`}
+                                <div className={`certificate-page bg-white border text-sm relative flex flex-col print:border-none shadow-2xl mb-8 print:mb-0 print:shadow-none ${getPageClass(4)}`}
                                     style={getPageStyle(4)}>
 
                             <div className="bg-white px-10 py-4 flex justify-between items-center border-b-4 border-[#0C6056]">
@@ -1404,7 +1231,8 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                 const originalText = btn?.innerText || '';
                                 if (btn) btn.innerText = 'PROCESANDO PDF...';
                                 try {
-                                    const activePages = [1, 2, 3, 4].filter(p => eval(`showPage${p}`));
+                                    const activePagesList = [showPage1, showPage2, showPage3, showPage4];
+                                    const activePages = [1, 2, 3, 4].filter((_, idx) => activePagesList[idx]);
                                     const pagesQuery = activePages.join(',');
                                     const printUrl = `${window.location.origin}/export/certificate/${inventoryId}?pages=${pagesQuery}`;
                                     
@@ -1413,13 +1241,20 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ url: printUrl, fileName: `Certificado-Lote-${inventoryId}` })
                                     });
-                                    if (!response.ok) throw new Error('API request failed');
-                                    const blob = await response.blob();
-                                    const url = URL.createObjectURL(blob);
-                                    const link = document.createElement('a');
-                                    link.href = url;
-                                    link.download = `Certificado-Lote-${inventoryId}.pdf`;
-                                    link.click();
+                                    
+                                    if (response.ok) {
+                                        const blob = await response.blob();
+                                        const url = URL.createObjectURL(blob);
+                                        const link = document.createElement('a');
+                                        link.href = url;
+                                        link.download = `Certificado-Lote-${inventoryId}.pdf`;
+                                        link.click();
+                                    } else {
+                                        console.warn('API cloud PDF generation failed, falling back to local print view');
+                                        // Abrir versión local imprimible en pestaña nueva como respaldo impecable
+                                        const printUrlLocal = `/export/certificate/${inventoryId}?pages=${pagesQuery}&autoPrint=true`;
+                                        window.open(printUrlLocal, '_blank');
+                                    }
                                 } catch (err) {
                                     console.error(err);
                                     window.print(); // Fallback

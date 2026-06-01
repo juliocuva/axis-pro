@@ -29,13 +29,17 @@
 
 ---
 
-### 2. Estructura de Comercialización
+### 2. Estructura Tarifaria: Founding Partner Program (AxisOne Coffee)
 
-| Modelo | Inversión / Costo | Ventaja Principal |
-| :--- | :--- | :--- |
-| **SaaS (Alquiler)** | $49 - $199 USD / mes | Ingreso recurrente, escala con el negocio del cliente. |
-| **Licencia (Venta)** | $15,000 - $25,000 USD | Inyección de capital inmediata y exclusividad de marca. |
-| **Pay-per-Batch** | $0.02 USD x Kg registrado | Alineado al éxito y volumen del negocio del cliente. |
+| Plan | Enfoque / Audiencia | Mensualidad | Costo de Setup (Único) | Beneficios e Incluye |
+| :--- | :--- | :--- | :--- | :--- |
+| **PLAN PILOTO (Entrada)** | Validación técnica de confianza. | **USD 100** (Pago único) | **USD 0** | Certificación y auditoría completa de **4 lotes de café** (Demuestra la inmutabilidad sin suscripción). |
+| **STARTER** | Operaciones de café de especialidad de origen único. | **USD 450** / mes | **USD 2,500** | Enfoque en un solo país (Colombia/etc.), hasta 3 asociaciones conectadas, 20 certificados QR gratis al mes, Portal de Caficultor privado 'Alchemy'. |
+| **PROFESSIONAL** | Importadores globales de café de especialidad. | **USD 750** / mes | **USD 2,500** | Hasta 3 países de origen activos, hasta 10 asociaciones conectadas, 50 certificados QR gratis al mes, Módulo Coffee Radar incluido, habilitación de protocolo Grateful Ledger. |
+| **ENTERPRISE** | Escala global multi-origen. | **Tarifa Personalizada** | **Onboarding Personalizado** | Países de origen ilimitados, asociaciones ilimitadas, volumen personalizado de certificados de lote, soporte prioritario dedicado 24/7, integraciones avanzadas de API y ERP. |
+
+> [!NOTE]
+> **Políticas de Certificados Adicionales:** Los certificados técnicos (Pasaportes Digitales QR) generados excediendo el cupo mensual establecido de cada plan tienen un costo adicional de **USD 20 por cada uno generado**.
 
 ---
 

@@ -41,7 +41,7 @@ const COMMON_MUNICIPALITIES = [
 ];
 
 const COUNTRIES = [
-    'Colombia', 'Etiopía', 'Brasil', 'Perú', 'Costa Rica', 'Panamá', 'Honduras', 'Guatemala'
+    'Colombia', 'Ethiopia', 'Brazil', 'Vietnam', 'Panama', 'Costa Rica', 'Kenya', 'Indonesia', 'Guatemala', 'Honduras', 'El Salvador'
 ];
 
 interface PurchaseFormProps {
@@ -888,65 +888,115 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* País */}
+                            <div>
+                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
+                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    {t('purchaseForm', 'country') || 'País'}
+                                </label>
+                                <select
+                                    required
+                                    value={formData.country}
+                                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
+                                    disabled={isSubmitting}
+                                >
+                                    {COUNTRIES.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Región / Departamento */}
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
                                     {t('purchaseForm', 'region')}
                                 </label>
-                                <select
-                                    required
-                                    value={formData.region}
-                                    onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
-                                    disabled={isSubmitting}
-                                >
-                                    <option value="">Seleccionar</option>
-                                    {COLOMBIAN_REGIONS.map(r => (
-                                        <option key={r} value={r} className={r === 'Otro' ? 'text-brand-navy font-bold' : ''}>
-                                            {r === 'Otro' ? '+ OTRO (ESPECIFICAR)' : r}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formData.region === 'Otro' && (
+                                {formData.country === 'Colombia' ? (
+                                    <>
+                                        <select
+                                            required
+                                            value={formData.region}
+                                            onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
+                                            disabled={isSubmitting}
+                                        >
+                                            <option value="">Seleccionar</option>
+                                            {COLOMBIAN_REGIONS.map(r => (
+                                                <option key={r} value={r} className={r === 'Otro' ? 'text-brand-navy font-bold' : ''}>
+                                                    {r === 'Otro' ? '+ OTRO (ESPECIFICAR)' : r}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formData.region === 'Otro' && (
+                                            <input
+                                                type="text"
+                                                placeholder="Especificar Región"
+                                                value={customRegion}
+                                                onChange={(e) => setCustomRegion(e.target.value)}
+                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
+                                                required
+                                                disabled={isSubmitting}
+                                            />
+                                        )}
+                                    </>
+                                ) : (
                                     <input
                                         type="text"
-                                        placeholder="Especificar {t('purchaseForm', 'region')}"
-                                        value={customRegion}
-                                        onChange={(e) => setCustomRegion(e.target.value)}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
+                                        placeholder="Ej. Sidama o Dak Lak"
                                         required
+                                        value={formData.region === 'Otro' ? customRegion : formData.region}
+                                        onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-brand-navy"
                                         disabled={isSubmitting}
                                     />
                                 )}
                             </div>
+
+                            {/* Municipio */}
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
                                     {t('purchaseForm', 'municipality')}
                                 </label>
-                                <select
-                                    required
-                                    value={formData.municipality}
-                                    onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
-                                    disabled={isSubmitting}
-                                >
-                                    <option value="">Seleccionar</option>
-                                    {COMMON_MUNICIPALITIES.map((m, idx) => (
-                                        <option key={`${m}-${idx}`} value={m} className={m === 'Otro' ? 'text-brand-navy font-bold' : ''}>
-                                            {m === 'Otro' ? '+ OTRO (ESPECIFICAR)' : m}
-                                        </option>
-                                    ))}
-                                </select>
-                                {formData.municipality === 'Otro' && (
+                                {formData.country === 'Colombia' ? (
+                                    <>
+                                        <select
+                                            required
+                                            value={formData.municipality}
+                                            onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
+                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
+                                            disabled={isSubmitting}
+                                        >
+                                            <option value="">Seleccionar</option>
+                                            {COMMON_MUNICIPALITIES.map((m, idx) => (
+                                                <option key={`${m}-${idx}`} value={m} className={m === 'Otro' ? 'text-brand-navy font-bold' : ''}>
+                                                    {m === 'Otro' ? '+ OTRO (ESPECIFICAR)' : m}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formData.municipality === 'Otro' && (
+                                            <input
+                                                type="text"
+                                                placeholder="Especificar Municipio"
+                                                value={customMunicipality}
+                                                onChange={(e) => setCustomMunicipality(e.target.value)}
+                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
+                                                required
+                                                disabled={isSubmitting}
+                                            />
+                                        )}
+                                    </>
+                                ) : (
                                     <input
                                         type="text"
-                                        placeholder="Especificar {t('purchaseForm', 'municipality')}"
-                                        value={customMunicipality}
-                                        onChange={(e) => setCustomMunicipality(e.target.value)}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
+                                        placeholder="Ej. Buon Ma Thuot o Choche"
                                         required
+                                        value={formData.municipality === 'Otro' ? customMunicipality : formData.municipality}
+                                        onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-brand-navy"
                                         disabled={isSubmitting}
                                     />
                                 )}

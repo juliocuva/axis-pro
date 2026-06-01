@@ -137,3 +137,177 @@ input, textarea, select {
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+/* ==========================================================================
+   AXIS CERTIFICATE VISUALIZER & PRINT SYSTEM
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .lot-certificate-area {
+        transform: scale(calc(100vw / 780px));
+        transform-origin: top left;
+        width: 816px !important;
+    }
+    .no-export {
+        width: 100% !important;
+        flex-direction: column;
+    }
+}
+
+@media screen {
+    .step-hidden {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: absolute !important;
+    }
+    body.exporting .step-hidden, [data-exporting="true"] .step-hidden {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        position: relative !important;
+        pointer-events: auto !important;
+    }
+    .step-visible { 
+        display: flex !important; 
+        animation: stepFadeIn 0.4s ease-out; 
+    }
+    .certificate-page {
+        min-height: 1056px !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    /* Estilos para Vista Cuadrícula 2x2 */
+    .certificate-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 24px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .grid-page-wrapper {
+        position: relative !important;
+        cursor: pointer !important;
+        border: 2px solid transparent !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        transition: all 0.3s ease !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+    .grid-page-wrapper:hover {
+        border-color: #0C6056 !important;
+        transform: translateY(-4px) !important;
+        box-shadow: 0 10px 30px rgba(12, 96, 86, 0.2) !important;
+    }
+    .grid-page-badge {
+        position: absolute !important;
+        top: 12px !important;
+        left: 12px !important;
+        background: #0C6056 !important;
+        color: white !important;
+        padding: 4px 8px !important;
+        border-radius: 8px !important;
+        font-size: 10px !important;
+        font-weight: 800 !important;
+        z-index: 50 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+    }
+    .grid-page-content {
+        transform: scale(0.48) !important;
+        transform-origin: top left !important;
+        width: 816px !important;
+        height: 1056px !important;
+    }
+    /* Asegurar que las páginas escaladas quepan en sus contenedores */
+    .certificate-grid .grid-page-wrapper {
+        width: 392px !important;
+        height: 507px !important;
+        overflow: hidden !important;
+    }
+}
+
+@keyframes stepFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media print {
+    body, html, main { 
+        margin: 0 !important; 
+        padding: 0 !important;
+        background: white !important;
+        color: black !important;
+        overflow: visible !important;
+        height: auto !important;
+        display: block !important;
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+    }
+    @page { 
+        size: letter portrait; 
+        margin: 0 !important; 
+    }
+    footer, nav, header { 
+        display: none !important; 
+    }
+    #lot-certificate-area {
+        width: 816px !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .certificate-page {
+        width: 816px !important;
+        min-height: 1056px !important;
+        max-height: none !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        border: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: relative !important;
+        background: white !important;
+        color: black !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+    }
+    .certificate-page:not(:last-child) {
+        page-break-after: always !important;
+        break-after: page !important;
+    }
+    .certificate-page:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+    .step-hidden, .step-visible {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: 1056px !important;
+        min-height: 1056px !important;
+        overflow: visible !important;
+    }
+    .no-print, .no-export, .print\:hidden {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    * { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    ::-webkit-scrollbar {
+        display: none !important;
+    }
+}

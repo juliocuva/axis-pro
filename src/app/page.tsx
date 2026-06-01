@@ -14,6 +14,7 @@ import RadarDashboard from '@/modules/supply/components/analysis/RadarDashboard'
 import CloudVault from '@/modules/export/components/CloudVault';
 import PurchaseForm from '@/modules/supply/components/PurchaseForm';
 import StatsDashboard from '@/modules/admin/components/StatsDashboard';
+import QuickCaptureContainer from '@/modules/supply/components/QuickCaptureContainer';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
@@ -22,7 +23,7 @@ import { useLanguage } from '@/shared/context/LanguageContext';
 export default function Home() {
     const { t, language, setLanguage } = useLanguage();
     const [user, setUser] = useState<{ name: string, email: string, companyId: string, role?: string } | null>(null);
-    const [view, setView] = useState<'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar' | 'stats'>('supply');
+    const [view, setView] = useState<'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar' | 'stats' | 'quick-capture'>('supply');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +34,7 @@ export default function Home() {
     // Lifted and Shared lot states
     const [selectedLot, setSelectedLot] = useState<any>(null);
     const [recentLots, setRecentLots] = useState<any[]>([]);
-    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' | 'archive'>('purchase');
+    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' | 'archive' | 'transparency'>('transparency');
     const [showSyncModal, setShowSyncModal] = useState(false);
     const [syncSearchQuery, setSyncSearchQuery] = useState('');
     const [syncCurrentPage, setSyncCurrentPage] = useState(1);
@@ -157,9 +158,9 @@ export default function Home() {
             } else {
                 // MOCK DATA PARA MOSTRAR ALCANCE (Exportadores Verdes)
                 const demoBatches = [
-                    { id: 'AX-GRN-001', date: new Date().toISOString(), process: 'Washed / Colombia', greenWeight: 2450.0, isDemo: true },
-                    { id: 'AX-GRN-002', date: new Date(Date.now() - 86400000).toISOString(), process: 'Natural / Brazil', greenWeight: 1800.0, isDemo: true },
-                    { id: 'AX-GRN-003', date: new Date(Date.now() - 172800000).toISOString(), process: 'Honey / Costa Rica', greenWeight: 900.0, isDemo: true }
+                    { id: 'AX-GRN-001', date: new Date().toISOString(), process: 'Geisha Natural / Panama', greenWeight: 2450.0, isDemo: true },
+                    { id: 'AX-GRN-002', date: new Date(Date.now() - 86400000).toISOString(), process: 'Yirgacheffe Washed / Ethiopia', greenWeight: 1800.0, isDemo: true },
+                    { id: 'AX-GRN-003', date: new Date(Date.now() - 172800000).toISOString(), process: 'Pink Bourbon Honey / Colombia', greenWeight: 900.0, isDemo: true }
                 ];
                 setBatches(demoBatches);
             }
@@ -194,16 +195,17 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen bg-bg-main p-8 transition-colors duration-400">
-            <header className="mb-12 flex flex-col gap-6 border-b border-brand-gray/50 shadow-sm pb-8">
+        <div className="min-h-screen bg-bg-main p-4 md:p-6 transition-colors duration-400 print:p-0 print:bg-white">
+            <header className="relative z-[50] mb-6 flex flex-col gap-4 border-b border-brand-gray/50 shadow-sm pb-4 print:hidden animate-in fade-in duration-500">
                 <div className="flex justify-between items-center w-full pl-8 pr-4">
                     <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-36 h-36 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-gray/50 shadow-sm transition-all">
+                            <div className="w-16 h-16 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-gray/50 shadow-sm transition-all">
                                 <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-3xl font-black text-brand-navy uppercase tracking-[0.2em]">COLOMBIA</span>
+                                <span className="text-xl font-black text-brand-navy uppercase tracking-[0.2em]">AXISONE COFFEE</span>
+                                <span className="text-[9px] font-black text-brand-green uppercase mt-0.5">Origin Quality System</span>
                             </div>
                         </div>
                     </div>
@@ -227,6 +229,8 @@ export default function Home() {
                             onLogout={() => setUser(null)}
                             onOpenManual={() => setShowFunctionalDocs(true)}
                             onOpenUpdates={() => setShowUpdates(true)}
+                            onSelectView={(v) => { setView(v); setShowCloudVault(false); }}
+                            onOpenCloudVault={() => setShowCloudVault(true)}
                         />
                     </div>
                 </div>
@@ -235,11 +239,11 @@ export default function Home() {
                     <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
 
                     <button
-                        onClick={() => setShowPurchaseForm(true)}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-brand-green text-white rounded-industrial-sm text-[10px] font-black uppercase transition-all shadow-lg shadow-brand-green/20 hover:scale-105 active:scale-95"
+                        onClick={() => { setView('supply'); setShowCloudVault(false); }}
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all active:scale-95 shadow-sm border ${view === 'supply' && !showCloudVault ? 'bg-brand-green text-brand-navy border-brand-green shadow-lg shadow-brand-green/20 font-black' : 'bg-white border-gray-400 text-brand-navy hover:border-black'}`}
                     >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                        {t('nav', 'newLot')}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
+                        {t('nav', 'operations')}
                     </button>
 
                     <button
@@ -250,66 +254,19 @@ export default function Home() {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                         {t('nav', 'syncLots')}
                     </button>
-
-                    {user?.email?.toLowerCase() === 'juliocuva@gmail.com' && (
-                        <button
-                            onClick={() => setView('radar')}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all active:scale-95 shadow-sm border ${view === 'radar' ? 'bg-brand-green text-white border-brand-green shadow-lg shadow-brand-green/20' : 'bg-brand-green/10 text-brand-green border-brand-green/30 hover:bg-brand-green hover:text-white'}`}
-                            title={t('nav', 'radar')}
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M12 12l5-5"/></svg>
-                            {t('nav', 'radar')}
-                        </button>
-                    )}
-
-                    <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
-
-                    <div className="flex bg-bg-offset p-1 rounded-industrial-sm border border-border-main overflow-hidden shadow-sm">
-                        <button
-                            onClick={() => { setView('supply'); setShowCloudVault(false); }}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view !== 'master' && !showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
-                        >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
-                            {t('nav', 'operations')}
-                        </button>
-
-                        {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
-                            <button
-                                onClick={() => { setView('master'); setShowCloudVault(false); }}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view === 'master' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
-                                title={t('nav', 'governance')}
-                            >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                {t('nav', 'governance')}
-                            </button>
-                        )}
-                        
-                        {(user?.email.toLowerCase().includes('julio') || user?.role === 'auditor' || user?.role === 'admin') && (
-                            <button
-                                onClick={() => { setView('stats'); setShowCloudVault(false); }}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${view === 'stats' ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
-                                title={t('nav', 'statistics')}
-                            >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-                                {t('nav', 'statistics')}
-                            </button>
-                        )}
-                        
-                        <button
-                            onClick={() => setShowCloudVault(true)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all ${showCloudVault ? 'bg-brand-green text-white shadow-lg shadow-brand-green/20' : 'text-brand-navy/40 hover:text-brand-navy'}`}
-                            title={t('nav', 'archive')}
-                        >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-                            {t('nav', 'archive')}
-                        </button>
-                    </div>
-
-                    <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
-
                 </nav>
             </header>
 
+
+            {view === 'quick-capture' && (
+                <div className="max-w-7xl mx-auto py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <QuickCaptureContainer 
+                        user={user} 
+                        onClose={() => { setView('supply'); fetchRecentLots(); }} 
+                        fetchRecentLots={fetchRecentLots}
+                    />
+                </div>
+            )}
 
             {view === 'supply' && (
                 <div className="max-w-7xl mx-auto space-y-8">
@@ -638,6 +595,8 @@ export default function Home() {
                     </div>
                 </div>
             )}
+
+            {/* MOBILE QUICK CAPTURA FAB REMOVED */}
         </div>
     );
 }

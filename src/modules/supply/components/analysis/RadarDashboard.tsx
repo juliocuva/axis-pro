@@ -4,10 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
-import { 
-    Radar, RadarChart, PolarGrid, PolarAngleAxis, 
-    ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip 
-} from 'recharts';
 
 const HUB_BOGOTA = [4.711, -74.072];
 const PORT_BUENAVENTURA = [3.880, -77.031];
@@ -49,6 +45,115 @@ const REGION_COORDINATES: Record<string, { lat: number; lon: number }> = {
     'VALLE': { lat: 3.90, lon: -76.30 },      // Sevilla
     'CUNDINAMARCA': { lat: 4.70, lon: -73.90 } // Fusagasugá
 };
+
+// Orígenes Globales de Proyección para Presentación de Julio César
+const GLOBAL_ORIGINS = [
+    {
+        id: 'global-ethiopia',
+        lot_number: 'AX1-ETH-YIRG-09',
+        farmer_name: 'Abebe Bikila',
+        farm_name: 'Yirgacheffe Cooperative',
+        region: 'YIRGACHEFFE, ETHIOPIA',
+        variety: 'SL28',
+        process: 'Lavado / Anaeróbico',
+        purchase_weight: 18200,
+        q_score: 91.0,
+        latitude: 6.162,
+        longitude: 38.241,
+        is_global: true,
+        destinations: ['ROTTERDAM', 'LONDON'],
+        attributes: {
+            fermentation: '72h Anaeróbica Hermética',
+            ph: '3.62 / 16.5°Bx',
+            secado: 'Camas Africanas Bajo Sombra',
+            notes: 'Notas cítricas limpias, jazmín, bergamota refinada y acidez brillante.'
+        }
+    },
+    {
+        id: 'global-brazil',
+        lot_number: 'AX1-BRA-CERR-22',
+        farmer_name: 'Thiago Pereira',
+        farm_name: 'Fazenda Cerrado Grande',
+        region: 'CERRADO MINEIRO, BRAZIL',
+        variety: 'MUNDO NOVO',
+        process: 'Natural',
+        purchase_weight: 32000,
+        q_score: 86.5,
+        latitude: -18.604,
+        longitude: -46.518,
+        is_global: true,
+        destinations: ['NEW_YORK', 'SAN_FRANCISCO'],
+        attributes: {
+            fermentation: 'Tradicional Natural Seco',
+            ph: '4.10 / 14.0°Bx',
+            secado: 'Patios de Concreto Expuestos',
+            notes: 'Cuerpo denso almibarado, notas marcadas a chocolate y avellanas.'
+        }
+    },
+    {
+        id: 'global-costarica',
+        lot_number: 'AX1-CRC-TARR-15',
+        farmer_name: 'María Elizondo',
+        farm_name: 'Finca El Laurel',
+        region: 'TARRAZÚ, COSTA RICA',
+        variety: 'CATURRA',
+        process: 'Red Honey',
+        purchase_weight: 9500,
+        q_score: 88.8,
+        latitude: 9.682,
+        longitude: -84.025,
+        is_global: true,
+        destinations: ['NEW_YORK', 'LONDON'],
+        attributes: {
+            fermentation: '36h Honey en Tanque Tapado',
+            ph: '3.85 / 18.0°Bx',
+            secado: 'Marquesinas Parabólicas Controladas',
+            notes: 'Dulzura profunda a miel de caña, manzana roja y acidez elegante.'
+        }
+    },
+    {
+        id: 'global-sumatra',
+        lot_number: 'AX1-IDN-MAND-41',
+        farmer_name: 'Dian Wijaya',
+        farm_name: 'Mandheling Smallholders',
+        region: 'SUMATRA, INDONESIA',
+        variety: 'TYPICA',
+        process: 'Giling Basah (Wet Hulled)',
+        purchase_weight: 15400,
+        q_score: 87.2,
+        latitude: -0.533,
+        longitude: 101.447,
+        is_global: true,
+        destinations: ['TOKYO', 'SYDNEY'],
+        attributes: {
+            fermentation: 'Húmeda Semi-lavada',
+            ph: '4.20 / 13.5°Bx',
+            secado: 'Patio Abierto Rápido',
+            notes: 'Cuerpo robusto, notas terrosas de cedro, tabaco dulce y especias.'
+        }
+    },
+    {
+        id: 'global-colombia',
+        lot_number: 'AX1-COL-HUIL-88',
+        farmer_name: 'Julio César Aruba',
+        farm_name: 'Finca La Esmeralda Alta',
+        region: 'PITALITO, HUILA, COLOMBIA',
+        variety: 'GEISHA',
+        process: 'Doble Fermentación Lavado',
+        purchase_weight: 4200,
+        q_score: 89.5,
+        latitude: 2.152,
+        longitude: -75.954,
+        is_global: true,
+        destinations: ['TOKYO', 'ROTTERDAM'],
+        attributes: {
+            fermentation: '48h Cereza Entera + 24h Mucílago',
+            ph: '3.75 / 19.5°Bx',
+            secado: 'Marquesinas Sombreadas Secado Lento',
+            notes: 'Exótico perfil floral, melocotón maduro, miel silvestre y final persistente.'
+        }
+    }
+];
 
 const getLotCoordinates = (lot: any, seedIndex: number) => {
     const regionStr = (lot.region || '').toUpperCase();
@@ -125,12 +230,6 @@ export default function RadarDashboard({ user }: { user: any }) {
 
     const [L, setL] = useState<any>(null);
     const [lots, setLots] = useState<any[]>([]);
-    const [stats, setStats] = useState({
-        totalWeight: 0,
-        avgScore: 0,
-        activeAssociations: 0,
-        complianceRate: 0
-    });
     const [loading, setLoading] = useState(true);
     const [showShareModal, setShowShareModal] = useState(false);
     const [inviteEmail, setInviteEmail] = useState('');
@@ -145,19 +244,26 @@ export default function RadarDashboard({ user }: { user: any }) {
     const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO'>('ORIGEN');
     const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
 
+    // Controles de Presentación Global Exclusivos de Super Admin Julio César
+    const [isGlobalProjection, setIsGlobalProjection] = useState(false);
+    const [showMaritimalLines, setShowMaritimalLines] = useState(true);
+    const [showConsumerScans, setShowConsumerScans] = useState(true);
+    const [showSimTransit, setShowSimTransit] = useState(true);
+    const [showAllGlobalRoutes, setShowAllGlobalRoutes] = useState(true);
+
     const createSignalIcon = (scale = 1, isPulsing = false, color = '#0C6056', isOutline = false) => {
         if (!L) return null;
         return L.divIcon({
             className: 'custom-pulse-icon',
             html: `<div class="pulse-container ${isPulsing ? 'is-pulsing' : ''} ${isOutline ? 'is-outline' : ''}" style="transform: scale(${scale}); color: ${color}">
-                    <div class="pulse-dot"></div>
+                    <div class="pulse-dot" style="background-color: ${color} !important; ${isOutline ? `border: 2px solid ${color} !important; background-color: #ffffff !important;` : ''}"></div>
                   </div>`,
             iconSize: [12, 12],
             iconAnchor: [6, 6]
         });
     };
 
-    // Controlador para bloquear el pan en zoom mínimo
+    // Controlador para bloquear el pan en zoom mínimo y flyTo automático en proyecciones
     const MapController = () => {
         const { useMap: _useMap, useMapEvents: _useMapEvents } = leafletHooks || {};
         if (!_useMap || !_useMapEvents) return null;
@@ -167,6 +273,17 @@ export default function RadarDashboard({ user }: { user: any }) {
 
     const MapControllerInternal = ({ useMap, useMapEvents }: any) => {
         const map = useMap();
+        
+        useEffect(() => {
+            if (isGlobalProjection) {
+                map.setView([20.0, 0.0], 2);
+            } else if (viewMode === 'ORIGEN') {
+                map.setView([4.5709, -74.2973], 6);
+            } else {
+                map.setView([20.0, 0.0], 2);
+            }
+        }, [viewMode, isGlobalProjection, map]);
+
         useMapEvents({
             zoomend: () => {
                 const currentZoom = map.getZoom();
@@ -182,6 +299,7 @@ export default function RadarDashboard({ user }: { user: any }) {
 
     // Seguridad: Admin, Julio o Auditor (Viewer)
     const hasAccess = user?.role === 'admin' || user?.role === 'auditor' || user?.email?.toLowerCase().includes('julio') || user?.email?.toLowerCase().includes('main');
+    const isSuperAdmin = user?.email?.toLowerCase().includes('julio') || user?.role === 'admin';
 
     useEffect(() => {
         // Inicializar Leaflet solo en el cliente
@@ -204,19 +322,6 @@ export default function RadarDashboard({ user }: { user: any }) {
 
             if (data) {
                 setLots(data);
-                
-                // Calcular estadísticas de "Torre de Control"
-                const weight = data.reduce((acc, curr) => acc + Number(curr.purchase_weight || 0), 0);
-                const scores = data.map(l => (l.process_data?.axis_score || 84.5)); // Mock de score si no hay
-                const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-                const uniqueAssocs = new Set(data.map(l => l.company_id)).size;
-
-                setStats({
-                    totalWeight: weight,
-                    avgScore: Math.round(avg * 10) / 10,
-                    activeAssociations: uniqueAssocs,
-                    complianceRate: 98.4 // Simulado para impacto
-                });
             }
         } catch (err) {
             console.error("Radar Error:", err);
@@ -224,6 +329,62 @@ export default function RadarDashboard({ user }: { user: any }) {
             setLoading(false);
         }
     };
+
+    // Combinación en caliente de orígenes globales y locales según la proyección
+    const projectedLots = useMemo(() => {
+        const filteredNormal = lots
+            .filter(lot => filterVariety === 'ALL' || lot.variety?.toUpperCase() === filterVariety)
+            .filter(lot => filterProcess === 'ALL' || lot.process?.toUpperCase()?.includes(filterProcess))
+            .filter(lot => {
+                if (filterPreset === 'SIMULACION') return lot.is_simulated === true || lot.lot_number?.includes('SIM-');
+                if (filterPreset === 'COMPETENCIA') return lot.lot_number?.includes('WCE-HUILA-');
+                return true;
+            });
+            
+        if (isGlobalProjection) {
+            return [...filteredNormal, ...GLOBAL_ORIGINS];
+        }
+        return filteredNormal;
+    }, [lots, filterVariety, filterProcess, filterPreset, isGlobalProjection]);
+
+    // Estadísticas dinámicas de la torre de control recalibradas con la proyección global
+    const stats = useMemo(() => {
+        if (lots.length === 0) {
+            return {
+                totalWeight: 0,
+                avgScore: 0,
+                activeAssociations: 0,
+                complianceRate: 0
+            };
+        }
+        
+        const weight = lots.reduce((acc, curr) => acc + Number(curr.purchase_weight || 0), 0);
+        const scores = lots.map(l => (l.process_data?.axis_score || 84.5));
+        const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+        const uniqueAssocs = new Set(lots.map(l => l.company_id)).size;
+
+        if (isGlobalProjection) {
+            const globalWeight = GLOBAL_ORIGINS.reduce((acc, curr) => acc + curr.purchase_weight, 0);
+            const globalScores = GLOBAL_ORIGINS.map(o => o.q_score);
+            const combinedWeight = weight + globalWeight;
+            const combinedScores = [...scores, ...globalScores];
+            const combinedAvg = combinedScores.reduce((a, b) => a + b, 0) / combinedScores.length;
+            
+            return {
+                totalWeight: combinedWeight,
+                avgScore: Math.round(combinedAvg * 10) / 10,
+                activeAssociations: uniqueAssocs + 4, 
+                complianceRate: 99.4 
+            };
+        }
+
+        return {
+            totalWeight: weight,
+            avgScore: Math.round(avg * 10) / 10,
+            activeAssociations: uniqueAssocs,
+            complianceRate: 98.4
+        };
+    }, [lots, isGlobalProjection]);
 
     const handleInvite = async () => {
         if (!inviteEmail) return;
@@ -255,8 +416,8 @@ export default function RadarDashboard({ user }: { user: any }) {
                 <div className="w-20 h-20 border-4 border-red-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
                     <span className="text-4xl font-black">!</span>
                 </div>
-                <h1 className="text-3xl font-black uppercase er">Acceso Denegado</h1>
-                <p className="text-brand-navy uppercase text-xs  mt-2">Esta terminal requiere credenciales de Alta Gerencia FNC / AXIS ADMIN.</p>
+                <h1 className="text-3xl font-black uppercase tracking-wide">Acceso Denegado</h1>
+                <p className="text-brand-navy uppercase text-xs mt-2">Esta terminal requiere credenciales de Alta Gerencia FNC / AXIS ADMIN.</p>
             </div>
         );
     }
@@ -276,12 +437,12 @@ export default function RadarDashboard({ user }: { user: any }) {
                     width: 8px;
                     height: 8px;
                     border-radius: 50%;
-                    background-color: #0C6056 !important;
+                    background-color: #0C6056;
                     opacity: 0.9;
                 }
                 .pulse-container.is-outline .pulse-dot {
                     background-color: #ffffff !important;
-                    border: 2px solid #0C6056 !important;
+                    border: 2px solid #0C6056;
                 }
                 .pulse-container.is-pulsing .pulse-dot {
                     animation: pulse-intensity 1.2s ease-in-out infinite;
@@ -332,7 +493,6 @@ export default function RadarDashboard({ user }: { user: any }) {
                 .leaflet-dragging .leaflet-container {
                     cursor: grabbing !important;
                 }
-                /* Preserve CartoDB's native high-contrast light-gray style for sharp text and borders */
                 .sidebar-scroll::-webkit-scrollbar {
                     display: none;
                 }
@@ -382,6 +542,19 @@ export default function RadarDashboard({ user }: { user: any }) {
                     color: #ffffff !important;
                     box-shadow: 0 0 15px rgba(12, 96, 86, 0.4) !important;
                     border-color: #0C6056 !important;
+                }
+                /* Animate dashed maritime and shipping lines gracefully */
+                @keyframes dash-flow {
+                    from {
+                        stroke-dashoffset: 120;
+                    }
+                    to {
+                        stroke-dashoffset: 0;
+                    }
+                }
+                .animated-maritime-line {
+                    stroke-dasharray: 8, 12;
+                    animation: dash-flow 15s linear infinite !important;
                 }
             `}</style>
 
@@ -498,6 +671,85 @@ export default function RadarDashboard({ user }: { user: any }) {
                     </div>
                 </div>
 
+                {/* 3. TERMINAL DE CONTROL DE PRESENTACIÓN GLOBAL (SUPER ADMIN ONLY) */}
+                {isSuperAdmin && (
+                    <div className="bg-neutral-900 border border-neutral-800 p-5 rounded-2xl space-y-4 shadow-lg text-white">
+                        <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                            <div className="flex items-center gap-2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00FFB2" strokeWidth="2.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="2" y1="12" x2="22" y2="12"/>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                </svg>
+                                <h4 className="text-[10px] font-black uppercase tracking-wider text-neutral-200">Presentación Global</h4>
+                            </div>
+                            <span className="text-[8px] bg-[#00FFB2]/10 text-[#00FFB2] px-2 py-0.5 rounded-full font-black uppercase tracking-wider">Master</span>
+                        </div>
+                        
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-[9px] font-black uppercase text-neutral-200">Expansión Global axisONE</p>
+                                    <p className="text-[8px] text-neutral-500 uppercase font-semibold">Proyectar alcance internacional</p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        const nextVal = !isGlobalProjection;
+                                        setIsGlobalProjection(nextVal);
+                                        if (nextVal) {
+                                            setViewMode('LOGISTICA');
+                                        }
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg border text-[9px] font-black uppercase tracking-wide transition-all ${isGlobalProjection ? 'bg-[#00FFB2] text-black border-[#00FFB2] shadow-[0_0_15px_rgba(0,255,178,0.4)]' : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:border-neutral-600'}`}
+                                >
+                                    {isGlobalProjection ? 'ON' : 'OFF'}
+                                </button>
+                            </div>
+
+                            {isGlobalProjection && (
+                                <div className="space-y-2 pt-2 border-t border-neutral-800 animate-in fade-in duration-200">
+                                    <div className="flex items-center justify-between text-[9px] text-neutral-300">
+                                        <span className="font-bold uppercase">Ver Red Completa (Simultánea)</span>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={showAllGlobalRoutes}
+                                            onChange={(e) => setShowAllGlobalRoutes(e.target.checked)}
+                                            className="w-3.5 h-3.5 accent-[#00FFB2] bg-neutral-800 border-neutral-700 rounded focus:ring-0 cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between text-[9px] text-neutral-300">
+                                        <span className="font-bold uppercase">Mostrar Rutas Marítimas</span>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={showMaritimalLines}
+                                            onChange={(e) => setShowMaritimalLines(e.target.checked)}
+                                            className="w-3.5 h-3.5 accent-[#00FFB2] bg-neutral-800 border-neutral-700 rounded focus:ring-0 cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between text-[9px] text-neutral-300">
+                                        <span className="font-bold uppercase">Mostrar Escaneos de Consumo</span>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={showConsumerScans}
+                                            onChange={(e) => setShowConsumerScans(e.target.checked)}
+                                            className="w-3.5 h-3.5 accent-[#00FFB2] bg-neutral-800 border-neutral-700 rounded focus:ring-0 cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between text-[9px] text-neutral-300">
+                                        <span className="font-bold uppercase">Simular Barcos en Tránsito</span>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={showSimTransit}
+                                            onChange={(e) => setShowSimTransit(e.target.checked)}
+                                            className="w-3.5 h-3.5 accent-[#00FFB2] bg-neutral-800 border-neutral-700 rounded focus:ring-0 cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 <div className="mt-auto space-y-3">
                     <button 
                         onClick={() => setShowShareModal(true)}
@@ -531,119 +783,169 @@ export default function RadarDashboard({ user }: { user: any }) {
                             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                         />
 
-                        {lots
-                          .filter(lot => filterVariety === 'ALL' || lot.variety?.toUpperCase() === filterVariety)
-                          .filter(lot => filterProcess === 'ALL' || lot.process?.toUpperCase()?.includes(filterProcess))
-                          .filter(lot => {
-                              if (filterPreset === 'SIMULACION') return lot.is_simulated === true || lot.lot_number?.includes('SIM-');
-                              if (filterPreset === 'COMPETENCIA') return lot.lot_number?.includes('WCE-HUILA-');
-                              return true;
-                          })
-                          .map((lot, index) => {
-                            const { lat, lon } = getLotCoordinates(lot, index);
+                        {projectedLots.map((lot, index) => {
+                            const isGlobal = lot.is_global === true;
+                            const { lat, lon } = isGlobal ? { lat: lot.latitude, lon: lot.longitude } : getLotCoordinates(lot, index);
                             
+                            // Determinación de colores según si el lote es local o de proyección internacional
+                            const routeColor = isGlobal ? '#00FFB2' : '#0C6056';
+
                             // Trayectoria Internacional con Lógica Marítima
                             const destNames = Object.keys(PORTS_GLOBAL);
                             const destName = destNames[index % destNames.length];
-                            const finalDestination = PORTS_GLOBAL[destName as keyof typeof PORTS_GLOBAL];
                             
-                            // Determinamos puerto de salida según destino
-                            const isPacific = ['TOKYO', 'SHANGHAI', 'SINGAPORE', 'SYDNEY', 'SAN_FRANCISCO'].includes(destName);
-                            const portColombia = isPacific ? PORT_BUENAVENTURA : PORT_CARTAGENA;
-
-                            // Punto en el mar (Tránsito lógico)
-                            const midLat = (portColombia[0] + finalDestination[0]) / 2 + (isPacific ? -8 : 5);
-                            const midLon = (portColombia[1] + finalDestination[1]) / 2;
+                            // Los orígenes globales admiten múltiples puertos de destino simultáneamente para exhibir cobertura masiva
+                            const destinationsToRender = isGlobal ? (lot.destinations || [destName]) : [destName];
 
                             return (
                                 <React.Fragment key={lot.id}>
-                                    {/* Origen */}
+                                    {/* Marcador de Origen */}
                                     <Marker 
                                         position={[lat, lon]} 
-                                        icon={createSignalIcon(1, selectedLotId === lot.id, '#0C6056')}
+                                        icon={createSignalIcon(1.2, selectedLotId === lot.id, routeColor)}
                                         eventHandlers={{
                                             click: () => setSelectedLotId(lot.id === selectedLotId ? null : lot.id)
                                         }}
                                     >
                                         <Popup className="custom-popup">
                                             <div className="p-3 text-neutral-900 max-w-xs space-y-2">
-                                                <p className="text-[12px] font-black uppercase text-brand-green tracking-wider border-b border-brand-green/20 pb-1">{lot.lot_number}</p>
+                                                <p className="text-[12px] font-black uppercase text-brand-green tracking-wider border-b border-brand-green/20 pb-1">
+                                                    {lot.lot_number} {isGlobal && <span className="text-[8px] bg-[#00FFB2]/10 text-brand-green px-1.5 py-0.5 rounded font-black float-right uppercase tracking-wider">Global</span>}
+                                                </p>
                                                 <div className="text-[10px] space-y-1">
                                                     <p><span className="text-gray-500 font-bold uppercase">Productor:</span> <span className="font-black text-neutral-800">{lot.farmer_name}</span></p>
                                                     <p><span className="text-gray-500 font-bold uppercase">Finca:</span> <span className="font-black text-neutral-800">{lot.farm_name}</span></p>
                                                     <p><span className="text-gray-500 font-bold uppercase">Variedad:</span> <span className="font-bold text-brand-green">{lot.variety}</span></p>
                                                     <p><span className="text-gray-500 font-bold uppercase">Proceso:</span> <span className="font-bold text-brand-green">{lot.process}</span></p>
                                                     <p><span className="text-gray-500 font-bold uppercase">Peso:</span> <span className="font-black text-neutral-800">{lot.purchase_weight} kg</span></p>
+                                                    {isGlobal && lot.q_score && (
+                                                        <p><span className="text-gray-500 font-bold uppercase">Calidad Q-Score:</span> <span className="font-black text-brand-green">{lot.q_score} PTS</span></p>
+                                                    )}
                                                 </div>
-                                                {lot.process_data && (
+                                                
+                                                {isGlobal && lot.attributes ? (
+                                                    <div className="text-[9px] bg-gray-50 p-2 rounded-lg border border-brand-green/10 space-y-0.5">
+                                                        <p className="text-[8px] font-black text-brand-green uppercase tracking-widest mb-1">Especificación Origen</p>
+                                                        <p><span className="text-gray-400 font-bold">Fermentación:</span> <span className="text-gray-700 font-semibold">{lot.attributes.fermentation}</span></p>
+                                                        <p><span className="text-gray-400 font-bold">pH / Brix:</span> <span className="text-gray-700 font-semibold">{lot.attributes.ph}</span></p>
+                                                        <p><span className="text-gray-400 font-bold">Secado:</span> <span className="text-gray-700 font-semibold">{lot.attributes.secado}</span></p>
+                                                        <p className="text-[8px] text-brand-green italic mt-1.5 font-bold">"{lot.attributes.notes}"</p>
+                                                    </div>
+                                                ) : lot.process_data ? (
                                                     <div className="text-[9px] bg-gray-50 p-2 rounded-lg border border-brand-green/10 space-y-0.5">
                                                         <p className="text-[8px] font-black text-brand-green uppercase tracking-widest mb-1">Parámetros Críticos</p>
                                                         <p><span className="text-gray-400 font-bold">Fermentación:</span> <span className="text-gray-700 font-semibold">{lot.process_data.duracion_fermentacion_horas}h ({lot.process_data.fermentation_style})</span></p>
                                                         <p><span className="text-gray-400 font-bold">pH final / Brix:</span> <span className="text-gray-700 font-semibold">{lot.process_data.ph_final} / {lot.process_data.brix_inicial}°Bx</span></p>
                                                         <p><span className="text-gray-400 font-bold">Secado:</span> <span className="text-gray-700 font-semibold">{lot.process_data.tipo_secado} ({lot.process_data.duracion_secado})</span></p>
                                                     </div>
-                                                )}
+                                                ) : null}
                                             </div>
                                         </Popup>
                                     </Marker>
 
-                                    {/* Ruta a Puerto Nacional (Solo si está seleccionado) */}
-                                    {selectedLotId === lot.id && (
-                                        <Polyline 
-                                            positions={[[lat, lon], portColombia as any]} 
-                                            pathOptions={{ color: '#0C6056', weight: 2.5, opacity: 0.8, dashArray: '5, 8' }} 
-                                        />
-                                    )}
+                                    {/* Mapeo de múltiples destinos marítimos asignados */}
+                                    {destinationsToRender.map((dName: string) => {
+                                        const finalDestination = PORTS_GLOBAL[dName as keyof typeof PORTS_GLOBAL];
+                                        if (!finalDestination) return null;
 
-                                    {/* Ruta Internacional y Consumo (Diferenciado por modo) */}
-                                    {(viewMode === 'LOGISTICA' || viewMode === 'CONSUMO') && selectedLotId === lot.id && (
-                                        <>
-                                            {/* Trayectoria Base (Logística) */}
-                                            <Polyline 
-                                                positions={[portColombia as any, [midLat, midLon], finalDestination as any]} 
-                                                pathOptions={{ 
-                                                    color: '#0C6056', 
-                                                    weight: 3, 
-                                                    opacity: 1, 
-                                                    dashArray: '10, 20'
-                                                }} 
-                                            />
-                                            
-                                            <Marker position={[midLat, midLon]} icon={createSignalIcon(0.6, false, '#0C6056')}>
-                                                <Popup>En Tránsito: {lot.lot_number}</Popup>
-                                            </Marker>
+                                        // Determinación de puertos colombianos de salida
+                                        const isPacific = ['TOKYO', 'SHANGHAI', 'SINGAPORE', 'SYDNEY', 'SAN_FRANCISCO'].includes(dName);
+                                        const portColombia = isPacific ? PORT_BUENAVENTURA : PORT_CARTAGENA;
 
-                                            <Marker position={finalDestination as any} icon={createSignalIcon(1.5, true, '#0C6056', true)}>
-                                                 <Tooltip permanent direction="top" className="custom-map-tooltip">
-                                                     {destName}
-                                                 </Tooltip>
-                                                <Popup>Nodo de Desembarque: {lot.lot_number}</Popup>
-                                            </Marker>
+                                        // Si el origen es internacional, la ruta va directo desde su coordenada
+                                        const startPoint = isGlobal ? [lat, lon] : portColombia;
+                                        
+                                        // Puntos geodésicos marinos de tránsito
+                                        const midLat = (startPoint[0] + finalDestination[0]) / 2 + (isPacific ? -8 : 5);
+                                        const midLon = (startPoint[1] + finalDestination[1]) / 2;
+                                        const midPoint = [midLat, midLon];
 
-                                            {/* Solo mostrar Consumo si el modo es CONSUMO */}
-                                            {viewMode === 'CONSUMO' && (
-                                                <>
-                                                    {Object.entries(CONSUMER_NODES).slice(index % 3, (index % 3) + 1).map(([cityName, cityCoords]) => (
-                                                        <React.Fragment key={cityName}>
-                                                            <Polyline 
-                                                                positions={[finalDestination as any, cityCoords as any]} 
-                                                                pathOptions={{ color: '#0C6056', weight: 1.5, opacity: 0.6, dashArray: '3, 6' }} 
-                                                            />
-                                                            <Marker position={cityCoords as any} icon={createSignalIcon(1, true, '#0C6056')}>
+                                        const showRoute = showAllGlobalRoutes || (selectedLotId === lot.id);
+
+                                        return (
+                                            <React.Fragment key={`${lot.id}-${dName}`}>
+                                                {/* Ruta terrestre a puerto nacional (solo lotes locales colombianos) */}
+                                                {!isGlobal && selectedLotId === lot.id && (
+                                                    <Polyline 
+                                                        positions={[[lat, lon], portColombia as any]} 
+                                                        pathOptions={{ color: '#0C6056', weight: 2.5, opacity: 0.8, dashArray: '5, 8' }} 
+                                                    />
+                                                )}
+
+                                                {/* Trazado Marítimo Internacional Principal */}
+                                                {(viewMode === 'LOGISTICA' || viewMode === 'CONSUMO') && showRoute && showMaritimalLines && (
+                                                    <>
+                                                        <Polyline 
+                                                            positions={[startPoint as any, midPoint as any, finalDestination as any]} 
+                                                            pathOptions={{ 
+                                                                className: 'animated-maritime-line',
+                                                                color: routeColor, 
+                                                                weight: isGlobal ? 2.5 : 2, 
+                                                                opacity: 0.9, 
+                                                                dashArray: '8, 12'
+                                                            }} 
+                                                        />
+                                                        
+                                                        {/* Barcos mercantes en tránsito simulados */}
+                                                        {showSimTransit && (
+                                                            <Marker position={midPoint as any} icon={createSignalIcon(0.8, true, routeColor)}>
                                                                 <Popup className="custom-popup">
-                                                                    <div className="p-3 text-neutral-900 max-w-xs space-y-1">
-                                                                        <p className="text-[11px] font-black uppercase text-brand-green border-b border-brand-green/20 pb-0.5">Consumer Scan Active</p>
-                                                                        <p className="text-[9px] font-bold mt-1 text-neutral-800">{cityName} • Cafetería de Especialidad</p>
-                                                                        <p className="text-[9px] text-gray-500 mt-0.5">Escaneo de QR detectado • Trazabilidad Deep</p>
+                                                                    <div className="p-2 text-neutral-900 space-y-1">
+                                                                        <p className="text-[10px] font-black uppercase text-brand-green border-b border-brand-green/10 pb-0.5">En Tránsito Activo</p>
+                                                                        <p className="text-[9px] font-bold">Lote: {lot.lot_number}</p>
+                                                                        <p className="text-[9px] text-gray-500">Ruta: Origen hacia Puerto de {dName}</p>
                                                                     </div>
                                                                 </Popup>
                                                             </Marker>
-                                                        </React.Fragment>
-                                                    ))}
-                                                </>
-                                            )}
-                                        </>
-                                    )}
+                                                        )}
+
+                                                        {/* Nodo de Puerto de Desembarque en Destino */}
+                                                        <Marker position={finalDestination as any} icon={createSignalIcon(1.4, true, routeColor, true)}>
+                                                             <Tooltip permanent direction="top" className="custom-map-tooltip">
+                                                                 {dName}
+                                                             </Tooltip>
+                                                            <Popup className="custom-popup">
+                                                                <div className="p-2 text-neutral-900 space-y-1">
+                                                                    <p className="text-[10px] font-black uppercase text-brand-green border-b border-brand-green/10 pb-0.5">Puerto de Destino</p>
+                                                                    <p className="text-[9px] font-bold">{dName}</p>
+                                                                    <p className="text-[9px] text-gray-500">Contenedor recibido bajo sello axisONE.</p>
+                                                                </div>
+                                                            </Popup>
+                                                        </Marker>
+
+                                                        {/* Escaneos Deep en Puntos de Consumo Final */}
+                                                        {viewMode === 'CONSUMO' && showConsumerScans && (
+                                                            <>
+                                                                {Object.entries(CONSUMER_NODES).slice(index % 3, (index % 3) + 1).map(([cityName, cityCoords]) => (
+                                                                    <React.Fragment key={cityName}>
+                                                                        <Polyline 
+                                                                            positions={[finalDestination as any, cityCoords as any]} 
+                                                                            pathOptions={{ 
+                                                                                className: 'animated-maritime-line',
+                                                                                color: routeColor, 
+                                                                                weight: 1.5, 
+                                                                                opacity: 0.75, 
+                                                                                dashArray: '4, 8' 
+                                                                            }} 
+                                                                        />
+                                                                        <Marker position={cityCoords as any} icon={createSignalIcon(1, true, routeColor)}>
+                                                                            <Popup className="custom-popup">
+                                                                                <div className="p-3 text-neutral-900 max-w-xs space-y-1">
+                                                                                    <p className="text-[11px] font-black uppercase text-brand-green border-b border-brand-green/20 pb-0.5">Escaneo QR de Consumo</p>
+                                                                                    <p className="text-[9px] font-bold mt-1 text-neutral-800">{cityName} • Specialty Coffee Bar</p>
+                                                                                    <p className="text-[9px] text-gray-500 mt-0.5">Historial técnico consultado por consumidor final.</p>
+                                                                                </div>
+                                                                            </Popup>
+                                                                        </Marker>
+                                                                    </React.Fragment>
+                                                                ))}
+                                                            </>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </React.Fragment>
+                                        );
+                                    })}
                                 </React.Fragment>
                             );
                         })}
@@ -681,10 +983,6 @@ export default function RadarDashboard({ user }: { user: any }) {
                     </MapContainer>
                 )}
 
-                {/* Overlays de Interfaz (HUD) Eliminados según requerimiento */}
-
-
-
                 {/* MODAL COMPARTIR ESTILO DRIVE */}
                 {showShareModal && (
                     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-white/85 backdrop-blur-md animate-in fade-in duration-300">
@@ -716,7 +1014,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                                 <button 
                                     onClick={handleInvite}
                                     disabled={isInviting}
-                                    className="flex-2 bg-brand-green hover:bg-brand-green/90 text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all disabled:opacity-50"
+                                    className="flex-2 bg-brand-green hover:bg-brand-green/90 text-white px-10 py-4 rounded-2xl text-[11px] font-black uppercase hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] transition-all disabled:opacity-50 font-bold"
                                 >
                                     {isInviting ? 'Otorgando...' : 'Dar Acceso Viewer'}
                                 </button>
