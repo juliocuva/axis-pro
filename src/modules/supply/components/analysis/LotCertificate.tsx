@@ -61,6 +61,13 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
     const [isSubmittingToTraces, setIsSubmittingToTraces] = useState(false);
     const [tracesStatus, setTracesStatus] = useState<'idle' | 'preparing' | 'sending' | 'certified'>('idle');
     const [ddsReference, setDdsReference] = useState<string | null>(null);
+    const [origin, setOrigin] = useState('https://axisone.coffee');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setOrigin(window.location.origin);
+        }
+    }, []);
 
     // Estados para la previsualización multipágina
     const [viewType, setViewType] = useState<'continuous' | 'paginated' | 'grid'>('continuous');
@@ -930,7 +937,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     <div className="flex flex-col items-center justify-center text-center">
                                         <div className="qr-container p-2 bg-white border border-black/10 rounded-xl shadow-md">
                                             <QRCodeSVG
-                                                value={`https://axisone.coffee/verify/${inventoryId}`}
+                                                value={`${origin}/verify/${inventoryId}`}
                                                 size={200}
                                                 level="H"
                                                 includeMargin={false}
