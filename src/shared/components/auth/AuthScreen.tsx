@@ -416,8 +416,8 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 <div className="flex flex-col gap-4">
                                     {t.problem.list.map((item, i) => (
                                         <div key={i} className="flex items-center gap-6 group">
-                                            <div className="w-2 h-px bg-black/20 group-hover:w-8 group-hover:bg-brand-green transition-all duration-500"></div>
-                                            <span className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-brand-navy/30 group-hover:text-brand-navy transition-colors duration-500">{item}</span>
+                                            <div className="w-2 h-px bg-brand-green/45 group-hover:w-8 group-hover:bg-brand-green transition-all duration-500"></div>
+                                            <span className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-brand-navy/75 group-hover:text-brand-navy group-hover:translate-x-2 transition-all duration-500">{item}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -617,7 +617,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                 <div className="text-xl font-black text-brand-green tracking-tighter">{tier.price}</div>
                                 <ul className="space-y-3 pt-6 border-t border-brand-gray/50">
                                     {tier.features.map((f, j) => (
-                                        <li key={j} className="flex items-start gap-2.5 text-[10px] font-black uppercase text-brand-navy/60 tracking-wider group-hover:text-brand-navy transition-colors leading-relaxed">
+                                        <li key={j} className="flex items-start gap-2.5 text-[11px] font-normal normal-case text-brand-navy leading-relaxed">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="text-brand-green shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
                                             {f}
                                         </li>

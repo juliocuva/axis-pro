@@ -21,7 +21,7 @@ export default function ExportCertificatePage() {
     // Parse pages to print, default to all 4 pages if not specified
     const pagesToPrint = pagesParam 
         ? pagesParam.split(',').map(p => parseInt(p, 10)).filter(n => !isNaN(n)) 
-        : [1, 2, 3, 4];
+        : [1, 2];
 
     // Minimal user object for the certificate
     const mockUser = {

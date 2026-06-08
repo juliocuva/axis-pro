@@ -70,6 +70,27 @@ const GLOBAL_ORIGINS = [
         }
     },
     {
+        id: 'global-ethiopia-sidama',
+        lot_number: 'AX1-ETH-SIDA-04',
+        farmer_name: 'Kenenisa Bekele',
+        farm_name: 'Sidama Organic Farmers',
+        region: 'SIDAMA, ETHIOPIA',
+        variety: 'HEIRLOOM',
+        process: 'Natural Anaeróbico',
+        purchase_weight: 12500,
+        q_score: 89.8,
+        latitude: 6.784,
+        longitude: 38.385,
+        is_global: true,
+        destinations: ['TOKYO', 'DUBAI'],
+        attributes: {
+            fermentation: '120h Anaeróbica Seca en Cereza',
+            ph: '3.70 / 17.5°Bx',
+            secado: 'Camas Africanas Elevadas',
+            notes: 'Notas florales intensas, arándano maduro, jazmín y acidez sedosa.'
+        }
+    },
+    {
         id: 'global-brazil',
         lot_number: 'AX1-BRA-CERR-22',
         farmer_name: 'Thiago Pereira',
@@ -88,6 +109,27 @@ const GLOBAL_ORIGINS = [
             ph: '4.10 / 14.0°Bx',
             secado: 'Patios de Concreto Expuestos',
             notes: 'Cuerpo denso almibarado, notas marcadas a chocolate y avellanas.'
+        }
+    },
+    {
+        id: 'global-brazil-minas',
+        lot_number: 'AX1-BRA-MINAS-52',
+        farmer_name: 'Aline Silva',
+        farm_name: 'Fazenda Vista Alegre',
+        region: 'SUL DE MINAS, BRAZIL',
+        variety: 'YELLOW BOURBON',
+        process: 'Pulped Natural',
+        purchase_weight: 28000,
+        q_score: 85.8,
+        latitude: -21.802,
+        longitude: -45.864,
+        is_global: true,
+        destinations: ['HAMBURG', 'ROTTERDAM'],
+        attributes: {
+            fermentation: 'Despulpado Directo con Mucílago',
+            ph: '4.15 / 15.0°Bx',
+            secado: 'Patio Sol Pleno Controlado',
+            notes: 'Dulce caramelo, vainilla, cuerpo cremoso y acidez suave.'
         }
     },
     {
@@ -130,6 +172,27 @@ const GLOBAL_ORIGINS = [
             ph: '4.20 / 13.5°Bx',
             secado: 'Patio Abierto Rápido',
             notes: 'Cuerpo robusto, notas terrosas de cedro, tabaco dulce y especias.'
+        }
+    },
+    {
+        id: 'global-indonesia-bali',
+        lot_number: 'AX1-IDN-BALI-18',
+        farmer_name: 'Wayan Gede',
+        farm_name: 'Kintamani Highlands',
+        region: 'BALI, INDONESIA',
+        variety: 'KARTIKA',
+        process: 'Full Honey',
+        purchase_weight: 8400,
+        q_score: 87.5,
+        latitude: -8.244,
+        longitude: 115.342,
+        is_global: true,
+        destinations: ['SYDNEY', 'SHANGHAI'],
+        attributes: {
+            fermentation: '36h Honey en Tanques de Concreto',
+            ph: '3.90 / 16.0°Bx',
+            secado: 'Secado Lento en Camas Africanas',
+            notes: 'Sabor exótico a mandarina dulce, clavo de olor y notas de cacao.'
         }
     },
     {
@@ -241,15 +304,15 @@ export default function RadarDashboard({ user }: { user: any }) {
     const [filterPreset, setFilterPreset] = useState<'ALL' | 'SIMULACION' | 'COMPETENCIA'>('ALL');
 
     // Vista: ORIGEN (Colombia), LOGISTICA (Puertos), CONSUMO (Escaneos Deep)
-    const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO'>('ORIGEN');
+    const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO'>('LOGISTICA');
     const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
 
     // Controles de Presentación Global Exclusivos de Super Admin Julio César
-    const [isGlobalProjection, setIsGlobalProjection] = useState(false);
+    const [isGlobalProjection, setIsGlobalProjection] = useState(true);
     const [showMaritimalLines, setShowMaritimalLines] = useState(true);
     const [showConsumerScans, setShowConsumerScans] = useState(true);
     const [showSimTransit, setShowSimTransit] = useState(true);
-    const [showAllGlobalRoutes, setShowAllGlobalRoutes] = useState(true);
+    const [showAllGlobalRoutes, setShowAllGlobalRoutes] = useState(false);
 
     const createSignalIcon = (scale = 1, isPulsing = false, color = '#0C6056', isOutline = false) => {
         if (!L) return null;

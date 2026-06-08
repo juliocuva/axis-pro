@@ -121,7 +121,7 @@ const newLotsData = [
       water_activity: 0.58,
       density_gl: 720,
       defects_count: { primarios: 0, secundarios: 0 },
-      notes: "Predominancia Malla 15/16"
+      notes: "Predominancia Malla 17/18"
     },
     // Tostión
     roast: {
