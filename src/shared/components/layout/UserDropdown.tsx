@@ -7,7 +7,7 @@ interface UserDropdownProps {
     onLogout: () => void;
     onOpenManual: () => void;
     onOpenUpdates: () => void;
-    onSelectView?: (view: 'supply' | 'master' | 'stats' | 'radar') => void;
+    onSelectView?: (view: 'ecosystem' | 'supply' | 'master' | 'stats' | 'radar') => void;
     onOpenCloudVault?: () => void;
 }
 
@@ -68,6 +68,17 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
                     </div>
 
                     <div className="space-y-1">
+                        {/* 360 ECOSYSTEM DASHBOARD */}
+                        {onSelectView && (
+                            <button
+                                onClick={() => { onSelectView('ecosystem'); setIsOpen(false); }}
+                                className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r hover:from-brand-green hover:to-emerald-500 rounded-industrial-sm text-[11px] font-black uppercase text-brand-navy hover:text-white transition-all duration-300"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                                360° Ecosystem Dashboard
+                            </button>
+                        )}
+
                         {/* ACCESOS DE TRAZABILIDAD (MÓDULO PRINCIPAL DE SUPPLY) */}
                         {onSelectView && (
                             <button
@@ -75,7 +86,7 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
                                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white rounded-industrial-sm text-[11px] font-bold uppercase text-brand-navy hover:text-brand-navy transition-all"
                             >
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
-                                Trazabilidad Café
+                                Traceability Operations
                             </button>
                         )}
 

@@ -108,14 +108,13 @@ export default function SupplyModuleContainer({
                 <div className="flex-1 space-y-4">
                     <ModuleHeader 
                         title={
-                            activeTab === 'transparency' ? '📊 MONITOREO Y TRANSPARENCIA 360°' :
-                            activeTab === 'purchase' ? t('moduleHeaders', 'purchase') :
-                            activeTab === 'thrashing' ? t('moduleHeaders', 'thrashing') :
-                            activeTab === 'analysis' ? t('moduleHeaders', 'analysis') :
-                            activeTab === 'cupping' ? t('moduleHeaders', 'cupping') : 
-                            activeTab === 'roast' ? t('moduleHeaders', 'roast') : t('moduleHeaders', 'team')
+                            activeTab === 'purchase' ? 'ORIGIN / FARM LEVEL' :
+                            activeTab === 'thrashing' ? 'DRY MILL / THRASHING' :
+                            activeTab === 'analysis' ? 'PHYSICAL LAB' :
+                            activeTab === 'cupping' ? 'CVA CUPPING' : 
+                            activeTab === 'roast' ? 'ROAST INTELLIGENCE' : 'TEAM MANAGEMENT'
                         }
-                        subtitle="AXISONE COFFEE GLOBAL • ORIGIN QUALITY SYSTEM"
+                        subtitle="AXISONE COFFEE GLOBAL • TRACEABILITY OPERATIONS"
                     >
                         {selectedLot && activeTab !== 'archive' && activeTab !== 'transparency' && (
                             <div className="flex items-center gap-4 bg-white border border-gray-400 shadow-sm px-6 py-3 rounded-industrial animate-in fade-in slide-in-from-right-4 duration-500">
@@ -134,12 +133,11 @@ export default function SupplyModuleContainer({
                     <div className="hidden md:block">
                         <nav className="flex flex-wrap bg-transparent p-0 mb-4 gap-2">
                             {[
-                                { id: 'transparency', label: 'Monitoreo 360°' },
-                                { id: 'purchase', label: t('tabs', 'origin') },
-                                { id: 'thrashing', label: t('tabs', 'thrashing') },
-                                { id: 'analysis', label: t('tabs', 'lab') },
-                                { id: 'roast', label: t('tabs', 'roast') },
-                                { id: 'cupping', label: t('tabs', 'cupping') }
+                                { id: 'purchase', label: 'Origin' },
+                                { id: 'thrashing', label: 'Dry Mill' },
+                                { id: 'analysis', label: 'Physical Lab' },
+                                { id: 'roast', label: 'Roast Intelligence' },
+                                { id: 'cupping', label: 'CVA Cupping' }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -151,23 +149,23 @@ export default function SupplyModuleContainer({
                             ))}
                         </nav>
 
-                        <div className="bg-soft-white/50 rounded-industrial border border-gray-400 shadow-sm p-6 min-h-[500px]">
-                            {!selectedLot && activeTab !== 'purchase' && activeTab !== 'archive' && activeTab !== 'transparency' ? (
+                        <div className="bg-soft-white/50 rounded-industrial border border-gray-400 shadow-sm p-6 min-h-[200px]">
+                            {!selectedLot && activeTab !== 'purchase' && activeTab !== 'archive' && activeTab !== 'transparency' && activeTab !== 'roast' ? (
                                 <div className="h-[400px] flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in duration-500">
                                     <div className="w-20 h-20 rounded-full bg-carbon/5 border border-gray-400 shadow-sm flex items-center justify-center text-gray-600">
                                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2v20M2 12h20M12 2l10 10-10 10M12 2L2 12l10 10"/></svg>
                                     </div>
                                     <div className="space-y-2">
-                                        <h3 className="text-lg font-bold text-brand-navy uppercase">Requiere Selección de Lote</h3>
+                                        <h3 className="text-lg font-bold text-brand-navy uppercase">Lot Selection Required</h3>
                                         <p className="text-xs text-gray-600 max-w-xs mx-auto uppercase leading-relaxed">
-                                            Por favor, selecciona un lote del <span className="text-brand-navy font-black">Historial de Flujo</span> en la parte inferior para cargar los datos técnicos.
+                                            Please, select a lot from the <span className="text-brand-navy font-black">Ecosystem Dashboard</span> to load technical data.
                                         </p>
                                     </div>
                                     <button 
                                         onClick={onOpenSyncModal}
                                         className="px-6 py-3 bg-[#0C6056] text-white shadow-lg shadow-brand-green/20 rounded-full text-[11px] font-black uppercase transition-all hover:scale-105 active:scale-95"
                                     >
-                                        Sincronizar Lotes
+                                        Sync Lots
                                     </button>
                                 </div>
                             ) : (
@@ -178,27 +176,7 @@ export default function SupplyModuleContainer({
 
                     {/* VISTA MOBILE: Acordeón vertical ultra digerible */}
                     <div className="md:hidden space-y-3 pb-20 animate-in fade-in duration-500">
-                        {/* ITEM 0: Panel de Monitoreo 360° en Móvil */}
-                        <div className={`border-2 rounded-2xl overflow-hidden shadow-sm transition-all ${activeTab === 'transparency' ? 'border-brand-green bg-white shadow-md' : 'border-zinc-200 bg-zinc-50/30'}`}>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setActiveTab('transparency');
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }}
-                                className="w-full flex items-center justify-between p-4 text-xs font-black uppercase text-left transition-all hover:bg-zinc-50"
-                            >
-                                <span className="text-brand-navy tracking-wide">Monitoreo y Procesos 360°</span>
-                                <span className="text-[9px] font-black px-2.5 py-0.5 rounded-full border border-teal-200 bg-teal-50 text-teal-800 uppercase">
-                                    Ecosistema
-                                </span>
-                            </button>
-                            {activeTab === 'transparency' && (
-                                <div className="p-4 bg-white border-t border-zinc-100 animate-in fade-in slide-in-from-top-4 duration-300">
-                                    {renderForm('transparency')}
-                                </div>
-                            )}
-                        </div>
+                        {/* Mobile view removed transparency logic, starting directly with forms */}
 
                         {[
                             { id: 'purchase', label: '1. Origen y Compra', status: selectedLot ? '✓ Guardado' : 'Pendiente', color: selectedLot ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200', locked: false },

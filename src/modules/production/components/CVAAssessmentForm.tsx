@@ -81,45 +81,48 @@ interface CVAAssessmentFormProps {
   isReadOnly?: boolean;
 }
 
-const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => (
-  <div className="space-y-2">
-    <div className="flex justify-between items-center">
-      <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-        <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-        {label}
-      </label>
-      <span className="text-brand-navy font-mono font-bold text-sm bg-white border border-gray-400 shadow-sm px-2 py-0.5 rounded">{value}</span>
-    </div>
-    <div className="relative h-6 flex items-center">
-      <input
-        type="range"
-        min="0"
-        max="15"
-        step="0.5"
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className={`w-full h-1 bg-black/20 rounded-lg appearance-none accent-brand-green ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-      />
-      <style jsx>{`
-        input[type='range']::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          background: #0C6056;
-          cursor: pointer;
-          border-radius: 50%;
-          border: 1px solid #000;
-        }
-        input[type='range']:disabled::-webkit-slider-thumb {
-          background: #006056;
-          cursor: not-allowed;
-        }
-      `}</style>
-    </div>
-  </div>
-);
+const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => {
+    const totalBlocks = 15;
+    const filledBlocks = Math.round(value);
+
+    return (
+        <div className="flex flex-col gap-1 w-full relative group">
+            <div className="flex justify-between items-end mb-1">
+                <label className="text-[10px] font-bold text-brand-navy uppercase">{label}</label>
+                <span className="text-xs font-bold text-brand-navy bg-white border border-gray-400 px-1.5 py-0.5 rounded-sm shadow-sm">{value.toFixed(2)}</span>
+            </div>
+            
+            <div className="relative h-4 w-full">
+                {/* Visual Equalizer */}
+                <div className="absolute inset-0 flex items-center justify-between gap-[2px] pointer-events-none">
+                    {Array.from({ length: totalBlocks }).map((_, i) => {
+                        const isActive = i < filledBlocks;
+                        return (
+                            <div 
+                                key={i} 
+                                className={`flex-1 h-full rounded-[1px] transition-all duration-300 ${
+                                    isActive ? 'bg-brand-green shadow-[0_0_5px_rgba(0,223,154,0.3)]' : 'bg-gray-200'
+                                }`}
+                            />
+                        );
+                    })}
+                </div>
+                
+                {/* Invisible native range slider for interaction */}
+                <input
+                    type="range"
+                    min="0"
+                    max="15"
+                    step="0.25"
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => onChange(parseFloat(e.target.value))}
+                    className={`absolute inset-0 w-full h-full opacity-0 m-0 p-0 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                />
+            </div>
+        </div>
+    );
+};
 
 interface DescriptorOption {
     label: string;
@@ -128,45 +131,50 @@ interface DescriptorOption {
 
 const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }: { label: string, options: (string | DescriptorOption)[], selected: string[], onToggle: (val: string) => void, disabled?: boolean }) => (
     <div className="space-y-2">
-        <label className="text-[11px] font-bold text-brand-navy font-black uppercase ">{label}</label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 border-l border-gray-400 pl-4">
+        <label className="text-[10px] font-bold text-brand-navy uppercase">{label}</label>
+        <div className="flex flex-wrap gap-2">
             {options.map((opt, idx) => {
                 const isString = typeof opt === 'string';
                 const mainLabel = isString ? opt : opt.label;
                 const subs = isString ? [] : opt.subOptions || [];
+                const isSelected = selected.includes(mainLabel);
 
                 return (
                     <div key={idx} className="flex flex-col gap-1">
-                        {/* CATEGORÍA PRINCIPAL */}
                         <button
                             type="button"
                             disabled={disabled}
                             onClick={() => onToggle(mainLabel)}
-                            className={`flex items-center gap-1 py-0.5 transition-all w-fit group ${disabled ? 'cursor-not-allowed' : ''}`}
+                            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-industrial-sm border transition-all ${
+                                isSelected 
+                                    ? 'bg-brand-navy border-brand-navy text-white shadow-sm' 
+                                    : 'bg-white border-gray-400 text-brand-navy hover:border-brand-navy'
+                            } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
                         >
-                            <div className={`w-3.5 h-3.5 border flex-shrink-0 transition-all flex items-center justify-center ${selected.includes(mainLabel) ? 'bg-black border-black shadow-[0_0_8px_rgba(0,166,81,0.4)]' : 'border-black'}`}>
-                                {selected.includes(mainLabel) && <svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" className="w-2.5 h-2.5"><path d="M20 6L9 17l-5-5" /></svg>}
-                            </div>
-                            <span className={`text-[11px] font-bold uppercase  ${selected.includes(mainLabel) ? 'text-brand-navy' : 'text-brand-navy font-black'}`}>{mainLabel}</span>
+                            {mainLabel}
                         </button>
                         
-                        {/* SUB-CATEGORÍAS */}
-                        {subs.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pl-6">
-                                {subs.map(sub => (
-                                    <button
-                                        key={sub}
-                                        type="button"
-                                        disabled={disabled}
-                                        onClick={() => onToggle(sub)}
-                                        className={`flex items-center gap-1.5 py-0.5 transition-all group ${disabled ? 'cursor-not-allowed' : ''}`}
-                                    >
-                                        <div className={`w-3 h-3 border flex-shrink-0 transition-all flex items-center justify-center ${selected.includes(sub) ? 'bg-black/70 border-black' : 'border-black'}`}>
-                                            {selected.includes(sub) && <svg viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" className="w-2 h-2"><path d="M20 6L9 17l-5-5" /></svg>}
-                                        </div>
-                                        <span className={`text-[11px] font-medium uppercase  ${selected.includes(sub) ? 'text-brand-navy' : 'text-brand-navy font-black'}`}>{sub}</span>
-                                    </button>
-                                ))}
+                        {/* SUBCATEGORÍAS SOLO VISIBLES SI LA PRINCIPAL ESTÁ SELECCIONADA */}
+                        {isSelected && subs.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1 pl-2 border-l border-brand-navy/30">
+                                {subs.map(sub => {
+                                    const isSubSelected = selected.includes(sub);
+                                    return (
+                                        <button
+                                            key={sub}
+                                            type="button"
+                                            disabled={disabled}
+                                            onClick={() => onToggle(sub)}
+                                            className={`px-2 py-1 text-[9px] font-bold uppercase rounded-industrial-sm border transition-all ${
+                                                isSubSelected 
+                                                    ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' 
+                                                    : 'bg-white border-gray-300 text-gray-500 hover:border-brand-green hover:text-brand-navy'
+                                            } ${disabled ? 'cursor-not-allowed' : ''}`}
+                                        >
+                                            {sub}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -224,30 +232,48 @@ const SCAExtrinsicSection = ({
     </div>
 );
 
-const QualityScale = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => (
-  <div className="space-y-2">
-    <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-3">
-      <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-      {label}
-    </label>
-    <div className="flex justify-between gap-1">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-        <button
-          key={num}
-          type="button"
-          disabled={disabled}
-          onClick={() => onChange(num)}
-          className={`w-7 h-7 rounded-full border text-[11px] font-bold transition-all flex items-center justify-center
-            ${value === num 
-              ? 'bg-brand-green border-black text-brand-navy font-black scale-110 shadow-sm' 
-              : disabled ? 'border-gray-400 bg-white text-brand-navy font-black cursor-not-allowed' : 'border-gray-400 bg-white text-brand-navy hover:border-black'}`}
-        >
-          {num}
-        </button>
-      ))}
-    </div>
-  </div>
-);
+const QualityScale = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => {
+    const totalBlocks = 9;
+    const filledBlocks = Math.round(value);
+
+    return (
+        <div className="flex flex-col gap-1 w-full relative group">
+            <div className="flex justify-between items-end mb-1">
+                <label className="text-[10px] font-bold text-brand-navy uppercase">{label}</label>
+                <span className="text-xs font-bold text-brand-navy bg-white border border-gray-400 px-1.5 py-0.5 rounded-sm shadow-sm">{value.toFixed(2)}</span>
+            </div>
+            
+            <div className="relative h-6 w-full">
+                <div className="absolute inset-0 flex items-center justify-between gap-[2px] pointer-events-none">
+                    {Array.from({ length: totalBlocks }).map((_, i) => {
+                        const isActive = i < filledBlocks;
+                        return (
+                            <div 
+                                key={i} 
+                                className={`flex-1 h-full rounded-[1px] transition-all duration-300 flex items-center justify-center text-[9px] font-bold ${
+                                    isActive ? 'bg-brand-navy text-white shadow-[0_0_5px_rgba(10,37,64,0.3)]' : 'bg-white border border-gray-400 text-gray-300'
+                                }`}
+                            >
+                                {i + 1}
+                            </div>
+                        );
+                    })}
+                </div>
+                
+                <input
+                    type="range"
+                    min="0"
+                    max="9"
+                    step="0.25"
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => onChange(parseFloat(e.target.value))}
+                    className={`absolute inset-0 w-full h-full opacity-0 m-0 p-0 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                />
+            </div>
+        </div>
+    );
+};
 
 export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave, onCuppingComplete, isReadOnly }: CVAAssessmentFormProps) {
   const { t } = useLanguage();

@@ -18,6 +18,11 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         developmentTime: '',
         developmentPct: 0,
         dropTemp: 0,
+        chargeTemp: 0,
+        yellowingTime: '',
+        fcTime: '',
+        fcTemp: 0,
+        notes: ''
     });
 
     const [curveFile, setCurveFile] = useState<File | null>(null);
@@ -142,8 +147,19 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         roasted_weight: roastedW,
                         selected_weight: selectedW,
                         quakers_grams: quakersG,
-                        roast_curve: curveData, // Guardamos la telemetría real
-                        company_id: user?.companyId
+                        roast_curve: curveData,
+                        company_id: user?.companyId,
+                        manual_metrics: {
+                            chargeTemp: formData.chargeTemp,
+                            yellowingTime: formData.yellowingTime,
+                            fcTime: formData.fcTime,
+                            fcTemp: formData.fcTemp,
+                            roastTime: formData.roastTime,
+                            developmentTime: formData.developmentTime,
+                            developmentPct: formData.developmentPct,
+                            dropTemp: formData.dropTemp,
+                            notes: formData.notes
+                        }
                     }
                 ]);
 
@@ -271,7 +287,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 xl:px-0">
             <button
                 onClick={() => window.dispatchEvent(new CustomEvent('change-view', { detail: 'live' }))}
                 className="flex items-center gap-2 text-[11px] font-bold uppercase text-brand-navy hover:text-brand-navy transition-all mb-4"
@@ -283,15 +299,19 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             </button>
 
             <div className="text-center mb-10 relative">
-                <div className="absolute top-0 right-0">
-                    <button
-                        onClick={loadDemoData}
-                        className="group flex items-center gap-2 bg-white hover:bg-brand-green text-brand-navy hover:text-brand-navy border border-gray-400 shadow-sm px-4 py-2 rounded-full transition-all duration-500 shadow-lg shadow-brand-green/5"
-                        title="Cargar Datos de Demostración"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:animate-bounce"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        <span className="text-[9px] font-bold uppercase ">Auto-Fill Demo</span>
-                    </button>
+                <div className="absolute top-0 right-0 flex items-center gap-3">
+                    {/* Boton Cargar Curva */}
+                    <div className="relative overflow-hidden cursor-pointer group flex items-center gap-2 bg-brand-navy hover:bg-brand-green text-white px-5 py-2 rounded-full transition-all duration-300 shadow-lg shadow-brand-navy/10">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span className="text-[10px] font-bold uppercase tracking-wide">Cargar Curva .CSV</span>
+                        <input
+                            type="file"
+                            accept=".csv,.alog"
+                            onChange={handleCurveUpload}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            disabled={curveStatus.type === 'processing' || isSubmitting}
+                        />
+                    </div>
                 </div>
                 <div className="inline-block px-3 py-1 bg-white border border-gray-400 shadow-sm rounded-full mb-4">
                     <p className="text-[11px] text-brand-navy font-bold uppercase ">Ingreso Rápido Industrial</p>
@@ -306,30 +326,33 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
 
             {/* LOT IDENTIFICATION */}
             {lotData && (
-                <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial-sm flex flex-col md:flex-row gap-6 justify-between items-center mb-8">
-                    <div className="flex-1">
-                        <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">Materia Prima Vinculada</p>
-                        <p className="text-xl font-bold text-brand-navy uppercase">{lotData.farmer_name || 'Productor'} • {lotData.variety || 'Variedad Tatama'}</p>
-                    </div>
-                    <div className="flex gap-6 text-center">
-                        <div className="bg-white px-4 py-2 rounded border border-gray-400 shadow-sm">
-                            <p className="text-[9px] text-brand-navy uppercase font-bold">Humedad</p>
-                            <p className="text-sm font-bold text-brand-navy">{lotData.physical_analysis?.[0]?.moisture_pct || '--'}%</p>
+                <div className="mb-8">
+                    <p className="text-[10px] text-brand-navy font-black uppercase tracking-widest mb-2 pl-2">Materia Prima Vinculada</p>
+                    <div className="bg-white p-5 lg:p-6 rounded-industrial flex flex-col lg:flex-row gap-5 lg:gap-8 justify-between items-start lg:items-center">
+                        <div className="flex-1 min-w-0 w-full border-b lg:border-b-0 lg:border-r border-gray-200 pb-4 lg:pb-0 lg:pr-8 flex flex-col justify-center">
+                            <h3 className="text-lg font-black text-brand-navy uppercase leading-tight truncate mb-1" title={lotData.farmer_name || 'Productor'}>
+                                {lotData.farmer_name || 'Productor'}
+                            </h3>
+                            <p className="text-[11px] text-gray-500 font-bold uppercase truncate" title={`${lotData.variety || 'Variedad'} • ${lotData.process}`}>
+                                <span className="text-brand-navy">{lotData.variety || 'Variedad'}</span> <span className="mx-2 text-gray-300">•</span> {lotData.process}
+                            </p>
                         </div>
-                        <div className="bg-white px-4 py-2 rounded border border-gray-400 shadow-sm">
-                            <p className="text-[9px] text-brand-navy uppercase font-bold">Densidad</p>
-                            <p className="text-sm font-bold text-brand-navy">{lotData.physical_analysis?.[0]?.density_gl || '--'} <span className="text-[11px] text-brand-navy">g/L</span></p>
-                        </div>
-                        <div className="bg-white px-4 py-2 rounded border border-gray-400 shadow-sm">
-                            <p className="text-[9px] text-brand-navy uppercase font-bold">Proceso</p>
-                            <p className="text-sm font-bold text-brand-navy uppercase">{lotData.process}</p>
+                        <div className="flex flex-wrap sm:flex-nowrap gap-4 w-full lg:w-auto shrink-0">
+                            <div className="bg-zinc-50 px-5 py-3 rounded-lg border border-zinc-200 flex-1 sm:flex-none min-w-[110px]">
+                                <p className="text-[9px] text-gray-500 uppercase tracking-wider font-bold mb-1">Humedad</p>
+                                <p className="text-base font-black text-brand-navy">{lotData.physical_analysis?.[0]?.moisture_pct || '--'}%</p>
+                            </div>
+                            <div className="bg-zinc-50 px-5 py-3 rounded-lg border border-zinc-200 flex-1 sm:flex-none min-w-[110px]">
+                                <p className="text-[9px] text-gray-500 uppercase tracking-wider font-bold mb-1">Densidad</p>
+                                <p className="text-base font-black text-brand-navy">{lotData.physical_analysis?.[0]?.density_gl || '--'} <span className="text-[11px] text-gray-400 font-bold">g/L</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white p-10 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white blur-3xl pointer-events-none rounded-full"></div>
+            <form onSubmit={handleSubmit} className="space-y-6 relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/50 blur-3xl pointer-events-none rounded-full"></div>
 
                 {status && (
                     <div className={`p-4 rounded text-xs font-bold border flex items-center gap-3 ${status.type === 'success' ? 'bg-white border-gray-400 shadow-sm text-brand-navy-bright' : 'bg-brand-red/10 border-brand-red/30 text-brand-red-bright'}`}>
@@ -337,44 +360,15 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     </div>
                 )}
 
-                {/* INTEGRACIÓN DE CURVAS DE MÁQUINA (Artisan/Cropster) */}
-                <div className="relative z-10 bg-white border border-dashed border-gray-300 p-8 rounded-industrial flex flex-col sm:flex-row items-center gap-6 group hover:border-gray-400 shadow-sm transition-colors">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm group-hover:scale-110 transition-transform">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-navy-bright"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                {curveStatus.type && curveStatus.type !== 'idle' && curveData.length === 0 && (
+                    <div className="relative z-10 flex justify-end -mt-4 mb-4">
+                        <div className={`flex items-center gap-2 text-[10px] font-bold uppercase px-4 py-2 rounded-full border shadow-sm ${curveStatus.type === 'processing' ? 'bg-white border-gray-400 text-brand-navy' : curveStatus.type === 'success' ? 'bg-white border-brand-green/50 text-brand-green' : 'bg-red-50 border-red-200 text-red-500'}`}>
+                            {curveStatus.type === 'processing' && <div className="w-3 h-3 border-2 border-brand-navy border-t-transparent rounded-full animate-spin"></div>}
+                            {curveStatus.type === 'success' && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                            {curveStatus.message}
+                        </div>
                     </div>
-                    <div className="flex-1">
-                        <h4 className="text-[12px] font-bold text-brand-navy uppercase  mb-1">Cargar Curva de Tostadora</h4>
-                        <p className="text-[11px] text-brand-navy uppercase  leading-relaxed">Arrastre o seleccione el log térmico generado por su máquina (Artisan / Cropster) en formato .CSV o .ALOG</p>
-
-                        {curveStatus.type === 'processing' && (
-                            <div className="mt-3 flex items-center gap-2 text-[11px] text-brand-navy font-bold uppercase  animate-pulse">
-                                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                                {curveStatus.message}
-                            </div>
-                        )}
-                        {curveStatus.type === 'success' && (
-                            <div className="mt-3 flex items-center gap-2 text-[11px] text-brand-navy-bright font-bold uppercase  bg-white px-3 py-1.5 rounded-full w-max border border-gray-400 shadow-sm">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                {curveStatus.message}
-                            </div>
-                        )}
-                        {curveStatus.type === 'error' && (
-                            <div className="mt-3 text-[11px] text-red-400 font-bold uppercase ">
-                                {curveStatus.message}
-                            </div>
-                        )}
-                    </div>
-                    <div className="relative overflow-hidden cursor-pointer bg-white hover:bg-white transition-all text-brand-navy font-bold text-[11px] uppercase  px-8 py-4 rounded-industrial-sm">
-                        Examinar Archivo
-                        <input
-                            type="file"
-                            accept=".csv,.alog"
-                            onChange={handleCurveUpload}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            disabled={curveStatus.type === 'processing' || isSubmitting}
-                        />
-                    </div>
-                </div>
+                )}
 
                 {/* VISUALIZADOR DE CURVA (VISTA PREVIA) */}
                 {curveData.length > 0 && (
@@ -394,51 +388,84 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 relative z-10">
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-3 block">Bache de Tostión (ID)</label>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Bache de Tostión (ID)</label>
                         <input
                             type="text"
                             value={formData.batchId}
                             onChange={(e) => setFormData({ ...formData, batchId: e.target.value.toUpperCase() })}
                             placeholder="EJ: AX-TOST-7721"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none transition-all font-mono text-lg text-brand-navy font-bold placeholder:text-brand-navy"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-lg text-brand-navy font-bold placeholder:text-brand-navy"
                             disabled={isSubmitting}
                         />
                     </div>
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-3 block">Fecha de Tueste</label>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Fecha de Tueste</label>
                         <input
                             type="date"
                             required
                             value={formData.roastDate}
                             onChange={(e) => setFormData({ ...formData, roastDate: e.target.value })}
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none transition-all font-bold text-brand-navy-bright scheme-light"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-bold text-brand-navy-bright scheme-light"
                             disabled={isSubmitting}
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10 p-6 bg-white rounded-xl border border-gray-400 shadow-sm">
+                <div className="mt-8">
+                    <h4 className="text-[10px] text-brand-green font-black uppercase tracking-widest mb-2 pl-2">1. PARAMETROS DE TUESTE (MANUALES)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-3 relative z-10 p-5 bg-white rounded-xl border border-gray-400 shadow-sm">
+
+                    <NumericInput
+                        label="Temp. Carga (°C)"
+                        value={formData.chargeTemp}
+                        onChange={(val) => setFormData({ ...formData, chargeTemp: val })}
+                        step={0.1}
+                        unit="°C"
+                        disabled={isSubmitting}
+                        variant="industrial"
+                    />
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-3 block">Tiempo Total</label>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Secado / Color Change</label>
                         <input
                             type="text"
-                            value={formData.roastTime}
-                            onChange={(e) => setFormData({ ...formData, roastTime: e.target.value })}
-                            placeholder="Ej: 11:30"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            value={formData.yellowingTime}
+                            onChange={(e) => setFormData({ ...formData, yellowingTime: e.target.value })}
+                            placeholder="Ej: 5:30"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
                             disabled={isSubmitting}
                         />
                     </div>
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-3 block">Tiempo DTR</label>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Tiempo 1er Crack</label>
+                        <input
+                            type="text"
+                            value={formData.fcTime}
+                            onChange={(e) => setFormData({ ...formData, fcTime: e.target.value })}
+                            placeholder="Ej: 9:15"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            disabled={isSubmitting}
+                        />
+                    </div>
+                    <NumericInput
+                        label="Temp. 1er Crack (°C)"
+                        value={formData.fcTemp}
+                        onChange={(val) => setFormData({ ...formData, fcTemp: val })}
+                        step={0.1}
+                        unit="°C"
+                        disabled={isSubmitting}
+                        variant="industrial"
+                    />
+
+                    <div>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Tiempo DTR</label>
                         <input
                             type="text"
                             value={formData.developmentTime}
                             onChange={(e) => setFormData({ ...formData, developmentTime: e.target.value })}
                             placeholder="Ej: 1:45"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -451,6 +478,17 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         disabled={isSubmitting}
                         variant="industrial"
                     />
+                    <div>
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Tiempo Total</label>
+                        <input
+                            type="text"
+                            value={formData.roastTime}
+                            onChange={(e) => setFormData({ ...formData, roastTime: e.target.value })}
+                            placeholder="Ej: 11:30"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            disabled={isSubmitting}
+                        />
+                    </div>
                     <NumericInput
                         label="Temp. Caída (°C)"
                         value={formData.dropTemp}
@@ -461,8 +499,12 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         variant="industrial"
                     />
                 </div>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10 p-6 bg-white rounded-xl border border-gray-400 shadow-sm">
+                <div className="mt-8">
+                    <h4 className="text-[10px] text-brand-green font-black uppercase tracking-widest mb-2 pl-2">2. RESULTADOS DE CALIDAD (MERMA Y DEFECTOS)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 relative z-10 p-5 bg-white rounded-xl border border-gray-400 shadow-sm">
+                    
                     <NumericInput
                         label="Carga Verde (IN)"
                         value={formData.greenWeight}
@@ -486,9 +528,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         variant="industrial"
                         formatThousands={true}
                     />
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                     <NumericInput
                         label="Selección / Limpio (Opcional)"
                         value={formData.selectedWeight}
@@ -509,48 +549,38 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         variant="orange"
                         formatThousands={true}
                     />
+
+                    <div className="col-span-1 md:col-span-2 mt-4 flex flex-col md:flex-row gap-6">
+                        <div className="flex-1">
+                            <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">Notas u Observaciones del Tostador</label>
+                            <textarea
+                                value={formData.notes}
+                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                placeholder="Notas sobre el desarrollo, incidencias en la máquina..."
+                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all text-sm text-brand-navy resize-none h-24"
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        {(formData.greenWeight > 0 && formData.roastedWeight > 0) && (
+                            <div className="flex items-end justify-end gap-8 pb-2 shrink-0">
+                                <div className="text-right">
+                                    <p className="text-[10px] text-brand-navy uppercase font-bold mb-1">Merma (Pérdida)</p>
+                                    <p className={`text-lg font-bold ${stats.roastLoss > 16.5 || stats.roastLoss < 12 ? 'text-brand-red' : 'text-brand-navy'}`}>{stats.roastLoss.toFixed(2)}%</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] text-brand-navy uppercase font-bold mb-1">Rendimiento</p>
+                                    <p className="text-lg font-bold text-brand-navy-bright">{stats.netYield.toFixed(2)}%</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
                 </div>
 
-                {/* Cuadro de Predicción de Merma */}
-                {formData.greenWeight > 0 && (
-                    <div className="relative z-10 bg-white border border-gray-400 shadow-sm rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 my-6">
-                        <div className="flex items-center gap-4 flex-1">
-                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-400 shadow-sm">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-navy"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                            </div>
-                            <div>
-                                <h4 className="text-[11px] font-bold text-brand-navy uppercase  mb-1">Predicción de Merma (IA)</h4>
-                                <p className="text-[11px] text-brand-navy">Según densidad ({lotData?.physical_analysis?.[0]?.density_gl || '--'} g/L) y proceso ({lotData?.process || '--'})</p>
-                            </div>
-                        </div>
-                        <div className="text-right border-l border-gray-400 shadow-sm pl-6">
-                            <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Pérdida Esperada</p>
-                            <p className="text-xl font-bold text-brand-navy">{expectedStats.minLoss.toFixed(1)}% - {expectedStats.maxLoss.toFixed(1)}%</p>
-                        </div>
-                        <div className="text-right border-l border-gray-400 shadow-sm pl-6">
-                            <p className="text-[9px] text-brand-navy uppercase font-bold mb-1">Rango OUT Proyectado</p>
-                            <p className="text-xl font-bold text-brand-navy-bright ">
-                                {(formData.greenWeight * (1 - expectedStats.maxLoss / 100)).toLocaleString('es-CO', {maximumFractionDigits: 1})} <span className="text-[12px] text-brand-navy">KG</span>
-                                <span className="text-brand-navy font-medium mx-2">-</span>
-                                {(formData.greenWeight * (1 - expectedStats.minLoss / 100)).toLocaleString('es-CO', {maximumFractionDigits: 1})} <span className="text-[12px] text-brand-navy">KG</span>
-                            </p>
-                        </div>
-                    </div>
-                )}
 
-                {/* Dashboard en vivo */}
-                {(formData.greenWeight > 0 && formData.roastedWeight > 0) && (
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-center text-center md:text-left pt-6 border-t border-gray-400 shadow-sm gap-6">
-                        <div>
-                            <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">Merma (Pérdida por Evaporación)</p>
-                            <p className={`text-2xl font-bold ${stats.roastLoss > 16.5 || stats.roastLoss < 12 ? 'text-brand-red' : 'text-brand-navy'}`}>{stats.roastLoss.toFixed(2)}%</p>
-                        </div>
-                        <div>
-                            <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">Rendimiento Industrial</p>
-                            <p className="text-3xl font-black text-brand-navy-bright er">{stats.netYield.toFixed(2)}%</p>
-                        </div>
-                    </div>
-                )}
+
+
 
                 <div className="flex justify-end pt-8 relative z-10">
                     <button

@@ -103,10 +103,10 @@ export default function ProcessPipelineDashboard({ user, onSelectLotAndTab, onOp
             )}
 
             {/* BANNER DE GOBERNANZA DEMOCRÁTICA (SOBERANÍA DE DATOS) */}
-            <div className="relative overflow-hidden rounded-3xl border-2 border-brand-green/20 bg-bg-card p-6 shadow-md shadow-brand-green/5">
-                <div className="absolute -right-16 -top-16 w-36 h-36 bg-brand-green/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/40 backdrop-blur-2xl p-6 shadow-xl shadow-brand-navy/5 group hover:bg-white/60 transition-all duration-500">
+                <div className="absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-br from-brand-green/20 to-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-                    <div className="w-14 h-14 bg-white/50 border border-brand-green/30 rounded-2xl flex items-center justify-center text-brand-green shadow-inner shrink-0">
+                    <div className="w-14 h-14 bg-white border border-brand-green/20 rounded-2xl flex items-center justify-center text-brand-green shadow-sm shrink-0">
                         {isGrower ? (
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         ) : (
@@ -115,12 +115,12 @@ export default function ProcessPipelineDashboard({ user, onSelectLotAndTab, onOp
                     </div>
                     <div className="space-y-1">
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-green">
-                            {isGrower ? 'Tu Banco Técnico Soberano' : 'Ecosistema Democrático Axis'}
+                            {isGrower ? 'Sovereign Technical Bank' : 'Axis Democratic Ecosystem'}
                         </h4>
                         <p className="text-xs font-bold text-brand-navy leading-relaxed uppercase">
                             {isGrower 
-                                ? 'Este registro de calidad física, sensorial y de tostión te pertenece. Es tu pasaporte técnico independiente para respaldar tu trabajo y negociar tu café con el mundo.' 
-                                : 'Estás patrocinando el Banco Técnico de tus caficultores en origen. Tienes acceso completo a los reportes de calidad, pasaportes digitales e historial de los lotes adquiridos.'}
+                                ? 'This physical, sensory, and roasting quality record belongs to you. It is your independent technical passport.' 
+                                : 'You are sponsoring the Technical Bank of your origin growers. You have full access to quality reports and traceability.'}
                         </p>
                     </div>
                 </div>
@@ -128,21 +128,21 @@ export default function ProcessPipelineDashboard({ user, onSelectLotAndTab, onOp
 
             {/* PANEL DE METRICAS DEL BANCO TÉCNICO */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-bg-card border border-gray-400/40 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow transition-all group">
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-zinc-200/20 blur-xl rounded-full"></div>
-                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">Lotes Totales</span>
+                <div className="bg-white/50 backdrop-blur-xl border border-white/60 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-brand-green/5 blur-xl rounded-full"></div>
+                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">Total Lots</span>
                     <span className="text-3xl font-black text-brand-navy mt-2 block">{totalLotsCount}</span>
                 </div>
-                <div className="bg-bg-card border border-gray-400/40 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow transition-all group">
-                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">En Proceso</span>
+                <div className="bg-white/50 backdrop-blur-xl border border-white/60 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
+                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">In Process</span>
                     <span className="text-3xl font-black text-amber-600 mt-2 block">{activeLotsCount}</span>
                 </div>
-                <div className="bg-bg-card border border-gray-400/40 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow transition-all group">
-                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">Lotes Completados</span>
+                <div className="bg-white/50 backdrop-blur-xl border border-white/60 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
+                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">Completed</span>
                     <span className="text-3xl font-black text-emerald-600 mt-2 block">{completedLotsCount}</span>
                 </div>
-                <div className="bg-bg-card border border-gray-400/40 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow transition-all group">
-                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">Certificados Activos</span>
+                <div className="bg-white/50 backdrop-blur-xl border border-white/60 p-5 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
+                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block">Certified Active</span>
                     <span className="text-3xl font-black text-teal-600 mt-2 block">{certifiedLotsCount}</span>
                 </div>
             </div>
@@ -151,30 +151,30 @@ export default function ProcessPipelineDashboard({ user, onSelectLotAndTab, onOp
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-transparent">
                 {/* Buscador */}
                 <div className="relative w-full md:flex-1 max-w-xl group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-brand-green transition-colors">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </div>
                     <input 
                         type="text" 
-                        placeholder="Buscar por Productor, Finca, Lote o Variedad..."
+                        placeholder="Search by Producer, Farm, Lot, or Variety..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white border border-gray-400/60 shadow-sm rounded-2xl py-3 pl-12 pr-4 text-xs font-bold text-brand-navy uppercase outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all placeholder:text-zinc-400"
+                        className="w-full bg-white/70 backdrop-blur-md border border-white/60 shadow-sm rounded-2xl py-3 pl-12 pr-4 text-xs font-bold text-brand-navy uppercase outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20 transition-all placeholder:text-zinc-400 hover:bg-white"
                     />
                 </div>
 
                 {/* Filtros */}
-                <div className="flex bg-white border border-gray-400/60 p-1 rounded-2xl shadow-sm overflow-x-auto w-full md:w-auto shrink-0 scrollbar-none">
+                <div className="flex bg-white/60 backdrop-blur-md border border-white/60 p-1.5 rounded-2xl shadow-sm overflow-x-auto w-full md:w-auto shrink-0 scrollbar-none">
                     {[
-                        { id: 'ALL', label: 'Todos' },
-                        { id: 'ACTIVE', label: 'En Proceso' },
-                        { id: 'COMPLETED', label: 'Completados' },
-                        { id: 'CERTIFIED', label: 'Certificados' }
+                        { id: 'ALL', label: 'All' },
+                        { id: 'ACTIVE', label: 'Active' },
+                        { id: 'COMPLETED', label: 'Completed' },
+                        { id: 'CERTIFIED', label: 'Certified' }
                     ].map((status) => (
                         <button
                             key={status.id}
                             onClick={() => setFilterStatus(status.id as any)}
-                            className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all shrink-0 ${filterStatus === status.id ? 'bg-brand-green text-brand-navy shadow-sm' : 'text-zinc-600 hover:text-brand-navy bg-transparent'}`}
+                            className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all shrink-0 ${filterStatus === status.id ? 'bg-gradient-to-r from-brand-navy to-black text-white shadow-md' : 'text-zinc-600 hover:text-brand-navy bg-transparent'}`}
                         >
                             {status.label}
                         </button>
@@ -278,11 +278,11 @@ export default function ProcessPipelineDashboard({ user, onSelectLotAndTab, onOp
 
                                     {/* Nodos de Pasos */}
                                     {[
-                                        { id: 'purchase', label: 'Origen', done: hasStep1, active: activeStep === 1 && !isCompleted },
-                                        { id: 'thrashing', label: 'Trilla', done: hasStep2, active: activeStep === 2 && !isCompleted },
-                                        { id: 'analysis', label: 'Lab Físico', done: hasStep3, active: activeStep === 3 && !isCompleted },
-                                        { id: 'roast', label: 'Tostión', done: hasStep4, active: activeStep === 4 && !isCompleted },
-                                        { id: 'cupping', label: 'Catación', done: hasStep5, active: activeStep === 5 && !isCompleted }
+                                        { id: 'purchase', label: 'Origin', done: hasStep1, active: activeStep === 1 && !isCompleted },
+                                        { id: 'thrashing', label: 'Dry Mill', done: hasStep2, active: activeStep === 2 && !isCompleted },
+                                        { id: 'analysis', label: 'Lab', done: hasStep3, active: activeStep === 3 && !isCompleted },
+                                        { id: 'roast', label: 'Roast', done: hasStep4, active: activeStep === 4 && !isCompleted },
+                                        { id: 'cupping', label: 'CVA', done: hasStep5, active: activeStep === 5 && !isCompleted }
                                     ].map((step, idx) => (
                                         <div key={idx} className="relative z-10 flex flex-col items-center gap-1">
                                             <div 
@@ -293,10 +293,10 @@ export default function ProcessPipelineDashboard({ user, onSelectLotAndTab, onOp
                                                 }}
                                                 className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black border transition-all ${
                                                     step.done 
-                                                        ? 'bg-emerald-600 border-emerald-600 text-white shadow shadow-emerald-500/20 cursor-pointer hover:scale-105 active:scale-95' 
-                                                        : 'bg-white border-zinc-300 text-zinc-400 pointer-events-none'
+                                                        ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 border-emerald-600 text-white shadow-lg shadow-emerald-500/30 cursor-pointer hover:scale-110 active:scale-95' 
+                                                        : 'bg-white border-zinc-200 text-zinc-300 pointer-events-none'
                                                 } ${step.active ? 'ring-4 ring-brand-green/30 animate-pulse' : ''}`}
-                                                title={step.done ? `Paso ${idx+1} completo - Click para ver` : `Paso ${idx+1} pendiente`}
+                                                title={step.done ? `Step ${idx+1} complete - Click to view` : `Step ${idx+1} pending`}
                                             >
                                                 {step.done ? '✓' : idx + 1}
                                             </div>

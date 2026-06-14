@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from 'recharts';
 
 const HUB_BOGOTA = [4.711, -74.072];
 const PORT_BUENAVENTURA = [3.880, -77.031];
@@ -218,6 +219,50 @@ const GLOBAL_ORIGINS = [
     }
 ];
 
+const TRENDS_DATA = {
+    ANAEROBICO: [
+        { name: 'Ene', value: 120 },
+        { name: 'Feb', value: 135 },
+        { name: 'Mar', value: 150 },
+        { name: 'Abr', value: 172 },
+        { name: 'May', value: 195 },
+        { name: 'Jun', value: 210 },
+    ],
+    GEISHA: [
+        { name: 'Ene', value: 45 },
+        { name: 'Feb', value: 52 },
+        { name: 'Mar', value: 68 },
+        { name: 'Abr', value: 74 },
+        { name: 'May', value: 89 },
+        { name: 'Jun', value: 105 },
+    ],
+    HONEY: [
+        { name: 'Ene', value: 80 },
+        { name: 'Feb', value: 85 },
+        { name: 'Mar', value: 92 },
+        { name: 'Abr', value: 110 },
+        { name: 'May', value: 115 },
+        { name: 'Jun', value: 130 },
+    ]
+};
+
+const BUYERS_DIRECTORY = [
+    { name: 'Hamburgo Import Co.', country: 'Alemania 🇩🇪', preference: 'Naturales / Anaeróbicos', vol: '15 cont/año', contact: 'hamburg-import.de' },
+    { name: 'Solberg & Hansen', country: 'Noruega 🇳🇴', preference: 'Lavados de alta puntuación', vol: '6 cont/año', contact: 'solberghansen.no' },
+    { name: 'Blue Bottle Roasters', country: 'EE.UU. 🇺🇸', preference: 'Orgánicos y Honey', vol: '40 cont/año', contact: 'bluebottlecoffee.com' },
+    { name: 'The Barn Coffee Roast', country: 'Alemania 🇩🇪', preference: 'Anaeróbicos / Varietales Exóticos', vol: '4 cont/año', contact: 'thebarn.de' },
+    { name: 'Gardelli Specialty', country: 'Italia 🇮🇹', preference: 'Lotes SCA 88+ Exóticos', vol: '2 cont/año', contact: 'gardellicoffee.com' },
+    { name: 'Onyx Coffee Lab', country: 'EE.UU. 🇺🇸', preference: 'Procesos de Co-fermentación', vol: '8 cont/año', contact: 'onyxcoffeelab.com' }
+];
+
+const SEARCH_SIGNALS = [
+    { term: 'Pink Bourbon', growth: '+45%', type: 'up' },
+    { term: 'Choque Térmico', growth: '+68%', type: 'up' },
+    { term: 'Castillo Lavado', growth: '-5%', type: 'down' },
+    { term: 'Sidra Honey', growth: '+30%', type: 'up' },
+    { term: 'Gesha Natural', growth: '+25%', type: 'up' }
+];
+
 const getLotCoordinates = (lot: any, seedIndex: number) => {
     const regionStr = (lot.region || '').toUpperCase();
     
@@ -252,7 +297,9 @@ const getLotCoordinates = (lot: any, seedIndex: number) => {
     return { lat: baseLat + fallbackJitterLat, lon: baseLon + fallbackJitterLon };
 };
 
-export default function RadarDashboard({ user }: { user: any }) {
+export default function RadarDashboard({ user, onClose }: { user: any; onClose?: () => void }) {
+    const [showSidebar, setShowSidebar] = useState(true);
+    const [selectedTrend, setSelectedTrend] = useState<'ANAEROBICO' | 'GEISHA' | 'HONEY'>('ANAEROBICO');
     // Carga dinámica de componentes de mapa para evitar errores de SSR
     const MapContainer = useMemo(() => dynamic(
         () => import('react-leaflet').then((mod) => mod.MapContainer),
@@ -303,8 +350,8 @@ export default function RadarDashboard({ user }: { user: any }) {
     const [filterProcess, setFilterProcess] = useState('ALL');
     const [filterPreset, setFilterPreset] = useState<'ALL' | 'SIMULACION' | 'COMPETENCIA'>('ALL');
 
-    // Vista: ORIGEN (Colombia), LOGISTICA (Puertos), CONSUMO (Escaneos Deep)
-    const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO'>('LOGISTICA');
+    // Vista: ORIGEN (Colombia), LOGISTICA (Puertos), CONSUMO (Escaneos Deep), MARKET (Terminal de Datos)
+    const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO' | 'MARKET'>('LOGISTICA');
     const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
 
     // Controles de Presentación Global Exclusivos de Super Admin Julio César
@@ -622,14 +669,36 @@ export default function RadarDashboard({ user }: { user: any }) {
             `}</style>
 
             {/* Side Control Tower (Métricas) */}
-            <aside className="w-96 bg-white border-r border-gray-200/80 p-6 flex flex-col gap-4 z-[2000] shadow-xl relative overflow-y-auto sidebar-scroll text-neutral-800">
-                <div className="flex items-center gap-4 border-b border-gray-100 pb-4">
-                    <div className="w-10 h-10 bg-brand-green rounded-lg flex items-center justify-center text-white font-black shadow-lg shadow-brand-green/20">AX</div>
-                    <div>
-                        <h2 className="text-sm font-black uppercase text-neutral-900 tracking-wider">Control Center</h2>
-                        <p className="text-[11px] text-brand-green font-bold uppercase tracking-widest">Global Logistics Radar</p>
-                    </div>
-                </div>
+            <aside className={`${showSidebar ? 'w-96 p-6 border-r border-gray-200/80' : 'w-0 p-0 border-r-0 overflow-hidden'} bg-white flex flex-col gap-4 z-[2000] shadow-xl relative transition-all duration-300 sidebar-scroll text-neutral-800`}>
+                {showSidebar && (
+                    <div className="flex flex-col gap-4 h-full">
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setShowSidebar(false)}
+                                    className="w-8 h-8 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center text-[12px] transition-all font-bold shadow-sm"
+                                    title="Ocultar Panel"
+                                >
+                                    ◀
+                                </button>
+                                {onClose && (
+                                    <button 
+                                        onClick={onClose}
+                                        className="px-3 py-1.5 bg-red-50 hover:bg-red-500 hover:text-white text-red-600 rounded-lg text-[9px] font-black uppercase transition-all shadow-sm border border-red-100 hover:border-red-500"
+                                        title="Cerrar Radar"
+                                    >
+                                        Cerrar Radar
+                                    </button>
+                                )}
+                            </div>
+                            
+                            <div className="flex items-center gap-3 text-right">
+                                <div>
+                                    <h2 className="text-xs font-black uppercase text-neutral-900 tracking-wider">Control Center</h2>
+                                    <p className="text-[9px] text-brand-green font-bold uppercase tracking-widest">Global Logistics</p>
+                                </div>
+                            </div>
+                        </div>
 
                 {/* 1. CONFIGURACIONES (TOP) */}
                 <div className="bg-neutral-50/80 border border-gray-200/60 p-5 rounded-2xl space-y-4 backdrop-blur-md">
@@ -707,6 +776,12 @@ export default function RadarDashboard({ user }: { user: any }) {
                             className={`w-full py-2 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'CONSUMO' ? 'bg-brand-green text-white border-brand-green shadow-[0_0_20px_rgba(12,96,86,0.4)]' : 'border-gray-200 text-gray-500 hover:text-brand-green hover:border-brand-green/45'}`}
                         >
                             Deep Trace (Escaneos)
+                        </button>
+                        <button 
+                            onClick={() => setViewMode('MARKET')} 
+                            className={`w-full py-2.5 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'MARKET' ? 'bg-amber-600 text-white border-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.4)]' : 'border-gray-200 text-amber-700 hover:text-amber-600 hover:border-amber-600/45'}`}
+                        >
+                            ⚡ Coffee Radar Terminal
                         </button>
                     </div>
                 </div>
@@ -827,11 +902,257 @@ export default function RadarDashboard({ user }: { user: any }) {
                         <p className="text-[9px] text-neutral-700 leading-tight uppercase font-bold">{stats.activeAssociations} Asociaciones en Red.</p>
                     </div>
                 </div>
+                </div>
+                )}
             </aside>
 
-            <main className="flex-1 relative">
-                {L && (
-                    <MapContainer 
+            <main className={`flex-1 relative ${viewMode === 'MARKET' ? 'bg-[#0a0a0a] overflow-y-auto' : ''}`}>
+                 {!showSidebar && (
+                     <div className="absolute top-6 left-6 z-[1001] flex items-center gap-2 bg-white/95 dark:bg-neutral-900/95 border border-gray-200 dark:border-neutral-800 rounded-full p-1.5 shadow-xl backdrop-blur-md no-print">
+                         {onClose && (
+                             <button
+                                 onClick={onClose}
+                                 className="px-4 py-2 bg-brand-green hover:bg-brand-green/90 text-white rounded-full text-[9px] font-black uppercase transition-all active:scale-95"
+                             >
+                                 ← Cerrar Radar
+                             </button>
+                         )}
+                         <button
+                             onClick={() => setShowSidebar(true)}
+                             className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 flex items-center justify-center text-[10px] transition-all font-bold"
+                             title="Mostrar Panel"
+                         >
+                             ▶
+                         </button>
+                     </div>
+                 )}
+                 {viewMode === 'MARKET' ? (
+                    <div className="p-8 space-y-8 text-neutral-200 animate-in fade-in duration-300">
+                        {/* Header Terminal */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-800/80 pb-6">
+                            <div>
+                                <span className="text-[9px] bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2.5 py-1 rounded-full font-black uppercase tracking-wider">
+                                    Terminal de Inteligencia Comercial
+                                </span>
+                                <h1 className="text-3xl font-black tracking-tight text-white mt-2">COFFEE RADAR</h1>
+                                <p className="text-xs text-neutral-400 mt-1 uppercase font-bold tracking-wide">
+                                    Monitoreo de Ofertas, Tendencias de Consumo y Directorio Activo de Compradores
+                                </p>
+                            </div>
+                            
+                            {/* NY C Price Ticker */}
+                            <div className="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-4 flex items-center gap-6 shadow-xl backdrop-blur-md">
+                                <div className="border-r border-neutral-800 pr-6">
+                                    <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider">Bolsa NY Contrato C</p>
+                                    <p className="text-lg font-black text-white mt-0.5">228.45 <span className="text-xs font-bold text-neutral-400">¢/lb</span></p>
+                                    <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-0.5 mt-0.5">
+                                        ▲ +2.15% (Hoy)
+                                    </span>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider">Diferencial Colombia</p>
+                                    <p className="text-lg font-black text-amber-500 mt-0.5">+38.00 <span className="text-xs font-bold text-neutral-400">¢/lb</span></p>
+                                    <span className="text-[8px] bg-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded font-black uppercase tracking-widest mt-1 block">
+                                        Premium FNC
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Fila 1: Métricas Críticas de Mercado */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden group hover:border-amber-500/40 transition-all duration-300">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all"></div>
+                                <p className="text-neutral-500 text-[9px] font-black uppercase tracking-wider mb-2">Compradores Activos</p>
+                                <p className="text-3xl font-black text-white">87 Tostadores</p>
+                                <p className="text-[10px] text-neutral-400 mt-1 uppercase font-semibold">
+                                    Buscando Naturales en Alemania y EE.UU.
+                                </p>
+                            </div>
+                            <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
+                                <p className="text-neutral-500 text-[9px] font-black uppercase tracking-wider mb-2">Proceso Líder</p>
+                                <p className="text-3xl font-black text-emerald-500">Anaeróbicos</p>
+                                <p className="text-[10px] text-neutral-400 mt-1 uppercase font-semibold">
+                                    +75% de presencia en menús retail
+                                </p>
+                            </div>
+                            <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden group hover:border-amber-500/40 transition-all duration-300">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all"></div>
+                                <p className="text-neutral-500 text-[9px] font-black uppercase tracking-wider mb-2">Origen Más Buscado</p>
+                                <p className="text-3xl font-black text-white">Colombia</p>
+                                <p className="text-[10px] text-neutral-400 mt-1 uppercase font-semibold">
+                                    Seguido de Etiopía y Costa Rica
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Fila 2: Gráfico de Tendencias y Señales de Búsqueda */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Trend Chart (2/3 de ancho) */}
+                            <div className="lg:col-span-2 bg-neutral-900/40 border border-neutral-800 rounded-3xl p-6 backdrop-blur-md">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                    <div>
+                                        <h3 className="text-sm font-black uppercase text-white tracking-wider">Histórico de Ofertas en Tostadores</h3>
+                                        <p className="text-[10px] text-neutral-500 uppercase font-semibold mt-0.5">Frecuencia de aparición de procesos en menús globales</p>
+                                    </div>
+                                    <div className="flex gap-2 bg-neutral-950 p-1 rounded-xl border border-neutral-800">
+                                        {(['ANAEROBICO', 'GEISHA', 'HONEY'] as const).map((t) => (
+                                            <button
+                                                key={t}
+                                                onClick={() => setSelectedTrend(t)}
+                                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${selectedTrend === t ? 'bg-amber-500 text-neutral-950' : 'text-neutral-400 hover:text-white'}`}
+                                            >
+                                                {t}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="w-full">
+                                    <ResponsiveContainer width="100%" height={240}>
+                                        <AreaChart data={TRENDS_DATA[selectedTrend]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={selectedTrend === 'GEISHA' ? '#10b981' : '#f59e0b'} stopOpacity={0.25}/>
+                                                    <stop offset="95%" stopColor={selectedTrend === 'GEISHA' ? '#10b981' : '#f59e0b'} stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#1f1f1f" vertical={false} />
+                                            <XAxis dataKey="name" stroke="#525252" fontSize={10} tickLine={false} />
+                                            <YAxis stroke="#525252" fontSize={10} tickLine={false} />
+                                            <RechartsTooltip 
+                                                contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', borderRadius: '12px', color: '#fff', fontSize: '11px' }}
+                                            />
+                                            <Area 
+                                                type="monotone" 
+                                                dataKey="value" 
+                                                stroke={selectedTrend === 'GEISHA' ? '#10b981' : '#f59e0b'} 
+                                                strokeWidth={2} 
+                                                fillOpacity={1} 
+                                                fill="url(#colorValue)" 
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            {/* Search Intent */}
+                            <div className="bg-neutral-900/40 border border-neutral-800 rounded-3xl p-6 flex flex-col justify-between backdrop-blur-md">
+                                <div>
+                                    <h3 className="text-sm font-black uppercase text-white tracking-wider mb-1">Señales de Búsqueda</h3>
+                                    <p className="text-[10px] text-neutral-500 uppercase font-semibold mb-4">Palabras clave con mayor crecimiento global</p>
+                                    
+                                    <div className="space-y-3">
+                                        {SEARCH_SIGNALS.map((sig, i) => (
+                                            <div key={i} className="flex items-center justify-between p-3 bg-neutral-900/80 border border-neutral-800/60 rounded-xl">
+                                                <span className="text-xs font-bold text-neutral-200">{sig.term}</span>
+                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${sig.type === 'up' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                    {sig.type === 'up' ? '▲' : '▼'} {sig.growth}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-4 pt-4 border-t border-neutral-800/60">
+                                    <p className="text-[9px] text-neutral-500 uppercase font-bold text-center">Datos recopilados de Google Trends e Instagram Specialty Coffee Tags</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Fila 3: Directorio Vivo de Compradores */}
+                        <div className="bg-neutral-900/40 border border-neutral-800 rounded-3xl p-6 backdrop-blur-md">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <h3 className="text-sm font-black uppercase text-white tracking-wider">Directorio Vivo de Compradores</h3>
+                                    <p className="text-[10px] text-neutral-500 uppercase font-semibold mt-0.5">Tostadores e importadores activos y sus preferencias actuales</p>
+                                </div>
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Buscar por país o proceso..." 
+                                        className="bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-2 text-xs w-64 focus:outline-none focus:border-amber-500 transition-all text-white"
+                                    />
+                                    <span className="absolute right-3 top-2.5 text-neutral-600 text-xs">🔍</span>
+                                </div>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr className="border-b border-neutral-800 text-neutral-500 font-bold uppercase tracking-wider">
+                                            <th className="pb-3 pl-2">Comprador</th>
+                                            <th className="pb-3">País de Destino</th>
+                                            <th className="pb-3">Preferencia de Café</th>
+                                            <th className="pb-3">Volumen Est.</th>
+                                            <th className="pb-3">Web / Contacto</th>
+                                            <th className="pb-3 text-right pr-2">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-neutral-900">
+                                        {BUYERS_DIRECTORY.map((buyer, i) => (
+                                            <tr key={i} className="hover:bg-neutral-900/30 transition-all">
+                                                <td className="py-4 pl-2 font-black text-white">{buyer.name}</td>
+                                                <td className="py-4 text-neutral-300">{buyer.country}</td>
+                                                <td className="py-4">
+                                                    <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 font-semibold border border-amber-500/20">
+                                                        {buyer.preference}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 text-neutral-300 font-bold">{buyer.vol}</td>
+                                                <td className="py-4 text-neutral-500 underline font-mono">{buyer.contact}</td>
+                                                <td className="py-4 text-right pr-2">
+                                                    <button className="bg-amber-600 hover:bg-amber-500 text-neutral-950 font-black uppercase text-[9px] px-3.5 py-1.5 rounded-lg transition-all shadow-md shadow-amber-600/10">
+                                                        Ofrecer Lote
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Fila 4: Coffee Radar Weekly - Newsletter Preview */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="md:col-span-2 bg-gradient-to-r from-neutral-900 to-neutral-950 border border-neutral-800 rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-all"></div>
+                                <div className="space-y-2">
+                                    <span className="text-[8px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">
+                                        Newsletter Premium
+                                    </span>
+                                    <h4 className="text-base font-black text-white">Coffee Radar Weekly — Edición Vol. 42</h4>
+                                    <p className="text-xs text-neutral-400 leading-relaxed">
+                                        "El impacto de la sequía en el diferencial de cafés naturales de Brasil y cómo la demanda alemana de procesos de fermentación anaeróbica está abriendo una ventana de oportunidad única para los productores del Huila en este tercer trimestre..."
+                                    </p>
+                                </div>
+                                <div className="flex items-center justify-between mt-6 pt-4 border-t border-neutral-800">
+                                    <span className="text-[10px] text-neutral-500 font-bold uppercase">Publicado hace 2 días</span>
+                                    <button className="text-amber-500 text-[10px] font-black uppercase tracking-wider hover:underline flex items-center gap-1">
+                                        Leer Edición Completa ➔
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="bg-neutral-900/40 border border-neutral-800 rounded-3xl p-6 flex flex-col justify-between backdrop-blur-md">
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-black uppercase text-white tracking-wider">Suscripción Activa</h4>
+                                    <p className="text-[10px] text-neutral-400 uppercase font-semibold leading-relaxed">
+                                        Acceso completo ilimitado a la base de datos de tostadores y el boletín analítico semanal.
+                                    </p>
+                                </div>
+                                <div className="bg-neutral-950/80 border border-neutral-800 rounded-2xl p-4 mt-4 text-center">
+                                    <span className="text-[9px] text-neutral-500 uppercase font-black tracking-wider block">Tu tarifa actual</span>
+                                    <span className="text-2xl font-black text-white block mt-1">USD 49<span className="text-xs text-neutral-500">/mes</span></span>
+                                    <span className="text-[8px] text-emerald-500 font-bold uppercase tracking-wider mt-1 block">Facturación Activa vía Stripe</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 ) : (
+                    L && (
+                        <MapContainer 
                         center={viewMode === 'ORIGEN' ? [4.5709, -74.2973] as any : [20.0, 0.0] as any} 
                         zoom={viewMode === 'ORIGEN' ? 6 : 2} 
                         minZoom={2}
@@ -1044,6 +1365,7 @@ export default function RadarDashboard({ user }: { user: any }) {
                             </Marker>
                         ))}
                     </MapContainer>
+                    )
                 )}
 
                 {/* MODAL COMPARTIR ESTILO DRIVE */}

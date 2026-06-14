@@ -33,23 +33,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     variant = 'industrial',
     formatThousands = false
 }) => {
-    const handleIncrement = () => {
-        if (disabled) return;
-        const currentVal = typeof value === 'string' ? parseFloat(value) || 0 : value;
-        const newVal = currentVal + step;
-        if (max !== undefined && newVal > max) return;
-        // Si el valor es pequeño, toFixed(2) podría agregar ceros de más a la vista, usamos Number para quitar trailing zeros, 
-        // pero almacenamos como string para evitar el salto del cursor
-        onChange(String(Number(newVal.toFixed(2))));
-    };
 
-    const handleDecrement = () => {
-        if (disabled) return;
-        const currentVal = typeof value === 'string' ? parseFloat(value) || 0 : value;
-        const newVal = currentVal - step;
-        if (min !== undefined && newVal < min) return;
-        onChange(String(Number(newVal.toFixed(2))));
-    };
 
     const variantStyles = {
         default: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
@@ -59,16 +43,10 @@ export const NumericInput: React.FC<NumericInputProps> = ({
         orange: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black'
     };
 
-    const arrowColor = {
-        default: 'text-brand-navy',
-        industrial: 'text-brand-navy',
-        blue: 'text-brand-navy-bright',
-        red: 'text-brand-red',
-        orange: 'text-brand-navy-bright'
-    };
+
 
     return (
-        <div className={`space-y-2 ${className}`}>
+        <div className={`space-y-0.5 ${className}`}>
             {label && (
                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
@@ -100,32 +78,14 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         }
                         onChange(val);
                     }}
-                    className={`block w-full border rounded-industrial-sm px-4 py-3 outline-none font-bold transition-all pr-14 ${variantStyles[variant]} ${inputClassName} placeholder:text-brand-navy/40 placeholder:font-medium`}
+                    className={`w-full border border-gray-400 bg-white shadow-sm rounded-industrial-sm px-3 py-1.5 outline-none font-bold transition-all text-xs text-brand-navy focus:border-black ${inputClassName} placeholder:text-brand-navy/40 placeholder:font-medium`}
                 />
                 <div
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"
-                    style={{ right: '16px' }}
+                    style={{ right: '12px' }}
                 >
-                    <div className="flex flex-col border-l border-gray-400 shadow-sm pl-3">
-                        <button
-                            type="button"
-                            onClick={handleIncrement}
-                            disabled={disabled}
-                            className={`p-1 hover:brightness-125 transition-all ${arrowColor[variant]}`}
-                        >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M18 15l-6-6-6 6" /></svg>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleDecrement}
-                            disabled={disabled}
-                            className={`p-1 hover:brightness-125 transition-all ${arrowColor[variant]}`}
-                        >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
-                        </button>
-                    </div>
                     {unit && (
-                        <span className="text-brand-navy font-black text-[11px] er w-4 text-center">{unit}</span>
+                        <span className="text-brand-navy font-black text-[11px] w-4 text-center">{unit}</span>
                     )}
                 </div>
             </div>

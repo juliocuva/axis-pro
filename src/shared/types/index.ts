@@ -66,6 +66,28 @@ export interface RoastBatch {
     roasterName?: string;
     roastCurve?: any[]; // Points for chart {time, temp, ror, airflow, event}
     scaScore?: number;
+    agtronBean?: number;
+    agtronGround?: number;
+}
+
+export interface CVACupping {
+    id: string;
+    inventoryId: string;
+    cuppingDate: string;
+    tasterName: string;
+    // SCA-103 (Descriptive)
+    descriptiveData?: any; // JSON containing descriptive descriptors
+    // SCA-104 (Affective 1-9 scale)
+    cvaFragranceAroma?: number;
+    cvaFlavorAftertaste?: number;
+    cvaAcidity?: number;
+    cvaSweetness?: number;
+    cvaMouthfeel?: number;
+    cvaUniformity?: number;
+    cvaDefectsDeduction?: number;
+    cvaFinalScore?: number;
+    // Conversion to 100 scale for legacy compatibility
+    legacy100ScoreEquivalent?: number;
 }
 
 export interface DegassingResult {

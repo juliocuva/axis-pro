@@ -204,7 +204,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
     };
 
     return (
-        <div className="bg-transparent p-0 space-y-10 animate-in fade-in duration-700 relative overflow-hidden">
+        <div className="bg-transparent p-0 animate-in fade-in duration-700 relative overflow-hidden">
             {/* Background Decorative Element */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
             
@@ -222,7 +222,9 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
 
             
 
-            <EUDRComplianceBadge lotData={lotDetails} className="mb-6" />
+            <div className="mb-4">
+                <EUDRComplianceBadge lotData={lotDetails} />
+            </div>
 
             {error && (
                 <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl text-red-500 text-[11px] font-bold uppercase  flex items-center gap-4 animate-in slide-in-from-top-4">
@@ -231,10 +233,10 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-12">
+            <form onSubmit={handleSubmit} className="relative z-10">
                 {/* 1. Métrica Base (High Impact) */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
                         <NumericInput
                             label={t('physicalAnalysisForm', 'moisture')}
                             value={formData.moisture}
@@ -242,16 +244,16 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={0.01}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-5xl font-black py-6 er"
+                            inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
                             unit="%"
                         />
-                        <div className="mt-4 flex items-center justify-between">
+                        <div className="mt-1 flex items-center justify-between">
                             <span className="text-[9px] font-bold uppercase text-brand-navy ">{t('physicalAnalysisForm', 'moistureRange')}</span>
-                            <div className={`w-2 h-2 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
+                            <div className={`w-1.5 h-1.5 rounded-full ${formData.moisture >= 10 && formData.moisture <= 12 ? 'bg-brand-green' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
 
-                    <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
+                    <div>
                         <NumericInput
                             label={t('physicalAnalysisForm', 'waterActivity')}
                             value={formData.waterActivity}
@@ -259,15 +261,15 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={0.001}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-5xl font-black py-6 er"
+                            inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
                         />
-                        <div className="mt-4 flex items-center justify-between">
+                        <div className="mt-1 flex items-center justify-between">
                             <span className="text-[9px] font-bold uppercase text-brand-navy ">{t('physicalAnalysisForm', 'waterActivityRange')}</span>
-                            <div className={`w-2 h-2 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-black animate-pulse'}`}></div>
+                            <div className={`w-1.5 h-1.5 rounded-full ${formData.waterActivity <= 0.7 ? 'bg-brand-green' : 'bg-black animate-pulse'}`}></div>
                         </div>
                     </div>
 
-                    <div className="bg-white border border-gray-400 shadow-sm p-8 rounded-[2rem] group hover:border-gray-400 shadow-sm transition-all shadow-inner">
+                    <div>
                         <NumericInput
                             label={t('physicalAnalysisForm', 'density')}
                             value={formData.density}
@@ -275,68 +277,64 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={1}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="text-5xl font-black py-6 er"
+                            inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
                             unit="g/L"
                         />
-                        <div className="mt-4 flex items-center justify-between">
+                        <div className="mt-1 flex items-center justify-between">
                             <span className="text-[9px] font-bold uppercase text-brand-navy ">Standard: {'>'} 680 g/L</span>
-                            <div className={`w-2 h-2 rounded-full ${formData.density > 680 ? 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]' : 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]'}`}></div>
+                            <div className={`w-1.5 h-1.5 rounded-full ${formData.density > 680 ? 'bg-brand-green' : 'bg-yellow-500'}`}></div>
                         </div>
                     </div>
                 </div>
 
                 {/* 2. Granulometría (Sieve Instrument) */}
-                <section className="bg-black/20 border border-gray-400 shadow-sm p-10 rounded-[2.5rem] space-y-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl -mr-16 -mt-16"></div>
-                    
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-gray-400 shadow-sm pb-6">
-                        <div className="space-y-1">
-                            <h4 className="text-[11px] font-bold text-brand-navy-bright uppercase ">{t('physicalAnalysisForm', 'sieveTitle')}</h4>
-                            <p className="text-xl font-bold text-brand-navy ">{t('physicalAnalysisForm', 'sieveSubtitle')}</p>
-                        </div>
-                        <div className={`flex flex-col items-end gap-1 text-brand-navy`}>
-                            <span className="text-[9px] font-bold uppercase opacity-60">{t('physicalAnalysisForm', 'massBalance')}</span>
-                            <div className="flex items-center gap-3">
-                                <span className="text-3xl font-black er leading-none">{screenSum.toFixed(1)}%</span>
-                                {!isReadOnly && !isAlreadyAnalyzed && (
-                                    <button 
-                                        type="button"
-                                        onClick={() => {
-                                            if (lotDetails?.process_data?.sieve_analysis) {
-                                                const sa = lotDetails.process_data.sieve_analysis;
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    screenSize: {
-                                                        size18: Number(sa.m18) || 0,
-                                                        size17: Number(sa.m17) || 0,
-                                                        size16: Number(sa.m16) || 0,
-                                                        size15: Number(sa.m15) || 0,
-                                                        size14: Number(sa.caracol) || 0,
-                                                        size13: 0,
-                                                        size12: 0,
-                                                        under12: Number(sa.menores) || 0
-                                                    }
-                                                }));
-                                            }
-                                        }}
-                                        className="p-2 bg-black text-white rounded-lg hover:bg-black/80 transition-all flex items-center gap-2 text-[8px] font-bold uppercase animate-pulse shadow-lg"
-                                    >
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
-                                        {t('physicalAnalysisForm', 'syncMilling')}
-                                    </button>
-                                )}
-                            </div>
-                            {!isScreenValid && <span className="text-[9px] font-bold uppercase">{t('physicalAnalysisForm', 'adjustRequired')} (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
+                <div className="mt-4 pt-4 border-t border-gray-400 shadow-sm space-y-4 relative z-10">
+                    <div className="flex justify-between items-end border-b border-gray-400 shadow-sm pb-2">
+                        <h4 className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
+                            {t('physicalAnalysisForm', 'sieveTitle')}
+                        </h4>
+                        <div className={`flex items-center gap-2 text-brand-navy`}>
+                            <span className="text-[9px] font-bold uppercase opacity-60">{t('physicalAnalysisForm', 'massBalance')}:</span>
+                            <span className="text-sm font-black er leading-none">{screenSum.toFixed(1)}%</span>
+                            {!isReadOnly && !isAlreadyAnalyzed && (
+                                <button 
+                                    type="button"
+                                    onClick={() => {
+                                        if (lotDetails?.process_data?.sieve_analysis) {
+                                            const sa = lotDetails.process_data.sieve_analysis;
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                screenSize: {
+                                                    size18: Number(sa.m18) || 0,
+                                                    size17: Number(sa.m17) || 0,
+                                                    size16: Number(sa.m16) || 0,
+                                                    size15: Number(sa.m15) || 0,
+                                                    size14: Number(sa.caracol) || 0,
+                                                    size13: 0,
+                                                    size12: 0,
+                                                    under12: Number(sa.menores) || 0
+                                                }
+                                            }));
+                                        }
+                                    }}
+                                    className="px-2 py-1 bg-black text-white rounded-industrial-sm hover:bg-black/80 transition-all flex items-center gap-1 text-[8px] font-bold uppercase shadow-sm ml-1"
+                                >
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
+                                    SYNC
+                                </button>
+                            )}
+                            {!isScreenValid && <span className="text-[9px] font-bold uppercase text-red-500 ml-2">{t('physicalAnalysisForm', 'adjustRequired')} (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
                         {[18, 17, 16, 15, 14, 13, 12, 'under12'].map((size, idx) => (
-                            <div key={idx} className="space-y-2">
-                                <label className="text-[9px] font-bold text-brand-navy uppercase  block text-center">
+                            <div key={idx} className="space-y-1">
+                                <label className="text-[9px] font-bold text-brand-navy uppercase block text-center">
                                     {size === 'under12' ? 'Fondo' : `Malla ${size}`}
                                 </label>
-                                <div className="relative group">
+                                <div className="relative">
                                     <input
                                         type="number"
                                         step="0.1"
@@ -346,11 +344,11 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                             screenSize: { ...formData.screenSize, [size === 'under12' ? 'under12' : `size${size}`]: parseFloat(e.target.value) || 0 }
                                         })}
                                         disabled={isSubmitting || isAlreadyAnalyzed}
-                                        className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-xl px-2 py-4 text-lg font-black text-brand-navy text-center outline-none focus:border-black focus:bg-white transition-all appearance-none"
+                                        className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-2 py-1 text-xs font-bold text-brand-navy text-center outline-none focus:border-black transition-all appearance-none"
                                     />
-                                    <span className="absolute bottom-1 right-1 text-[7px] font-black text-gray-600 uppercase">%</span>
+                                    <span className="absolute top-1/2 -translate-y-1/2 right-2 text-[8px] font-black text-gray-500 uppercase">%</span>
                                 </div>
-                                <div className="h-1 bg-white rounded-full overflow-hidden">
+                                <div className="h-0.5 bg-gray-200 rounded-full overflow-hidden mt-1">
                                     <div 
                                         className="h-full bg-brand-green transition-all duration-700" 
                                         style={{ width: `${(formData.screenSize as any)[size === 'under12' ? 'under12' : `size${size}`]}%` }}
@@ -359,12 +357,16 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             </div>
                         ))}
                     </div>
-                </section>
+                </div>
 
                 {/* 3. Defectos & Color (Visual Analysis) */}
-                <div className="grid grid-cols-1 md:grid-cols-10 gap-8">
-                    <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white border border-gray-400 shadow-sm p-10 rounded-[2.5rem]">
-                        <div className="space-y-4">
+                <div className="mt-4 pt-4 border-t border-gray-400 shadow-sm space-y-4 relative z-10">
+                    <h4 className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-2 mb-4">
+                        <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
+                        Visual Analysis
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
                             <NumericInput
                                 label={t('physicalAnalysisForm', 'primaryDefects')}
                                 value={formData.defects.primary}
@@ -372,12 +374,11 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="text-4xl font-black py-4 text-brand-navy"
+                                inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">{t('physicalAnalysisForm', 'primaryDefectsTip')}</p>
                         </div>
-                        <div className="space-y-4">
+                        <div>
                             <NumericInput
                                 label={t('physicalAnalysisForm', 'secondaryDefects')}
                                 value={formData.defects.secondary}
@@ -385,96 +386,75 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="text-4xl font-black py-4 text-brand-navy"
+                                inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
                                 unit="PTS"
                             />
-                            <p className="text-[9px] text-brand-navy font-bold uppercase  leading-relaxed">{t('physicalAnalysisForm', 'secondaryDefectsTip')}</p>
                         </div>
-                    </div>
-
-                    <div className="md:col-span-4 bg-white border border-gray-400 shadow-sm p-10 rounded-[2.5rem] flex flex-col justify-center gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('physicalAnalysisForm', 'colorDescriptor')}</label>
-                            <div className="relative group">
-                                <select
-                                    value={formData.grainColor}
-                                    disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
-                                    className="w-full bg-bg-main border border-gray-400 shadow-sm rounded-2xl px-6 py-5 text-sm font-black text-brand-navy outline-none focus:border-black uppercase appearance-none transition-all shadow-inner"
-                                    onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
-                                >
-                                    <option value="VERDE OLIVA">Verde Oliva (Optimum)</option>
-                                    <option value="VERDE AZULADO">Verde Azulado (High Fresh)</option>
-                                    <option value="VERDE PALIDO">Verde Pálido (Standard)</option>
-                                    <option value="AMARILLENTO">Amarillento (Aging)</option>
-                                    <option value="MARRON">Marrón (Damaged)</option>
-                                </select>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M6 9l6 6 6-6" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 bg-black/40 rounded-xl border border-gray-400 shadow-sm">
-                            <div className={`w-12 h-12 rounded-lg shadow-inner ${
-                                formData.grainColor === 'VERDE OLIVA' ? 'bg-[#4B5320]' : 
-                                formData.grainColor === 'VERDE AZULADO' ? 'bg-[#008080]' :
-                                formData.grainColor === 'VERDE PALIDO' ? 'bg-[#8FBC8F]' :
-                                formData.grainColor === 'AMARILLENTO' ? 'bg-[#F0E68C]' : 'bg-[#8B4513]'
-                            }`}></div>
-                            <div className="flex-1">
-                                <p className="text-[9px] font-bold text-brand-navy uppercase ">{t('physicalAnalysisForm', 'chromaticPreview')}</p>
-                                <p className="text-[9px] text-brand-navy uppercase mt-0.5">{t('physicalAnalysisForm', 'basedAgtron')}</p>
-                            </div>
+                        <div>
+                            <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">{t('physicalAnalysisForm', 'colorDescriptor')}</label>
+                            <select
+                                value={formData.grainColor}
+                                disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
+                                className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy outline-none focus:border-black uppercase appearance-none transition-all shadow-inner bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat"
+                                onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
+                            >
+                                <option value="VERDE OLIVA">Verde Oliva (Optimum)</option>
+                                <option value="VERDE AZULADO">Verde Azulado (High Fresh)</option>
+                                <option value="VERDE PALIDO">Verde Pálido (Standard)</option>
+                                <option value="AMARILLENTO">Amarillento (Aging)</option>
+                                <option value="MARRON">Marrón (Damaged)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 {/* Submit Action */}
-                <div className="pt-8 border-t border-gray-400 shadow-sm">
-                    <button
-                        type={isAlreadyAnalyzed || isReadOnly ? "button" : "submit"}
-                        disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid || isReadOnly}
-                        className={`w-full font-black py-8 rounded-[2rem] transition-all flex items-center justify-center gap-6 group uppercase  text-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${
-                            isAlreadyAnalyzed 
-                            ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-default' 
-                            : isReadOnly 
-                            ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-not-allowed' 
-                            : isScreenValid 
-                            ? 'bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-brand-green/20 hover:shadow-brand-green/40' 
-                            : 'bg-white text-brand-navy cursor-not-allowed border border-gray-400 shadow-sm opacity-50'
-                        }`}
-                    >
-                        {isSubmitting ? (
-                            <div className="flex items-center gap-4">
-                                <div className="w-6 h-6 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-                                <span>Firmando Digitalmente en AXIS Cloud...</span>
-                            </div>
-                        ) : isAlreadyAnalyzed ? (
-                            <>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                    <polyline points="22 4 12 14.01 9 11.01" />
-                                </svg>
-                                <span>{t('physicalAnalysisForm', 'analyzed')}</span>
-                            </>
-                        ) : !isScreenValid ? (
-                            <>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                                </svg>
-                                <span>{t('physicalAnalysisForm', 'correctSieve')}</span>
-                            </>
-                        ) : (
-                            <>
-                                <span>{t('physicalAnalysisForm', 'submit')}</span>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-2 transition-transform">
-                                    <path d="M5 12h14M12 5l7 7-7 7" />
-                                </svg>
-                            </>
-                        )}
-                    </button>
-                    <p className="text-center text-[9px] text-brand-navy uppercase font-black  mt-8 opacity-40">
-                        AXISONE COFFEE • DATA SOVEREIGNTY • CERTIFIED HUB
-                    </p>
+                <div className="grid grid-cols-3 items-center pt-6 border-t border-gray-400 relative z-20 mt-6">
+                    <div></div>
+                    <div className="flex justify-center w-full">
+                        <button
+                            type={isAlreadyAnalyzed || isReadOnly ? "button" : "submit"}
+                            disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid || isReadOnly}
+                            className={`w-full font-bold py-2.5 rounded-industrial-sm transition-all flex items-center justify-center gap-2 group uppercase text-[11px] shadow-sm ${
+                                isAlreadyAnalyzed 
+                                ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-default' 
+                                : isReadOnly 
+                                ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-not-allowed' 
+                                : isScreenValid 
+                                ? 'bg-brand-green hover:bg-opacity-90 text-white border border-brand-green shadow-sm' 
+                                : 'bg-white text-brand-navy cursor-not-allowed border border-gray-400 shadow-sm opacity-50'
+                            }`}
+                        >
+                            {isSubmitting ? (
+                                <div className="flex items-center gap-3">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <span>SINCRONIZANDO...</span>
+                                </div>
+                            ) : isAlreadyAnalyzed ? (
+                                <>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                    <span>{t('physicalAnalysisForm', 'analyzed')}</span>
+                                </>
+                            ) : !isScreenValid ? (
+                                <>
+                                    <span>{t('physicalAnalysisForm', 'correctSieve')}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>{t('physicalAnalysisForm', 'submit')}</span>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                        <polyline points="17 21 17 13 7 13 7 21" />
+                                        <polyline points="7 3 7 8 15 8" />
+                                    </svg>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    <div></div>
                 </div>
             </form>
         </div>

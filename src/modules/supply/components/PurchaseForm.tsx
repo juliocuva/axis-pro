@@ -19,9 +19,16 @@ const COFFEE_VARIETIES_BASE: string[] = [
 const PROCESS_TYPES: ProcessType[] = ['lavado', 'semilavado', 'honey', 'natural', 'sumergido'];
 
 const FERMENTATION_STYLES = [
-    { id: 'estandar', label: 'Estándar / Tradicional' },
-    { id: 'anaerobico', label: 'Anaeróbico (General)' },
-    { id: 'otro', label: '+ OTRO (ESPECIFICAR)' }
+    { id: 'estandar', label: 'STANDARD / TRADITIONAL' },
+    { id: 'anaerobico', label: 'ANAEROBIC (GENERAL)' },
+    { id: 'aerobic', label: 'AEROBIC (GENERAL)' },
+    { id: 'carbonic_maceration', label: 'CARBONIC MACERATION' },
+    { id: 'lactic', label: 'LACTIC FERMENTATION' },
+    { id: 'double_fermentation', label: 'DOUBLE FERMENTATION' },
+    { id: 'co_fermentation', label: 'CO-FERMENTATION (FRUITS/YEASTS)' },
+    { id: 'thermal_shock', label: 'THERMAL SHOCK' },
+    { id: 'koji', label: 'KOJI FERMENTATION' },
+    { id: 'otro', label: '+ OTHER (SPECIFY)' }
 ];
 
 const COLOMBIAN_REGIONS = [
@@ -68,14 +75,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
         region: '',
         municipality: '',
         variety: '' as CoffeeVariety | string,
-        process: 'lavado' as ProcessType,
+        process: '' as ProcessType,
         farmerPhone: '',
         purchaseWeight: 0,
         purchaseValue: 0,
         purchaseDate: new Date().toISOString().split('T')[0],
         harvestDate: new Date().toISOString().split('T')[0],
         lotNumber: `FINCA-${new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' })}-LOTE1`,
-        destination: 'export_green' as 'export_green',
+        destination: 'export_green' as 'export_green' | 'roasted_coffee',
         exportCertificate: '',
         isEuropeDestination: false as boolean,
         coffeeType: 'pergamino' as 'pergamino' | 'excelso',
@@ -83,11 +90,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
         longitude: 0,
         processData: {
             fermentation_style: 'estandar',
-            ph_inicial: '4.5',
-            ph_final: '3.8',
-            brix_inicial: '18.5',
-            temperatura_masa_max: '35',
-            duracion_fermentacion_horas: '72',
+            ph_inicial: '',
+            ph_final: '',
+            brix_inicial: '',
+            temperatura_masa_max: '',
+            duracion_fermentacion_horas: '',
             actividad_agua_aw: '',
             recipiente_fermentacion: '',
             tipo_secado: '',
@@ -217,11 +224,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
                     if (isSpecialty && hasData && !hasValues) {
                         return {
-                            ph_inicial: '4.5',
-                            ph_final: '3.8',
-                            brix_inicial: '18.5',
-                            temperatura_masa_max: '35',
-                            duracion_fermentacion_horas: '72',
+                            ph_inicial: '',
+                            ph_final: '',
+                            brix_inicial: '',
+                            temperatura_masa_max: '',
+                            duracion_fermentacion_horas: '',
                             actividad_agua_aw: '',
                             recipiente_fermentacion: '',
                             tipo_secado: '',
@@ -234,11 +241,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                         fermentation_style: pd.fermentation_style || 'estandar'
                     } : {
                         fermentation_style: 'estandar',
-                        ph_inicial: '4.5',
-                        ph_final: '3.8',
-                        brix_inicial: '18.5',
-                        temperatura_masa_max: '35',
-                        duracion_fermentacion_horas: '72',
+                        ph_inicial: '',
+                        ph_final: '',
+                        brix_inicial: '',
+                        temperatura_masa_max: '',
+                        duracion_fermentacion_horas: '',
                         actividad_agua_aw: '',
                         recipiente_fermentacion: '',
                         tipo_secado: '',
@@ -494,7 +501,23 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
     const isAlreadyRegistered = !!selectedLot;
 
     return (
-        <form autoComplete="off" onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+        <form autoComplete="off" onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+            
+            {/* EXTREME UI HEADER */}
+            <div className="sticky top-2 z-[60] mb-4 p-5 rounded-3xl bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex justify-between items-center transition-all hover:bg-white/80">
+                <div className="flex flex-col">
+                    <h2 className="text-xl md:text-2xl font-black text-brand-navy uppercase tracking-tight">Origin / Farm Level</h2>
+                    <p className="text-[10px] uppercase font-bold text-brand-green tracking-widest">Traceability Data Entry</p>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleNewLot}
+                    className="px-6 py-3.5 bg-gradient-to-r from-brand-navy to-black text-white rounded-2xl shadow-xl shadow-brand-navy/20 text-[11px] font-black uppercase tracking-wider hover:scale-[1.02] active:scale-95 transition-all border border-zinc-700"
+                >
+                    + New Origin Lot
+                </button>
+            </div>
+
             {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -559,29 +582,37 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
             
 
-            {/* Stepper Wizard Header */}
-            <div className="flex justify-between items-center mb-8 relative px-4">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] h-0.5 bg-white z-0 mx-4">
-                    <div className="h-full bg-brand-green transition-all duration-500" style={{ width: `${(currentStep - 1) * 50}%` }}></div>
-                </div>
-
-                <button type="button" onClick={() => setCurrentStep(1)} className="relative z-10 flex flex-col items-center gap-2 group">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-white border-2 transition-all duration-500 ${currentStep >= 1 ? 'border-brand-green shadow-lg text-brand-navy' : 'border-gray-400 shadow-sm text-brand-navy'}`}>1</div>
-                    <span className={`text-[11px] font-bold uppercase  bg-white px-3 transition-colors ${currentStep === 1 ? 'text-brand-navy' : (currentStep > 1 ? 'text-brand-navy' : 'text-brand-navy')}`}>Origen y Productor</span>
+            {/* Tabs Header */}
+            <div className="flex border-b-2 border-gray-300 mb-4 w-full relative">
+                <button 
+                    type="button" 
+                    onClick={() => setCurrentStep(1)} 
+                    className={`flex-1 py-2.5 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 border-b-2 -mb-[2px] ${currentStep === 1 ? 'border-brand-green text-brand-green' : 'border-transparent text-gray-500 hover:text-brand-navy hover:bg-gray-100/50'}`}
+                >
+                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${currentStep === 1 ? 'bg-brand-green text-white' : 'bg-gray-300 text-brand-navy'}`}>1</span>
+                    Origin Data
                 </button>
-                <button type="button" onClick={() => setCurrentStep(2)} className="relative z-10 flex flex-col items-center gap-2 group">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-white border-2 transition-all duration-500 ${currentStep >= 2 ? 'border-brand-green shadow-lg text-brand-navy' : 'border-gray-400 shadow-sm text-brand-navy'}`}>2</div>
-                    <span className={`text-[11px] font-bold uppercase  bg-white px-3 transition-colors ${currentStep === 2 ? 'text-brand-navy' : (currentStep > 2 ? 'text-brand-navy' : 'text-brand-navy')}`}>Comercialización</span>
+                <button 
+                    type="button" 
+                    onClick={() => setCurrentStep(2)} 
+                    className={`flex-1 py-2.5 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 border-b-2 -mb-[2px] ${currentStep === 2 ? 'border-brand-green text-brand-green' : 'border-transparent text-gray-500 hover:text-brand-navy hover:bg-gray-100/50'}`}
+                >
+                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${currentStep === 2 ? 'bg-brand-green text-white' : 'bg-gray-300 text-brand-navy'}`}>2</span>
+                    Commercialization
                 </button>
-                <button type="button" onClick={() => setCurrentStep(3)} className="relative z-10 flex flex-col items-center gap-2 group">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-white border-2 transition-all duration-500 ${currentStep >= 3 ? 'border-brand-green shadow-lg text-brand-navy' : 'border-gray-400 shadow-sm text-brand-navy'}`}>3</div>
-                    <span className={`text-[11px] font-bold uppercase  bg-white px-3 transition-colors ${currentStep === 3 ? 'text-brand-navy' : 'text-brand-navy'}`}>Beneficio (Productor)</span>
+                <button 
+                    type="button" 
+                    onClick={() => setCurrentStep(3)} 
+                    className={`flex-1 py-2.5 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 border-b-2 -mb-[2px] ${currentStep === 3 ? 'border-brand-green text-brand-green' : 'border-transparent text-gray-500 hover:text-brand-navy hover:bg-gray-100/50'}`}
+                >
+                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${currentStep === 3 ? 'bg-brand-green text-white' : 'bg-gray-300 text-brand-navy'}`}>3</span>
+                    Processing (Farmer)
                 </button>
             </div>
 
             <fieldset disabled={isSubmitting || isReadOnly} className="border-none p-0 m-0 min-h-[450px] relative transition-all">
                 {currentStep === 1 && (
-                    <section className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
+                    <section className="bg-soft-white border border-gray-400 shadow-sm p-5 rounded-industrial space-y-4 animate-in slide-in-from-right-4 duration-500">
                         <h3 className="text-brand-navy font-bold flex items-center gap-2 mb-6">
                             <span className="w-1.5 h-6 bg-black rounded-full"></span>
                             {t('purchaseForm', 'title')}
@@ -589,9 +620,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
 
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="md:col-span-3 bg-white border border-gray-400 shadow-sm p-6 rounded-industrial relative overflow-hidden group mb-6">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl group-hover:bg-black/20 transition-all pointer-events-none"></div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="md:col-span-3 mb-0">
                                 <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-3">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></svg>
                                     {t('purchaseForm', 'sicaHelper')}
@@ -608,7 +638,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 handleSicaSearch();
                                             }
                                         }}
-                                        className="flex-1 bg-white border border-gray-400 shadow-sm rounded-full px-6 py-4 focus:border-black outline-none font-mono text-brand-navy text-lg shadow-inner"
+                                        className="flex-1 bg-white border border-gray-400 shadow-sm rounded-full px-4 py-2 focus:border-black outline-none font-bold text-brand-navy text-xs shadow-inner"
                                         disabled={isSubmitting}
                                         onBlur={handleSicaSearch}
                                     />
@@ -616,17 +646,17 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         type="button"
                                         onClick={handleSicaSearch}
                                         disabled={isSearchingSica || !formData.sicaId}
-                                        className="bg-brand-green hover:bg-brand-green/90 disabled:opacity-50 text-white px-8 py-4 rounded-full font-bold uppercase  transition-all shadow-lg hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn"
+                                        className="bg-brand-green hover:bg-brand-green/90 disabled:opacity-50 text-white px-6 py-2 rounded-full font-bold uppercase  transition-all shadow-lg hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn text-xs"
                                         title="Autocompletar"
                                     >
                                         {isSearchingSica ? (
                                             <span className="flex items-center gap-2">
-                                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"></path></svg>
+                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"></path></svg>
                                                 {t('purchaseForm', 'searching')}
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-2">
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                                 {t('purchaseForm', 'searchFarmer')}
                                             </span>
                                         )}
@@ -643,7 +673,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                                         {t('purchaseForm', 'specificLot')}
                                     </label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
                                         {availableLots.map(lot => (
                                             <button
                                                 key={lot.id}
@@ -656,38 +686,40 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="text-[9px] text-brand-navy uppercase  mt-4 font-bold">
+                                    <p className="text-[9px] text-brand-navy uppercase  mt-2 font-bold">
                                         {t('purchaseForm', 'lotCrossTip')}
                                     </p>
                                 </div>
                             )}
 
-                            <div className="md:col-span-3 my-2 border-t border-gray-400 shadow-sm pt-6 relative">
-                                <div className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-bg-main px-4 flex items-center gap-3">
-                                    <span className="text-[11px] font-bold text-brand-navy uppercase ">{t('purchaseForm', 'directory')}</span>
+                            {recentFarmers.length > 0 && (
+                                <div className="md:col-span-3 mt-2 border-t border-gray-400 shadow-sm pt-4 relative">
+                                    <div className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-soft-white px-4 flex items-center gap-3">
+                                        <span className="text-[11px] font-bold text-brand-navy uppercase ">{t('purchaseForm', 'directory')}</span>
+                                    </div>
+                                    
+                                    <div className="flex gap-3 overflow-x-auto pb-2 px-1 no-scrollbar scroll-smooth mt-2">
+                                        {recentFarmers.map((f, i) => (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => handleFarmerSelect(f)}
+                                                className="flex-shrink-0 bg-white border border-gray-400 shadow-sm hover:border-black p-3 rounded-industrial-sm transition-all text-left min-w-[180px]"
+                                            >
+                                                <div className="flex justify-between items-start">
+                                                    <p className="text-[11px] font-bold text-brand-navy uppercase truncate">{f.farmer_name}</p>
+                                                    <span className="text-[9px] bg-white text-brand-navy px-1.5 py-0.5 rounded font-mono font-bold">LOTE {f.lot_number?.split('-').pop() || '01'}</span>
+                                                </div>
+                                                <p className="text-[9px] text-brand-navy uppercase er mt-1 truncate">{f.farm_name} • {f.region}</p>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                                
-                                <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar scroll-smooth">
-                                    {recentFarmers.length > 0 ? recentFarmers.map((f, i) => (
-                                        <button
-                                            key={i}
-                                            type="button"
-                                            onClick={() => handleFarmerSelect(f)}
-                                            className="flex-shrink-0 bg-white border border-gray-400 shadow-sm hover:border-gray-400 shadow-sm hover:bg-white p-4 rounded-industrial-sm transition-all text-left min-w-[200px]"
-                                        >
-                                            <div className="flex justify-between items-start">
-                                                <p className="text-[11px] font-bold text-brand-navy uppercase truncate">{f.farmer_name}</p>
-                                                <span className="text-[9px] bg-white text-brand-navy px-1.5 py-0.5 rounded font-mono font-bold">LOTE {f.lot_number?.split('-').pop() || '01'}</span>
-                                            </div>
-                                            <p className="text-[9px] text-brand-navy uppercase er mt-1 truncate">{f.farm_name} • {f.region}</p>
-                                        </button>
-                                    )) : (
-                                        <div className="w-full text-center py-4 text-[9px] text-brand-navy uppercase ">{t('purchaseForm', 'noFarmers')}</div>
-                                    )}
-                                </div>
-                            </div>
+                            )}
                             
-                            <div className="md:col-span-3 mt-2 relative py-2">
+                            <div className="md:col-span-3 border-t-2 border-brand-green my-0"></div>
+
+                            <div className="md:col-span-3 mt-0 relative py-0">
                                 <span className="text-[11px] font-bold text-brand-green uppercase ">
                                     {t('purchaseForm', 'individualLotId')}
                                 </span>
@@ -702,7 +734,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. 1081492345"
                                     value={formData.sicaId}
                                     onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-brand-navy font-mono"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -717,7 +749,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     required
                                     value={formData.farmerName}
                                     onChange={(e) => setFormData({ ...formData, farmerName: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-brand-navy"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -731,10 +763,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. +57 301 000 0000"
                                     value={formData.farmerPhone}
                                     onChange={(e) => setFormData({ ...formData, farmerPhone: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none text-brand-navy font-bold"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none text-brand-navy font-bold text-xs"
                                     disabled={isSubmitting}
                                 />
-                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase ">{t('purchaseForm', 'phoneTip')}</p>
                             </div>
 
                             <div>
@@ -748,7 +779,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     required
                                     value={formData.farmName}
                                     onChange={(e) => setFormData({ ...formData, farmName: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-brand-navy"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -764,53 +795,22 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     inputClassName="font-bold"
                                     unit="M"
                                 />
-                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase">{t('purchaseForm', 'altitudeTip')}</p>
-                            </div>
-                            <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    {t('purchaseForm', 'lotNum')}
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej. LOTE-001"
-                                    required
-                                    value={formData.lotNumber}
-                                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none text-brand-navy font-bold uppercase"
-                                    disabled={isSubmitting}
-                                />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                            <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial-sm h-full flex flex-col justify-center">
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-2">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    {t('purchaseForm', 'farmSize')}
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    placeholder="Ej. 4.5"
-                                    value={formData.farmSizeHectares || ''}
-                                    onChange={(e) => setFormData({ ...formData, farmSizeHectares: parseFloat(e.target.value) || undefined })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 focus:border-black outline-none text-brand-navy font-bold text-lg"
-                                    disabled={isSubmitting}
-                                />
-                                <p className="text-[9px] font-bold text-brand-navy mt-2 uppercase ">{t('purchaseForm', 'farmSizeTip')}</p>
-                            </div>
+                        <div className="border-t-2 border-brand-green my-4"></div>
 
-                            <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial-sm h-full flex flex-col justify-center">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
+                            <div className="w-full flex flex-col justify-center">
+                                <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-2 mb-1">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
                                     {t('purchaseForm', 'gpsLink')}
                                 </label>
-                                <div className="flex gap-2 w-full mt-1">
+                                <div className="flex gap-2 w-full mt-0.5">
                                     <input
                                         type="text"
                                         placeholder={t('purchaseForm', 'gpsPlaceholder')}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 focus:border-black outline-none text-xs text-brand-navy"
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                         value={smartLinkText}
                                         onChange={(e) => setSmartLinkText(e.target.value)}
                                         disabled={isSubmitting}
@@ -837,25 +837,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             });
                                             if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
                                         }}
-                                        className="bg-brand-green hover:bg-brand-green/90 text-white border border-brand-green shadow-sm transition-colors px-4 py-3 rounded-industrial-sm text-[11px] font-bold uppercase  whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-brand-green hover:bg-brand-green/90 text-white border border-brand-green shadow-sm transition-colors px-3 py-1.5 rounded-industrial-sm text-[11px] font-bold uppercase whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="{t('purchaseForm', 'gpsExtract')}"
                                     >
                                         {t('purchaseForm', 'gpsExtract')}
                                     </button>
                                 </div>
                             </div>
-                        </div>
-
-                        {(formData.farmSizeHectares ?? 0) >= 4 && (
-                            <div className="bg-white border border-gray-400 shadow-sm rounded-industrial-sm p-4 mb-6 flex items-start gap-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c6056" strokeWidth="2" className="mt-0.5 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                <div>
-                                    <h4 className="text-sm font-bold text-brand-navy uppercase ">{t('purchaseForm', 'eudrDetected') || 'EUDR Requirement Detected'}</h4>
-                                    <p className="text-[11px] text-brand-navy mt-1 uppercase">{t('purchaseForm', 'eudrAlert')}</p>
-                                </div>
-                            </div>
-                        )}
-                        <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
@@ -867,7 +855,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. 4.570868"
                                     value={formData.latitude || ''}
                                     onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-mono text-sm"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -882,13 +870,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. -74.297333"
                                     value={formData.longitude || ''}
                                     onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-mono text-sm"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                     disabled={isSubmitting}
                                 />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             {/* País */}
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
@@ -899,7 +887,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     required
                                     value={formData.country}
                                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs"
                                     disabled={isSubmitting}
                                 >
                                     {COUNTRIES.map(c => (
@@ -920,10 +908,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             required
                                             value={formData.region}
                                             onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
+                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs"
                                             disabled={isSubmitting}
                                         >
-                                            <option value="">Seleccionar</option>
+                                            <option value="">Select</option>
                                             {COLOMBIAN_REGIONS.map(r => (
                                                 <option key={r} value={r} className={r === 'Otro' ? 'text-brand-navy font-bold' : ''}>
                                                     {r === 'Otro' ? '+ OTRO (ESPECIFICAR)' : r}
@@ -936,7 +924,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 placeholder="Especificar Región"
                                                 value={customRegion}
                                                 onChange={(e) => setCustomRegion(e.target.value)}
-                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
+                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300 text-xs"
                                                 required
                                                 disabled={isSubmitting}
                                             />
@@ -949,7 +937,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         required
                                         value={formData.region === 'Otro' ? customRegion : formData.region}
                                         onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-brand-navy"
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                         disabled={isSubmitting}
                                     />
                                 )}
@@ -967,10 +955,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             required
                                             value={formData.municipality}
                                             onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
-                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 mt-1 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy"
+                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs"
                                             disabled={isSubmitting}
                                         >
-                                            <option value="">Seleccionar</option>
+                                            <option value="">Select</option>
                                             {COMMON_MUNICIPALITIES.map((m, idx) => (
                                                 <option key={`${m}-${idx}`} value={m} className={m === 'Otro' ? 'text-brand-navy font-bold' : ''}>
                                                     {m === 'Otro' ? '+ OTRO (ESPECIFICAR)' : m}
@@ -983,7 +971,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 placeholder="Especificar Municipio"
                                                 value={customMunicipality}
                                                 onChange={(e) => setCustomMunicipality(e.target.value)}
-                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-2 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300"
+                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300 text-xs"
                                                 required
                                                 disabled={isSubmitting}
                                             />
@@ -996,91 +984,141 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         required
                                         value={formData.municipality === 'Otro' ? customMunicipality : formData.municipality}
                                         onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none font-bold text-brand-navy"
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
                                         disabled={isSubmitting}
                                     />
                                 )}
                             </div>
                         </div>
 
-                        <div className="flex justify-end mt-10">
-                            <button
-                                type="button"
-                                onClick={nextStep}
-                                className="bg-white hover:bg-black/20 text-brand-navy border border-gray-400 shadow-sm px-10 py-5 rounded-2xl text-[11px] font-bold uppercase  flex items-center gap-4 transition-all group"
-                            >
-                                Siguiente: Comercialización
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-1 transition-transform">
-                                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                                </svg>
-                            </button>
-                        </div>
+
                     </section>
                 )}
 
                 {currentStep === 2 && (
-                    <section className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
-                        <h3 className="text-brand-navy font-bold flex items-center gap-2 mb-6">
-                            <span className="w-1.5 h-6 bg-black rounded-full"></span>
-                            Negocio, Destino y Tipo de Grano
+                    <section className="bg-soft-white border border-gray-400 shadow-sm p-5 rounded-industrial space-y-4 animate-in slide-in-from-right-4 duration-500">
+                        <h3 className="text-brand-navy font-bold flex items-center gap-2 mb-4 uppercase">
+                            <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
+                            Commercialization & Export Requirements
                         </h3>
 
-
-
-
-                        <div className="grid grid-cols-1 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-3">
+                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
-                                    Estado del Café al Ingreso
+                                    {t('purchaseForm', 'lotNum')}
                                 </label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <input
+                                    type="text"
+                                    placeholder="Ej. LOTE-001"
+                                    required
+                                    value={formData.lotNumber}
+                                    onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none text-brand-navy font-bold uppercase text-xs"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+
+                            <div>
+                                <div className="flex justify-between items-end mb-1">
+                                    <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
+                                        <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                        {t('purchaseForm', 'farmSize')}
+                                    </label>
+                                    <span className="text-[9px] font-bold text-brand-navy uppercase">{t('purchaseForm', 'farmSizeTip')}</span>
+                                </div>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    placeholder="Ej. 4.5"
+                                    value={formData.farmSizeHectares || ''}
+                                    onChange={(e) => setFormData({ ...formData, farmSizeHectares: parseFloat(e.target.value) || undefined })}
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none text-brand-navy font-bold text-xs"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                        </div>
+
+                        {(formData.farmSizeHectares ?? 0) >= 4 && (
+                            <div className="bg-red-50 border border-red-200 shadow-sm rounded-industrial-sm p-4 mb-2 flex items-start gap-3">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2" className="mt-0.5 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                <div>
+                                    <h4 className="text-sm font-black text-red-800 uppercase ">{t('purchaseForm', 'eudrDetected') || 'EUDR Requirement Detected'}</h4>
+                                    <p className="text-[11px] text-red-900 mt-1 uppercase font-bold">{t('purchaseForm', 'eudrAlert')}</p>
+                                </div>
+                            </div>
+                        )}
+                           <div className="border-t-2 border-brand-green my-4"></div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
+                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    Incoming Coffee State
+                                </label>
+                                <div className="grid grid-cols-2 gap-2 mt-0.5">
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'pergamino' })}
-                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green border-brand-green text-brand-navy shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-gray-400 shadow-sm'}`}
+                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
                                     >
-                                        <span className="text-[11px] font-bold uppercase ">CAFÉ PERGAMINO</span>
-                                        <span className={`text-[9px] opacity-60 font-bold uppercase ${formData.coffeeType === 'pergamino' ? 'text-brand-navy' : 'text-brand-navy'}`}>(Requiere Trilla)</span>
+                                        <span className="text-[11px] font-bold uppercase ">PARCHMENT COFFEE</span>
+                                        <span className={`text-[9px] opacity-60 font-bold uppercase`}>(Requires Thrashing)</span>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'excelso' })}
-                                        className={`py-4 px-4 rounded-industrial-sm flex flex-col items-center gap-2 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-brand-green border-brand-green text-brand-navy shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-gray-400 shadow-sm'}`}
+                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
                                     >
-                                        <span className="text-xs font-bold uppercase ">CAFÉ VERDE / ORO</span>
-                                        <span className={`text-[11px] opacity-60 font-bold uppercase ${formData.coffeeType === 'excelso' ? 'text-brand-navy' : 'text-brand-navy'}`}>(Salto a Calidad)</span>
+                                        <span className="text-[11px] font-bold uppercase ">GREEN COFFEE</span>
+                                        <span className={`text-[9px] opacity-60 font-bold uppercase`}>(Skip to Quality)</span>
                                     </button>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="text-[11px] font-bold text-brand-navy uppercase  block mb-2">{t('purchaseForm', 'destination')}</label>
-                                <div className="w-full py-4 px-4 rounded-industrial-sm flex items-center justify-between border bg-white border-gray-400 shadow-sm text-brand-navy shadow-inner">
-                                    <span className="text-sm font-bold uppercase  flex items-center gap-2">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
-                                        EXPORTACIÓN VERDE
-                                    </span>
-                                    <span className="text-[11px] text-brand-navy uppercase font-bold">(Ruta Única)</span>
+                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
+                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    EXCLUSIVE LOT DESTINATION
+                                </label>
+                                <div className="grid grid-cols-2 gap-2 mt-0.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, destination: 'export_green' })}
+                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.destination === 'export_green' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
+                                    >
+                                        <span className="text-[11px] font-bold uppercase">GREEN COFFEE</span>
+                                        <span className="text-[9px] opacity-60 font-bold uppercase">(Export Route)</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, destination: 'roasted_coffee' })}
+                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.destination === 'roasted_coffee' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
+                                    >
+                                        <span className="text-[11px] font-bold uppercase">ROASTED COFFEE</span>
+                                        <span className="text-[9px] opacity-60 font-bold uppercase">(Finished Product)</span>
+                                    </button>
                                 </div>
                             </div>
+                        </div>
 
+                            <div className="border-t-2 border-brand-green my-4"></div>
                             {/* INJECTED IDENTITY FIELDS (Moved from Step 3) */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-400 shadow-sm">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 {/* Fecha de Recolección */}
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-brand-navy uppercase ">Fecha de Recolección</label>
+                                <div>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">Harvest Date</label>
                                     <div className="relative group/date">
                                         <input
                                             type="date"
                                             required
                                             value={formData.harvestDate}
                                             onChange={(e) => setFormData({ ...formData, harvestDate: e.target.value })}
-                                            className={`w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none text-brand-navy font-bold scheme-light pr-12 cursor-pointer text-xs shadow-lg shadow-brand-green/5
+                                            className={`w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] focus:border-black outline-none text-gray-500 font-medium scheme-light pr-8 cursor-pointer text-xs
                                                 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                                             disabled={isSubmitting}
                                         />
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy group-focus-within/date:opacity-100 opacity-60 transition-opacity">
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy group-focus-within/date:opacity-100 opacity-60 transition-opacity">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                                                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                                                 <line x1="16" y1="2" x2="16" y2="6" />
@@ -1092,174 +1130,153 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 </div>
 
                                 {/* Variedad */}
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-brand-navy uppercase ">Variedad del Café</label>
+                                <div>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">Coffee Variety</label>
                                     <select
                                         required
                                         value={formData.variety}
                                         onChange={(e) => setFormData({ ...formData, variety: e.target.value })}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy shadow-lg shadow-brand-green/5"
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm pl-2 pr-8 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
                                         disabled={isSubmitting}
                                     >
-                                        <option value="">Seleccionar</option>
+                                        <option value="">Select</option>
                                         {dynamicVarieties.map(v => <option key={v} value={v}>{v}</option>)}
-                                        <option value="Otro" className="text-brand-navy font-bold">+ OTRO (INGRESAR NUEVO)</option>
+                                        <option value="Other" className="text-brand-navy font-bold">+ OTHER (ENTER NEW)</option>
                                     </select>
                                 </div>
 
                                 {/* Proceso */}
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-brand-navy uppercase ">Proceso Base</label>
+                                <div>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">Base Process</label>
                                     <select
+                                        required
                                         value={formData.process}
                                         onChange={(e) => setFormData(prev => ({ ...prev, process: e.target.value as ProcessType }))}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy transition-all"
+                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm pl-2 pr-8 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
                                     >
-                                        <option value="lavado">Lavado</option>
-                                        <option value="semilavado">Semilavado</option>
-                                        <option value="sumergido">Sumergido</option>
+                                        <option value="">Select</option>
+                                        <option value="lavado">Washed</option>
+                                        <option value="semilavado">Semi-Washed</option>
+                                        <option value="sumergido">Submerged</option>
                                         <option value="honey">Honey</option>
                                         <option value="natural">Natural</option>
                                     </select>
                                 </div>
                             </div>
 
+                            <div className="border-t-2 border-brand-green my-4"></div>
 
-                        </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                {/* {t('purchaseForm', 'purchaseDate')} */}
+                                <div>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">{t('purchaseForm', 'purchaseDate')}</label>
+                                    <div className="relative group/date">
+                                        <input
+                                            type="date"
+                                            required
+                                            value={formData.purchaseDate}
+                                            onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+                                            className={`w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] focus:border-black outline-none text-gray-500 font-medium scheme-light pr-8 cursor-pointer text-xs
+                                                [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                                            disabled={isSubmitting}
+                                        />
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy group-focus-within/date:opacity-100 opacity-60 transition-opacity">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                                <line x1="16" y1="2" x2="16" y2="6" />
+                                                <line x1="8" y1="2" x2="8" y2="6" />
+                                                <line x1="3" y1="10" x2="21" y2="10" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-gray-400 shadow-sm">
-                            {/* {t('purchaseForm', 'purchaseDate')} */}
-                            <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial flex flex-col justify-center">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase  mb-2 block">{t('purchaseForm', 'purchaseDate')}</label>
-                                <div className="relative group/date">
-                                    <input
-                                        type="date"
-                                        required
-                                        value={formData.purchaseDate}
-                                        onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                                        className={`w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 focus:border-black outline-none text-brand-navy font-bold scheme-light pr-12 cursor-pointer text-xs
-                                            [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
-                                        disabled={isSubmitting}
-                                    />
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-navy group-focus-within/date:opacity-100 opacity-60 transition-opacity">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                            <line x1="16" y1="2" x2="16" y2="6" />
-                                            <line x1="8" y1="2" x2="8" y2="6" />
-                                            <line x1="3" y1="10" x2="21" y2="10" />
-                                        </svg>
+                                {/* Cantidad */}
+                                <div>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">Purchase Pack Quantity</label>
+                                    <div className="relative group w-full">
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            required
+                                            value={displayWeight}
+                                            onChange={handleWeightChange}
+                                            placeholder="0"
+                                            disabled={isSubmitting}
+                                            className="block w-full bg-white border rounded-industrial-sm px-3 py-1.5 h-[30px] text-xs outline-none font-bold transition-all pr-8 border-gray-400 shadow-sm text-brand-navy focus:border-black placeholder:text-brand-navy/30 placeholder:font-bold uppercase"
+                                        />
+                                        <div className="absolute top-1/2 -translate-y-1/2 right-3">
+                                            <span className="text-brand-navy font-bold opacity-60 text-[9px] ">KG</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Valor */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                        <label className="text-[11px] font-bold text-brand-navy uppercase block">Total Paid Value</label>
+                                        <span className="text-[7px] bg-brand-green/10 text-brand-green px-1.5 py-0.5 rounded font-bold uppercase border border-brand-green/20 shadow-sm">Fair Trade</span>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={displayValue}
+                                            onChange={handleValueChange}
+                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] text-xs font-bold outline-none transition-all pr-10 text-brand-navy focus:border-black placeholder:text-brand-navy/30 uppercase"
+                                            placeholder="0"
+                                            disabled={isSubmitting}
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-brand-navy font-bold opacity-60">COP</span>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Cantidad */}
-                            <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial flex flex-col justify-center">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase  block mb-2">Cantidad Pack de Compra</label>
-                                <div className="relative group w-full">
-                                    <input
-                                        type="text"
-                                        inputMode="decimal"
-                                        required
-                                        value={displayWeight}
-                                        onChange={handleWeightChange}
-                                        placeholder="0"
-                                        disabled={isSubmitting}
-                                        className="block w-full bg-white border rounded-industrial-sm px-4 py-3 text-xl outline-none font-bold transition-all pr-12 border-gray-400 shadow-sm text-brand-navy focus:border-black placeholder:text-brand-navy placeholder:font-bold"
-                                    />
-                                    <div className="absolute top-1/2 -translate-y-1/2 right-4">
-                                        <span className="text-brand-navy font-bold opacity-60 text-[9px] ">KG</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Valor */}
-                            <div className="bg-white border border-gray-400 shadow-sm p-4 rounded-industrial flex flex-col justify-center">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">Valor Total Pagado</label>
-                                    <span className="text-[7px] bg-black/20 text-brand-navy px-1.5 py-0.5 rounded font-bold uppercase border border-gray-400 shadow-sm">Fair Trade</span>
-                                </div>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        value={displayValue}
-                                        onChange={handleValueChange}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 text-xl font-bold er outline-none transition-all pr-12 text-brand-navy focus:border-black"
-                                        placeholder="0"
-                                        disabled={isSubmitting}
-                                    />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] text-brand-navy font-bold  opacity-60">COP</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p className="text-[9px] text-brand-navy mt-2 uppercase text-right ">Auditoría Financiera Industrial • Manejando COP</p>
-
-                        <div className="flex justify-between items-center mt-10">
-                            <button
-                                type="button"
-                                onClick={prevStep}
-                                className="text-brand-navy hover:text-brand-navy text-[11px] font-bold uppercase  flex items-center gap-2 transition-all"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                                Volver a Origen
-                            </button>
-                            <button
-                                type="button"
-                                onClick={nextStep}
-                                className="bg-white hover:bg-black/20 text-brand-navy border border-gray-400 shadow-sm px-10 py-5 rounded-2xl text-[11px] font-bold uppercase  flex items-center gap-4 transition-all group"
-                            >
-                                Siguiente: Datos del Beneficio
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-1 transition-transform">
-                                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                                </svg>
-                            </button>
-                        </div>
                     </section>
                 )}
 
                 {currentStep === 3 && (
-                    <section className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial space-y-6 animate-in slide-in-from-right-4 duration-500">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-brand-navy font-bold flex items-center gap-2">
-                                <span className="w-1.5 h-6 bg-black rounded-full"></span>
-                                Beneficio: Datos Básicos del Productor
+                    <section className="bg-soft-white border border-gray-400 shadow-sm p-5 rounded-industrial space-y-4 animate-in slide-in-from-right-4 duration-500">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-brand-navy font-bold flex items-center gap-2 uppercase">
+                                <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
+                                PROCESSING: FARMER DATA
                             </h3>
-                            <span className="px-3 py-1 bg-white text-brand-navy text-[11px] font-bold uppercase  rounded-full border border-gray-400 shadow-sm">Campo Mínimo</span>
+                            <span className="px-3 py-1 bg-white text-brand-navy text-[11px] font-bold uppercase rounded-full border border-gray-400 shadow-sm">MINIMUM FIELD</span>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                              {/* 1. Variedad del Café (Heredada) */}
                              <div>
-                                 <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-1">
-                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                                     Variedad Detectada (Origen)
+                                 <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">
+                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                     DETECTED VARIETY (ORIGIN)
                                  </label>
-                                 <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 text-sm font-bold text-brand-navy flex items-center justify-between shadow-inner">
-                                     <span>{formData.variety || '---'}</span>
-                                     <span className="text-[9px] opacity-60 uppercase font-black">Identidad Confirmada</span>
+                                 <div className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 flex items-center justify-between shadow-inner">
+                                     <span className="text-xs font-bold text-brand-navy uppercase">{formData.variety || '---'}</span>
+                                     <span className="text-[9px] opacity-60 uppercase font-black">IDENTITY CONFIRMED</span>
                                  </div>
                              </div>
 
-                             {/* 2. Tipo de proceso (Heredado) */}
-                             <div>
-                                 <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-1">
-                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                                     Proceso Base Detectado
-                                 </label>
-                                 <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-3 text-sm font-bold text-brand-navy flex items-center justify-between shadow-inner">
-                                     <span className="uppercase">{formData.process || '---'}</span>
-                                     <span className="text-[9px] opacity-60 uppercase font-black">Flujo Standard</span>
-                                 </div>
-                             </div>
+                            {/* 2. Tipo de proceso (Heredado) */}
+                            <div className="md:col-span-2">
+                                <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">
+                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    DETECTED BASE PROCESS
+                                </label>
+                                <div className="w-full min-h-[30px] py-1 bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 flex items-center justify-between shadow-inner">
+                                    <span className="text-xs font-bold text-brand-navy uppercase break-words mr-2">{formData.process || '---'}</span>
+                                    <span className="text-[9px] opacity-60 uppercase font-black whitespace-nowrap">STANDARD FLOW</span>
+                                </div>
+                            </div>
 
-                            <div className="flex flex-col gap-2 md:col-span-3">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase ">Estilo de Fermentación / Variación</label>
+                            <div className="flex flex-col md:col-span-3">
+                                <label className="text-[11px] font-bold text-brand-navy uppercase mb-1">FERMENTATION STYLE / VARIATION</label>
                                 <select
                                     value={formData.processData?.fermentation_style || 'estandar'}
                                     onChange={(e) => setFormData(prev => ({ 
                                         ...prev, 
                                         processData: { ...prev.processData, fermentation_style: e.target.value } 
                                     }))}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 py-4 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat font-bold text-brand-navy shadow-lg shadow-brand-green/5"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm pl-3 pr-8 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
                                 >
                                     {FERMENTATION_STYLES.map(style => (
                                         <option key={style.id} value={style.id} className={style.id === 'otro' ? 'font-bold text-brand-navy' : ''}>
@@ -1269,58 +1286,56 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 </select>
 
                                 {formData.processData?.fermentation_style === 'otro' && (
-                                    <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
-                                        <label className="text-[11px] font-bold text-brand-navy uppercase  block mb-2">Descripción del Proceso Personalizado</label>
+                                    <div className="mt-3 animate-in slide-in-from-top-2 duration-300">
+                                        <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">CUSTOM PROCESS DESCRIPTION</label>
                                         <textarea
-                                            placeholder="Describa aquí el protocolo de fermentación, microorganismos utilizados o variaciones específicas del caficultor..."
+                                            placeholder="Describe the fermentation protocol, microorganisms used, or specific variations..."
                                             value={formData.processData?.fermentation_notes || ''}
                                             onChange={(e) => setFormData(prev => ({ 
                                                 ...prev, 
                                                 processData: { ...prev.processData, fermentation_notes: e.target.value } 
                                             }))}
-                                            className="w-full bg-white border border-black border-dashed rounded-industrial-sm px-5 py-4 text-sm font-bold text-brand-navy outline-none focus:border-black h-32 resize-none shadow-inner"
+                                            className="w-full bg-white border border-gray-400 rounded-industrial-sm px-3 py-2 text-xs font-bold text-brand-navy outline-none focus:border-black h-20 resize-none shadow-inner"
                                         />
-                                        <p className="text-[9px] text-brand-navy mt-2 uppercase ">Este detalle técnico será incluido en el certificado final de exportación.</p>
+                                        <p className="text-[9px] text-brand-navy mt-1 uppercase opacity-60 font-bold">This technical detail will be included in the final export certificate.</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* SECCIÓN DE ALQUIMIA (FISICOQUÍMICA) */}
-                        <div className="pt-8 border-t border-gray-400 shadow-sm space-y-6">
+                        <div className="pt-4 border-t border-gray-400 mt-4 space-y-4">
                             <div className="flex items-center justify-between">
-                                <h4 className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-black rounded-full animate-pulse"></span>
-                                    Alquimia de Fermentación (Fisicoquímica)
+                                <h4 className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5">
+                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    FERMENTATION ALCHEMY (PHYSICOCHEMISTRY)
                                 </h4>
-                                <span className="text-[9px] text-brand-navy font-mono uppercase">Control de Variables Críticas</span>
+                                <span className="text-[9px] text-brand-navy font-mono uppercase font-bold opacity-60">CRITICAL VARIABLES CONTROL</span>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                 <NumericInput
-                                    label="pH Inicial"
+                                    label="Initial pH"
                                     value={formData.processData?.ph_inicial || ''}
                                     onChange={(val) => setFormData(prev => ({ 
                                         ...prev, 
                                         processData: { ...prev.processData, ph_inicial: val } 
                                     }))}
                                     step={0.1}
-                                    variant="blue"
-                                    inputClassName="text-sm !text-brand-navy !font-bold !h-[58px]"
+                                    placeholder="4.5"
                                 />
                                 <NumericInput
-                                    label="pH Final"
+                                    label="Final pH"
                                     value={formData.processData?.ph_final || ''}
                                     onChange={(val) => setFormData(prev => ({ 
                                         ...prev, 
                                         processData: { ...prev.processData, ph_final: val } 
                                     }))}
                                     step={0.1}
-                                    variant="blue"
-                                    inputClassName="text-sm !text-brand-navy !font-bold !h-[58px]"
+                                    placeholder="3.8"
                                 />
                                 <NumericInput
-                                    label="Grados Brix"
+                                    label="Brix Degrees"
                                     value={formData.processData?.brix_inicial || ''}
                                     onChange={(val) => setFormData(prev => ({ 
                                         ...prev, 
@@ -1328,11 +1343,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     }))}
                                     step={0.1}
                                     unit="°Bx"
-                                    variant="blue"
-                                    inputClassName="text-sm !text-brand-navy !font-bold !h-[58px]"
+                                    placeholder="18.5"
                                 />
                                 <NumericInput
-                                    label="Actividad Agua (Aw)"
+                                    label="Water Activity (Aw)"
                                     value={formData.processData?.actividad_agua_aw || ''}
                                     onChange={(val) => setFormData(prev => ({ 
                                         ...prev, 
@@ -1341,11 +1355,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     step={0.01}
                                     unit="Aw"
                                     placeholder="0.55"
-                                    variant="industrial"
-                                    inputClassName="text-sm !text-brand-navy !font-bold !h-[58px]"
                                 />
                                 <NumericInput
-                                    label="Temp. Máx (°C)"
+                                    label="Max Temp (°C)"
                                     value={formData.processData?.temperatura_masa_max || ''}
                                     onChange={(val) => setFormData(prev => ({ 
                                         ...prev, 
@@ -1353,85 +1365,86 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     }))}
                                     step={0.5}
                                     unit="°C"
-                                    variant="industrial"
-                                    inputClassName="text-sm !text-brand-navy !font-bold !h-[58px]"
+                                    placeholder="35"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">Recipiente</label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                                <div>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">Container</label>
                                     <select
                                         value={formData.processData?.recipiente_fermentacion || ''}
                                         onChange={(e) => setFormData(prev => ({ 
                                             ...prev, 
                                             processData: { ...prev.processData, recipiente_fermentacion: e.target.value } 
                                         }))}
-                                        className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 text-xs font-bold text-brand-navy outline-none focus:border-black appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.1rem_1.1rem] bg-[position:right_1rem_center] bg-no-repeat transition-all"
+                                        className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 text-xs font-bold text-brand-navy outline-none focus:border-black appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat uppercase"
                                     >
-                                        <option value="">Seleccionar Recipiente</option>
-                                        {['Bioreactor Inoxidable', 'Tanque Plástico', 'Bolsa GrainPro', 'Tanque Cemento'].map(r => (
+                                        <option value="">Select Container</option>
+                                        {['Stainless Bioreactor', 'Plastic Tank', 'GrainPro Bag', 'Cement Tank'].map(r => (
                                             <option key={r} value={r}>{r}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <NumericInput
-                                    label="Horas Fermentación"
-                                    value={formData.processData?.duracion_fermentacion_horas || ''}
-                                    onChange={(val) => setFormData(prev => ({ 
-                                        ...prev, 
-                                        processData: { ...prev.processData, duracion_fermentacion_horas: val } 
-                                    }))}
-                                    unit="Hrs"
-                                    variant="industrial"
-                                    inputClassName="text-sm !text-brand-navy !font-bold !h-[58px]"
-                                />
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">Agente de Infusión</label>
+                                <div>
+                                    <NumericInput
+                                        label="Fermentation Hours"
+                                        value={formData.processData?.duracion_fermentacion_horas || ''}
+                                        onChange={(val) => setFormData(prev => ({ 
+                                            ...prev, 
+                                            processData: { ...prev.processData, duracion_fermentacion_horas: String(val) } 
+                                        }))}
+                                        unit="Hrs"
+                                        placeholder="72"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">Infusion Agent</label>
                                     <input
                                         type="text"
-                                        placeholder="Ej. Frutas, Levaduras, Canela..."
+                                        placeholder="Fruits, Yeasts, Cinnamon..."
                                         value={formData.processData?.agente_infusion || ''}
                                         onChange={(e) => setFormData(prev => ({ 
                                             ...prev, 
                                             processData: { ...prev.processData, agente_infusion: e.target.value } 
                                         }))}
-                                        className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 text-xs font-bold text-brand-navy outline-none focus:border-black uppercase transition-all shadow-inner"
+                                        className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 text-xs font-bold text-brand-navy outline-none focus:border-black uppercase transition-all shadow-inner"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-gray-400 shadow-sm">
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase ">Método de Secado</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t-2 border-brand-green mt-4">
+                            <div>
+                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
+                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    DRYING METHOD
+                                </label>
                                 <select
                                     value={formData.processData?.tipo_secado || ''}
                                     onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, tipo_secado: e.target.value } }))}
-                                    className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 text-xs font-bold text-brand-navy outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat transition-all"
+                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_0.5rem_center] bg-no-repeat font-bold text-xs text-brand-navy uppercase transition-all"
                                 >
-                                    <option value="">Seleccionar Método</option>
+                                    <option value="">SELECT METHOD</option>
                                     {[
-                                        { id: 'Camas Africanas', label: 'Camas Africanas' },
-                                        { id: 'Marquesina Parabólica', label: 'Marquesina Parabólica' },
-                                        { id: 'Silo Mecánico', label: 'Silo Mecánico' },
-                                        { id: 'Patio al Sol', label: 'Patio al Sol' },
-                                        { id: 'Secado Mixto', label: 'Secado Mixto (Sol/Máquina)' }
+                                        { id: 'African Beds', label: 'AFRICAN BEDS' },
+                                        { id: 'Parabolic Canopy', label: 'PARABOLIC CANOPY' },
+                                        { id: 'Mechanical Silo', label: 'MECHANICAL SILO' },
+                                        { id: 'Sun Patio', label: 'SUN PATIO' },
+                                        { id: 'Mixed Drying', label: 'MIXED DRYING (SUN/MACHINE)' }
                                     ].map(m => (
                                         <option key={m.id} value={m.id}>{m.label}</option>
                                     ))}
                                 </select>
                             </div>
 
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase ">Tiempo de Secado (Días/Horas)</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej. 15 días o 32 horas"
+                            <div>
+                                <NumericInput
+                                    label="DRYING HOURS"
                                     value={formData.processData?.duracion_secado || ''}
-                                    onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, duracion_secado: e.target.value } }))}
-                                    className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 text-sm font-bold text-brand-navy outline-none focus:border-black placeholder:text-brand-navy placeholder:font-bold"
-                                    disabled={isSubmitting}
+                                    onChange={(val) => setFormData(p => ({ ...p, processData: { ...p.processData, duracion_secado: String(val) } }))}
+                                    placeholder="360"
+                                    unit="Hrs"
                                 />
                             </div>
                         </div>
@@ -1458,59 +1471,67 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             </fieldset>
 
             {/* Navigational Buttons */}
-            <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-400 shadow-sm relative z-20">
-                {currentStep > 1 ? (
-                    <button type="button" onClick={prevStep} disabled={isSubmitting} className="px-6 py-3 border border-gray-400 shadow-sm text-brand-navy rounded-industrial-sm font-bold uppercase  text-[11px] hover:bg-white transition-colors disabled:opacity-50">
-                        &larr; Volver Atrás
-                    </button>
-                ) : <div></div>}
-
-                {currentStep < 3 ? (
-                    <button type="button" onClick={nextStep} className="px-10 py-4 bg-white text-brand-navy border border-gray-400 shadow-sm rounded-industrial-sm font-bold uppercase  text-[11px] hover:bg-brand-green hover:text-white transition-colors shadow-[0_0_15px_rgba(0,255,136,0.1)]">
-                        Siguiente Paso &rarr;
-                    </button>
-                ) : (
-                    <div className="flex-1 ml-4 animate-in fade-in zoom-in-95 duration-500">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting || isReadOnly}
-                            className={`w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase  text-xs shadow-2xl bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50`}
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        SINCRONIZANDO CON LA NUBE...
-                                    </div>
-                                </>
-                            ) : (selectedLot?.status === 'completed' || selectedLot?.status === 'sealed') ? (
-                                <>
-                                    PROCESO SELLADO Y VERIFICADO
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                </>
-                            ) : selectedLot?.id ? (
-                                <>
-                                    GUARDAR DATOS
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
-                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                                        <polyline points="17 21 17 13 7 13 7 21" />
-                                        <polyline points="7 3 7 8 15 8" />
-                                    </svg>
-                                </>
-                            ) : (
-                                <>
-                                    REGISTRAR ORIGEN AL SISTEMA AXIS
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
-                                        <path d="M5 12h14M12 5l7 7-7 7" />
-                                    </svg>
-                                </>
-                            )}
+            <div className="grid grid-cols-3 items-center pt-4 border-t border-brand-green/30 relative z-20">
+                <div className="flex justify-start">
+                    {currentStep > 1 && (
+                        <button type="button" onClick={prevStep} disabled={isSubmitting} className="px-6 py-2.5 border border-gray-400 shadow-sm text-brand-navy bg-white rounded-industrial-sm font-bold uppercase text-[11px] hover:bg-gray-50 transition-colors disabled:opacity-50">
+                            &larr; BACK
                         </button>
-                    </div>
-                )}
+                    )}
+                </div>
+
+                <div className="flex justify-center w-full">
+                    {currentStep === 3 && (
+                        <div className="w-full animate-in fade-in zoom-in-95 duration-500">
+                            <button
+                                type="submit"
+                                disabled={isSubmitting || isReadOnly}
+                                className={`w-full font-bold py-2.5 rounded-industrial-sm transition-all flex items-center justify-center gap-2 group uppercase text-[11px] shadow-sm bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50 border border-brand-green`}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            SINCRONIZANDO...
+                                        </div>
+                                    </>
+                                ) : (selectedLot?.status === 'completed' || selectedLot?.status === 'sealed') ? (
+                                    <>
+                                        PROCESO SELLADO
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                            <polyline points="22 4 12 14.01 9 11.01" />
+                                        </svg>
+                                    </>
+                                ) : selectedLot?.id ? (
+                                    <>
+                                        GUARDAR DATOS
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                            <polyline points="17 21 17 13 7 13 7 21" />
+                                            <polyline points="7 3 7 8 15 8" />
+                                        </svg>
+                                    </>
+                                ) : (
+                                    <>
+                                        REGISTRAR ORIGEN
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                            <path d="M5 12h14M12 5l7 7-7 7" />
+                                        </svg>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex justify-end">
+                    {currentStep < 3 && (
+                        <button type="button" onClick={nextStep} className="px-6 py-2.5 bg-white text-brand-navy border border-gray-400 shadow-sm rounded-industrial-sm font-bold uppercase text-[11px] hover:bg-gray-50 transition-colors flex items-center gap-2">
+                            {currentStep === 1 ? 'NEXT: COMMERCIALIZATION' : 'NEXT: PROCESSING'} &rarr;
+                        </button>
+                    )}
+                </div>
             </div>
 
             <style jsx>{`

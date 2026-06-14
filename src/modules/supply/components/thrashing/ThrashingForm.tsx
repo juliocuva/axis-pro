@@ -213,7 +213,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     };
 
     return (
-        <div className="bg-soft-white border border-gray-400 shadow-sm p-8 rounded-industrial space-y-6 relative overflow-hidden min-h-[300px]">
+        <div className="space-y-6 relative overflow-hidden min-h-[300px]">
             {isLoading && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-white backdrop-blur-sm rounded-industrial">
                     <div className="flex flex-col items-center gap-4">
@@ -226,14 +226,14 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             <EUDRComplianceBadge lotData={lotDetails} className="mb-2" />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-                <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'processType')}</label>
+                <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'processType')}</label>
                     <div className="relative group/select">
                         <select
                             value={formData.processType}
                             onChange={(e) => setFormData({ ...formData, processType: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-12 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                            className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat"
                         >
                             <option value="Lavado">LAVADO (18-20%)</option>
                             <option value="Semilavado">SEMILAVADO (19-21%)</option>
@@ -244,33 +244,33 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         </select>
                     </div>
                 </div>
-                <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'initialWeight')}</label>
-                    <div className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 font-bold text-brand-navy flex justify-between items-center shadow-inner transition-all">
+                <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'initialWeight')}</label>
+                    <div className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 text-xs font-bold text-brand-navy flex justify-between items-center shadow-inner transition-all">
                         <span>{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
                         <span className="text-[9px] opacity-60 uppercase font-black ">Parchment</span>
                     </div>
                 </div>
                 <NumericInput
-                    label="t('thrashingForm', 'humidity')"
+                    label={t('thrashingForm', 'humidity')}
                     value={formData.humidity}
                     onChange={(val) => setFormData({ ...formData, humidity: val })}
                     step={0.1}
                     disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
                     variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'default'}
-                    inputClassName="text-sm !h-[58px] font-bold"
+                    inputClassName="text-xs !h-[30px] font-bold uppercase"
                 />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10 mt-2">
-                <div className="space-y-2 col-span-3">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'preparationProtocol')}</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10 mt-2">
+                <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'preparationProtocol')}</label>
                     <div className="relative group/select">
                         <select
                             value={formData.preparationProtocol}
                             onChange={(e) => setFormData({ ...formData, preparationProtocol: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-12 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat"
+                            className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat"
                         >
                             <option value="EP">European Prep (EP) - Especialidad</option>
                             <option value="American">American Prep - Comercial Plus</option>
@@ -280,22 +280,22 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         </select>
                     </div>
                 </div>
-            </div>
 
-            <div className="space-y-2 relative z-10 mt-4">
-                <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('thrashingForm', 'sortingMethod')}</label>
-                <div className="relative group/select">
-                    <select
-                        value={formData.sortingMethod}
-                        onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
-                        disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                        className="w-full h-[58px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-5 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-12 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat shadow-sm"
-                    >
-                        <option value="Máquina Selectora Óptica">Máquina Selectora Óptica</option>
-                        <option value="Manual (Hand-Sorted)">Manual (Hand-Sorted)</option>
-                        <option value="Mixto (Óptica + Repaso Manual)">Mixto (Óptica + Repaso Manual)</option>
-                        <option value="Solo Densimétrica">Solo Densimétrica</option>
-                    </select>
+                <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'sortingMethod')}</label>
+                    <div className="relative group/select">
+                        <select
+                            value={formData.sortingMethod}
+                            onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
+                            disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
+                            className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat shadow-sm"
+                        >
+                            <option value="Máquina Selectora Óptica">Máquina Selectora Óptica</option>
+                            <option value="Manual (Hand-Sorted)">Manual (Hand-Sorted)</option>
+                            <option value="Mixto (Óptica + Repaso Manual)">Mixto (Óptica + Repaso Manual)</option>
+                            <option value="Solo Densimétrica">Solo Densimétrica</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -329,7 +329,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                                 unit="%"
                                 disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
                                 variant="industrial"
-                                inputClassName="text-center text-xs !h-[48px] !px-2"
+                                inputClassName="text-center text-xs !h-[30px] !px-2 font-bold"
                             />
                         </div>
                     ))}
@@ -373,7 +373,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         required
                         disabled={isSubmitting || isAlreadyThrashed}
                         variant="industrial"
-                        inputClassName="text-xl !h-[58px]"
+                        inputClassName="text-xs !h-[30px] font-bold uppercase"
                         formatThousands={true}
                     />
                     <NumericInput
@@ -383,8 +383,8 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         step={0.1}
                         unit="KG"
                         disabled={isSubmitting || isAlreadyThrashed}
-                        variant="default"
-                        inputClassName="text-xl !h-[58px]"
+                        variant="industrial"
+                        inputClassName="text-xs !h-[30px] font-bold uppercase"
                         formatThousands={true}
                     />
                     <NumericInput
@@ -394,8 +394,8 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         step={0.1}
                         unit="KG"
                         disabled={isSubmitting || isAlreadyThrashed}
-                        variant="default"
-                        inputClassName="text-xl !h-[58px] opacity-60"
+                        variant="industrial"
+                        inputClassName="text-xs !h-[30px] opacity-60 font-bold uppercase"
                         formatThousands={true}
                     />
                 </div>
@@ -468,42 +468,43 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             </div>
                         </div>
                     </div>
-                ) : (
-                    <div className="h-48 border border-dashed border-gray-400 shadow-sm rounded-industrial flex flex-col items-center justify-center gap-3 opacity-30">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M12 20V10M18 20V4M6 20v-4" /></svg>
-                        <p className="text-[11px] uppercase font-bold  text-center"><span dangerouslySetInnerHTML={{ __html: t('thrashingForm', 'waitingOutput') }} /></p>
-                    </div>
-                )}
+                ) : null}
 
-                <button
-                    type="submit"
-                    disabled={isSubmitting || !formData.excelsoWeight || isAlreadyThrashed || isReadOnly}
-                    className="w-full font-bold py-6 rounded-industrial-sm transition-all flex items-center justify-center gap-4 group uppercase text-xs shadow-2xl bg-brand-green text-brand-navy hover:bg-opacity-90 disabled:opacity-100 disabled:text-brand-navy"
-                >
-                    {isSubmitting ? (
-                        <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            SINCRONIZANDO CON LA NUBE...
-                        </div>
-                    ) : isAlreadyThrashed ? (
-                        <>
-                            {t('thrashingForm', 'sealing')}
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                <polyline points="22 4 12 14.01 9 11.01" />
-                            </svg>
-                        </>
-                    ) : (
-                        <>
-                            {t('thrashingForm', 'submit')}
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                                <polyline points="17 21 17 13 7 13 7 21" />
-                                <polyline points="7 3 7 8 15 8" />
-                            </svg>
-                        </>
-                    )}
-                </button>
+                <div className="grid grid-cols-3 items-center pt-6 border-t border-gray-400 relative z-20 mt-6">
+                    <div></div>
+                    <div className="flex justify-center w-full">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting || !formData.excelsoWeight || isAlreadyThrashed || isReadOnly}
+                            className="w-full font-bold py-2.5 rounded-industrial-sm transition-all flex items-center justify-center gap-2 group uppercase text-[11px] shadow-sm bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50 border border-brand-green"
+                        >
+                            {isSubmitting ? (
+                                <div className="flex items-center gap-3">
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    SINCRONIZANDO...
+                                </div>
+                            ) : isAlreadyThrashed ? (
+                                <>
+                                    {t('thrashingForm', 'sealing')}
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                </>
+                            ) : (
+                                <>
+                                    {t('thrashingForm', 'submit') || 'GUARDAR DATOS'}
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                        <polyline points="17 21 17 13 7 13 7 21" />
+                                        <polyline points="7 3 7 8 15 8" />
+                                    </svg>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    <div></div>
+                </div>
             </form>
         </div>
     );

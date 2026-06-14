@@ -15,6 +15,7 @@ import CloudVault from '@/modules/export/components/CloudVault';
 import PurchaseForm from '@/modules/supply/components/PurchaseForm';
 import StatsDashboard from '@/modules/admin/components/StatsDashboard';
 import QuickCaptureContainer from '@/modules/supply/components/QuickCaptureContainer';
+import ProcessPipelineDashboard from '@/modules/supply/components/ProcessPipelineDashboard';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
@@ -23,7 +24,7 @@ import { useLanguage } from '@/shared/context/LanguageContext';
 export default function Home() {
     const { t, language, setLanguage } = useLanguage();
     const [user, setUser] = useState<{ name: string, email: string, companyId: string, role?: string } | null>(null);
-    const [view, setView] = useState<'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar' | 'stats' | 'quick-capture'>('supply');
+    const [view, setView] = useState<'ecosystem' | 'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar' | 'stats' | 'quick-capture'>('supply');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +35,7 @@ export default function Home() {
     // Lifted and Shared lot states
     const [selectedLot, setSelectedLot] = useState<any>(null);
     const [recentLots, setRecentLots] = useState<any[]>([]);
-    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' | 'archive' | 'transparency'>('transparency');
+    const [activeTab, setActiveTab] = useState<'purchase' | 'thrashing' | 'analysis' | 'cupping' | 'roast' | 'team' | 'archive' | 'transparency'>('purchase');
     const [showSyncModal, setShowSyncModal] = useState(false);
     const [syncSearchQuery, setSyncSearchQuery] = useState('');
     const [syncCurrentPage, setSyncCurrentPage] = useState(1);
@@ -51,6 +52,15 @@ export default function Home() {
         if (savedTheme) {
             setTheme(savedTheme);
             document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+    }, []);
+
+    useEffect(() => {
+        const savedUser = localStorage.getItem('axis-user');
+        if (savedUser) {
+            try {
+                setUser(JSON.parse(savedUser));
+            } catch (e) {}
         }
     }, []);
 
@@ -191,6 +201,7 @@ export default function Home() {
     if (!user) {
         return <AuthScreen onLogin={(userData) => {
             setUser(userData);
+            localStorage.setItem('axis-user', JSON.stringify(userData));
         }} />;
     }
 
@@ -226,7 +237,7 @@ export default function Home() {
                         </div>
                         <UserDropdown
                             user={user}
-                            onLogout={() => setUser(null)}
+                            onLogout={() => { setUser(null); localStorage.removeItem('axis-user'); }}
                             onOpenManual={() => setShowFunctionalDocs(true)}
                             onOpenUpdates={() => setShowUpdates(true)}
                             onSelectView={(v) => { setView(v); setShowCloudVault(false); }}
@@ -268,8 +279,22 @@ export default function Home() {
                 </div>
             )}
 
+            {view === 'ecosystem' && (
+                <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <ProcessPipelineDashboard 
+                        user={user}
+                        onSelectLotAndTab={(lot, targetTab) => {
+                            setSelectedLot(lot);
+                            setActiveTab(targetTab as any);
+                            setView('supply');
+                        }}
+                        onOpenSyncModal={() => setShowSyncModal(true)}
+                    />
+                </div>
+            )}
+
             {view === 'supply' && (
-                <div className="max-w-7xl mx-auto space-y-8">
+                <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <SupplyModuleContainer 
                         user={user} 
                         selectedLot={selectedLot}
@@ -303,15 +328,7 @@ export default function Home() {
 
             {view === 'radar' && (
                 <div className="fixed inset-0 z-[500] bg-black animate-in fade-in duration-700">
-                    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1001] no-print">
-                         <button 
-                            onClick={() => setView('supply')}
-                            className="px-6 py-2.5 bg-brand-green hover:bg-brand-green/90 text-white border border-brand-green shadow-lg shadow-brand-green/30 rounded-full text-[9px] font-black uppercase transition-all active:scale-95"
-                         >
-                            Cerrar Radar
-                         </button>
-                    </div>
-                    <RadarDashboard user={user} />
+                    <RadarDashboard user={user} onClose={() => setView('supply')} />
                 </div>
             )}
 

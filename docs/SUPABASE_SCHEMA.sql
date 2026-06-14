@@ -34,6 +34,23 @@ CREATE TABLE IF NOT EXISTS physical_analysis (
     company_id UUID NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS roast_batches (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    inventory_id UUID REFERENCES coffee_purchase_inventory(id) ON DELETE SET NULL,
+    batch_id_label TEXT,
+    roast_date DATE DEFAULT CURRENT_DATE,
+    profile_id TEXT,
+    green_weight DECIMAL NOT NULL,
+    roasted_weight DECIMAL NOT NULL,
+    machine_id TEXT,
+    roaster_name TEXT,
+    agtron_bean DECIMAL,
+    agtron_ground DECIMAL,
+    roast_curve JSONB,
+    company_id UUID NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS sca_cupping (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -80,6 +97,24 @@ BEGIN
     -- Columnas para physical_analysis
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='physical_analysis' AND column_name='grain_color') THEN
         ALTER TABLE physical_analysis ADD COLUMN grain_color TEXT; END IF;
+
+    -- Columnas para sca_cupping (Migración a CVA)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='cva_flavor_aftertaste') THEN
+        ALTER TABLE sca_cupping ADD COLUMN cva_flavor_aftertaste DECIMAL DEFAULT 0; END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='cva_acidity') THEN
+        ALTER TABLE sca_cupping ADD COLUMN cva_acidity DECIMAL DEFAULT 0; END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='cva_sweetness') THEN
+        ALTER TABLE sca_cupping ADD COLUMN cva_sweetness DECIMAL DEFAULT 0; END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='cva_mouthfeel') THEN
+        ALTER TABLE sca_cupping ADD COLUMN cva_mouthfeel DECIMAL DEFAULT 0; END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='cva_uniformity') THEN
+        ALTER TABLE sca_cupping ADD COLUMN cva_uniformity DECIMAL DEFAULT 0; END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='cva_defects_deduction') THEN
+        ALTER TABLE sca_cupping ADD COLUMN cva_defects_deduction DECIMAL DEFAULT 0; END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='cva_final_score') THEN
+        ALTER TABLE sca_cupping ADD COLUMN cva_final_score DECIMAL DEFAULT 0; END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sca_cupping' AND column_name='descriptive_data') THEN
+        ALTER TABLE sca_cupping ADD COLUMN descriptive_data JSONB DEFAULT '{}'::jsonb; END IF;
         
     -- Columnas de Título Valor Inmutable para green_exports
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='green_exports' AND column_name='status') THEN
@@ -116,6 +151,7 @@ END $$;
 ALTER TABLE coffee_purchase_inventory DISABLE ROW LEVEL SECURITY;
 ALTER TABLE physical_analysis DISABLE ROW LEVEL SECURITY;
 ALTER TABLE sca_cupping DISABLE ROW LEVEL SECURITY;
+ALTER TABLE roast_batches DISABLE ROW LEVEL SECURITY;
 ALTER TABLE green_exports DISABLE ROW LEVEL SECURITY;
 
 -- 6. REINICIO DE MOTOR API
