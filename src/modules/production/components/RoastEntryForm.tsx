@@ -40,6 +40,10 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         setFormData({
             batchId: 'AX-TOST-GEISHA-' + Math.floor(Math.random() * 900 + 100),
             roastDate: new Date().toISOString().split('T')[0],
+            chargeTemp: 210,
+            yellowingTime: '5:30',
+            fcTime: '9:15',
+            fcTemp: 198,
             greenWeight: demoGreen,
             roastedWeight: demoRoasted,
             selectedWeight: 20.72,
@@ -48,6 +52,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             developmentTime: '2:15',
             developmentPct: 18.5,
             dropTemp: 204,
+            notes: ''
         });
 
         // Generar curva simulada de alta fidelidad para la demo
@@ -288,22 +293,24 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 xl:px-0">
-            <button
-                onClick={() => window.dispatchEvent(new CustomEvent('change-view', { detail: 'live' }))}
-                className="flex items-center gap-2 text-[11px] font-bold uppercase text-brand-navy hover:text-brand-navy transition-all mb-4"
-            >
-                <div className="p-2 bg-white rounded-full">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-                </div>
-                Volver al Panel Principal
-            </button>
+            <div className="flex items-center justify-between mb-10 relative">
+                <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('change-view', { detail: 'live' }))}
+                    className="flex items-center gap-2 text-[11px] font-bold uppercase text-brand-navy hover:text-brand-navy transition-all z-10"
+                >
+                    <div className="p-2 bg-white rounded-full shadow-sm">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                    </div>
+                    Back to Main Dashboard
+                </button>
 
-            <div className="text-center mb-10 relative">
-                <div className="absolute top-0 right-0 flex items-center gap-3">
+                <h2 className="text-xl font-bold text-brand-navy uppercase absolute left-1/2 -translate-x-1/2 w-full text-center pointer-events-none">Roast Log</h2>
+
+                <div className="flex items-center gap-3 z-10">
                     {/* Boton Cargar Curva */}
-                    <div className="relative overflow-hidden cursor-pointer group flex items-center gap-2 bg-brand-navy hover:bg-brand-green text-white px-5 py-2 rounded-full transition-all duration-300 shadow-lg shadow-brand-navy/10">
+                    <div className="relative overflow-hidden cursor-pointer group flex items-center gap-2 bg-brand-navy hover:bg-brand-green text-white px-5 py-2 rounded-full transition-all duration-300 shadow-lg shadow-brand-navy/10 pointer-events-auto">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        <span className="text-[10px] font-bold uppercase tracking-wide">Cargar Curva .CSV</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wide">Upload .CSV Curve</span>
                         <input
                             type="file"
                             accept=".csv,.alog"
@@ -313,38 +320,73 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         />
                     </div>
                 </div>
-                <div className="inline-block px-3 py-1 bg-white border border-gray-400 shadow-sm rounded-full mb-4">
-                    <p className="text-[11px] text-brand-navy font-bold uppercase ">Ingreso Rápido Industrial</p>
-                </div>
-                <h2 className="text-3xl font-bold text-brand-navy mb-2 uppercase er">Registro de Tostión</h2>
-                <p className="text-brand-navy text-sm max-w-2xl mx-auto uppercase font-bold  text-[11px]">
-                    Sincronización algorítmica de curvas térmicas y balance de masas industrial.
-                </p>
             </div>
 
             <EUDRComplianceBadge lotData={lotData} className="mb-8" />
 
             {/* LOT IDENTIFICATION */}
             {lotData && (
-                <div className="mb-8">
-                    <p className="text-[10px] text-brand-navy font-black uppercase tracking-widest mb-2 pl-2">Materia Prima Vinculada</p>
-                    <div className="bg-white p-5 lg:p-6 rounded-industrial flex flex-col lg:flex-row gap-5 lg:gap-8 justify-between items-start lg:items-center">
-                        <div className="flex-1 min-w-0 w-full border-b lg:border-b-0 lg:border-r border-gray-200 pb-4 lg:pb-0 lg:pr-8 flex flex-col justify-center">
-                            <h3 className="text-lg font-black text-brand-navy uppercase leading-tight truncate mb-1" title={lotData.farmer_name || 'Productor'}>
-                                {lotData.farmer_name || 'Productor'}
-                            </h3>
-                            <p className="text-[11px] text-gray-500 font-bold uppercase truncate" title={`${lotData.variety || 'Variedad'} • ${lotData.process}`}>
-                                <span className="text-brand-navy">{lotData.variety || 'Variedad'}</span> <span className="mx-2 text-gray-300">•</span> {lotData.process}
-                            </p>
+                <div className="mb-2 space-y-8">
+                    {/* Section 1 */}
+                    <div>
+                        <div className="flex items-center flex-wrap gap-2 mb-4">
+                            <h4 className="text-[12px] font-black text-brand-green uppercase border-b-2 border-brand-green pb-0.5 tracking-widest">
+                                1. LOT SPECIFICATIONS
+                            </h4>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                                DETERMINES PROFILE STRATEGY
+                            </span>
                         </div>
-                        <div className="flex flex-wrap sm:flex-nowrap gap-4 w-full lg:w-auto shrink-0">
-                            <div className="bg-zinc-50 px-5 py-3 rounded-lg border border-zinc-200 flex-1 sm:flex-none min-w-[110px]">
-                                <p className="text-[9px] text-gray-500 uppercase tracking-wider font-bold mb-1">Humedad</p>
-                                <p className="text-base font-black text-brand-navy">{lotData.physical_analysis?.[0]?.moisture_pct || '--'}%</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+                            <div className="col-span-1">
+                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Variety</label>
+                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase truncate">
+                                    {lotData.variety || '--'}
+                                </div>
                             </div>
-                            <div className="bg-zinc-50 px-5 py-3 rounded-lg border border-zinc-200 flex-1 sm:flex-none min-w-[110px]">
-                                <p className="text-[9px] text-gray-500 uppercase tracking-wider font-bold mb-1">Densidad</p>
-                                <p className="text-base font-black text-brand-navy">{lotData.physical_analysis?.[0]?.density_gl || '--'} <span className="text-[11px] text-gray-400 font-bold">g/L</span></p>
+                            <div className="col-span-2">
+                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Base Process</label>
+                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase truncate">
+                                    {lotData.process || '--'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 2 */}
+                    <div>
+                        <div className="flex items-center flex-wrap gap-2 mb-4">
+                            <h4 className="text-[12px] font-black text-brand-green uppercase border-b-2 border-brand-green pb-0.5 tracking-widest">
+                                2. PHYSICAL PROPERTIES (CRITICAL & RAW)
+                            </h4>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+                                DICTATES CHARGE TEMP & CLEANNESS
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
+                            <div>
+                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Density</label>
+                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
+                                    {lotData.physical_analysis?.[0]?.density_gl || '--'} G/L
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Moisture</label>
+                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
+                                    {lotData.physical_analysis?.[0]?.moisture_pct || '--'}%
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Water Activity (AW)</label>
+                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
+                                    {lotData.physical_analysis?.[0]?.water_activity || '0.58'}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Physical Defects</label>
+                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
+                                    {lotData.physical_analysis?.[0]?.defects_grams || '0'}G
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -375,7 +417,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     <div className="relative z-10 animate-in zoom-in duration-500">
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse"></div>
-                            <h4 className="text-[11px] font-bold text-brand-navy uppercase ">Vista Previa de Telemetría Sincronizada</h4>
+                            <h4 className="text-[11px] font-bold text-brand-navy uppercase ">Synchronized Telemetry Preview</h4>
                         </div>
                         <RoastCurveVisualizer data={curveData} />
                         <button 
@@ -383,25 +425,25 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             onClick={() => { setCurveData([]); setCurveFile(null); setCurveStatus({ type: 'idle', message: '' }); }}
                             className="mt-4 text-[9px] font-bold text-red-500 uppercase  hover:underline"
                         >
-                            Quitar Archivo y Limpiar Curva
+                            Remove File and Clear Curve
                         </button>
                     </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 relative z-10">
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Bache de Tostión (ID)</label>
+                        <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">Roast Batch (ID)</label>
                         <input
                             type="text"
                             value={formData.batchId}
                             onChange={(e) => setFormData({ ...formData, batchId: e.target.value.toUpperCase() })}
-                            placeholder="EJ: AX-TOST-7721"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-lg text-brand-navy font-bold placeholder:text-brand-navy"
+                            placeholder="EX: AX-TOST-7721"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-lg text-brand-navy font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Fecha de Tueste</label>
+                        <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">Roast Date</label>
                         <input
                             type="date"
                             required
@@ -414,11 +456,11 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 </div>
 
                 <div className="mt-8">
-                    <h4 className="text-[10px] text-brand-green font-black uppercase tracking-widest mb-2 pl-2">1. PARAMETROS DE TUESTE (MANUALES)</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-3 relative z-10 p-5 bg-white rounded-xl border border-gray-400 shadow-sm">
+                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">3. ROASTING PARAMETERS (MANUAL)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-3 relative z-10">
 
                     <NumericInput
-                        label="Temp. Carga (°C)"
+                        label="Charge Temp (°C)"
                         value={formData.chargeTemp}
                         onChange={(val) => setFormData({ ...formData, chargeTemp: val })}
                         step={0.1}
@@ -427,29 +469,29 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         variant="industrial"
                     />
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Secado / Color Change</label>
+                        <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">Yellowing / Color Change</label>
                         <input
                             type="text"
                             value={formData.yellowingTime}
                             onChange={(e) => setFormData({ ...formData, yellowingTime: e.target.value })}
-                            placeholder="Ej: 5:30"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            placeholder="Ex: 5:30"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Tiempo 1er Crack</label>
+                        <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">1st Crack Time</label>
                         <input
                             type="text"
                             value={formData.fcTime}
                             onChange={(e) => setFormData({ ...formData, fcTime: e.target.value })}
-                            placeholder="Ej: 9:15"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            placeholder="Ex: 9:15"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
                     <NumericInput
-                        label="Temp. 1er Crack (°C)"
+                        label="1st Crack Temp (°C)"
                         value={formData.fcTemp}
                         onChange={(val) => setFormData({ ...formData, fcTemp: val })}
                         step={0.1}
@@ -459,13 +501,13 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     />
 
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Tiempo DTR</label>
+                        <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">DTR Time</label>
                         <input
                             type="text"
                             value={formData.developmentTime}
                             onChange={(e) => setFormData({ ...formData, developmentTime: e.target.value })}
-                            placeholder="Ej: 1:45"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            placeholder="Ex: 1:45"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -479,18 +521,18 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         variant="industrial"
                     />
                     <div>
-                        <label className="text-[11px] font-bold text-brand-navy uppercase  mb-1 block">Tiempo Total</label>
+                        <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">Total Time</label>
                         <input
                             type="text"
                             value={formData.roastTime}
                             onChange={(e) => setFormData({ ...formData, roastTime: e.target.value })}
-                            placeholder="Ej: 11:30"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm"
+                            placeholder="Ex: 11:30"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
                     <NumericInput
-                        label="Temp. Caída (°C)"
+                        label="Drop Temp (°C)"
                         value={formData.dropTemp}
                         onChange={(val) => setFormData({ ...formData, dropTemp: val })}
                         step={0.1}
@@ -502,11 +544,11 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 </div>
 
                 <div className="mt-8">
-                    <h4 className="text-[10px] text-brand-green font-black uppercase tracking-widest mb-2 pl-2">2. RESULTADOS DE CALIDAD (MERMA Y DEFECTOS)</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 relative z-10 p-5 bg-white rounded-xl border border-gray-400 shadow-sm">
+                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">4. QUALITY RESULTS (SHRINKAGE & DEFECTS)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 relative z-10">
                     
                     <NumericInput
-                        label="Carga Verde (IN)"
+                        label="Green Weight (IN)"
                         value={formData.greenWeight}
                         onChange={(val) => setFormData({ ...formData, greenWeight: val })}
                         step={0.1}
@@ -517,12 +559,12 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         formatThousands={true}
                     />
                     <NumericInput
-                        label="Café Tostado (OUT)"
+                        label="Roasted Weight (OUT)"
                         value={formData.roastedWeight}
                         onChange={(val) => setFormData({ ...formData, roastedWeight: val })}
                         step={0.1}
                         unit="KG"
-                        placeholder="Ej: 20.80"
+                        placeholder="Ex: 20.80"
                         required
                         disabled={isSubmitting}
                         variant="industrial"
@@ -530,17 +572,17 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     />
 
                     <NumericInput
-                        label="Selección / Limpio (Opcional)"
+                        label="Selected / Clean (Optional)"
                         value={formData.selectedWeight}
                         onChange={(val) => setFormData({ ...formData, selectedWeight: val })}
                         step={0.1}
                         unit="KG"
-                        placeholder="Ej: 20.72"
+                        placeholder="Ex: 20.72"
                         disabled={isSubmitting}
                         formatThousands={true}
                     />
                     <NumericInput
-                        label="Quakers / Defectos (Gramos)"
+                        label="Quakers / Defects (Grams)"
                         value={formData.quakersGrams}
                         onChange={(val) => setFormData({ ...formData, quakersGrams: val })}
                         step={1}
@@ -552,12 +594,12 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
 
                     <div className="col-span-1 md:col-span-2 mt-4 flex flex-col md:flex-row gap-6">
                         <div className="flex-1">
-                            <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">Notas u Observaciones del Tostador</label>
+                            <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">Roaster Notes & Observations</label>
                             <textarea
                                 value={formData.notes}
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                placeholder="Notas sobre el desarrollo, incidencias en la máquina..."
-                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all text-sm text-brand-navy resize-none h-24"
+                                placeholder="Notes on development, machine incidents..."
+                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all text-sm text-brand-navy resize-none h-24 placeholder:text-gray-400"
                                 disabled={isSubmitting}
                             />
                         </div>
@@ -565,12 +607,12 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         {(formData.greenWeight > 0 && formData.roastedWeight > 0) && (
                             <div className="flex items-end justify-end gap-8 pb-2 shrink-0">
                                 <div className="text-right">
-                                    <p className="text-[10px] text-brand-navy uppercase font-bold mb-1">Merma (Pérdida)</p>
-                                    <p className={`text-lg font-bold ${stats.roastLoss > 16.5 || stats.roastLoss < 12 ? 'text-brand-red' : 'text-brand-navy'}`}>{stats.roastLoss.toFixed(2)}%</p>
+                                    <p className="text-[10px] text-brand-navy uppercase font-bold mb-1">Roast Loss</p>
+                                    <p className={`text-sm font-bold ${stats.roastLoss > 16.5 || stats.roastLoss < 12 ? 'text-brand-red' : 'text-brand-navy'}`}>{stats.roastLoss.toFixed(2)}%</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[10px] text-brand-navy uppercase font-bold mb-1">Rendimiento</p>
-                                    <p className="text-lg font-bold text-brand-navy-bright">{stats.netYield.toFixed(2)}%</p>
+                                    <p className="text-[10px] text-brand-navy uppercase font-bold mb-1">Yield</p>
+                                    <p className="text-sm font-bold text-brand-navy-bright">{stats.netYield.toFixed(2)}%</p>
                                 </div>
                             </div>
                         )}
@@ -582,7 +624,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
 
 
 
-                <div className="flex justify-end pt-8 relative z-10">
+                <div className="flex justify-center pt-8 relative z-10">
                     <button
                         type="submit"
                         disabled={isSubmitting}
@@ -591,11 +633,11 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         {isSubmitting ? (
                             <>
                                 <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                                SINCRONIZANDO CON LA NUBE...
+                                SYNCHRONIZING WITH CLOUD...
                             </>
                         ) : (
                             <>
-                                GUARDAR DATOS
+                                SAVE DATA
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
                                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                                     <polyline points="17 21 17 13 7 13 7 21" />

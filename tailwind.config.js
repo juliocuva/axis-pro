@@ -9,6 +9,10 @@ module.exports = {
                 sans: ["var(--font-montserrat)", "sans-serif"],
                 mono: ["var(--font-montserrat)", "monospace"],
             },
+            fontWeight: {
+                extrabold: '700',
+                black: '700',
+            },
             letterSpacing: {
                 tighter: "-0.05em",
                 tight: "-0.025em",

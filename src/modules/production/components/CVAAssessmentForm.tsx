@@ -82,9 +82,6 @@ interface CVAAssessmentFormProps {
 }
 
 const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => {
-    const totalBlocks = 15;
-    const filledBlocks = Math.round(value);
-
     return (
         <div className="flex flex-col gap-1 w-full relative group">
             <div className="flex justify-between items-end mb-1">
@@ -92,34 +89,16 @@ const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, 
                 <span className="text-xs font-bold text-brand-navy bg-white border border-gray-400 px-1.5 py-0.5 rounded-sm shadow-sm">{value.toFixed(2)}</span>
             </div>
             
-            <div className="relative h-4 w-full">
-                {/* Visual Equalizer */}
-                <div className="absolute inset-0 flex items-center justify-between gap-[2px] pointer-events-none">
-                    {Array.from({ length: totalBlocks }).map((_, i) => {
-                        const isActive = i < filledBlocks;
-                        return (
-                            <div 
-                                key={i} 
-                                className={`flex-1 h-full rounded-[1px] transition-all duration-300 ${
-                                    isActive ? 'bg-brand-green shadow-[0_0_5px_rgba(0,223,154,0.3)]' : 'bg-gray-200'
-                                }`}
-                            />
-                        );
-                    })}
-                </div>
-                
-                {/* Invisible native range slider for interaction */}
-                <input
-                    type="range"
-                    min="0"
-                    max="15"
-                    step="0.25"
-                    value={value}
-                    disabled={disabled}
-                    onChange={(e) => onChange(parseFloat(e.target.value))}
-                    className={`absolute inset-0 w-full h-full opacity-0 m-0 p-0 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                />
-            </div>
+            <input
+                type="range"
+                min="0"
+                max="15"
+                step="0.25"
+                value={value}
+                disabled={disabled}
+                onChange={(e) => onChange(parseFloat(e.target.value))}
+                className={`w-full h-2 bg-gray-200 rounded-lg appearance-none accent-brand-green outline-none ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+            />
         </div>
     );
 };
@@ -130,9 +109,9 @@ interface DescriptorOption {
 }
 
 const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }: { label: string, options: (string | DescriptorOption)[], selected: string[], onToggle: (val: string) => void, disabled?: boolean }) => (
-    <div className="space-y-2">
+    <div className="space-y-1">
         <label className="text-[10px] font-bold text-brand-navy uppercase">{label}</label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
             {options.map((opt, idx) => {
                 const isString = typeof opt === 'string';
                 const mainLabel = isString ? opt : opt.label;
@@ -145,10 +124,12 @@ const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }
                             type="button"
                             disabled={disabled}
                             onClick={() => onToggle(mainLabel)}
-                            className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-industrial-sm border transition-all ${
+                            className={`px-2 py-1 text-[9px] font-medium uppercase rounded-industrial-sm border transition-all ${
                                 isSelected 
                                     ? 'bg-brand-navy border-brand-navy text-white shadow-sm' 
-                                    : 'bg-white border-gray-400 text-brand-navy hover:border-brand-navy'
+                                    : subs.length > 0
+                                        ? 'bg-brand-green/10 border-brand-green/50 text-brand-navy hover:border-brand-green hover:bg-brand-green/20'
+                                        : 'bg-white border-gray-400 text-brand-navy hover:border-brand-navy'
                             } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
                         >
                             {mainLabel}
@@ -165,7 +146,7 @@ const DescriptiveMarkerGroup = ({ label, options, selected, onToggle, disabled }
                                             type="button"
                                             disabled={disabled}
                                             onClick={() => onToggle(sub)}
-                                            className={`px-2 py-1 text-[9px] font-bold uppercase rounded-industrial-sm border transition-all ${
+                                            className={`px-2 py-1 text-[8px] font-medium uppercase rounded-industrial-sm border transition-all ${
                                                 isSubSelected 
                                                     ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' 
                                                     : 'bg-white border-gray-300 text-gray-500 hover:border-brand-green hover:text-brand-navy'
@@ -233,9 +214,6 @@ const SCAExtrinsicSection = ({
 );
 
 const QualityScale = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => {
-    const totalBlocks = 9;
-    const filledBlocks = Math.round(value);
-
     return (
         <div className="flex flex-col gap-1 w-full relative group">
             <div className="flex justify-between items-end mb-1">
@@ -243,34 +221,16 @@ const QualityScale = ({ label, value, onChange, disabled }: { label: string, val
                 <span className="text-xs font-bold text-brand-navy bg-white border border-gray-400 px-1.5 py-0.5 rounded-sm shadow-sm">{value.toFixed(2)}</span>
             </div>
             
-            <div className="relative h-6 w-full">
-                <div className="absolute inset-0 flex items-center justify-between gap-[2px] pointer-events-none">
-                    {Array.from({ length: totalBlocks }).map((_, i) => {
-                        const isActive = i < filledBlocks;
-                        return (
-                            <div 
-                                key={i} 
-                                className={`flex-1 h-full rounded-[1px] transition-all duration-300 flex items-center justify-center text-[9px] font-bold ${
-                                    isActive ? 'bg-brand-navy text-white shadow-[0_0_5px_rgba(10,37,64,0.3)]' : 'bg-white border border-gray-400 text-gray-300'
-                                }`}
-                            >
-                                {i + 1}
-                            </div>
-                        );
-                    })}
-                </div>
-                
-                <input
-                    type="range"
-                    min="0"
-                    max="9"
-                    step="0.25"
-                    value={value}
-                    disabled={disabled}
-                    onChange={(e) => onChange(parseFloat(e.target.value))}
-                    className={`absolute inset-0 w-full h-full opacity-0 m-0 p-0 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                />
-            </div>
+            <input
+                type="range"
+                min="0"
+                max="9"
+                step="0.25"
+                value={value}
+                disabled={disabled}
+                onChange={(e) => onChange(parseFloat(e.target.value))}
+                className={`w-full h-2 bg-gray-200 rounded-lg appearance-none accent-brand-navy outline-none ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+            />
         </div>
     );
 };
@@ -591,7 +551,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   };
 
   return (
-    <div className="flex flex-col gap-8 animate-in fade-in duration-700 relative bg-white min-h-screen">
+    <div className="flex flex-col gap-4 animate-in fade-in duration-700 relative bg-white min-h-screen">
       {/* HEADER DE ETAPA NOTARIAL */}
       
 
@@ -602,7 +562,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
       )}
 
       {/* TABS DE NAVEGACIÓN */}
-      <div className="flex gap-3 mb-10 w-full">
+      <div className="flex gap-3 mb-4 w-full">
             <button
                 onClick={() => setActiveTab('intrinsic')}
                 className={`flex-1 py-4 rounded-xl text-[11px] font-bold uppercase border-2 transition-all ${activeTab === 'intrinsic' ? 'bg-brand-green border-transparent text-brand-navy' : 'bg-white border-gray-400 text-brand-navy'}`}
@@ -618,24 +578,24 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
       </div>
 
       {activeTab === 'intrinsic' ? (
-        <div className="flex flex-col gap-6 animate-in slide-in-from-left duration-500">
+        <div className="flex flex-col gap-4 animate-in slide-in-from-left duration-500">
             {/* PARTE 1: DESCRIPTIVA (LÓGICA) */}
-            <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-6">
+            <div className="bg-white p-4 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-4">
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-green shadow-[0_0_15px_rgba(0,166,81,0.3)]"></div>
                 <header className="flex justify-between items-center border-b border-black/20 pb-4">
                     <h3 className="text-[11px] font-bold text-brand-navy font-black uppercase ">{t('cuppingForm', 'descriptiveHeader')}</h3>
                     <span className="text-[9px] font-bold text-brand-navy uppercase ">{t('cuppingForm', 'intensityLabel')}</span>
                 </header>
 
-                <div className="space-y-16">
+                <div className="space-y-4">
                     {/* AROMA / FRAGANCIA */}
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <IntensitySlider label={t('cuppingForm', 'fragrance')} value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                             <IntensitySlider label={t('cuppingForm', 'aroma')} value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                         </div>
                         <DescriptiveMarkerGroup 
-                            label="{t('cuppingForm', 'fragranceAromaNotes')}"
+                            label={t('cuppingForm', 'fragranceAromaNotes')}
                             options={[
                                 { label: 'Floral' },
                                 { label: 'Afrutado', subOptions: ['Bayas', 'Frutas deshidratadas', 'Cítricos'] },
@@ -654,14 +614,14 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     </div>
 
                     {/* SABOR / SABOR RESIDUAL */}
-                    <div className="space-y-6 pt-6 border-t border-black/20">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3 pt-3 border-t border-black/20">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <IntensitySlider label={t('cuppingForm', 'flavor')} value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                             <IntensitySlider label={t('cuppingForm', 'aftertaste')} value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <DescriptiveMarkerGroup 
-                                label="{t('cuppingForm', 'flavorNotes')}"
+                                label={t('cuppingForm', 'flavorNotes')}
                                 options={[
                                     { label: 'Floral' },
                                     { label: 'Afrutado', subOptions: ['Bayas', 'Frutas deshidratadas', 'Cítricos'] },
@@ -675,7 +635,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                 disabled={isAlreadySealed}
                             />
                             <DescriptiveMarkerGroup 
-                                label="{t('cuppingForm', 'predominantGusts')}"
+                                label={t('cuppingForm', 'predominantGusts')}
                                 options={['Salado', 'Ácido', 'Dulce', 'Amargo', 'Umami']}
                                 selected={data.descriptive.predominantGusts}
                                 onToggle={toggleGust}
@@ -685,22 +645,22 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     </div>
 
                     {/* ACIDEZ / DULZOR */}
-                    <div className="space-y-6 pt-6 border-t border-black/20">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-6">
+                    <div className="space-y-3 pt-3 border-t border-black/20">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-3">
                                 <IntensitySlider label={t('cuppingForm', 'acidity')} value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                                 <DescriptiveMarkerGroup 
-                                    label="{t('cuppingForm', 'acidityCharacter')}"
+                                    label={t('cuppingForm', 'acidityCharacter')}
                                     options={['Cítrica', 'Málica', 'Fosfórica', 'Acética', 'Láctica', 'Vibrante', 'Compleja']}
                                     selected={data.descriptive.descriptors.acidity}
                                     onToggle={(v) => toggleDescriptor('acidity', v)}
                                     disabled={isAlreadySealed || isReadOnly}
                                 />
                             </div>
-                            <div className="space-y-6">
+                            <div className="space-y-3">
                                 <IntensitySlider label={t('cuppingForm', 'sweetness')} value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                                 <DescriptiveMarkerGroup 
-                                    label="{t('cuppingForm', 'sweetnessCharacter')}"
+                                    label={t('cuppingForm', 'sweetnessCharacter')}
                                     options={['Miel', 'Azúcar Moreno', 'Jarabe', 'Melaza', 'Floral', 'Frutal']}
                                     selected={data.descriptive.descriptors.sweetness}
                                     onToggle={(v) => toggleDescriptor('sweetness', v)}
@@ -711,10 +671,10 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     </div>
 
                     {/* CUERPO */}
-                    <div className="space-y-6 pt-6 border-t border-black/20">
-                        <IntensitySlider label="{t('cuppingForm', 'mouthfeel')}" value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                    <div className="space-y-3 pt-3 border-t border-black/20">
+                        <IntensitySlider label={t('cuppingForm', 'mouthfeel')} value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
                         <DescriptiveMarkerGroup 
-                            label="{t('cuppingForm', 'mouthfeelCharacter')}"
+                            label={t('cuppingForm', 'mouthfeelCharacter')}
                             options={['Áspero', 'Aceitoso', 'Suave', 'Astringente', 'Metálico', 'Cremoso', 'Sedoso', 'Almibarado']}
                             selected={data.descriptive.descriptors.mouthfeel}
                             onToggle={(v) => toggleDescriptor('mouthfeel', v)}
@@ -724,28 +684,30 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 </div>
             </div>
 
-            {/* PARTE 2: AFECTIVA (EMOCIÓN) */}
-            <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-6">
+            {/* PARTE 2: AFECTIVA Y RADAR (Side by side) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* AFECTIVA (EMOCIÓN) */}
+                <div className="bg-white p-4 rounded-industrial border border-gray-400 shadow-sm relative overflow-hidden flex flex-col gap-4 h-full">
                 <div className="absolute top-0 right-0 w-1.5 h-full bg-black-bright shadow-[0_0_15px_rgba(255,255,255,0.2)]"></div>
-                <header className="flex justify-between items-center border-b border-black/20 pb-4">
+                <header className="flex justify-between items-center border-b border-black/20 pb-3">
                     <h3 className="text-[11px] font-bold text-brand-navy uppercase ">{t('cuppingForm', 'affectiveHeader')}</h3>
                     <span className="text-[9px] font-bold text-brand-navy uppercase ">{t('cuppingForm', 'qualityLabel')}</span>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+                <div className="flex flex-col flex-1 justify-between gap-4 py-2">
                     <QualityScale label="Fragancia / Aroma" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label={t('cuppingForm', 'flavor')} value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label={t('cuppingForm', 'aftertaste')} value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label={t('cuppingForm', 'acidity')} value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label={t('cuppingForm', 'sweetness')} value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isAlreadySealed} />
                     <QualityScale label="Cuerpo" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)} disabled={isAlreadySealed} />
-                    <div className="md:col-span-2 pt-6 border-t border-black">
-                        <QualityScale label="{t('cuppingForm', 'overallImpression')}" value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
+                    <div className="pt-4 border-t border-black">
+                        <QualityScale label={t('cuppingForm', 'overallImpression')} value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
                     </div>
                 </div>
 
                 {/* DEFECTOS */}
-                <div className="mt-auto pt-8 border-t border-black/20 grid grid-cols-2 gap-8">
+                <div className="pt-3 border-t border-black/20 grid grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-[11px] font-bold text-brand-navy uppercase  block">{t('cuppingForm', 'uniformCups')}</label>
                         <div className="flex gap-6">
@@ -780,12 +742,52 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                         </div>
                     </div>
                     <DescriptiveMarkerGroup 
-                        label="{t('cuppingForm', 'defectsLabel')}"
+                        label={t('cuppingForm', 'defectsLabel')}
                         options={['Mohoso', 'Fenólico', 'Papa', 'Fermento', 'Químico', 'Tierra']}
                         selected={data.defects.type}
                         onToggle={toggleDefectType}
                         disabled={isAlreadySealed}
                     />
+                </div>
+                </div>
+
+                <div className="flex flex-col gap-4 h-full">
+                {/* HUELLA ORGANOLEPTICA (RADAR) */}
+                <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial flex flex-col items-center gap-6">
+                    <h4 className="text-[11px] font-bold text-brand-navy uppercase ">Huella Biometría Sensorial</h4>
+                    <div className="w-full h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                                <PolarGrid stroke="#00000020" />
+                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#1A1A1A', fontSize: 10, fontWeight: '900' }} />
+                                <Radar 
+                                    name="Calidad" 
+                                    dataKey="A" 
+                                    stroke="#000000" 
+                                    fill="#000000" 
+                                    fillOpacity={0.15} 
+                                    dot={{ fill: '#000000', r: 3 }}
+                                />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="text-center mt-auto">
+                        <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">LAB Score Final</p>
+                        <p className="text-5xl font-black text-brand-navy font-black er">{totalScore.toFixed(2)}</p>
+                    </div>
+                </div>
+
+                {/* CATADOR, NOTAS Y SELLADO */}
+                <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm flex flex-col gap-6">
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  block">Catador Principal</label>
+                        <input type="text" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none focus:border-black" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[11px] font-bold text-brand-navy uppercase  block">Notas de Laboratorio</label>
+                        <textarea rows={4} value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none resize-none focus:border-black" placeholder="Escriba aquí los descriptores finales..." />
+                    </div>
+                </div>
                 </div>
             </div>
 
@@ -967,89 +969,6 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         </div>
       )}
 
-      {/* FOOTER: RADAR Y SELLADO */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial flex flex-col items-center gap-6">
-                <h4 className="text-[11px] font-bold text-brand-navy uppercase ">Huella Biometría Sensorial</h4>
-                <div className="w-full h-[250px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-                            <PolarGrid stroke="#00000020" />
-                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#1A1A1A', fontSize: 10, fontWeight: '900' }} />
-                            <Radar 
-                                name="Calidad" 
-                                dataKey="A" 
-                                stroke="#000000" 
-                                fill="#000000" 
-                                fillOpacity={0.15} 
-                                dot={{ fill: '#000000', r: 3 }}
-                            />
-                        </RadarChart>
-                    </ResponsiveContainer>
-                </div>
-                <div className="text-center">
-                    <p className="text-[11px] text-brand-navy uppercase font-bold  mb-1">LAB Score Final</p>
-                    <p className="text-5xl font-black text-brand-navy font-black er">{totalScore.toFixed(2)}</p>
-                </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-industrial border border-gray-400 shadow-sm flex flex-col gap-6">
-                <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">Catador Principal</label>
-                    <input type="text" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none focus:border-black" />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase  block">Notas de Laboratorio</label>
-                    <textarea rows={4} value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})} disabled={isAlreadySealed} className="w-full bg-white border border-gray-400 shadow-sm rounded-xl px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none resize-none focus:border-black" placeholder="Escriba aquí los descriptores finales..." />
-                </div>
-                {/* ADVERTENCIA SI EXTRÍNSECO INCOMPLETO */}
-                {!isAlreadySealed && !isReadOnly && !isExtrinsicFilled && (
-                  <div
-                    onClick={() => setActiveTab('extrinsic')}
-                    className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-100 transition-all"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    <div>
-                      <p className="text-[10px] font-black text-amber-800 uppercase">Completa la evaluación extrínseca primero</p>
-                      <p className="text-[9px] text-amber-700 font-medium">Haz clic aquí para ir al tab 2 → N° Muestra + al menos un campo</p>
-                    </div>
-                  </div>
-                )}
-                <button
-                    onClick={handleSave}
-                    disabled={isSaving || isAlreadySealed || isReadOnly || !isExtrinsicFilled}
-                    className={`w-full py-6 rounded-2xl font-black uppercase  text-xs transition-all flex items-center justify-center gap-4 ${isAlreadySealed ? 'bg-brand-green text-brand-navy border border-gray-400 shadow-sm cursor-default' : isReadOnly ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-not-allowed' : !isExtrinsicFilled ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : 'bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'}`}
-                >
-                    {isAlreadySealed ? (
-                        <>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            PROTOCOLO SELLADO E INMUTABLE
-                        </>
-                    ) : isReadOnly ? (
-                        <>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" /></svg>
-                            MODO LECTURA (SIN PERMISOS DE EDICIÓN)
-                        </>
-                    ) : isSaving ? (
-                        <>
-                            <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
-                            SINCRONIZANDO...
-                        </>
-                    ) : !isExtrinsicFilled ? (
-                        <>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                            COMPLETA LA EVALUACIÓN EXTRÍNSECA
-                        </>
-                    ) : (
-                        <>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-pulse"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" /></svg>
-                            SELLAR PROCESO DE CATACIÓN
-                        </>
-                    )}
-                    {isAlreadySealed && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
-                </button>
-            </div>
-      </div>
     </div>
   );
 }
