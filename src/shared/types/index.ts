@@ -64,7 +64,7 @@ export interface RoastBatch {
     developmentPct?: number;
     machineId?: string;
     roasterName?: string;
-    roastCurve?: any[]; // Points for chart {time, temp, ror, airflow, event}
+    roastCurve?: Record<string, unknown>[]; // Points for chart {time, temp, ror, airflow, event}
     scaScore?: number;
     agtronBean?: number;
     agtronGround?: number;
@@ -76,7 +76,7 @@ export interface CVACupping {
     cuppingDate: string;
     tasterName: string;
     // SCA-103 (Descriptive)
-    descriptiveData?: any; // JSON containing descriptive descriptors
+    descriptiveData?: Record<string, unknown>; // JSON containing descriptive descriptors
     // SCA-104 (Affective 1-9 scale)
     cvaFragranceAroma?: number;
     cvaFlavorAftertaste?: number;

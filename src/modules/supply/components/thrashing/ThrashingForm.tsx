@@ -6,6 +6,8 @@ import { useLanguage } from '@/shared/context/LanguageContext';
 import { supabase } from '@/shared/lib/supabase';
 import { processThrashingAction } from '../../actions/thrashing';
 import { NumericInput } from '@/shared/components/ui/NumericInput';
+import { SieveDistributionTable, SieveData } from '@/shared/components/ui/SieveDistributionTable';
+import { useThrashingData } from '@/shared/hooks/useThrashingData';
 import EUDRComplianceBadge from '../EUDRComplianceBadge';
 
 interface ThrashingFormProps {
@@ -54,74 +56,28 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
     const [yieldFactor, setYieldFactor] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isAlreadyThrashed, setIsAlreadyThrashed] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [warning, setWarning] = useState<{ message: string; type: 'low' | 'high' | 'optimal' } | null>(null);
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [lotDetails, setLotDetails] = useState<any>(null);
+    const { 
+        isLoading, 
+        error: fetchError, 
+        isAlreadyThrashed, 
+        lotDetails, 
+        initialFormData 
+    } = useThrashingData(inventoryId, user?.companyId);
 
     useEffect(() => {
-        const fetchThrashingData = async () => {
-            if (!inventoryId || !user?.companyId) return;
-            setIsLoading(true);
-            try {
-                const { data, error } = await supabase
-                    .from('coffee_purchase_inventory')
-                    .select('*')
-                    .eq('id', inventoryId.trim())
-                    .eq('company_id', user.companyId)
-                    .maybeSingle();
+        if (initialFormData) {
+            setFormData(prev => ({ ...prev, ...initialFormData }));
+        }
+    }, [initialFormData]);
 
-                if (error) {
-                    console.error("AXIS DB ERROR (Trilla):", error);
-                } else if (data) {
-                    let processKey = 'Lavado';
-                    const dbProcess = (data.process || 'lavado').toLowerCase();
-
-                    if (dbProcess === 'natural') {
-                        processKey = 'Natural';
-                    } else if (dbProcess === 'honey') {
-                        processKey = 'Honey';
-                    } else if (dbProcess === 'sumergido') {
-                        processKey = 'Sumergido';
-                    } else if (dbProcess === 'semilavado') {
-                        processKey = 'Semilavado';
-                    } else { 
-                        processKey = 'Lavado';
-                    }
-
-                    const rawExcel = data.process_data?.raw_excel_data?.inventory;
-                    const thrashedW = Number(data.thrashed_weight) || rawExcel?.thrashedWeight || 0;
-                    const pasillaW = Number(data.pasilla_weight) || (rawExcel?.processData?.pasillaWeight) || 0;
-                    const ciscoW = Number(data.cisco_weight) || (rawExcel?.processData?.ciscoWeight) || 0;
-
-                    setFormData(prev => ({
-                        ...prev,
-                        excelsoWeight: thrashedW,
-                        pasillaWeight: pasillaW,
-                        ciscoWeight: ciscoW,
-                        processType: processKey,
-                        humidity: Number(data.humidity) || data.process_data?.raw_excel_data?.physicalAnalysis?.moisturePct || 11.0,
-                        preparationProtocol: data.process_data?.preparation_protocol || 'EP',
-                        sortingMethod: data.process_data?.sorting_method || 'Máquina Selectora Óptica',
-                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 50, m17: 50, m16: 0, m15: 0, m14: 0, m13: 0, m12: 0, menores: 0 }
-                    }));
-
-                    if (thrashedW > 0) {
-                        setIsAlreadyThrashed(true);
-                    }
-                    setLotDetails(data);
-                }
-            } catch (err) {
-                console.error("AXIS CRITICAL ERROR (Trilla):", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchThrashingData();
-    }, [inventoryId]);
+    useEffect(() => {
+        if (fetchError) {
+            setError(fetchError);
+        }
+    }, [fetchError]);
 
     const [stats, setStats] = useState({
         totalOut: 0,
@@ -183,6 +139,11 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
         }
     }, [formData, parchmentWeight]);
 
+    // Wait! screenSum and isScreenValid are computed inside the SieveDistributionTable but ThrashingForm also uses them?
+    // ThrashingForm does not use screenSum for its internal stats! It only used them for the UI block we're deleting.
+    // However, wait... does handleSubmit use isScreenValid?
+    // Let me check handleSubmit. No, it doesn't block on isScreenValid! Let me just delete screenSum and isScreenValid if they are not used elsewhere.
+    // I'll keep them just in case I am wrong, but wait, I can just compute it.
     const screenSum = Object.values(formData.sieveAnalysis).reduce((a, b) => Number(a) + Number(b), 0);
     const isScreenValid = Math.abs(screenSum - 100) < 0.1;
 
@@ -308,48 +269,13 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-400 shadow-sm space-y-4 relative z-10">
-                <div className="flex justify-between items-end border-b border-gray-400 shadow-sm pb-2">
-                    <h4 className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
-                        {t('thrashingForm', 'sieveAnalysis')}
-                    </h4>
-                    <div className={`flex items-center gap-2 text-brand-navy`}>
-                        <span className="text-[9px] font-bold uppercase opacity-60">MASS BALANCE:</span>
-                        <span className="text-sm font-black er leading-none">{screenSum.toFixed(1)}%</span>
-                        {!isScreenValid && <span className="text-[9px] font-bold uppercase text-red-500 ml-2">ADJUSTMENT REQUIRED (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
-                    {[18, 17, 16, 15, 14, 13, 12, 'menores'].map((size, idx) => (
-                        <div key={idx} className="space-y-1">
-                            <label className="text-[9px] font-bold text-brand-navy uppercase block text-center">
-                                {size === 'menores' ? 'Fondo' : `Malla ${size}`}
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={(formData.sieveAnalysis as any)[size === 'menores' ? 'menores' : `m${size}`]}
-                                    onChange={(e) => setFormData({
-                                        ...formData,
-                                        sieveAnalysis: { ...formData.sieveAnalysis, [size === 'menores' ? 'menores' : `m${size}`]: parseFloat(e.target.value) || 0 }
-                                    })}
-                                    disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                                    className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-2 py-1 text-xs font-bold text-brand-navy text-center outline-none focus:border-black transition-all appearance-none"
-                                />
-                                <span className="absolute top-1/2 -translate-y-1/2 right-2 text-[8px] font-black text-gray-500 uppercase">%</span>
-                            </div>
-                            <div className="h-0.5 bg-gray-200 rounded-full overflow-hidden mt-1">
-                                <div 
-                                    className="h-full bg-brand-green transition-all duration-700" 
-                                    style={{ width: `${(formData.sieveAnalysis as any)[size === 'menores' ? 'menores' : `m${size}`]}%` }}
-                                ></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <SieveDistributionTable 
+                data={formData.sieveAnalysis}
+                onChange={(newData: SieveData) => setFormData({ ...formData, sieveAnalysis: newData })}
+                isReadOnly={isReadOnly || isAlreadyThrashed}
+                isSubmitting={isSubmitting}
+                showSyncButton={false}
+            />
 
             {/* Output Automático: Proyección */}
             <div className="p-4 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">

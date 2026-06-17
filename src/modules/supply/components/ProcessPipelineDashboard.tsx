@@ -43,13 +43,22 @@ export default function ProcessPipelineDashboard({ user, onSelectLotAndTab, onOp
             if (lotsError) throw lotsError;
             const fetchedLots = lotsData || [];
 
-            // 2. Obtener Cataciones en Paralelo
-            const { data: cuppingsData } = await supabase.from('sca_cupping').select('inventory_id, overall, overall_sensory_score, taster_name');
-            const fetchedCuppings = cuppingsData || [];
+            // 2. Obtener Cataciones y Tuestes en Paralelo (con filtros de compañía)
+            let cuppingsQuery = supabase.from('sca_cupping').select('inventory_id, overall, overall_sensory_score, taster_name');
+            let roastsQuery = supabase.from('roast_batches').select('inventory_id, roast_date');
 
-            // 3. Obtener Tuestes en Paralelo
-            const { data: roastsData } = await supabase.from('roast_batches').select('inventory_id, roast_date');
-            const fetchedRoasts = roastsData || [];
+            if (user?.role !== 'auditor' && !user?.email?.toLowerCase()?.includes('julio') && !user?.email?.toLowerCase()?.includes('main')) {
+                cuppingsQuery = cuppingsQuery.eq('company_id', user?.companyId);
+                roastsQuery = roastsQuery.eq('company_id', user?.companyId);
+            }
+
+            const [cuppingsRes, roastsRes] = await Promise.all([
+                cuppingsQuery,
+                roastsQuery
+            ]);
+
+            const fetchedCuppings = cuppingsRes.data || [];
+            const fetchedRoasts = roastsRes.data || [];
 
             setLots(fetchedLots);
             setCuppings(fetchedCuppings);

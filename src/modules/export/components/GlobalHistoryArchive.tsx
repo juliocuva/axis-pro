@@ -29,13 +29,24 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
         let allHistory: any[] = [];
         try {
             let exportsQuery = supabase.from('green_exports').select('*');
-            
-            // Si el usuario es Julio o Auditor, ve TODO el historial global
+            let lotsQuery = supabase.from('coffee_purchase_inventory').select('*');
+            let roastsQuery = supabase.from('roast_batches').select('*');
+
             if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
                 exportsQuery = exportsQuery.eq('company_id', user?.companyId);
+                lotsQuery = lotsQuery.eq('company_id', user?.companyId);
+                roastsQuery = roastsQuery.eq('company_id', user?.companyId);
             }
 
-            const { data: exports } = await exportsQuery.order('created_at', { ascending: false });
+            const [exportsRes, lotsRes, roastsRes] = await Promise.all([
+                exportsQuery.order('created_at', { ascending: false }).limit(300),
+                lotsQuery.order('created_at', { ascending: false }).limit(300),
+                roastsQuery.order('roast_date', { ascending: false }).limit(300)
+            ]);
+
+            const exports = exportsRes.data;
+            const lots = lotsRes.data;
+            const roasts = roastsRes.data;
 
             if (exports) {
                 const formatted = exports.map(exp => ({
@@ -48,20 +59,6 @@ export default function GlobalHistoryArchive({ user }: { user: { companyId: stri
                 }));
                 allHistory = [...allHistory, ...formatted];
             }
-
-            // También traemos los certificados de materia prima y su progreso
-            let lotsQuery = supabase.from('coffee_purchase_inventory').select('*');
-            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
-                lotsQuery = lotsQuery.eq('company_id', user?.companyId);
-            }
-            const { data: lots, error: lotsError } = await lotsQuery.order('created_at', { ascending: false });
-
-            // Traemos también los tuestes (Tostión) para cruzar datos
-            let roastsQuery = supabase.from('roast_batches').select('*');
-            if (user?.role !== 'auditor' && !user?.email?.toLowerCase().includes('julio') && !user?.email?.toLowerCase().includes('main')) {
-                roastsQuery = roastsQuery.eq('company_id', user?.companyId);
-            }
-            const { data: roasts } = await roastsQuery.order('roast_date', { ascending: false });
 
             if (lots) {
                 const formatted = lots.map(lot => {

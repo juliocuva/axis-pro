@@ -53,10 +53,14 @@ const COUNTRIES = [
     'Colombia', 'Ethiopia', 'Brazil', 'Vietnam', 'Panama', 'Costa Rica', 'Kenya', 'Indonesia', 'Guatemala', 'Honduras', 'El Salvador'
 ];
 
+import { CoffeePurchaseInventory, PurchaseFormData, PurchaseProcessData } from '@/shared/types/database';
+import { purchaseSchema } from '@/shared/schemas/formSchemas';
+import { z } from 'zod';
+
 interface PurchaseFormProps {
-    onPurchaseComplete?: (lot: any) => void;
-    selectedLot?: any;
-    user: { email: string, name: string, companyId: string, role?: string } | null;
+    onPurchaseComplete?: (lot: CoffeePurchaseInventory) => void;
+    selectedLot?: Record<string, any>;
+    user: { id?: string, email: string, name: string, companyId: string, role?: string } | null;
     isReadOnly?: boolean;
 }
 
@@ -103,9 +107,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             duracion_secado: '',
             agente_infusion: '',
             fermentation_notes: ''
-        } as any
+        }
 
-    };
+    } as PurchaseFormData;
 
     const [formData, setFormData] = useState(initialFormState);
     const [displayValue, setDisplayValue] = useState('');
@@ -116,9 +120,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
     const [expectedYield, setExpectedYield] = useState<number>(0);
     const [smartLinkText, setSmartLinkText] = useState('');
     const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
-    const [availableLots, setAvailableLots] = useState<any[]>([]);
+    const [availableLots, setAvailableLots] = useState<Record<string, any>[]>([]);
     const [selectedLotId, setSelectedLotId] = useState<string>('');
-    const [recentFarmers, setRecentFarmers] = useState<any[]>([]);
+    const [recentFarmers, setRecentFarmers] = useState<Record<string, any>[]>([]);
     const [showFarmerDirectory, setShowFarmerDirectory] = useState(false);
     const [isSearchingSica, setIsSearchingSica] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
@@ -191,16 +195,16 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
     useEffect(() => {
         if (selectedLot) {
-            const isBase = COFFEE_VARIETIES_BASE.includes(selectedLot.variety);
-            const isRegionBase = COLOMBIAN_REGIONS.includes(selectedLot.region);
-            const isMunBase = COMMON_MUNICIPALITIES.includes(selectedLot.municipality);
+            const isBase = COFFEE_VARIETIES_BASE.includes((selectedLot.variety || '') as string);
+            const isRegionBase = COLOMBIAN_REGIONS.includes((selectedLot.region || '') as string);
+            const isMunBase = COMMON_MUNICIPALITIES.includes((selectedLot.municipality || '') as string);
 
             setFormData({
                 sicaId: selectedLot.process_data?.sica_id || '',
                 farmerName: selectedLot.farmer_name || '',
                 farmName: selectedLot.farm_name || '',
                 farmSizeHectares: selectedLot.farm_size_hectares || undefined,
-                altitude: selectedLot.altitude || 1600,
+                altitude: Number(selectedLot.altitude) || 1600,
                 country: selectedLot.country || 'Colombia',
                 region: isRegionBase ? selectedLot.region : 'Otro',
                 municipality: isMunBase ? selectedLot.municipality : 'Otro',
@@ -216,8 +220,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 exportCertificate: selectedLot.export_certificate || '',
                 isEuropeDestination: selectedLot.is_europe_destination || false,
                 coffeeType: (selectedLot.coffee_type as 'pergamino' | 'excelso') || 'pergamino',
-                latitude: selectedLot.latitude || 0,
-                longitude: selectedLot.longitude || 0,
+                latitude: Number(selectedLot.latitude) || 0,
+                longitude: Number(selectedLot.longitude) || 0,
                 processData: (() => {
                     const pd = selectedLot.process_data;
                     const isSpecialty = ['anaerobico', 'doble_fermentacion', 'co_fermentacion'].includes((selectedLot.process as ProcessType) || 'lavado');
@@ -284,7 +288,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
     // Cálculo dinámico de rendimiento esperado (Factor de rendimiento estándar ~81%)
     useEffect(() => {
-        setExpectedYield(formData.purchaseWeight * 0.81);
+        setExpectedYield(Number(formData.purchaseWeight) * 0.81);
     }, [formData.purchaseWeight]);
 
     const formatCOP = (val: string) => {
@@ -331,7 +335,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             if (res.ok) {
                 const data = await res.json();
                 // Buscar por codigo_sica o cedula_productor
-                const found = data.find((p: any) => p.codigo_sica === formData.sicaId || p.cedula_productor === formData.sicaId);
+                const found = data.find((p: Record<string, unknown>) => p.codigo_sica === formData.sicaId || p.cedula_productor === formData.sicaId);
 
                 if (found) {
                     setFormData(prev => ({
@@ -367,17 +371,17 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
         }
     };
 
-    const handleFarmerSelect = (farmer: any) => {
+    const handleFarmerSelect = (farmer: Record<string, any>) => {
         setFormData(prev => ({
             ...prev,
             farmerName: farmer.farmer_name,
             farmName: farmer.farm_name,
-            altitude: farmer.altitude,
+            altitude: Number(farmer.altitude),
             country: farmer.country,
             region: farmer.region,
             municipality: farmer.municipality || '',
-            latitude: farmer.latitude,
-            longitude: farmer.longitude,
+            latitude: Number(farmer.latitude),
+            longitude: Number(farmer.longitude),
             sicaId: farmer.sicaId || prev.sicaId
         }));
         setShowFarmerDirectory(false);
@@ -392,9 +396,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             setFormData(prev => ({
                 ...prev,
                 variety: lot.variedad || prev.variety,
-                altitude: lot.altitud || prev.altitude,
-                latitude: lot.lat || prev.latitude,
-                longitude: lot.lon || prev.longitude,
+                altitude: Number(lot.altitud) || prev.altitude,
+                latitude: Number(lot.lat) || prev.latitude,
+                longitude: Number(lot.lon) || prev.longitude,
                 processData: { 
                     ...prev.processData, 
                     eudr_polygon: lot.poligono || prev.processData.eudr_polygon 
@@ -418,6 +422,19 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             const finalRegion = formData.region === 'Otro' ? customRegion : formData.region;
             const finalMunicipality = formData.municipality === 'Otro' ? customMunicipality : formData.municipality;
 
+            // ZOD VALIDATION
+            const zodResult = purchaseSchema.safeParse({
+                ...formData,
+                variety: finalVariety,
+                region: finalRegion,
+                municipality: finalMunicipality
+            });
+
+            if (!zodResult.success) {
+                const errorMessage = zodResult.error.issues.map((err: any) => err.message).join(' | ');
+                throw new Error(`VALIDATION ERROR: ${errorMessage}`);
+            }
+
             // VALIDACIÓN ESTRICTA EUDR
             const isEudrRequired = (formData.farmSizeHectares ?? 0) >= 4;
             if (isEudrRequired && formData.isEuropeDestination && !formData.processData?.eudr_polygon) {
@@ -435,7 +452,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                     region: finalRegion,
                     municipality: finalMunicipality,
                     processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone }
-                }, user);
+                }, user as any);
             } else {
                 // Modo Creación
                 result = await createCoffeePurchase({
@@ -444,7 +461,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                     region: finalRegion,
                     municipality: finalMunicipality,
                     processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone },
-                    companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
+                    companyId: (user as any)?.companyId || '99999999-9999-9999-9999-999999999999'
                 });
             }
 
@@ -467,11 +484,11 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                     onPurchaseComplete(result.data);
                 }
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("DEBUG SUBMISSION:", err);
             setStatus({
                 type: 'error',
-                message: err.message || 'Error de Sincronización Industrial: Fallo crítico en el procesamiento.'
+                message: (err as any).message || 'Error de Sincronización Industrial: Fallo crítico en el procesamiento.'
             });
         } finally {
             setIsSubmitting(false);
@@ -695,7 +712,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                                 altitude: inv.altitude || formData.altitude,
                                                                 region: finalRegion,
                                                                 variety: finalVariety,
-                                                                process: inv.process as any || formData.process,
+                                                                process: inv.process || formData.process,
                                                                 purchaseWeight: inv.purchaseWeight || formData.purchaseWeight,
                                                                 processData: {
                                                                     ...formData.processData,
@@ -717,7 +734,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                             
                                                             let result;
                                                             if (selectedLot?.id) {
-                                                                result = await updateCoffeePurchase(selectedLot.id, payload, user);
+                                                                result = await updateCoffeePurchase(selectedLot.id, payload, user as any);
                                                             } else {
                                                                 result = await createCoffeePurchase(payload);
                                                             }
@@ -872,7 +889,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     min={800}
                                     max={2500}
                                     step={1}
-                                    variant={formData.altitude < 1000 || formData.altitude > 2500 ? 'red' : 'default'}
+                                    variant={Number(formData.altitude) < 1000 || Number(formData.altitude) > 2500 ? 'red' : 'default'}
                                     inputClassName="font-bold"
                                     unit="M"
                                 />

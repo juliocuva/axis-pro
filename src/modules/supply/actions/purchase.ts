@@ -2,17 +2,19 @@
 
 import { supabase } from '@/shared/lib/supabase';
 
+import { PurchaseFormData, UserSession, CoffeePurchaseInventory } from '@/shared/types/database';
+
 /**
  * AXIS SUPPLY HUB - SERVER SIDE ACTIONS
  * Validación robusta de ingreso de lotes al sistema AXIS COFFEE PRO.
  */
 
 // Helper para sanitización estricta
-function sanitizeString(str: string): string {
+function sanitizeString(str: string | undefined | null): string {
     return str ? str.trim().replace(/\s+/g, ' ').toUpperCase() : '';
 }
 
-export async function createCoffeePurchase(formData: any) {
+export async function createCoffeePurchase(formData: PurchaseFormData) {
     try {
         // 1. Sanitización Estricta
         const cleanFarmerName = sanitizeString(formData.farmerName);
@@ -21,17 +23,19 @@ export async function createCoffeePurchase(formData: any) {
 
         // 2. Validaciones Flexibilizadas para Fase de Piloto/Importación
         // Se permite altura 0 o fuera de rango para evitar bloqueos en recepción
-        const altitude = parseInt(formData.altitude) || 0;
+        const altitude = typeof formData.altitude === 'string' ? parseInt(formData.altitude) : (formData.altitude || 0);
         
-        if (formData.purchaseWeight <= 0) {
+        const purchaseWeight = typeof formData.purchaseWeight === 'string' ? parseFloat(formData.purchaseWeight) : (formData.purchaseWeight || 0);
+
+        if (purchaseWeight <= 0) {
             throw new Error("ERROR INDUSTRIAL: El peso de compra debe ser un valor positivo.");
         }
 
         // Se permite purchaseValue = 0 para lotes en proceso de liquidación
-        const purchaseValue = parseFloat(formData.purchaseValue) || 0;
+        const purchaseValue = typeof formData.purchaseValue === 'string' ? parseFloat(formData.purchaseValue) : (formData.purchaseValue || 0);
 
         // 3. Construcción de Datos Atómica
-        const insertData: any = {
+        const insertData: Partial<CoffeePurchaseInventory> = {
             farmer_name: cleanFarmerName,
             farm_name: cleanFarmName,
             lot_number: cleanLotNumber,
@@ -40,20 +44,20 @@ export async function createCoffeePurchase(formData: any) {
             region: formData.municipality ? `${formData.region}, ${formData.municipality}` : (formData.region || 'Huila'),
             variety: formData.variety || 'Caturra',
             process: formData.process || 'lavado',
-            purchase_weight: parseFloat(formData.purchaseWeight) || 0,
+            purchase_weight: purchaseWeight,
             purchase_value: purchaseValue, // USAR VALOR LIMPIO
             purchase_date: formData.purchaseDate || new Date().toISOString().split('T')[0],
             harvest_date: formData.harvestDate || formData.purchaseDate || new Date().toISOString().split('T')[0],
             destination: formData.destination || 'local',
-            export_certificate: formData.exportCertificate || false,
-            latitude: parseFloat(formData.latitude) || 0,
-            longitude: parseFloat(formData.longitude) || 0,
+            export_certificate: Boolean(formData.exportCertificate) || false,
+            latitude: typeof formData.latitude === 'string' ? parseFloat(formData.latitude) : (formData.latitude || 0),
+            longitude: typeof formData.longitude === 'string' ? parseFloat(formData.longitude) : (formData.longitude || 0),
             process_data: formData.processData || {},
             sica_id: formData.sicaId || null,
-            company_id: formData.companyId,
+            company_id: formData.companyId as string,
             status: formData.status || (formData.coffeeType === 'excelso' ? 'thrashed' : 'purchased'),
             coffee_type: formData.coffeeType || 'pergamino',
-            thrashed_weight: formData.coffeeType === 'excelso' ? formData.purchaseWeight : null
+            thrashed_weight: formData.coffeeType === 'excelso' ? purchaseWeight : null
         };
 
         // 4. Verificación de Identificador Único (Lote AX-XXXX)
@@ -154,20 +158,23 @@ export async function createCoffeePurchase(formData: any) {
             message: `Lote ${cleanLotNumber} registrado exitosamente en AXIS COFFEE PRO. Trazabilidad vinculada.`
         };
 
-    } catch (error: any) {
-        console.error("CRITICAL BACKEND ERROR:", error.message);
-        const userMessage = error.message.includes("ERROR INDUSTRIAL") || error.message.includes("Fallo en guardado")
-            ? error.message
-            : `Error de Sincronización Industrial: ${error.message}`;
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("CRITICAL BACKEND ERROR:", error.message);
+            const userMessage = error.message.includes("ERROR INDUSTRIAL") || error.message.includes("Fallo en guardado")
+                ? error.message
+                : `Error de Sincronización Industrial: ${error.message}`;
 
-        return {
-            success: false,
-            message: userMessage
-        };
+            return {
+                success: false,
+                message: userMessage
+            };
+        }
+        return { success: false, message: "Error desconocido" };
     }
 }
 
-export async function updateCoffeePurchase(lotId: string, formData: any, user: any) {
+export async function updateCoffeePurchase(lotId: string, formData: PurchaseFormData, user: UserSession | null | undefined) {
     try {
         // 1. Verificación de Seguridad: Propiedad del Lote
         const { data: currentLot } = await supabase
@@ -204,7 +211,7 @@ export async function updateCoffeePurchase(lotId: string, formData: any, user: a
             purchase_date: formData.purchaseDate,
             harvest_date: formData.harvestDate,
             destination: formData.destination,
-            export_certificate: formData.exportCertificate,
+            export_certificate: Boolean(formData.exportCertificate) || false,
             latitude: formData.latitude,
             longitude: formData.longitude,
             process_data: formData.processData || {},
@@ -264,11 +271,14 @@ export async function updateCoffeePurchase(lotId: string, formData: any, user: a
             data: updateResponse.data,
             message: `Lote ${cleanLotNumber} actualizado correctamente.`
         };
-    } catch (error: any) {
-        console.error("UPDATE ERROR:", error);
-        return {
-            success: false,
-            message: `Fallo al actualizar lote: ${error.message}`
-        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("UPDATE ERROR:", error);
+            return {
+                success: false,
+                message: `Fallo al actualizar lote: ${error.message}`
+            };
+        }
+        return { success: false, message: "Error desconocido al actualizar lote" };
     }
 }

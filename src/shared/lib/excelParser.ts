@@ -12,8 +12,7 @@ export interface ExcelParsedPayload {
     process: string;
     purchaseWeight: number;
     thrashedWeight: number;
-    thrashingYield: number;
-    processData: any; // JSONB con tiempos, ph, brix
+    processData: Record<string, unknown>; // JSONB con tiempos, ph, brix
   };
   physicalAnalysis: {
     moisturePct: number;
@@ -33,7 +32,7 @@ export interface ExcelParsedPayload {
   cvaCupping: {
     cuppingDate: string;
     tasterName: string;
-    descriptiveData: any;
+    descriptiveData: Record<string, unknown>;
     cvaFragranceAroma: number;
     cvaFlavorAftertaste: number;
     cvaAcidity: number;
@@ -50,10 +49,10 @@ export interface ExcelParsedPayload {
 /**
  * Convierte un campo extraído a número de forma segura
  */
-function parseNum(val: any): number {
+function parseNum(val: unknown): number {
   if (val === undefined || val === null || val === '') return 0;
   if (typeof val === 'number') return val;
-  const parsed = parseFloat(val.toString().replace(/,/g, '.').replace(/[^0-9.-]/g, ''));
+  const parsed = parseFloat(String(val).replace(/,/g, '.').replace(/[^0-9.-]/g, ''));
   return isNaN(parsed) ? 0 : parsed;
 }
 
@@ -66,9 +65,9 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
   const worksheet = workbook.Sheets[sheetName];
 
   // Convertimos a JSON usando array de arrays para no depender de cabeceras
-  const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  const rows: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-  const dataMap: Record<string, any> = {};
+  const dataMap: Record<string, unknown> = {};
 
   // Iteramos sobre las filas. 
   // Según nuestro generador, el nombre del campo está en la columna A (índice 0)
@@ -82,20 +81,25 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
     }
   }
 
+  const getString = (key: string): string => {
+    const val = dataMap[key];
+    return val !== undefined && val !== null ? String(val) : '';
+  };
+
   // --- MAPEO A INVENTORY ---
   const inventory = {
-    lotNumber: dataMap['Numero_Lote'] || '',
-    farmerName: dataMap['Caficultor'] || '',
-    farmName: dataMap['Finca'] || '',
+    lotNumber: getString('Numero_Lote'),
+    farmerName: getString('Caficultor'),
+    farmName: getString('Finca'),
     altitude: parseNum(dataMap['Altura_msnm']),
-    region: (dataMap['Municipio'] || '') + ', ' + (dataMap['Departamento'] || ''),
-    variety: dataMap['Variedad'] || '',
-    process: dataMap['Proceso'] || '',
+    region: (getString('Municipio') ? getString('Municipio') + ', ' : '') + getString('Departamento'),
+    variety: getString('Variedad'),
+    process: getString('Proceso'),
     purchaseWeight: parseNum(dataMap['Peso_Pergamino_Kg']),
     thrashedWeight: parseNum(dataMap['Peso_Excelso_Kg']),
     thrashingYield: parseNum(dataMap['Merma_Trilla_Pct']),
     processData: {
-      estiloFermentacion: dataMap['Estilo_Fermentacion'] || '',
+      estiloFermentacion: getString('Estilo_Fermentacion'),
       horasFermentacion: parseNum(dataMap['Horas_Fermentacion']),
       pH_Inicial: parseNum(dataMap['pH_Inicial']),
       pH_Final: parseNum(dataMap['pH_Final']),
@@ -115,7 +119,7 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
     moisturePct: parseNum(dataMap['Humedad_Pct']),
     waterActivity: parseNum(dataMap['Actividad_Agua_Aw']),
     densityGl: parseNum(dataMap['Densidad_Confirmada_gL']) || parseNum(dataMap['Densidad_gL']),
-    grainColor: dataMap['Color_Grano'] || '',
+    grainColor: getString('Color_Grano'),
     sieveAnalysis: {
         size18: parseNum(dataMap['Malla_18_Pct']),
         size17: parseNum(dataMap['Malla_17_Pct']),
@@ -130,22 +134,22 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
 
   // --- MAPEO A ROAST BATCH ---
   const roastBatch = {
-    roastDate: dataMap['Fecha_Tueste'] || '',
-    greenWeight: parseNum(dataMap['Peso_Verde_Entrada_Kg']),
-    roastedWeight: parseNum(dataMap['Peso_Tostado_Salida_Kg']),
-    machineId: dataMap['Tostadora_ID'] || '',
-    roasterName: dataMap['Operario_Tueste'] || '',
+    roastDate: getString('Fecha_Tueste'),
+    greenWeight: parseNum(dataMap['Peso_Verde_Tueste_g']),
+    roastedWeight: parseNum(dataMap['Peso_Tostado_g']),
+    machineId: getString('Maquina_Tueste'),
+    roasterName: getString('Tostador'),
     agtronBean: parseNum(dataMap['Agtron_Grano']),
     agtronGround: parseNum(dataMap['Agtron_Molido']),
-    roastTime: dataMap['Tiempo_Tueste_min'] ? dataMap['Tiempo_Tueste_min'].toString() : '',
-    maxTemp: parseNum(dataMap['Temperatura_Max_C']),
-    roastLevel: dataMap['Nivel_Tueste'] || '',
-    notes: dataMap['Perfil_Tueste_Notas'] || ''
+    roastTime: getString('Tiempo_Tueste'),
+    maxTemp: parseNum(dataMap['Temperatura_Maxima']),
+    roastLevel: getString('Nivel_Tueste'),
+    notes: getString('Notas_Tueste')
   };
 
   // --- MAPEO A CVA CUPPING ---
-  const cuppingDate = dataMap['Fecha_Catacion'] || '';
-  const tasterName = dataMap['Catador'] || '';
+  const cuppingDate = getString('Fecha_Catacion');
+  const tasterName = getString('Catador');
   
   // Afectivo 1-9
   const cvaFragranceAroma = parseNum(dataMap['CVA_Fragancia_Aroma']);
