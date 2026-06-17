@@ -7,6 +7,8 @@ import { supabase } from '@/shared/lib/supabase';
 import EUDRGeoreference from './EUDRGeoreference';
 import EUDRComplianceBadge from './EUDRComplianceBadge';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import * as XLSX from 'xlsx';
+import { parseFichaDeLote } from '@/shared/lib/excelParser';
 
 
 const COFFEE_VARIETIES_BASE: string[] = [
@@ -661,6 +663,85 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             </span>
                                         )}
                                     </button>
+                                    <label className="bg-brand-navy hover:bg-brand-navy/90 text-white px-6 py-2 rounded-full font-bold uppercase transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs whitespace-nowrap">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                                        Excel
+                                        <input 
+                                            type="file" 
+                                            accept=".xlsx,.xls" 
+                                            className="hidden" 
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    const reader = new FileReader();
+                                                    reader.onload = async (evt) => {
+                                                        try {
+                                                            setIsSubmitting(true);
+                                                            setStatus({ type: 'success', message: 'Procesando Ficha de Lote y generando borrador global...' });
+                                                            const buffer = evt.target?.result as ArrayBuffer;
+                                                            const excelData = parseFichaDeLote(buffer);
+                                                            
+                                                            // 1. Populate formData with inventory part
+                                                            const inv = excelData.inventory;
+                                                            const finalVariety = inv.variety || formData.variety;
+                                                            const finalRegion = inv.region || formData.region;
+                                                            const finalMunicipality = formData.municipality;
+
+                                                            const newData = {
+                                                                ...formData,
+                                                                lotNumber: inv.lotNumber || formData.lotNumber,
+                                                                farmerName: inv.farmerName || formData.farmerName,
+                                                                farmName: inv.farmName || formData.farmName,
+                                                                altitude: inv.altitude || formData.altitude,
+                                                                region: finalRegion,
+                                                                variety: finalVariety,
+                                                                process: inv.process as any || formData.process,
+                                                                purchaseWeight: inv.purchaseWeight || formData.purchaseWeight,
+                                                                processData: {
+                                                                    ...formData.processData,
+                                                                    ...inv.processData,
+                                                                    raw_excel_data: excelData // GUARDA EL EXCEL COMPLETO AQUI
+                                                                }
+                                                            };
+                                                            setFormData(newData);
+                                                            
+                                                            // 2. AUTO-SAVE to DB so other tabs can be unlocked and read from DB
+                                                            const payload = {
+                                                                ...newData,
+                                                                variety: finalVariety,
+                                                                region: finalRegion,
+                                                                municipality: finalMunicipality,
+                                                                processData: newData.processData,
+                                                                companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
+                                                            };
+                                                            
+                                                            let result;
+                                                            if (selectedLot?.id) {
+                                                                result = await updateCoffeePurchase(selectedLot.id, payload, user);
+                                                            } else {
+                                                                result = await createCoffeePurchase(payload);
+                                                            }
+                                                            
+                                                            if (result.success) {
+                                                                setStatus({ type: 'success', message: 'Ficha precargada y borrador guardado. Ya puedes navegar a las demás pestañas.' });
+                                                                if (onPurchaseComplete) {
+                                                                    onPurchaseComplete(result.data);
+                                                                }
+                                                            } else {
+                                                                setStatus({ type: 'error', message: 'Error guardando borrador: ' + result.message });
+                                                            }
+                                                        } catch (error: any) {
+                                                            setStatus({ type: 'error', message: 'Error procesando Excel: ' + error.message });
+                                                        } finally {
+                                                            setIsSubmitting(false);
+                                                            e.target.value = '';
+                                                        }
+                                                    };
+                                                    reader.readAsArrayBuffer(file);
+                                                }
+                                            }}
+                                        />
+                                    </label>
                                 </div>
                                 <p className="text-[11px] text-brand-navy uppercase  mt-2 font-mono">
                                     {t('purchaseForm', 'demoTip')}

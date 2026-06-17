@@ -78,7 +78,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         }
                         onChange(val);
                     }}
-                    className={`w-full border border-gray-400 bg-white shadow-sm rounded-industrial-sm px-3 py-1.5 outline-none font-medium transition-all text-xs text-gray-400 focus:border-black ${inputClassName} placeholder:text-gray-400 placeholder:font-medium`}
+                    className={`w-full border rounded-industrial-sm px-3 py-1.5 outline-none font-bold transition-all text-xs ${variantStyles[variant]} ${inputClassName} placeholder:text-gray-400 placeholder:font-medium`}
                 />
                 <div
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"

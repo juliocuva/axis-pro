@@ -45,7 +45,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             m17: 50,
             m16: 0,
             m15: 0,
-            caracol: 0,
+            m14: 0,
+            m13: 0,
+            m12: 0,
             menores: 0
         }
     });
@@ -89,17 +91,21 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         processKey = 'Lavado';
                     }
 
-                    const thrashedW = Number(data.thrashed_weight) || 0;
+                    const rawExcel = data.process_data?.raw_excel_data?.inventory;
+                    const thrashedW = Number(data.thrashed_weight) || rawExcel?.thrashedWeight || 0;
+                    const pasillaW = Number(data.pasilla_weight) || (rawExcel?.processData?.pasillaWeight) || 0;
+                    const ciscoW = Number(data.cisco_weight) || (rawExcel?.processData?.ciscoWeight) || 0;
+
                     setFormData(prev => ({
                         ...prev,
                         excelsoWeight: thrashedW,
-                        pasillaWeight: Number(data.pasilla_weight) || 0,
-                        ciscoWeight: Number(data.cisco_weight) || 0,
+                        pasillaWeight: pasillaW,
+                        ciscoWeight: ciscoW,
                         processType: processKey,
-                        humidity: Number(data.humidity) || 11.0,
+                        humidity: Number(data.humidity) || data.process_data?.raw_excel_data?.physicalAnalysis?.moisturePct || 11.0,
                         preparationProtocol: data.process_data?.preparation_protocol || 'EP',
                         sortingMethod: data.process_data?.sorting_method || 'Máquina Selectora Óptica',
-                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 50, m17: 50, m16: 0, m15: 0, caracol: 0, menores: 0 }
+                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 50, m17: 50, m16: 0, m15: 0, m14: 0, m13: 0, m12: 0, menores: 0 }
                     }));
 
                     if (thrashedW > 0) {
@@ -176,6 +182,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             setWarning(null);
         }
     }, [formData, parchmentWeight]);
+
+    const screenSum = Object.values(formData.sieveAnalysis).reduce((a, b) => Number(a) + Number(b), 0);
+    const isScreenValid = Math.abs(screenSum - 100) < 0.1;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -300,37 +309,43 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             </div>
 
             <div className="pt-6 border-t border-gray-400 shadow-sm space-y-4 relative z-10">
-                <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2">
-                        <span className="w-2 h-2 bg-brand-green rounded-full"></span>
+                <div className="flex justify-between items-end border-b border-gray-400 shadow-sm pb-2">
+                    <h4 className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
                         {t('thrashingForm', 'sieveAnalysis')}
                     </h4>
-                    <span className="text-[9px] text-brand-navy font-bold uppercase ">{t('thrashingForm', 'sieveTip')}</span>
+                    <div className={`flex items-center gap-2 text-brand-navy`}>
+                        <span className="text-[9px] font-bold uppercase opacity-60">MASS BALANCE:</span>
+                        <span className="text-sm font-black er leading-none">{screenSum.toFixed(1)}%</span>
+                        {!isScreenValid && <span className="text-[9px] font-bold uppercase text-red-500 ml-2">ADJUSTMENT REQUIRED (Δ {Math.abs(100 - screenSum).toFixed(1)}%)</span>}
+                    </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
-                    {[
-                        { id: 'm18', label: '18+' },
-                        { id: 'm17', label: '17+' },
-                        { id: 'm16', label: '16+' },
-                        { id: 'm15', label: '15+' },
-                        { id: 'caracol', label: 'Caracol' },
-                        { id: 'menores', label: 'Menores' }
-                    ].map(m => (
-                        <div key={m.id} className="space-y-1">
-                            <label className="text-[9px] font-bold text-brand-navy uppercase block text-center ">{m.label}</label>
-                            <NumericInput
-                                label=""
-                                value={formData.sieveAnalysis[m.id as keyof typeof formData.sieveAnalysis]}
-                                onChange={(val) => setFormData(prev => ({
-                                    ...prev,
-                                    sieveAnalysis: { ...prev.sieveAnalysis, [m.id]: val }
-                                }))}
-                                step={1}
-                                unit="%"
-                                disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                                variant="industrial"
-                                inputClassName="text-center text-xs !h-[30px] !px-2 font-bold"
-                            />
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+                    {[18, 17, 16, 15, 14, 13, 12, 'menores'].map((size, idx) => (
+                        <div key={idx} className="space-y-1">
+                            <label className="text-[9px] font-bold text-brand-navy uppercase block text-center">
+                                {size === 'menores' ? 'Fondo' : `Malla ${size}`}
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    value={(formData.sieveAnalysis as any)[size === 'menores' ? 'menores' : `m${size}`]}
+                                    onChange={(e) => setFormData({
+                                        ...formData,
+                                        sieveAnalysis: { ...formData.sieveAnalysis, [size === 'menores' ? 'menores' : `m${size}`]: parseFloat(e.target.value) || 0 }
+                                    })}
+                                    disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
+                                    className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-2 py-1 text-xs font-bold text-brand-navy text-center outline-none focus:border-black transition-all appearance-none"
+                                />
+                                <span className="absolute top-1/2 -translate-y-1/2 right-2 text-[8px] font-black text-gray-500 uppercase">%</span>
+                            </div>
+                            <div className="h-0.5 bg-gray-200 rounded-full overflow-hidden mt-1">
+                                <div 
+                                    className="h-full bg-brand-green transition-all duration-700" 
+                                    style={{ width: `${(formData.sieveAnalysis as any)[size === 'menores' ? 'menores' : `m${size}`]}%` }}
+                                ></div>
+                            </div>
                         </div>
                     ))}
                 </div>

@@ -30,27 +30,7 @@ export async function createCoffeePurchase(formData: any) {
         // Se permite purchaseValue = 0 para lotes en proceso de liquidación
         const purchaseValue = parseFloat(formData.purchaseValue) || 0;
 
-        // 3. Verificación de Identificador Único (Lote AX-XXXX) con Código 409
-        const { data: existingLot, error: checkError } = await supabase
-            .from('coffee_purchase_inventory')
-            .select('lot_number')
-            .eq('lot_number', cleanLotNumber)
-            .maybeSingle();
-
-        if (checkError) {
-            console.error("AXIS DB CHECK ERROR:", checkError);
-            throw new Error("Error de Sincronización Industrial - Fallo al verificar unicidad.");
-        }
-
-        if (existingLot) {
-            return {
-                success: false,
-                code: 409,
-                message: `CONFLICTO 409: El Lote ${cleanLotNumber} ya existe en el sistema AXIS COFFEE PRO.`
-            };
-        }
-
-        // 4. Inserción de Datos Atómica
+        // 3. Construcción de Datos Atómica
         const insertData: any = {
             farmer_name: cleanFarmerName,
             farm_name: cleanFarmName,
@@ -75,6 +55,62 @@ export async function createCoffeePurchase(formData: any) {
             coffee_type: formData.coffeeType || 'pergamino',
             thrashed_weight: formData.coffeeType === 'excelso' ? formData.purchaseWeight : null
         };
+
+        // 4. Verificación de Identificador Único (Lote AX-XXXX)
+        const { data: existingLot, error: checkError } = await supabase
+            .from('coffee_purchase_inventory')
+            .select('id, lot_number')
+            .eq('lot_number', cleanLotNumber)
+            .maybeSingle();
+
+        if (checkError) {
+            console.error("AXIS DB CHECK ERROR:", checkError);
+            throw new Error("Error de Sincronización Industrial - Fallo al verificar unicidad.");
+        }
+
+        if (existingLot) {
+            // OVERWRITE MODE ENABLED
+            console.warn(`AXIS LOG: Sobreescribiendo lote existente ${cleanLotNumber} (ID: ${existingLot.id})`);
+            
+            const updateResponse = await supabase
+                .from('coffee_purchase_inventory')
+                .update(insertData)
+                .eq('id', existingLot.id)
+                .select()
+                .single();
+
+            if (updateResponse.error) {
+                // Intento fallback si fallan columnas extendidas
+                const legacyData = { ...insertData };
+                delete legacyData.coffee_type;
+                delete legacyData.destination;
+                delete legacyData.export_certificate;
+                delete legacyData.latitude;
+                delete legacyData.longitude;
+                delete legacyData.sica_id;
+
+                const fallbackUpdate = await supabase
+                    .from('coffee_purchase_inventory')
+                    .update(legacyData)
+                    .eq('id', existingLot.id)
+                    .select()
+                    .single();
+                
+                if (fallbackUpdate.error) throw fallbackUpdate.error;
+                
+                return {
+                    success: true,
+                    message: `Lote ${cleanLotNumber} sobreescrito exitosamente (Modo Compatibilidad).`,
+                    data: fallbackUpdate.data
+                };
+            }
+
+            return {
+                success: true,
+                message: `Lote ${cleanLotNumber} sobreescrito exitosamente.`,
+                data: updateResponse.data
+            };
+        }
 
         let insertResponse = await supabase
             .from('coffee_purchase_inventory')

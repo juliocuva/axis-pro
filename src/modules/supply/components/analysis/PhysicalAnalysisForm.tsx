@@ -109,6 +109,21 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                         grainColor: record.grain_color || 'VERDE OLIVA'
                     });
                     setIsAlreadyAnalyzed(true);
+                } else if (!lotError && lotData) {
+                    // Fallback to Excel pre-loaded data
+                    const excelData = lotData.process_data?.raw_excel_data?.physicalAnalysis;
+                    if (excelData) {
+                        setFormData({
+                            moisture: excelData.moisturePct || 11.5,
+                            waterActivity: excelData.waterActivity || 0.58,
+                            density: excelData.density || 720,
+                            screenSize: excelData.sieveAnalysis || {
+                                size18: 0, size17: 0, size16: 0, size15: 0, size14: 0, size13: 0, size12: 0, under12: 0
+                            },
+                            defects: excelData.defects || { primary: 0, secondary: 0 },
+                            grainColor: excelData.grainColor || 'VERDE OLIVA'
+                        });
+                    }
                 }
 
                 if (!lotError && lotData) {

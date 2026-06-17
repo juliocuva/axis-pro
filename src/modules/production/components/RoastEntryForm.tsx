@@ -100,16 +100,20 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             const greenW = lotData.thrashed_weight || lotData.purchase_weight || 0;
             const avgLoss = (min + max) / 2;
             const predRoasted = greenW > 0 ? (greenW * (1 - (avgLoss / 100))) : 0;
+            
+            const excelData = lotData.process_data?.raw_excel_data?.roastBatch;
 
             setFormData(prev => ({
                 ...prev,
-                greenWeight: greenW,
-                roastedWeight: prev.roastedWeight || parseFloat(predRoasted.toFixed(2)),
+                batchId: excelData?.batchId || prev.batchId,
+                greenWeight: excelData?.greenWeight || greenW,
+                roastedWeight: excelData?.roastedWeight || prev.roastedWeight || parseFloat(predRoasted.toFixed(2)),
                 selectedWeight: prev.selectedWeight || parseFloat(predRoasted.toFixed(2)),
                 quakersGrams: prev.quakersGrams || 0,
-                dropTemp: prev.dropTemp || predDrop,
+                chargeTemp: excelData?.chargeTemp || prev.chargeTemp || 200,
+                dropTemp: excelData?.dropTemp || prev.dropTemp || predDrop,
                 developmentPct: prev.developmentPct || predDevPct,
-                roastTime: prev.roastTime || '11:00',
+                roastTime: excelData?.roastTime || prev.roastTime || '11:00',
                 developmentTime: prev.developmentTime || '1:45'
             }));
         }

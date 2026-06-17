@@ -61,7 +61,7 @@ function parseNum(val: any): number {
  * Lee un Buffer o ArrayBuffer del Excel y lo convierte al Payload consolidado
  */
 export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPayload {
-  const workbook = XLSX.read(buffer, { type: 'buffer' });
+  const workbook = XLSX.read(buffer, { type: 'array' });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
@@ -105,6 +105,8 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
       tiempoSecadoDias: parseNum(dataMap['Tiempo_Secado_Dias']),
       tipoSecado: dataMap['Tipo_Secado'] || '',
       temperaturaSecado: parseNum(dataMap['Temperatura_Secado_C']),
+      pasillaWeight: parseNum(dataMap['Peso_Pasilla_Kg']),
+      ciscoWeight: parseNum(dataMap['Peso_Cisco_Kg']),
     }
   };
 
@@ -112,8 +114,18 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
   const physicalAnalysis = {
     moisturePct: parseNum(dataMap['Humedad_Pct']),
     waterActivity: parseNum(dataMap['Actividad_Agua_Aw']),
-    densityGl: parseNum(dataMap['Densidad_gL']),
+    density: parseNum(dataMap['Densidad_Confirmada_gL']) || parseNum(dataMap['Densidad_gL']),
     grainColor: dataMap['Color_Grano'] || '',
+    sieveAnalysis: {
+        size18: parseNum(dataMap['Malla_18_Pct']),
+        size17: parseNum(dataMap['Malla_17_Pct']),
+        size16: parseNum(dataMap['Malla_16_Pct']),
+        size15: 0, size14: 0, size13: 0, size12: 0, under12: 0
+    },
+    defects: {
+        primary: parseNum(dataMap['Defectos_Totales']),
+        secondary: 0
+    }
   };
 
   // --- MAPEO A ROAST BATCH ---
@@ -125,6 +137,10 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
     roasterName: dataMap['Operario_Tueste'] || '',
     agtronBean: parseNum(dataMap['Agtron_Grano']),
     agtronGround: parseNum(dataMap['Agtron_Molido']),
+    roastTime: dataMap['Tiempo_Tueste_min'] ? dataMap['Tiempo_Tueste_min'].toString() : '',
+    maxTemp: parseNum(dataMap['Temperatura_Max_C']),
+    roastLevel: dataMap['Nivel_Tueste'] || '',
+    notes: dataMap['Perfil_Tueste_Notas'] || ''
   };
 
   // --- MAPEO A CVA CUPPING ---
@@ -138,7 +154,7 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
   const cvaSweetness = parseNum(dataMap['CVA_Dulzor']);
   const cvaMouthfeel = parseNum(dataMap['CVA_Cuerpo_Mouthfeel']);
   const cvaUniformity = parseNum(dataMap['CVA_Uniformidad']);
-  const cvaOverall = parseNum(dataMap['CVA_Impresion_Global']); // Llamado "overall" en algunos formatos pero en Excel es Impresion_Global
+  const cvaOverall = parseNum(dataMap['CVA_Impresion_Global']); 
   const cvaDefectsDeduction = parseNum(dataMap['CVA_Defectos_Deduccion']);
   
   // Total máximo posible: 63 (7 atributos x 9)

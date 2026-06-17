@@ -350,7 +350,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
         // 2. Fetch lot details for defaults
         const { data: lot } = await supabase
           .from('coffee_purchase_inventory')
-          .select('variety, process, lot_number, purchase_value')
+          .select('variety, process, lot_number, purchase_value, process_data')
           .eq('id', inventoryId.trim())
           .single();
 
@@ -380,8 +380,14 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
           setIsAlreadySealed(true);
         } else if (lot) {
           // Si no hay registro previo, precargamos datos del café analizado
+          const excelCupping = lot.process_data?.raw_excel_data?.cvaCupping;
+          
           setData(prev => ({
             ...prev,
+            descriptive: excelCupping?.descriptive || prev.descriptive,
+            affective: excelCupping?.affective || prev.affective,
+            defects: excelCupping?.defects || prev.defects,
+            notes: excelCupping?.notes || prev.notes,
             extrinsic: {
               ...prev.extrinsic,
               alchemyProcess: lot.process || 'Lavado Tradicional',
