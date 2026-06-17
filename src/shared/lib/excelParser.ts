@@ -114,7 +114,7 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
   const physicalAnalysis = {
     moisturePct: parseNum(dataMap['Humedad_Pct']),
     waterActivity: parseNum(dataMap['Actividad_Agua_Aw']),
-    density: parseNum(dataMap['Densidad_Confirmada_gL']) || parseNum(dataMap['Densidad_gL']),
+    densityGl: parseNum(dataMap['Densidad_Confirmada_gL']) || parseNum(dataMap['Densidad_gL']),
     grainColor: dataMap['Color_Grano'] || '',
     sieveAnalysis: {
         size18: parseNum(dataMap['Malla_18_Pct']),
