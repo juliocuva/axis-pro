@@ -121,10 +121,10 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
     densityGl: parseNum(dataMap['Densidad_Confirmada_gL']) || parseNum(dataMap['Densidad_gL']),
     grainColor: getString('Color_Grano'),
     sieveAnalysis: {
-        size18: parseNum(dataMap['Malla_18_Pct']),
-        size17: parseNum(dataMap['Malla_17_Pct']),
-        size16: parseNum(dataMap['Malla_16_Pct']),
-        size15: 0, size14: 0, size13: 0, size12: 0, under12: 0
+        m18: parseNum(dataMap['Malla_18_Pct']),
+        m17: parseNum(dataMap['Malla_17_Pct']),
+        m16: parseNum(dataMap['Malla_16_Pct']),
+        m15: 0, m14: 0, m13: 0, m12: 0, menores: 0
     },
     defects: {
         primary: parseNum(dataMap['Defectos_Totales']),

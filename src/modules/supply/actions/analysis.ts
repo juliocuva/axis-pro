@@ -25,7 +25,7 @@ export async function submitPhysicalAnalysis(
                 moisture_pct: moisture,
                 water_activity: data.waterActivity,
                 density_gl: data.density,
-                screen_size_distribution: data.screenSize,
+                screen_size_distribution: data.sieveAnalysis || data.screenSize,
                 defects_count: data.defects,
                 grain_color: data.grain_color || data.grainColor,
                 company_id: companyId

@@ -557,12 +557,12 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   };
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-700 relative bg-white min-h-screen">
+    <div className="max-w-5xl mx-auto w-full flex flex-col gap-4 animate-in fade-in duration-700 relative bg-white min-h-[calc(100vh-100px)]">
       {/* HEADER DE ETAPA NOTARIAL */}
       
 
       {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-industrial">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-md rounded-industrial">
           <p className="text-brand-navy font-black uppercase  text-brand-navy animate-pulse">Sincronizando con AXIS Cloud...</p>
         </div>
       )}

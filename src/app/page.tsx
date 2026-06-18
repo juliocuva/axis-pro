@@ -207,65 +207,58 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-bg-main p-4 md:p-6 transition-colors duration-400 print:p-0 print:bg-white">
-            <header className="relative z-[50] mb-6 flex flex-col gap-4 border-b border-brand-gray/50 shadow-sm pb-4 print:hidden animate-in fade-in duration-500">
-                <div className="flex justify-between items-center w-full pl-8 pr-4">
-                    <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-bg-offset rounded-industrial-sm flex items-center justify-center overflow-hidden border border-border-main group-hover:border-brand-gray/50 shadow-sm transition-all">
-                                <img src="/logo.png" alt="Sagrado Corazón" className="w-full h-full object-contain p-2" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-black text-brand-navy uppercase tracking-[0.2em]">AXISONE COFFEE</span>
-                                <span className="text-[9px] font-black text-brand-green uppercase mt-0.5">Origin Quality System</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="flex bg-white/50 rounded-full p-1 border border-brand-gray/50 shadow-sm">
-                            <button 
-                                onClick={() => setLanguage('en')}
-                                className={`px-3 py-1 rounded-full text-[10px] font-black transition-all ${language === 'en' ? 'bg-brand-navy text-white shadow-sm' : 'text-brand-navy/50 hover:text-brand-navy'}`}
-                            >
-                                EN
-                            </button>
-                            <button 
-                                onClick={() => setLanguage('es')}
-                                className={`px-3 py-1 rounded-full text-[10px] font-black transition-all ${language === 'es' ? 'bg-brand-navy text-white shadow-sm' : 'text-brand-navy/50 hover:text-brand-navy'}`}
-                            >
-                                ES
-                            </button>
-                        </div>
-                        <UserDropdown
-                            user={user}
-                            onLogout={() => { setUser(null); localStorage.removeItem('axis-user'); }}
-                            onOpenManual={() => setShowFunctionalDocs(true)}
-                            onOpenUpdates={() => setShowUpdates(true)}
-                            onSelectView={(v) => { setView(v); setShowCloudVault(false); }}
-                            onOpenCloudVault={() => setShowCloudVault(true)}
-                        />
-                    </div>
+            <header className="relative z-[50] mb-6 flex justify-between items-center w-full px-2 h-16 print:hidden animate-in fade-in duration-500">
+                {/* Left side: Logo */}
+                <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center h-full">
+                    <img src="/logo.png" alt="AXISONE" className="h-8 md:h-10 object-contain drop-shadow-sm group-hover:scale-105 transition-transform" />
                 </div>
 
-                <nav className="flex items-center justify-center gap-4 flex-wrap w-full">
-                    <div className="w-px h-8 bg-brand-gray/50 mx-2"></div>
-
+                {/* Center: Navigation Buttons */}
+                <nav className="flex items-center justify-center gap-1.5 bg-gray-100/80 p-1.5 rounded-full border border-gray-200/50 shadow-inner">
                     <button
                         onClick={() => { setView('supply'); setShowCloudVault(false); }}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-industrial-sm text-[10px] font-black uppercase transition-all active:scale-95 shadow-sm border ${view === 'supply' && !showCloudVault ? 'bg-brand-green text-brand-navy border-brand-green shadow-lg shadow-brand-green/20 font-black' : 'bg-white border-gray-400 text-brand-navy hover:border-black'}`}
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full text-[10px] font-black uppercase transition-all shadow-sm ${view === 'supply' && !showCloudVault ? 'bg-brand-green text-white shadow-brand-green/30' : 'bg-transparent text-gray-500 hover:text-brand-navy hover:bg-white hover:shadow-sm border border-transparent'}`}
                     >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2l9 4.9V17L12 22l-9-4.9V7z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
                         {t('nav', 'operations')}
                     </button>
 
                     <button
                         onClick={() => setShowSyncModal(true)}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-bg-offset text-brand-navy border border-border-main rounded-industrial-sm text-[10px] font-black uppercase transition-all hover:bg-white hover:border-black active:scale-95 shadow-sm"
+                        className="flex items-center gap-2 px-5 py-2 text-gray-500 rounded-full text-[10px] font-black uppercase transition-all bg-transparent border border-transparent hover:text-brand-navy hover:bg-white hover:shadow-sm active:scale-95 shadow-sm"
                         title={t('nav', 'syncLots')}
                     >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-current"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                         {t('nav', 'syncLots')}
                     </button>
                 </nav>
+
+                {/* Right side: Language & User Dropdown */}
+                <div className="flex items-center gap-4 h-full py-2">
+                    <div className="flex bg-gray-100/80 rounded-full p-1 border border-gray-200/50 shadow-inner">
+                        <button 
+                            onClick={() => setLanguage('en')}
+                            className={`px-3 py-1 rounded-full text-[10px] font-black transition-all ${language === 'en' ? 'bg-white text-brand-navy shadow-sm' : 'text-gray-400 hover:text-brand-navy hover:bg-white/50'}`}
+                        >
+                            EN
+                        </button>
+                        <button 
+                            onClick={() => setLanguage('es')}
+                            className={`px-3 py-1 rounded-full text-[10px] font-black transition-all ${language === 'es' ? 'bg-white text-brand-navy shadow-sm' : 'text-gray-400 hover:text-brand-navy hover:bg-white/50'}`}
+                        >
+                            ES
+                        </button>
+                    </div>
+                    <div className="w-px h-6 bg-gray-200/60 hidden md:block"></div>
+                    <UserDropdown
+                        user={user}
+                        onLogout={() => { setUser(null); localStorage.removeItem('axis-user'); }}
+                        onOpenManual={() => setShowFunctionalDocs(true)}
+                        onOpenUpdates={() => setShowUpdates(true)}
+                        onSelectView={(v) => { setView(v); setShowCloudVault(false); }}
+                        onOpenCloudVault={() => setShowCloudVault(true)}
+                    />
+                </div>
             </header>
 
 

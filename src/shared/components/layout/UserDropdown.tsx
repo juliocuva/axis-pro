@@ -41,20 +41,20 @@ export default function UserDropdown({ user, onLogout, onOpenManual, onOpenUpdat
         <div className="relative z-[9999]" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-3 p-1.5 pl-4 pr-2 bg-bg-offset border border-border-main rounded-industrial-sm hover:border-gray-400 shadow-sm transition-all group animate-in fade-in duration-300"
+                className="flex items-center gap-3 p-1.5 pl-3 pr-2 bg-white border border-gray-200 hover:border-gray-300 rounded-full hover:shadow-md transition-all group animate-in fade-in duration-300"
             >
-                <div className="text-right hidden sm:block">
-                    <p className="text-[11px] font-bold text-brand-navy uppercase leading-none">{user.name || 'Operador'}</p>
-                    <p className="text-[9px] text-brand-navy font-bold uppercase mt-1">
+                <div className="text-right hidden sm:block pl-2">
+                    <p className="text-[11px] font-black text-brand-navy uppercase leading-none tracking-tight">{user.name || 'Operador'}</p>
+                    <p className="text-[9px] text-gray-500 font-bold uppercase mt-0.5 tracking-wider">
                         {isAdmin ? 'Super Administrador' : 'Operador Central'}
                     </p>
                 </div>
-                <div className="w-9 h-9 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex items-center justify-center text-brand-navy-bright font-bold text-xs shadow-inner uppercase">
+                <div className="w-8 h-8 bg-brand-navy text-white shadow-sm rounded-full flex items-center justify-center font-black text-xs uppercase transition-transform group-hover:scale-105">
                     {initials}
                 </div>
                 <svg
-                    width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
-                    className={`text-brand-navy transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                    width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                    className={`text-brand-navy transition-transform duration-300 opacity-60 ${isOpen ? 'rotate-180' : ''}`}
                 >
                     <path d="M6 9l6 6 6-6" />
                 </svg>

@@ -76,7 +76,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
         farmerName: '',
         farmName: '',
         farmSizeHectares: undefined as number | undefined,
-        altitude: 1600,
+        altitude: undefined as number | undefined,
         country: 'Colombia',
         region: '',
         municipality: '',
@@ -85,9 +85,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
         farmerPhone: '',
         purchaseWeight: 0,
         purchaseValue: 0,
-        purchaseDate: new Date().toISOString().split('T')[0],
-        harvestDate: new Date().toISOString().split('T')[0],
-        lotNumber: `FINCA-${new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' })}-LOTE1`,
+        purchaseDate: '',
+        harvestDate: '',
+        lotNumber: '',
         destination: 'export_green' as 'export_green' | 'roasted_coffee',
         exportCertificate: '',
         isEuropeDestination: false as boolean,
@@ -204,7 +204,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 farmerName: selectedLot.farmer_name || '',
                 farmName: selectedLot.farm_name || '',
                 farmSizeHectares: selectedLot.farm_size_hectares || undefined,
-                altitude: Number(selectedLot.altitude) || 1600,
+                altitude: selectedLot.altitude ? Number(selectedLot.altitude) : undefined,
                 country: selectedLot.country || 'Colombia',
                 region: isRegionBase ? selectedLot.region : 'Otro',
                 municipality: isMunBase ? selectedLot.municipality : 'Otro',
@@ -376,7 +376,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             ...prev,
             farmerName: farmer.farmer_name,
             farmName: farmer.farm_name,
-            altitude: Number(farmer.altitude),
+            altitude: farmer.altitude ? Number(farmer.altitude) : undefined as any,
             country: farmer.country,
             region: farmer.region,
             municipality: farmer.municipality || '',
@@ -422,12 +422,18 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             const finalRegion = formData.region === 'Otro' ? customRegion : formData.region;
             const finalMunicipality = formData.municipality === 'Otro' ? customMunicipality : formData.municipality;
 
+            const defaultDate = new Date().toISOString().split('T')[0];
+            const defaultLotNumber = `FINCA-${new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' })}-LOTE1`;
+            
             // ZOD VALIDATION
             const zodResult = purchaseSchema.safeParse({
                 ...formData,
                 variety: finalVariety,
                 region: finalRegion,
-                municipality: finalMunicipality
+                municipality: finalMunicipality,
+                purchaseDate: formData.purchaseDate || defaultDate,
+                harvestDate: formData.harvestDate || defaultDate,
+                lotNumber: formData.lotNumber || defaultLotNumber
             });
 
             if (!zodResult.success) {
@@ -451,6 +457,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                     variety: finalVariety,
                     region: finalRegion,
                     municipality: finalMunicipality,
+                    purchaseDate: formData.purchaseDate || defaultDate,
+                    harvestDate: formData.harvestDate || defaultDate,
+                    lotNumber: formData.lotNumber || defaultLotNumber,
                     processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone }
                 }, user as any);
             } else {
@@ -460,6 +469,9 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                     variety: finalVariety,
                     region: finalRegion,
                     municipality: finalMunicipality,
+                    purchaseDate: formData.purchaseDate || defaultDate,
+                    harvestDate: formData.harvestDate || defaultDate,
+                    lotNumber: formData.lotNumber || defaultLotNumber,
                     processData: { ...formData.processData, sica_id: formData.sicaId, farmer_phone: formData.farmerPhone },
                     companyId: (user as any)?.companyId || '99999999-9999-9999-9999-999999999999'
                 });
@@ -521,21 +533,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
     return (
         <form autoComplete="off" onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
-            
-            {/* EXTREME UI HEADER */}
-            <div className="sticky top-2 z-[60] mb-4 p-5 rounded-3xl bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex justify-between items-center transition-all hover:bg-white/80">
-                <div className="flex flex-col">
-                    <h2 className="text-xl md:text-2xl font-black text-brand-navy uppercase tracking-tight">Origin / Farm Level</h2>
-                    <p className="text-[10px] uppercase font-bold text-brand-green tracking-widest">Traceability Data Entry</p>
-                </div>
-                <button
-                    type="button"
-                    onClick={handleNewLot}
-                    className="px-6 py-3.5 bg-gradient-to-r from-brand-navy to-black text-white rounded-2xl shadow-xl shadow-brand-navy/20 text-[11px] font-black uppercase tracking-wider hover:scale-[1.02] active:scale-95 transition-all border border-zinc-700"
-                >
-                    + New Origin Lot
-                </button>
-            </div>
 
             {/* Success Modal */}
             {showSuccessModal && (
@@ -602,167 +599,157 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             
 
             {/* Tabs Header */}
-            <div className="flex border-b-2 border-gray-300 mb-4 w-full relative">
+            <div className="flex border-b-2 border-gray-300 mb-6 w-full relative gap-1">
                 <button 
                     type="button" 
                     onClick={() => setCurrentStep(1)} 
-                    className={`flex-1 py-2.5 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 border-b-2 -mb-[2px] ${currentStep === 1 ? 'border-brand-green text-brand-green' : 'border-transparent text-gray-500 hover:text-brand-navy hover:bg-gray-100/50'}`}
+                    className={`flex-1 py-3 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 rounded-t-xl -mb-[2px] border-b-2 ${currentStep === 1 ? 'bg-brand-navy text-white border-brand-navy shadow-[0_-4px_10px_rgba(0,0,0,0.05)]' : 'bg-transparent text-brand-navy border-transparent hover:bg-gray-100/50'}`}
                 >
-                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${currentStep === 1 ? 'bg-brand-green text-white' : 'bg-gray-300 text-brand-navy'}`}>1</span>
+                    <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] ${currentStep === 1 ? 'bg-white/20 text-white' : 'bg-gray-300 text-brand-navy'}`}>1</span>
                     Origin Data
                 </button>
                 <button 
                     type="button" 
                     onClick={() => setCurrentStep(2)} 
-                    className={`flex-1 py-2.5 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 border-b-2 -mb-[2px] ${currentStep === 2 ? 'border-brand-green text-brand-green' : 'border-transparent text-gray-500 hover:text-brand-navy hover:bg-gray-100/50'}`}
+                    className={`flex-1 py-3 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 rounded-t-xl -mb-[2px] border-b-2 ${currentStep === 2 ? 'bg-brand-navy text-white border-brand-navy shadow-[0_-4px_10px_rgba(0,0,0,0.05)]' : 'bg-transparent text-brand-navy border-transparent hover:bg-gray-100/50'}`}
                 >
-                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${currentStep === 2 ? 'bg-brand-green text-white' : 'bg-gray-300 text-brand-navy'}`}>2</span>
+                    <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] ${currentStep === 2 ? 'bg-white/20 text-white' : 'bg-gray-300 text-brand-navy'}`}>2</span>
                     Commercialization
                 </button>
                 <button 
                     type="button" 
                     onClick={() => setCurrentStep(3)} 
-                    className={`flex-1 py-2.5 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 border-b-2 -mb-[2px] ${currentStep === 3 ? 'border-brand-green text-brand-green' : 'border-transparent text-gray-500 hover:text-brand-navy hover:bg-gray-100/50'}`}
+                    className={`flex-1 py-3 px-4 text-[11px] font-bold uppercase transition-all flex items-center justify-center gap-2 rounded-t-xl -mb-[2px] border-b-2 ${currentStep === 3 ? 'bg-brand-navy text-white border-brand-navy shadow-[0_-4px_10px_rgba(0,0,0,0.05)]' : 'bg-transparent text-brand-navy border-transparent hover:bg-gray-100/50'}`}
                 >
-                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${currentStep === 3 ? 'bg-brand-green text-white' : 'bg-gray-300 text-brand-navy'}`}>3</span>
+                    <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] ${currentStep === 3 ? 'bg-white/20 text-white' : 'bg-gray-300 text-brand-navy'}`}>3</span>
                     Processing (Farmer)
                 </button>
             </div>
 
             <fieldset disabled={isSubmitting || isReadOnly} className="border-none p-0 m-0 min-h-[450px] relative transition-all">
                 {currentStep === 1 && (
-                    <section className="bg-soft-white border border-gray-400 shadow-sm p-5 rounded-industrial space-y-4 animate-in slide-in-from-right-4 duration-500">
-                        <h3 className="text-brand-navy font-bold flex items-center gap-2 mb-6">
-                            <span className="w-1.5 h-6 bg-black rounded-full"></span>
-                            {t('purchaseForm', 'title')}
-                        </h3>
-
-
-
+                    <section className="bg-transparent border-none p-0 space-y-6 animate-in slide-in-from-right-4 duration-500">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div className="md:col-span-3 mb-0">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2 mb-3">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></svg>
-                                    {t('purchaseForm', 'sicaHelper')}
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    AUTO-COMPLETE SICA / ID
                                 </label>
-                                <div className="flex flex-col sm:flex-row items-stretch gap-3">
-                                    <input
-                                        type="text"
-                                        placeholder={t('purchaseForm', 'sicaPlaceholder')}
-                                        value={formData.sicaId}
-                                        onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                handleSicaSearch();
-                                            }
-                                        }}
-                                        className="flex-1 bg-white border border-gray-400 shadow-sm rounded-full px-4 py-2 focus:border-black outline-none font-bold text-brand-navy text-xs shadow-inner"
-                                        disabled={isSubmitting}
-                                        onBlur={handleSicaSearch}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleSicaSearch}
-                                        disabled={isSearchingSica || !formData.sicaId}
-                                        className="bg-brand-green hover:bg-brand-green/90 disabled:opacity-50 text-white px-6 py-2 rounded-full font-bold uppercase  transition-all shadow-lg hover:shadow-[0_0_30px_rgba(0,223,154,0.5)] flex items-center justify-center gap-2 group/btn text-xs"
-                                        title="Autocompletar"
-                                    >
-                                        {isSearchingSica ? (
-                                            <span className="flex items-center gap-2">
-                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"></path></svg>
-                                                {t('purchaseForm', 'searching')}
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-2">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                                                {t('purchaseForm', 'searchFarmer')}
-                                            </span>
-                                        )}
-                                    </button>
-                                    <label className="bg-brand-navy hover:bg-brand-navy/90 text-white px-6 py-2 rounded-full font-bold uppercase transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer text-xs whitespace-nowrap">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                                        Excel
-                                        <input 
-                                            type="file" 
-                                            accept=".xlsx,.xls" 
-                                            className="hidden" 
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) {
-                                                    const reader = new FileReader();
-                                                    reader.onload = async (evt) => {
-                                                        try {
-                                                            setIsSubmitting(true);
-                                                            setStatus({ type: 'success', message: 'Procesando Ficha de Lote y generando borrador global...' });
-                                                            const buffer = evt.target?.result as ArrayBuffer;
-                                                            const excelData = parseFichaDeLote(buffer);
-                                                            
-                                                            // 1. Populate formData with inventory part
-                                                            const inv = excelData.inventory;
-                                                            const finalVariety = inv.variety || formData.variety;
-                                                            const finalRegion = inv.region || formData.region;
-                                                            const finalMunicipality = formData.municipality;
-
-                                                            const newData = {
-                                                                ...formData,
-                                                                lotNumber: inv.lotNumber || formData.lotNumber,
-                                                                farmerName: inv.farmerName || formData.farmerName,
-                                                                farmName: inv.farmName || formData.farmName,
-                                                                altitude: inv.altitude || formData.altitude,
-                                                                region: finalRegion,
-                                                                variety: finalVariety,
-                                                                process: inv.process || formData.process,
-                                                                purchaseWeight: inv.purchaseWeight || formData.purchaseWeight,
-                                                                processData: {
-                                                                    ...formData.processData,
-                                                                    ...inv.processData,
-                                                                    raw_excel_data: excelData // GUARDA EL EXCEL COMPLETO AQUI
-                                                                }
-                                                            };
-                                                            setFormData(newData);
-                                                            
-                                                            // 2. AUTO-SAVE to DB so other tabs can be unlocked and read from DB
-                                                            const payload = {
-                                                                ...newData,
-                                                                variety: finalVariety,
-                                                                region: finalRegion,
-                                                                municipality: finalMunicipality,
-                                                                processData: newData.processData,
-                                                                companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
-                                                            };
-                                                            
-                                                            let result;
-                                                            if (selectedLot?.id) {
-                                                                result = await updateCoffeePurchase(selectedLot.id, payload, user as any);
-                                                            } else {
-                                                                result = await createCoffeePurchase(payload);
-                                                            }
-                                                            
-                                                            if (result.success) {
-                                                                setStatus({ type: 'success', message: 'Ficha precargada y borrador guardado. Ya puedes navegar a las demás pestañas.' });
-                                                                if (onPurchaseComplete) {
-                                                                    onPurchaseComplete(result.data);
-                                                                }
-                                                            } else {
-                                                                setStatus({ type: 'error', message: 'Error guardando borrador: ' + result.message });
-                                                            }
-                                                        } catch (error: any) {
-                                                            setStatus({ type: 'error', message: 'Error procesando Excel: ' + error.message });
-                                                        } finally {
-                                                            setIsSubmitting(false);
-                                                            e.target.value = '';
-                                                        }
-                                                    };
-                                                    reader.readAsArrayBuffer(file);
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-12 pb-4">
+                                    <div className="relative w-full sm:max-w-[50%] border-b border-brand-navy/30">
+                                        <input
+                                            type="text"
+                                            placeholder="E.g. Farmer ID (1109417355)"
+                                            value={formData.sicaId}
+                                            onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleSicaSearch();
                                                 }
                                             }}
+                                            className="w-full bg-transparent outline-none font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light pb-2 pr-8"
+                                            disabled={isSubmitting}
+                                            onBlur={handleSicaSearch}
                                         />
-                                    </label>
+                                        <button
+                                            type="button"
+                                            onClick={handleSicaSearch}
+                                            disabled={isSearchingSica || !formData.sicaId}
+                                            className="absolute right-0 top-0 h-full pb-2 flex items-center text-brand-green hover:text-brand-navy transition-colors disabled:opacity-50"
+                                        >
+                                            {isSearchingSica ? (
+                                                <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"></path></svg>
+                                            ) : (
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                            )}
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center gap-16 shrink-0 pr-12">
+                                        <label className="text-brand-navy hover:text-brand-green hover:underline underline-offset-4 font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer text-[10px] whitespace-nowrap">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                                            LOAD EXCEL FILE
+                                            <input 
+                                                type="file" 
+                                                accept=".xlsx,.xls" 
+                                                className="hidden" 
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) {
+                                                        const reader = new FileReader();
+                                                        reader.onload = async (evt) => {
+                                                            try {
+                                                                setIsSubmitting(true);
+                                                                setStatus({ type: 'success', message: 'Procesando Ficha de Lote y generando borrador global...' });
+                                                                const buffer = evt.target?.result as ArrayBuffer;
+                                                                const excelData = parseFichaDeLote(buffer);
+                                                                
+                                                                // 1. Populate formData with inventory part
+                                                                const inv = excelData.inventory;
+                                                                const finalVariety = inv.variety || formData.variety;
+                                                                const finalRegion = inv.region || formData.region;
+                                                                const finalMunicipality = formData.municipality;
+
+                                                                const newData = {
+                                                                    ...formData,
+                                                                    lotNumber: inv.lotNumber || formData.lotNumber,
+                                                                    farmerName: inv.farmerName || formData.farmerName,
+                                                                    farmName: inv.farmName || formData.farmName,
+                                                                    altitude: inv.altitude || formData.altitude,
+                                                                    region: finalRegion,
+                                                                    variety: finalVariety,
+                                                                    process: inv.process || formData.process,
+                                                                    purchaseWeight: inv.purchaseWeight || formData.purchaseWeight,
+                                                                    processData: {
+                                                                        ...formData.processData,
+                                                                        ...inv.processData,
+                                                                        raw_excel_data: excelData // GUARDA EL EXCEL COMPLETO AQUI
+                                                                    }
+                                                                };
+                                                                setFormData(newData);
+                                                                
+                                                                // 2. AUTO-SAVE to DB so other tabs can be unlocked and read from DB
+                                                                const payload = {
+                                                                    ...newData,
+                                                                    variety: finalVariety,
+                                                                    region: finalRegion,
+                                                                    municipality: finalMunicipality,
+                                                                    processData: newData.processData,
+                                                                    companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
+                                                                };
+                                                                
+                                                                let result;
+                                                                if (selectedLot?.id) {
+                                                                    result = await updateCoffeePurchase(selectedLot.id, payload, user as any);
+                                                                } else {
+                                                                    result = await createCoffeePurchase(payload);
+                                                                }
+                                                                
+                                                                if (result.success) {
+                                                                    setStatus({ type: 'success', message: 'Ficha precargada y borrador guardado. Ya puedes navegar a las demás pestañas.' });
+                                                                    if (onPurchaseComplete) {
+                                                                        onPurchaseComplete(result.data);
+                                                                    }
+                                                                } else {
+                                                                    setStatus({ type: 'error', message: 'Error guardando borrador: ' + result.message });
+                                                                }
+                                                            } catch (error: any) {
+                                                                setStatus({ type: 'error', message: 'Error procesando Excel: ' + error.message });
+                                                            } finally {
+                                                                setIsSubmitting(false);
+                                                                e.target.value = '';
+                                                            }
+                                                        };
+                                                        reader.readAsArrayBuffer(file);
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                        <button type="button" onClick={() => setFormData({...formData, sicaId: '', farmerName: '', lotNumber: ''})} className="text-brand-navy hover:text-brand-green hover:underline underline-offset-4 font-bold uppercase transition-all flex items-center gap-1.5 text-[10px] whitespace-nowrap">
+                                            + ENTER NEW LOT
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="text-[11px] text-brand-navy uppercase  mt-2 font-mono">
-                                    {t('purchaseForm', 'demoTip')}
-                                </p>
+
                             </div>
 
                             {availableLots.length > 0 && (
@@ -777,7 +764,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 key={lot.id}
                                                 type="button"
                                                 onClick={() => handleLotSelect(lot.id)}
-                                                className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-brand-green border-brand-green text-brand-navy shadow-lg shadow-brand-green/20' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-gray-400 shadow-sm'}`}
+                                                className={`p-3 rounded-industrial-sm border transition-all flex flex-col items-center gap-1 ${selectedLotId === lot.id ? 'bg-brand-green/10 border-brand-green/20 text-brand-green shadow-sm' : 'bg-transparent border-brand-navy/20 text-brand-navy hover:bg-brand-green/5 shadow-sm'}`}
                                             >
                                                 <span className="text-[11px] font-bold uppercase ">{lot.id}</span>
                                                 <span className="text-[9px] font-mono opacity-60">{lot.area_ha} HA</span>
@@ -791,7 +778,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             )}
 
                             {recentFarmers.length > 0 && (
-                                <div className="md:col-span-3 mt-2 border-t border-gray-400 shadow-sm pt-4 relative">
+                                <div className="md:col-span-3 mt-2 border-t-2 border-brand-green shadow-sm pt-4 relative">
                                     <div className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-soft-white px-4 flex items-center gap-3">
                                         <span className="text-[11px] font-bold text-brand-navy uppercase ">{t('purchaseForm', 'directory')}</span>
                                     </div>
@@ -802,7 +789,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 key={i}
                                                 type="button"
                                                 onClick={() => handleFarmerSelect(f)}
-                                                className="flex-shrink-0 bg-white border border-gray-400 shadow-sm hover:border-black p-3 rounded-industrial-sm transition-all text-left min-w-[180px]"
+                                                className="flex-shrink-0 bg-transparent border border-brand-navy/20 shadow-sm hover:bg-brand-green/5 p-3 rounded-industrial-sm transition-all text-left min-w-[180px]"
                                             >
                                                 <div className="flex justify-between items-start">
                                                     <p className="text-[11px] font-bold text-brand-navy uppercase truncate">{f.farmer_name}</p>
@@ -818,13 +805,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <div className="md:col-span-3 border-t-2 border-brand-green my-0"></div>
 
                             <div className="md:col-span-3 mt-0 relative py-0">
-                                <span className="text-[11px] font-bold text-brand-green uppercase ">
+                                <span className="text-[11px] font-bold text-brand-green uppercase block mb-1">
                                     {t('purchaseForm', 'individualLotId')}
                                 </span>
                             </div>
                             <div className="md:col-span-1">
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'sicaId')}
                                 </label>
                                 <input
@@ -832,13 +819,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. 1081492345"
                                     value={formData.sicaId}
                                     onChange={(e) => setFormData({ ...formData, sicaId: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'farmerName')}
                                 </label>
                                 <input
@@ -847,13 +834,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     required
                                     value={formData.farmerName}
                                     onChange={(e) => setFormData({ ...formData, farmerName: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
                             <div className="md:col-span-1">
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'farmerPhone')}
                                 </label>
                                 <input
@@ -861,14 +848,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. +57 301 000 0000"
                                     value={formData.farmerPhone}
                                     onChange={(e) => setFormData({ ...formData, farmerPhone: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none text-brand-navy font-bold text-xs"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
 
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'farmName')}
                                 </label>
                                 <input
@@ -877,21 +864,22 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     required
                                     value={formData.farmName}
                                     onChange={(e) => setFormData({ ...formData, farmName: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
                             <div>
                                 <NumericInput
                                     label={t('purchaseForm', 'altitude')}
-                                    value={formData.altitude}
+                                    value={formData.altitude === undefined ? '' : formData.altitude}
                                     onChange={(val) => setFormData({ ...formData, altitude: val })}
                                     min={800}
                                     max={2500}
                                     step={1}
-                                    variant={Number(formData.altitude) < 1000 || Number(formData.altitude) > 2500 ? 'red' : 'default'}
+                                    variant={formData.altitude !== undefined && formData.altitude !== '' && (Number(formData.altitude) < 1000 || Number(formData.altitude) > 2500) ? 'red' : 'default'}
                                     inputClassName="font-bold"
                                     unit="M"
+                                    placeholder="1600"
                                 />
                             </div>
                         </div>
@@ -901,14 +889,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2">
                             <div className="w-full flex flex-col justify-center">
                                 <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-2 mb-1">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+
                                     {t('purchaseForm', 'gpsLink')}
                                 </label>
                                 <div className="flex gap-2 w-full mt-0.5">
                                     <input
                                         type="text"
                                         placeholder={t('purchaseForm', 'gpsPlaceholder')}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                        className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                         value={smartLinkText}
                                         onChange={(e) => setSmartLinkText(e.target.value)}
                                         disabled={isSubmitting}
@@ -935,7 +923,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             });
                                             if (!extracted) setStatus({ type: 'error', message: 'No se encontraron coordenadas válidas.' });
                                         }}
-                                        className="bg-brand-green hover:bg-brand-green/90 text-white border border-brand-green shadow-sm transition-colors px-3 py-1.5 rounded-industrial-sm text-[11px] font-bold uppercase whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-brand-navy text-white hover:bg-brand-navy/90 px-3 py-1.5 rounded-full text-[10px] tracking-widest font-bold uppercase transition-colors whitespace-nowrap disabled:cursor-not-allowed"
                                         title="{t('purchaseForm', 'gpsExtract')}"
                                     >
                                         {t('purchaseForm', 'gpsExtract')}
@@ -943,8 +931,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 </div>
                             </div>
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'latitude')}
                                 </label>
                                 <input
@@ -953,13 +941,13 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. 4.570868"
                                     value={formData.latitude || ''}
                                     onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'longitude')}
                                 </label>
                                 <input
@@ -968,24 +956,24 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. -74.297333"
                                     value={formData.longitude || ''}
                                     onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                             {/* País */}
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'country') || 'País'}
                                 </label>
                                 <select
                                     required
                                     value={formData.country}
                                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs"
+                                    className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 >
                                     {COUNTRIES.map(c => (
@@ -996,8 +984,8 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
                             {/* Región / Departamento */}
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     {t('purchaseForm', 'region')}
                                 </label>
                                 {formData.country === 'Colombia' ? (
@@ -1006,7 +994,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             required
                                             value={formData.region}
                                             onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs"
+                                            className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                             disabled={isSubmitting}
                                         >
                                             <option value="">Select</option>
@@ -1022,7 +1010,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 placeholder="Especificar Región"
                                                 value={customRegion}
                                                 onChange={(e) => setCustomRegion(e.target.value)}
-                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300 text-xs"
+                                                className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                                 required
                                                 disabled={isSubmitting}
                                             />
@@ -1035,7 +1023,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         required
                                         value={formData.region === 'Otro' ? customRegion : formData.region}
                                         onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                        className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                         disabled={isSubmitting}
                                     />
                                 )}
@@ -1044,7 +1032,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             {/* Municipio */}
                             <div>
                                 <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    
                                     {t('purchaseForm', 'municipality')}
                                 </label>
                                 {formData.country === 'Colombia' ? (
@@ -1053,7 +1041,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             required
                                             value={formData.municipality}
                                             onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
-                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs"
+                                            className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                             disabled={isSubmitting}
                                         >
                                             <option value="">Select</option>
@@ -1069,7 +1057,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                 placeholder="Especificar Municipio"
                                                 value={customMunicipality}
                                                 onChange={(e) => setCustomMunicipality(e.target.value)}
-                                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy animate-in fade-in slide-in-from-top-2 duration-300 text-xs"
+                                                className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                                 required
                                                 disabled={isSubmitting}
                                             />
@@ -1082,7 +1070,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         required
                                         value={formData.municipality === 'Otro' ? customMunicipality : formData.municipality}
                                         onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none font-bold text-brand-navy text-xs"
+                                        className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                         disabled={isSubmitting}
                                     />
                                 )}
@@ -1094,36 +1082,35 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 )}
 
                 {currentStep === 2 && (
-                    <section className="bg-soft-white border border-gray-400 shadow-sm p-5 rounded-industrial space-y-4 animate-in slide-in-from-right-4 duration-500">
-                        <h3 className="text-brand-navy font-bold flex items-center gap-2 mb-4 uppercase">
-                            <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
-                            Commercialization & Export Requirements
-                        </h3>
+                    <section className="bg-transparent border-none p-0 space-y-6 animate-in slide-in-from-right-4 duration-500">
+                        
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">
+                                    
                                     {t('purchaseForm', 'lotNum')}
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="Ej. LOTE-001"
                                     required
                                     value={formData.lotNumber}
+                                    placeholder={`Ej: FINCA-${new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: '2-digit' })}-LOTE1`}
                                     onChange={(e) => setFormData({ ...formData, lotNumber: e.target.value.toUpperCase() })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none text-brand-navy font-bold uppercase text-xs"
+                                    className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
 
                             <div>
                                 <div className="flex justify-between items-end mb-1">
-                                    <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5">
-                                        <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    <label className="text-[11px] font-bold text-brand-navy uppercase block">
+                                        
                                         {t('purchaseForm', 'farmSize')}
                                     </label>
-                                    <span className="text-[9px] font-bold text-brand-navy uppercase">{t('purchaseForm', 'farmSizeTip')}</span>
+                                    { (formData.farmSizeHectares ?? 0) >= 4 && (
+                                        <span className="text-[9px] font-bold text-brand-navy uppercase">{t('purchaseForm', 'farmSizeTip')}</span>
+                                    )}
                                 </div>
                                 <input
                                     type="number"
@@ -1131,34 +1118,34 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     placeholder="Ej. 4.5"
                                     value={formData.farmSizeHectares || ''}
                                     onChange={(e) => setFormData({ ...formData, farmSizeHectares: parseFloat(e.target.value) || undefined })}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 mt-0.5 focus:border-black outline-none text-brand-navy font-bold text-xs"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
                         </div>
 
-                        {(formData.farmSizeHectares ?? 0) >= 4 && (
-                            <div className="bg-red-50 border border-red-200 shadow-sm rounded-industrial-sm p-4 mb-2 flex items-start gap-3">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" strokeWidth="2" className="mt-0.5 shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                <div>
-                                    <h4 className="text-sm font-black text-red-800 uppercase ">{t('purchaseForm', 'eudrDetected') || 'EUDR Requirement Detected'}</h4>
-                                    <p className="text-[11px] text-red-900 mt-1 uppercase font-bold">{t('purchaseForm', 'eudrAlert')}</p>
-                                </div>
+                        { (formData.farmSizeHectares ?? 0) >= 4 && (
+                            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg animate-in fade-in slide-in-from-top-2">
+                                <p className="text-red-600 text-[11px] font-medium leading-tight">
+                                    <strong>ALERTA REGULATORIA EUDR:</strong> Ha declarado una finca de 4 hectáreas o más. Es obligatorio anexar el polígono de georreferenciación si el café tiene como destino Europa antes de continuar.
+                                </p>
                             </div>
                         )}
+
+
                            <div className="border-t-2 border-brand-green my-4"></div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">
+                                    
                                     Incoming Coffee State
                                 </label>
                                 <div className="grid grid-cols-2 gap-2 mt-0.5">
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'pergamino' })}
-                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
+                                        className={`py-1.5 px-2 rounded-md flex flex-col items-center gap-0.5 transition-all border ${formData.coffeeType === 'pergamino' ? 'bg-brand-green/10 text-brand-navy border-brand-green/30 shadow-sm' : 'bg-transparent border-gray-300 shadow-sm text-brand-navy/60 hover:bg-gray-50'}`}
                                     >
                                         <span className="text-[11px] font-bold uppercase ">PARCHMENT COFFEE</span>
                                         <span className={`text-[9px] opacity-60 font-bold uppercase`}>(Requires Thrashing)</span>
@@ -1166,7 +1153,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, coffeeType: 'excelso' })}
-                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
+                                        className={`py-1.5 px-2 rounded-md flex flex-col items-center gap-0.5 transition-all border ${formData.coffeeType === 'excelso' ? 'bg-brand-green/10 text-brand-navy border-brand-green/30 shadow-sm' : 'bg-transparent border-gray-300 shadow-sm text-brand-navy/60 hover:bg-gray-50'}`}
                                     >
                                         <span className="text-[11px] font-bold uppercase ">GREEN COFFEE</span>
                                         <span className={`text-[9px] opacity-60 font-bold uppercase`}>(Skip to Quality)</span>
@@ -1175,15 +1162,15 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             </div>
 
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">
+                                    
                                     EXCLUSIVE LOT DESTINATION
                                 </label>
                                 <div className="grid grid-cols-2 gap-2 mt-0.5">
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, destination: 'export_green' })}
-                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.destination === 'export_green' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
+                                        className={`py-1.5 px-2 rounded-md flex flex-col items-center gap-0.5 transition-all border ${formData.destination === 'export_green' ? 'bg-brand-green/10 text-brand-navy border-brand-green/30 shadow-sm' : 'bg-transparent border-gray-300 shadow-sm text-brand-navy/60 hover:bg-gray-50'}`}
                                     >
                                         <span className="text-[11px] font-bold uppercase">GREEN COFFEE</span>
                                         <span className="text-[9px] opacity-60 font-bold uppercase">(Export Route)</span>
@@ -1191,7 +1178,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, destination: 'roasted_coffee' })}
-                                        className={`py-1.5 px-2 rounded-industrial-sm flex flex-col items-center gap-0.5 transition-all border ${formData.destination === 'roasted_coffee' ? 'bg-brand-green border-brand-green text-brand-navy shadow-sm' : 'bg-white border-gray-400 shadow-sm text-brand-navy hover:border-black'}`}
+                                        className={`py-1.5 px-2 rounded-md flex flex-col items-center gap-0.5 transition-all border ${formData.destination === 'roasted_coffee' ? 'bg-brand-green/10 text-brand-navy border-brand-green/30 shadow-sm' : 'bg-transparent border-gray-300 shadow-sm text-brand-navy/60 hover:bg-gray-50'}`}
                                     >
                                         <span className="text-[11px] font-bold uppercase">ROASTED COFFEE</span>
                                         <span className="text-[9px] opacity-60 font-bold uppercase">(Finished Product)</span>
@@ -1208,11 +1195,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">Harvest Date</label>
                                     <div className="relative group/date">
                                         <input
-                                            type="date"
+                                            type={formData.harvestDate ? "date" : "text"}
+                                            onFocus={(e) => e.target.type = 'date'}
+                                            onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
+                                            placeholder={new Date().toLocaleDateString('en-GB')}
                                             required
                                             value={formData.harvestDate}
                                             onChange={(e) => setFormData({ ...formData, harvestDate: e.target.value })}
-                                            className={`w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] focus:border-black outline-none text-gray-500 font-medium scheme-light pr-8 cursor-pointer text-xs
+                                            className={`w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none text-brand-navy font-medium scheme-light pr-8 cursor-pointer text-xs placeholder-gray-400 placeholder:font-light
                                                 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                                             disabled={isSubmitting}
                                         />
@@ -1234,7 +1224,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         required
                                         value={formData.variety}
                                         onChange={(e) => setFormData({ ...formData, variety: e.target.value })}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm pl-2 pr-8 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
+                                        className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent font-medium text-brand-navy text-xs outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
                                         disabled={isSubmitting}
                                     >
                                         <option value="">Select</option>
@@ -1250,7 +1240,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         required
                                         value={formData.process}
                                         onChange={(e) => setFormData(prev => ({ ...prev, process: e.target.value as ProcessType }))}
-                                        className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm pl-2 pr-8 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
+                                        className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent font-medium text-brand-navy text-xs outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
                                     >
                                         <option value="">Select</option>
                                         <option value="lavado">Washed</option>
@@ -1270,11 +1260,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">{t('purchaseForm', 'purchaseDate')}</label>
                                     <div className="relative group/date">
                                         <input
-                                            type="date"
+                                            type={formData.purchaseDate ? "date" : "text"}
+                                            onFocus={(e) => e.target.type = 'date'}
+                                            onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
+                                            placeholder={new Date().toLocaleDateString('en-GB')}
                                             required
                                             value={formData.purchaseDate}
                                             onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                                            className={`w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] focus:border-black outline-none text-gray-500 font-medium scheme-light pr-8 cursor-pointer text-xs
+                                            className={`w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none text-brand-navy font-medium scheme-light pr-8 cursor-pointer text-xs placeholder-gray-400 placeholder:font-light
                                                 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                                             disabled={isSubmitting}
                                         />
@@ -1301,7 +1294,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             onChange={handleWeightChange}
                                             placeholder="0"
                                             disabled={isSubmitting}
-                                            className="block w-full bg-white border rounded-industrial-sm px-3 py-1.5 h-[30px] text-xs outline-none font-bold transition-all pr-8 border-gray-400 shadow-sm text-brand-navy focus:border-black placeholder:text-brand-navy/30 placeholder:font-bold uppercase"
+                                            className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                         />
                                         <div className="absolute top-1/2 -translate-y-1/2 right-3">
                                             <span className="text-brand-navy font-bold opacity-60 text-[9px] ">KG</span>
@@ -1320,7 +1313,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             type="text"
                                             value={displayValue}
                                             onChange={handleValueChange}
-                                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] text-xs font-bold outline-none transition-all pr-10 text-brand-navy focus:border-black placeholder:text-brand-navy/30 uppercase"
+                                            className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                             placeholder="0"
                                             disabled={isSubmitting}
                                         />
@@ -1332,49 +1325,40 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 )}
 
                 {currentStep === 3 && (
-                    <section className="bg-soft-white border border-gray-400 shadow-sm p-5 rounded-industrial space-y-4 animate-in slide-in-from-right-4 duration-500">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-brand-navy font-bold flex items-center gap-2 uppercase">
-                                <span className="w-1.5 h-6 bg-brand-green rounded-full"></span>
-                                PROCESSING: FARMER DATA
-                            </h3>
-                            <span className="px-3 py-1 bg-white text-brand-navy text-[11px] font-bold uppercase rounded-full border border-gray-400 shadow-sm">MINIMUM FIELD</span>
-                        </div>
+                    <section className="bg-transparent border-none p-0 space-y-6 animate-in slide-in-from-right-4 duration-500">
+                        
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                              {/* 1. Variedad del Café (Heredada) */}
                              <div>
                                  <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">
-                                     <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                     
                                      DETECTED VARIETY (ORIGIN)
                                  </label>
-                                 <div className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 flex items-center justify-between shadow-inner">
+                                 <div className="w-full h-[30px] border-b border-brand-navy/30 px-2 flex items-center justify-between bg-transparent">
                                      <span className="text-xs font-bold text-brand-navy uppercase">{formData.variety || '---'}</span>
-                                     <span className="text-[9px] opacity-60 uppercase font-black">IDENTITY CONFIRMED</span>
                                  </div>
                              </div>
 
                             {/* 2. Tipo de proceso (Heredado) */}
-                            <div className="md:col-span-2">
+                            <div>
                                 <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
                                     DETECTED BASE PROCESS
                                 </label>
-                                <div className="w-full min-h-[30px] py-1 bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 flex items-center justify-between shadow-inner">
+                                <div className="w-full h-[30px] border-b border-brand-navy/30 px-2 flex items-center justify-between bg-transparent">
                                     <span className="text-xs font-bold text-brand-navy uppercase break-words mr-2">{formData.process || '---'}</span>
-                                    <span className="text-[9px] opacity-60 uppercase font-black whitespace-nowrap">STANDARD FLOW</span>
                                 </div>
                             </div>
 
-                            <div className="flex flex-col md:col-span-3">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase mb-1">FERMENTATION STYLE / VARIATION</label>
+                            <div>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">FERMENTATION STYLE / VARIATION</label>
                                 <select
                                     value={formData.processData?.fermentation_style || 'estandar'}
                                     onChange={(e) => setFormData(prev => ({ 
                                         ...prev, 
                                         processData: { ...prev.processData, fermentation_style: e.target.value } 
                                     }))}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm pl-3 pr-8 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent font-medium text-brand-navy text-xs outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat font-bold text-brand-navy text-xs uppercase"
                                 >
                                     {FERMENTATION_STYLES.map(style => (
                                         <option key={style.id} value={style.id} className={style.id === 'otro' ? 'font-bold text-brand-navy' : ''}>
@@ -1402,10 +1386,10 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                         </div>
 
                         {/* SECCIÓN DE ALQUIMIA (FISICOQUÍMICA) */}
-                        <div className="pt-4 border-t border-gray-400 mt-4 space-y-4">
+                        <div className="pt-4 border-t-2 border-brand-green mt-4 space-y-4">
                             <div className="flex items-center justify-between">
                                 <h4 className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                    
                                     FERMENTATION ALCHEMY (PHYSICOCHEMISTRY)
                                 </h4>
                                 <span className="text-[9px] text-brand-navy font-mono uppercase font-bold opacity-60">CRITICAL VARIABLES CONTROL</span>
@@ -1476,7 +1460,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             ...prev, 
                                             processData: { ...prev.processData, recipiente_fermentacion: e.target.value } 
                                         }))}
-                                        className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 text-xs font-bold text-brand-navy outline-none focus:border-black appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.75rem_center] bg-no-repeat uppercase"
+                                        className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent font-medium text-brand-navy text-xs outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat uppercase"
                                     >
                                         <option value="">Select Container</option>
                                         {['Stainless Bioreactor', 'Plastic Tank', 'GrainPro Bag', 'Cement Tank'].map(r => (
@@ -1506,7 +1490,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             ...prev, 
                                             processData: { ...prev.processData, agente_infusion: e.target.value } 
                                         }))}
-                                        className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 text-xs font-bold text-brand-navy outline-none focus:border-black uppercase transition-all shadow-inner"
+                                        className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs uppercase"
                                     />
                                 </div>
                             </div>
@@ -1514,14 +1498,14 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t-2 border-brand-green mt-4">
                             <div>
-                                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
-                                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                                <label className="text-[11px] font-bold text-brand-navy uppercase block mb-1">
+                                    
                                     DRYING METHOD
                                 </label>
                                 <select
                                     value={formData.processData?.tipo_secado || ''}
                                     onChange={(e) => setFormData(p => ({ ...p, processData: { ...p.processData, tipo_secado: e.target.value } }))}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 h-[30px] focus:border-black outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_0.5rem_center] bg-no-repeat font-bold text-xs text-brand-navy uppercase transition-all"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                 >
                                     <option value="">SELECT METHOD</option>
                                     {[
@@ -1548,7 +1532,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                         </div>
 
                         {formData.variety === 'Otro' && (
-                            <div className="animate-in slide-in-from-top-2 duration-300 max-w-md pt-6 border-t border-gray-400 shadow-sm">
+                            <div className="animate-in slide-in-from-top-2 duration-300 max-w-md pt-6 border-t-2 border-brand-green shadow-sm">
                                 <label className="text-[11px] font-bold text-brand-navy uppercase ">Nombre Variedad Especial</label>
                                 <input
                                     type="text"
@@ -1556,7 +1540,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     required
                                     value={customVariety}
                                     onChange={(e) => setCustomVariety(e.target.value)}
-                                    className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-4 py-3 mt-1 focus:border-black outline-none text-brand-navy placeholder:text-brand-navy"
+                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -1572,7 +1556,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             <div className="grid grid-cols-3 items-center pt-4 border-t border-brand-green/30 relative z-20">
                 <div className="flex justify-start">
                     {currentStep > 1 && (
-                        <button type="button" onClick={prevStep} disabled={isSubmitting} className="px-6 py-2.5 border border-gray-400 shadow-sm text-brand-navy bg-white rounded-industrial-sm font-bold uppercase text-[11px] hover:bg-gray-50 transition-colors disabled:opacity-50">
+                        <button type="button" onClick={prevStep} disabled={isSubmitting} className="px-6 py-3 border border-brand-navy text-brand-navy bg-transparent rounded-full font-bold uppercase text-[10px] tracking-widest hover:bg-brand-navy/5 hover:scale-105 transition-all disabled:opacity-50">
                             &larr; BACK
                         </button>
                     )}
@@ -1584,7 +1568,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                             <button
                                 type="submit"
                                 disabled={isSubmitting || isReadOnly}
-                                className={`w-full font-bold py-2.5 rounded-industrial-sm transition-all flex items-center justify-center gap-2 group uppercase text-[11px] shadow-sm bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50 border border-brand-green`}
+                                className={`w-full font-bold py-3 rounded-full transition-all flex items-center justify-center gap-2 group uppercase text-[10px] tracking-widest shadow-sm bg-brand-green text-white hover:bg-brand-green/90 hover:scale-[1.02] disabled:opacity-50 border border-transparent`}
                             >
                                 {isSubmitting ? (
                                     <>
@@ -1625,7 +1609,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
 
                 <div className="flex justify-end">
                     {currentStep < 3 && (
-                        <button type="button" onClick={nextStep} className="px-6 py-2.5 bg-white text-brand-navy border border-gray-400 shadow-sm rounded-industrial-sm font-bold uppercase text-[11px] hover:bg-gray-50 transition-colors flex items-center gap-2">
+                        <button type="button" onClick={nextStep} className="px-6 py-3 bg-brand-green text-white rounded-full font-bold uppercase text-[10px] tracking-widest hover:bg-brand-green/90 hover:scale-105 transition-all flex items-center gap-2 shadow-sm">
                             {currentStep === 1 ? 'NEXT: COMMERCIALIZATION' : 'NEXT: PROCESSING'} &rarr;
                         </button>
                     )}

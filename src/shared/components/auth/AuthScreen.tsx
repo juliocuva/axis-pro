@@ -86,10 +86,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 cta: "Become an Early Adopter"
             },
             login: {
-                title: "Infrastructure Access",
+                title: "Access",
                 subtitle: "Master Control Terminal",
-                labelId: "Identifier (Email or ID)",
-                labelPass: "Access Key",
+                labelId: "User",
+                labelPass: "Password",
                 button: "Enter System",
                 verifying: "Verifying..."
             },
@@ -182,10 +182,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 cta: "Sé un Adoptante Temprano"
             },
             login: {
-                title: "Acceso a Infraestructura",
+                title: "Acceso",
                 subtitle: "Terminal de Control Maestro",
-                labelId: "Identificador (Email o Cédula)",
-                labelPass: "Clave de Acceso",
+                labelId: "Usuario",
+                labelPass: "Contraseña",
                 button: "Entrar al Sistema",
                 verifying: "Verificando..."
             },
@@ -835,25 +835,24 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             {/* LOGIN MODAL */}
             {showLoginModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-white/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="w-full max-w-md bg-white rounded-industrial p-10 shadow-2xl border border-brand-gray/50 relative">
-                        <button onClick={() => setShowLoginModal(false)} className="absolute top-6 right-6 text-brand-navy hover:text-brand-green transition-colors">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    <div className="w-full max-w-md bg-white rounded-[2rem] p-10 sm:p-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative">
+                        <button onClick={() => setShowLoginModal(false)} className="absolute top-8 right-8 text-brand-navy hover:text-brand-green transition-colors">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                         <div className="mb-10 text-center">
-                            <img src="/logo.png" alt="AXISONE" className="h-20 mx-auto mb-6" />
-                            <h2 className="text-2xl font-black uppercase text-brand-navy tracking-tighter">{t.login.title}</h2>
-                            <p className="text-xs text-brand-green font-black uppercase tracking-widest mt-2">{t.login.subtitle}</p>
+                            <img src="/logo.png" alt="AXISONE" className="h-32 mx-auto mb-8" />
+                            <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.2em]">{t.login.subtitle}</p>
                         </div>
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-8">
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-brand-navy/40 uppercase tracking-widest ml-1">{t.login.labelId}</label>
-                                <input type="text" required placeholder="user@email.com" value={identifier} onChange={(e) => setIdentifier(e.target.value)} className="w-full border-b border-black/10 px-1 py-3 text-base focus:border-brand-green outline-none transition-all font-bold text-brand-navy bg-transparent" />
+                                <label className="text-[10px] font-bold text-brand-navy/40 uppercase tracking-widest">{t.login.labelId}</label>
+                                <input type="text" required placeholder="user@email.com" value={identifier} onChange={(e) => setIdentifier(e.target.value)} className="w-full border-b border-black/10 px-0 py-3 text-sm focus:border-brand-green outline-none transition-all font-semibold text-brand-navy bg-transparent" />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-brand-navy/40 uppercase tracking-widest ml-1">{t.login.labelPass}</label>
-                                <input type="password" required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border-b border-black/10 px-1 py-3 text-base focus:border-brand-green outline-none transition-all font-bold text-brand-navy bg-transparent" />
+                                <label className="text-[10px] font-bold text-brand-navy/40 uppercase tracking-widest">{t.login.labelPass}</label>
+                                <input type="password" required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border-b border-black/10 px-0 py-3 text-sm focus:border-brand-green outline-none transition-all font-semibold text-brand-navy bg-transparent" />
                             </div>
-                            <button type="submit" disabled={isLoading} className="w-full bg-brand-green text-white font-black py-4 rounded-industrial-sm transition-all shadow-xl shadow-brand-green/20 uppercase text-xs tracking-widest mt-8">{isLoading ? t.login.verifying : t.login.button}</button>
+                            <button type="submit" disabled={isLoading} className="w-full bg-brand-green text-white font-bold py-4 rounded-xl transition-all shadow-xl shadow-brand-green/20 hover:shadow-brand-green/30 uppercase text-xs tracking-widest mt-10 hover:scale-[1.02] active:scale-[0.98]">{isLoading ? t.login.verifying : t.login.button}</button>
                         </form>
                     </div>
                 </div>

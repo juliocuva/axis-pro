@@ -418,13 +418,13 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
     );
 
     const scaRadarData = scaData ? [
-        { subject: 'Frag/Aroma', A: scaData.fragrance_aroma || 0 },
-        { subject: 'Flavor', A: scaData.flavor || 0 },
-        { subject: 'Aftertaste', A: scaData.aftertaste || 0 },
-        { subject: 'Acidity', A: scaData.acidity || 0 },
-        { subject: 'Body', A: scaData.body || 0 },
-        { subject: 'Balance', A: scaData.balance || 0 },
-        { subject: 'Overall', A: scaData.overall || 0 },
+        { subject: 'Frag/Aroma', A: scaData.cva_affective?.fragranceQuality || scaData.fragrance_aroma || 0 },
+        { subject: 'Flavor', A: scaData.cva_affective?.flavorQuality || scaData.flavor || 0 },
+        { subject: 'Aftertaste', A: scaData.cva_affective?.aftertasteQuality || scaData.aftertaste || 0 },
+        { subject: 'Acidity', A: scaData.cva_affective?.acidityQuality || scaData.acidity || 0 },
+        { subject: 'Body', A: scaData.cva_affective?.mouthfeelQuality || scaData.body || 0 },
+        { subject: 'Balance', A: scaData.cva_affective?.sweetnessQuality || scaData.balance || 0 }, // Using sweetness for CVA or balance for old
+        { subject: 'Overall', A: scaData.cva_affective?.overallImpression || scaData.overall || 0 },
     ].map(d => ({
         ...d,
         A: Number(d.A),
@@ -444,14 +444,14 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
     }));
 
     const screenData = (physicalData?.screen_size_distribution && Object.values(physicalData.screen_size_distribution).some(v => v !== null)) ? [
-        { name: 'M18', val: physicalData.screen_size_distribution.size18 || 0 },
-        { name: 'M17', val: physicalData.screen_size_distribution.size17 || 0 },
-        { name: 'M16', val: physicalData.screen_size_distribution.size16 || 0 },
-        { name: 'M15', val: physicalData.screen_size_distribution.size15 || 0 },
-        { name: 'M14', val: physicalData.screen_size_distribution.size14 || 0 },
-        { name: 'M13', val: physicalData.screen_size_distribution.size13 || 0 },
-        { name: 'M12', val: physicalData.screen_size_distribution.size12 || 0 },
-        { name: 'Bottom', val: physicalData.screen_size_distribution.under12 || 0 },
+        { name: 'M18', val: physicalData.screen_size_distribution.m18 || physicalData.screen_size_distribution.size18 || 0 },
+        { name: 'M17', val: physicalData.screen_size_distribution.m17 || physicalData.screen_size_distribution.size17 || 0 },
+        { name: 'M16', val: physicalData.screen_size_distribution.m16 || physicalData.screen_size_distribution.size16 || 0 },
+        { name: 'M15', val: physicalData.screen_size_distribution.m15 || physicalData.screen_size_distribution.size15 || 0 },
+        { name: 'M14', val: physicalData.screen_size_distribution.m14 || physicalData.screen_size_distribution.size14 || 0 },
+        { name: 'M13', val: physicalData.screen_size_distribution.m13 || physicalData.screen_size_distribution.size13 || 0 },
+        { name: 'M12', val: physicalData.screen_size_distribution.m12 || physicalData.screen_size_distribution.size12 || 0 },
+        { name: 'Bottom', val: physicalData.screen_size_distribution.menores || physicalData.screen_size_distribution.under12 || 0 },
     ] : [
         { name: 'M18', val: 45 },
         { name: 'M17', val: 40 },
@@ -488,7 +488,12 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
     const fermVal = pData.duracion_fermentacion_horas || pData.tiempo_fermentacion_horas || (isEugenioides ? '72' : '48');
     const tempVal = pData.temperatura_masa_max || pData.temperatura_controlada_c || (isEugenioides ? '18.0' : '20.0');
 
-    const totalScore = lotData?.lot_number === 'WCE-HUILA-01-EUG' ? 90.5 : (scaData?.total_score || scaData?.overall || 90.5);
+    const cvaAffective = scaData?.cva_affective;
+    const computedCVAScore = cvaAffective ? 
+        (Object.values(cvaAffective).reduce((acc: number, val: any) => acc + (Number(val) || 8.0), 0) + 25) : 0;
+        
+    const totalScore = lotData?.lot_number === 'WCE-HUILA-01-EUG' ? 90.5 : 
+        (computedCVAScore > 0 ? computedCVAScore : (scaData?.total_score || scaData?.overall || 90.5));
 
     const getPageClass = (pageNum: number) => {
         if (viewType === 'paginated') return activePage === getPageNum(pageNum) ? 'step-visible' : 'step-hidden';
@@ -699,10 +704,10 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
 
                                 <div className="grid grid-cols-4 gap-4">
                                     {[
-                                        { label: 'Parchment Weight', val: lotData?.purchase_weight || '--', unit: 'KG' },
-                                        { label: 'Green Coffee Weight', val: lotData?.thrashed_weight || '--', unit: 'KG' },
-                                        { label: 'Yield Factor', val: lotData?.thrashing_yield ? Number(lotData.thrashing_yield).toFixed(1) : '--', unit: 'FR' },
-                                        { label: 'Milling Loss', val: lotData?.purchase_weight && lotData?.thrashed_weight ? (((lotData.purchase_weight - lotData.thrashed_weight) / lotData.purchase_weight) * 100).toFixed(1) : '--', unit: '%' }
+                                        { label: 'Parchment Weight', val: lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight || '--', unit: 'KG' },
+                                        { label: 'Green Coffee Weight', val: lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight || '--', unit: 'KG' },
+                                        { label: 'Yield Factor', val: (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) && (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight) ? (((lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) * 70) / (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight)).toFixed(1) : '--', unit: 'FR' },
+                                        { label: 'Milling Loss', val: (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) && (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight) ? ((( (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) - (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight)) / (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight)) * 100).toFixed(1) : '--', unit: '%' }
                                     ].map((item, i) => (
                                         <div key={i} className="bg-white border border-gray-400 p-3 rounded-xl text-center">
                                             <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-1">{item.label}</p>

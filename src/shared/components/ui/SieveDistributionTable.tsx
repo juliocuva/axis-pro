@@ -97,7 +97,7 @@ export function SieveDistributionTable({
                             <input
                                 type="number"
                                 step="0.1"
-                                value={data[mesh.key]}
+                                value={data[mesh.key] ?? 0}
                                 onChange={(e) => handleInputChange(mesh.key, e.target.value)}
                                 disabled={isSubmitting || isReadOnly}
                                 className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-2 py-1 text-xs font-bold text-brand-navy text-center outline-none focus:border-black transition-all appearance-none"

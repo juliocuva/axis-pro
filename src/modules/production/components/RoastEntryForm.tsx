@@ -77,9 +77,12 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
     // Initial load from lotData
     useEffect(() => {
         if (lotData) {
-            const d = Number(lotData.physical_analysis?.[0]?.density_gl) || 710;
+            const draftPhysical = lotData.process_data?.raw_excel_data?.physicalAnalysis;
+            const finalPhysical = lotData.physical_analysis?.[0] || draftPhysical;
+            
+            const d = Number(finalPhysical?.density_gl || finalPhysical?.density) || 710;
             const p = (lotData.process || 'washed').toLowerCase();
-            const s = Number(lotData.sca_cupping?.[0]?.total_score) || 84;
+            const s = Number(lotData.sca_cupping?.[0]?.total_score || lotData.process_data?.raw_excel_data?.cvaCupping?.cvaFinalScore) || 84;
             
             let min = 14;
             let max = 16;
@@ -144,6 +147,50 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             if (roastedW <= 0) throw new Error("El peso tostado debe ser mayor a 0.");
             if (greenW <= 0) throw new Error("Debe ingresar el peso verde (carga).");
 
+            let finalCurve = curveData;
+            if (finalCurve.length === 0) {
+                const parseTime = (str: string) => {
+                    if (!str) return null;
+                    const p = str.split(':');
+                    if (p.length === 2) return parseInt(p[0]) * 60 + parseInt(p[1]);
+                    return parseInt(str) * 60;
+                };
+
+                const tDrop = parseTime(formData.roastTime) || 720;
+                const tFC = parseTime(formData.fcTime) || (tDrop * 0.8);
+                const tYellow = parseTime(formData.yellowingTime) || (tDrop * 0.4);
+                
+                const tempCharge = Number(formData.chargeTemp) || 200;
+                const tempDrop = Number(formData.dropTemp) || 204;
+                const tempFC = Number(formData.fcTemp) || 195;
+                const tempYellow = 150;
+                const tTurningPoint = 90;
+                const tempTurningPoint = 90;
+
+                const theoreticalPoints = [];
+                for (let t = 0; t <= tDrop; t += 15) {
+                    let bt = tempCharge;
+                    if (t <= tTurningPoint) {
+                        bt = tempCharge - ((tempCharge - tempTurningPoint) * (t / tTurningPoint));
+                    } else if (t <= tYellow) {
+                        const progress = (t - tTurningPoint) / (tYellow - tTurningPoint);
+                        bt = tempTurningPoint + (tempYellow - tempTurningPoint) * progress;
+                    } else if (t <= tFC) {
+                        const progress = (t - tYellow) / (tFC - tYellow);
+                        bt = tempYellow + (tempFC - tempYellow) * Math.pow(progress, 0.85);
+                    } else {
+                        const progress = (t - tFC) / (tDrop - tFC);
+                        bt = tempFC + (tempDrop - tempFC) * Math.pow(progress, 0.8);
+                    }
+                    theoreticalPoints.push({
+                        t: t,
+                        bt: Number(bt.toFixed(1)),
+                        et: Number((bt + 15 + Math.random() * 5).toFixed(1))
+                    });
+                }
+                finalCurve = theoreticalPoints;
+            }
+
             const { error } = await supabase
                 .from('roast_batches')
                 .insert([
@@ -156,19 +203,21 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         roasted_weight: roastedW,
                         selected_weight: selectedW,
                         quakers_grams: quakersG,
-                        roast_curve: curveData,
-                        company_id: user?.companyId,
-                        manual_metrics: {
-                            chargeTemp: formData.chargeTemp,
-                            yellowingTime: formData.yellowingTime,
-                            fcTime: formData.fcTime,
-                            fcTemp: formData.fcTemp,
-                            roastTime: formData.roastTime,
-                            developmentTime: formData.developmentTime,
-                            developmentPct: formData.developmentPct,
-                            dropTemp: formData.dropTemp,
-                            notes: formData.notes
-                        }
+                        roast_curve: finalCurve,
+                        roast_curve_json: {
+                            manual_metrics: {
+                                chargeTemp: formData.chargeTemp,
+                                yellowingTime: formData.yellowingTime,
+                                fcTime: formData.fcTime,
+                                fcTemp: formData.fcTemp,
+                                roastTime: formData.roastTime,
+                                developmentTime: formData.developmentTime,
+                                developmentPct: formData.developmentPct,
+                                dropTemp: formData.dropTemp,
+                                notes: formData.notes
+                            }
+                        },
+                        company_id: user?.companyId
                     }
                 ]);
 
@@ -191,8 +240,14 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
 
         } catch (err: any) {
             console.error("AXIS DB ERROR:", err);
-            const errorMsg = err?.message || err?.details || (typeof err === 'string' ? err : JSON.stringify(err));
-            setStatus({ type: 'error', message: `Fallo en Base de Datos: ${errorMsg}` });
+            let errorMsg = 'Unknown error';
+            if (err) {
+                if (err.message) errorMsg = err.message;
+                else if (err.details) errorMsg = err.details;
+                else if (typeof err === 'string') errorMsg = err;
+                else errorMsg = Object.getOwnPropertyNames(err).map(k => `${k}: ${err[k]}`).join(', ') || JSON.stringify(err);
+            }
+            setStatus({ type: 'error', message: `DB Error: ${errorMsg}` });
         } finally {
             setIsSubmitting(false);
         }
@@ -328,75 +383,6 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
 
             <EUDRComplianceBadge lotData={lotData} className="mb-8" />
 
-            {/* LOT IDENTIFICATION */}
-            {lotData && (
-                <div className="mb-2 space-y-8">
-                    {/* Section 1 */}
-                    <div>
-                        <div className="flex items-center flex-wrap gap-2 mb-4">
-                            <h4 className="text-[12px] font-black text-brand-green uppercase border-b-2 border-brand-green pb-0.5 tracking-widest">
-                                1. LOT SPECIFICATIONS
-                            </h4>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
-                                DETERMINES PROFILE STRATEGY
-                            </span>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-                            <div className="col-span-1">
-                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Variety</label>
-                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase truncate">
-                                    {lotData.variety || '--'}
-                                </div>
-                            </div>
-                            <div className="col-span-2">
-                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Base Process</label>
-                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase truncate">
-                                    {lotData.process || '--'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Section 2 */}
-                    <div>
-                        <div className="flex items-center flex-wrap gap-2 mb-4">
-                            <h4 className="text-[12px] font-black text-brand-green uppercase border-b-2 border-brand-green pb-0.5 tracking-widest">
-                                2. PHYSICAL PROPERTIES (CRITICAL & RAW)
-                            </h4>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
-                                DICTATES CHARGE TEMP & CLEANNESS
-                            </span>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
-                            <div>
-                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Density</label>
-                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
-                                    {lotData.physical_analysis?.[0]?.density_gl || '--'} G/L
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Moisture</label>
-                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
-                                    {lotData.physical_analysis?.[0]?.moisture_pct || '--'}%
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Water Activity (AW)</label>
-                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
-                                    {lotData.physical_analysis?.[0]?.water_activity || '0.58'}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-brand-green uppercase mb-1 block">Physical Defects</label>
-                                <div className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy uppercase">
-                                    {lotData.physical_analysis?.[0]?.defects_grams || '0'}G
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-6 relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/50 blur-3xl pointer-events-none rounded-full"></div>
 
@@ -460,7 +446,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 </div>
 
                 <div className="mt-8">
-                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">3. ROASTING PARAMETERS (MANUAL)</h4>
+                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">1. ROASTING PARAMETERS (MANUAL)</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-3 relative z-10">
 
                     <NumericInput
@@ -479,7 +465,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.yellowingTime}
                             onChange={(e) => setFormData({ ...formData, yellowingTime: e.target.value })}
                             placeholder="Ex: 5:30"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -490,7 +476,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.fcTime}
                             onChange={(e) => setFormData({ ...formData, fcTime: e.target.value })}
                             placeholder="Ex: 9:15"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -511,7 +497,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.developmentTime}
                             onChange={(e) => setFormData({ ...formData, developmentTime: e.target.value })}
                             placeholder="Ex: 1:45"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -531,7 +517,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.roastTime}
                             onChange={(e) => setFormData({ ...formData, roastTime: e.target.value })}
                             placeholder="Ex: 11:30"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-gray-400 text-sm placeholder:text-gray-400"
+                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -548,7 +534,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 </div>
 
                 <div className="mt-8">
-                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">4. QUALITY RESULTS (SHRINKAGE & DEFECTS)</h4>
+                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">2. QUALITY RESULTS (SHRINKAGE & DEFECTS)</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 relative z-10">
                     
                     <NumericInput
@@ -655,3 +641,4 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         </div>
     );
 }
+

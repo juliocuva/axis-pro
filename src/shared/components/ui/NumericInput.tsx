@@ -36,8 +36,8 @@ export const NumericInput: React.FC<NumericInputProps> = ({
 
 
     const variantStyles = {
-        default: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
-        industrial: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
+        default: 'border-b border-brand-navy/30 bg-transparent text-brand-navy focus:border-brand-green rounded-none',
+        industrial: 'border-b border-brand-navy/30 bg-transparent text-brand-navy focus:border-brand-green rounded-none',
         blue: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black',
         red: 'border-brand-red/50 bg-white text-brand-red focus:border-brand-red',
         orange: 'border-gray-400 shadow-sm bg-white text-brand-navy focus:border-black'
@@ -48,8 +48,8 @@ export const NumericInput: React.FC<NumericInputProps> = ({
     return (
         <div className={`space-y-0.5 ${className}`}>
             {label && (
-                <label className="text-[11px] font-bold text-brand-green uppercase flex items-center gap-1.5 mb-1">
-                    <span className="w-0.5 h-2.5 bg-brand-green rounded-full"></span>
+                <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">
+                    
                     {label}
                 </label>
             )}
@@ -78,7 +78,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
                         }
                         onChange(val);
                     }}
-                    className={`w-full border rounded-industrial-sm px-3 py-1.5 outline-none font-bold transition-all text-xs ${variantStyles[variant]} ${inputClassName} placeholder:text-gray-400 placeholder:font-medium`}
+                    className={`w-full h-[30px] px-2 py-2 outline-none font-medium transition-all text-xs ${variantStyles[variant]} ${inputClassName} placeholder:text-gray-400 placeholder:font-light`}
                 />
                 <div
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2"

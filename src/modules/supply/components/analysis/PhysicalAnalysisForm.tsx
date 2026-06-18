@@ -120,12 +120,12 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
     };
 
     return (
-        <div className="bg-transparent p-0 animate-in fade-in duration-700 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto w-full bg-transparent p-0 animate-in fade-in duration-700 relative overflow-hidden">
             {/* Background Decorative Element */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
             
             {isLoading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-main/80 backdrop-blur-md rounded-[2rem]">
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-md rounded-[2rem]">
                     <div className="flex flex-col items-center gap-6">
                         <div className="relative">
                             <div className="w-16 h-16 border-4 border-gray-400 shadow-sm rounded-full"></div>

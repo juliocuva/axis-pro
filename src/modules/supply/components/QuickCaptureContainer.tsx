@@ -343,7 +343,7 @@ export default function QuickCaptureContainer({ user, onClose, fetchRecentLots }
     };
 
     return (
-        <div className="max-w-3xl mx-auto bg-white border-2 border-zinc-300 rounded-3xl overflow-hidden shadow-2xl p-6 md:p-8 transition-all duration-300 text-zinc-900">
+        <div className="max-w-5xl mx-auto w-full bg-white border-2 border-zinc-300 rounded-3xl overflow-hidden shadow-2xl p-6 md:p-8 transition-all duration-300 text-zinc-900">
             
             {/* Header del Asistente */}
             <div className="flex justify-between items-center border-b border-zinc-200 pb-6 mb-6">
@@ -670,13 +670,16 @@ export default function QuickCaptureContainer({ user, onClose, fetchRecentLots }
                                 onChange={(e) => setMoisture(e.target.value ? Number(e.target.value) : '')}
                                 placeholder="Ej: 10.5"
                                 className={`bg-zinc-50/50 border-2 rounded-xl p-3.5 text-xs focus:outline-none transition-all font-semibold text-zinc-850 ${
-                                    moisture && (Number(moisture) < 9.5 || Number(moisture) > 12.5)
+                                    moisture && (Number(moisture) < 10 || Number(moisture) > 12)
                                         ? 'border-red-500 ring-2 ring-red-500/50 focus:bg-white'
                                         : 'border-zinc-300 focus:bg-white focus:ring-2 focus:ring-teal-600 focus:border-teal-600'
                                 }`}
                             />
-                            {moisture && (Number(moisture) < 9.5 || Number(moisture) > 12.5) && (
-                                <span className="text-[8px] font-black uppercase text-red-500 mt-1">❌ Humedad fuera del rango legal de exportación (10% - 12%)</span>
+                            {moisture && (Number(moisture) < 10 || Number(moisture) > 12) && (
+                                <button type="button" onClick={() => setMoisture('')} className="mt-2 w-full bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded-lg font-black uppercase text-[10px] shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
+                                    <span>❌ Humedad fuera de rango (10% - 12%)</span>
+                                    <span className="bg-white/20 px-2 py-0.5 rounded-full text-[8px]">Borrar</span>
+                                </button>
                             )}
                         </div>
                         <div className="flex flex-col">

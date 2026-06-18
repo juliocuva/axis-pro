@@ -82,7 +82,7 @@ export default function SupplyModuleContainer({
             return <PhysicalAnalysisForm key={selectedLot.id} inventoryId={selectedLot.id} user={user} isReadOnly={isReadOnly} onAnalysisComplete={fetchRecentLots} />;
         }
         if (tab === 'cupping' && selectedLot) {
-            return <CVAAssessmentForm key={selectedLot.id} inventoryId={selectedLot.id} user={user} isReadOnly={isReadOnly} onCuppingComplete={fetchRecentLots} />;
+            return <CVAAssessmentForm key={selectedLot.id} inventoryId={selectedLot.id} lotData={selectedLot} user={user} isReadOnly={isReadOnly} onCuppingComplete={fetchRecentLots} />;
         }
         if (tab === 'roast') {
             return <RoastIntelligenceContainer user={user} />;
@@ -129,27 +129,44 @@ export default function SupplyModuleContainer({
                         )}
                     </ModuleHeader>
 
-                    {/* VISTA DESKTOP: Navegación horizontal de pestañas */}
+                    {/* VISTA DESKTOP: Navegación horizontal de pestañas (High-Density Elegance) */}
                     <div className="hidden md:block">
-                        <nav className="flex flex-wrap bg-transparent p-0 mb-4 gap-2">
+                        <nav className="flex items-end justify-between bg-transparent mb-8 border-b border-brand-gray/30 gap-2">
                             {[
-                                { id: 'purchase', label: 'Origin' },
-                                { id: 'thrashing', label: 'Dry Mill' },
-                                { id: 'analysis', label: 'Physical Lab' },
-                                { id: 'roast', label: 'Roast Intelligence' },
-                                { id: 'cupping', label: 'CVA Cupping' }
-                            ].map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id as any)}
-                                    className={`flex-1 min-w-[80px] py-3 rounded-lg text-[11px] font-bold uppercase transition-all ${activeTab === tab.id ? 'bg-brand-green border-transparent text-brand-navy font-black shadow-md' : 'bg-white border border-gray-400 text-brand-navy hover:border-black'}`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
+                                { id: 'purchase', label: 'Origin', num: '01' },
+                                { id: 'thrashing', label: 'Dry Mill', num: '02' },
+                                { id: 'analysis', label: 'Physical Lab', num: '03' },
+                                { id: 'roast', label: 'Roast Intelligence', num: '04' },
+                                { id: 'cupping', label: 'CVA Cupping', num: '05' }
+                            ].map(tab => {
+                                const isActive = activeTab === tab.id;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id as any)}
+                                        className={`group relative flex flex-col items-center justify-center flex-1 pb-5 transition-all duration-500 ${isActive ? 'opacity-100 scale-105' : 'opacity-30 hover:opacity-70'}`}
+                                    >
+                                        <div className="relative flex items-center justify-center mb-2">
+                                            <span className={`text-4xl font-light transition-colors ${isActive ? 'text-brand-green' : 'text-brand-navy'}`}>
+                                                {tab.num}
+                                            </span>
+                                            {isActive && (
+                                                <span className="absolute -top-1 -right-3.5 w-1.5 h-1.5 bg-brand-green rounded-full animate-in zoom-in duration-300"></span>
+                                            )}
+                                        </div>
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-navy">
+                                            {tab.label}
+                                        </span>
+                                        {/* Active Line Indicator */}
+                                        {isActive && (
+                                            <div className="absolute bottom-[-1px] w-full h-[2px] bg-brand-green"></div>
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </nav>
 
-                        <div className="bg-soft-white/50 rounded-industrial border border-gray-400 shadow-sm p-6 min-h-[200px]">
+                        <div className="min-h-[200px] mt-4">
                             {!selectedLot && activeTab !== 'purchase' && activeTab !== 'archive' && activeTab !== 'transparency' && activeTab !== 'roast' ? (
                                 <div className="h-[400px] flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in duration-500">
                                     <div className="w-20 h-20 rounded-full bg-carbon/5 border border-gray-400 shadow-sm flex items-center justify-center text-gray-600">
@@ -174,20 +191,19 @@ export default function SupplyModuleContainer({
                         </div>
                     </div>
 
-                    {/* VISTA MOBILE: Acordeón vertical ultra digerible */}
-                    <div className="md:hidden space-y-3 pb-20 animate-in fade-in duration-500">
-                        {/* Mobile view removed transparency logic, starting directly with forms */}
-
+                    {/* VISTA MOBILE: Acordeón vertical elegante (High-Density Elegance) */}
+                    <div className="md:hidden pb-20 animate-in fade-in duration-500">
                         {[
-                            { id: 'purchase', label: '1. Origen y Compra', status: selectedLot ? '✓ Guardado' : 'Pendiente', color: selectedLot ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200', locked: false },
-                            { id: 'thrashing', label: '2. Trilla y Rendimiento', status: !selectedLot ? '🔒' : (selectedLot.thrashed_weight > 0 ? '✓ Trillado' : 'Pendiente'), color: !selectedLot ? 'text-zinc-400 bg-zinc-50 border-zinc-200' : (selectedLot.thrashed_weight > 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200'), locked: !selectedLot },
-                            { id: 'analysis', label: '3. Laboratorio Físico', status: !selectedLot ? '🔒' : (selectedLot.moisture > 0 || selectedLot.status === 'completed' ? '✓ Analizado' : 'Pendiente'), color: !selectedLot ? 'text-zinc-400 bg-zinc-50 border-zinc-200' : (selectedLot.moisture > 0 || selectedLot.status === 'completed' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200'), locked: !selectedLot },
-                            { id: 'roast', label: '4. Tostión de Café', status: !selectedLot ? '🔒' : (selectedLot.roast_batches && selectedLot.roast_batches.length > 0 ? '✓ Tostado' : 'Pendiente'), color: !selectedLot ? 'text-zinc-400 bg-zinc-50 border-zinc-200' : (selectedLot.roast_batches && selectedLot.roast_batches.length > 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200'), locked: !selectedLot },
-                            { id: 'cupping', label: '5. Catación (SCA CVA)', status: !selectedLot ? '🔒' : (selectedLot.status === 'completed' ? '✓ Sellado' : 'Pendiente'), color: !selectedLot ? 'text-zinc-400 bg-zinc-50 border-zinc-200' : (selectedLot.status === 'completed' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-amber-600 bg-amber-50 border-amber-200'), locked: !selectedLot }
+                            { id: 'purchase', label: 'ORIGIN', num: '01', status: selectedLot ? 'SAVED' : 'PENDING', locked: false },
+                            { id: 'thrashing', label: 'DRY MILL', num: '02', status: !selectedLot ? 'LOCKED' : (selectedLot.thrashed_weight > 0 ? 'SAVED' : 'PENDING'), locked: !selectedLot },
+                            { id: 'analysis', label: 'PHYSICAL LAB', num: '03', status: !selectedLot ? 'LOCKED' : (selectedLot.moisture > 0 || selectedLot.status === 'completed' ? 'SAVED' : 'PENDING'), locked: !selectedLot },
+                            { id: 'roast', label: 'ROAST INTELL.', num: '04', status: !selectedLot ? 'LOCKED' : (selectedLot.roast_batches && selectedLot.roast_batches.length > 0 ? 'SAVED' : 'PENDING'), locked: !selectedLot },
+                            { id: 'cupping', label: 'CVA CUPPING', num: '05', status: !selectedLot ? 'LOCKED' : (selectedLot.status === 'completed' ? 'SAVED' : 'PENDING'), locked: !selectedLot }
                         ].map((step) => {
                             const isOpen = activeTab === step.id;
+                            const isSaved = step.status === 'SAVED';
                             return (
-                                <div key={step.id} className={`border-2 rounded-2xl overflow-hidden shadow-sm transition-all ${isOpen ? 'border-brand-green bg-white shadow-md' : 'border-zinc-200 bg-zinc-50/30'}`}>
+                                <div key={step.id} className="border-b border-brand-gray/30 overflow-hidden">
                                     <button
                                         type="button"
                                         disabled={step.locked}
@@ -195,23 +211,30 @@ export default function SupplyModuleContainer({
                                             setActiveTab(step.id as any);
                                             window.scrollTo({ top: 0, behavior: 'smooth' });
                                         }}
-                                        className={`w-full flex items-center justify-between p-4 text-xs font-black uppercase text-left transition-all ${step.locked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-zinc-50'}`}
+                                        className={`w-full flex items-center justify-between py-6 transition-all duration-500 ${step.locked ? 'opacity-30 cursor-not-allowed' : 'hover:opacity-80'} ${isOpen ? 'opacity-100 pl-2' : 'opacity-50'}`}
                                     >
-                                        <span className="text-brand-navy tracking-wide">{step.label}</span>
-                                        <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-full border uppercase ${step.color}`}>
+                                        <div className="flex items-center gap-4 relative">
+                                            {isOpen && (
+                                                <span className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-1 bg-brand-green rounded-full shadow-[0_0_4px_rgba(0,96,86,0.6)]"></span>
+                                            )}
+                                            <span className={`text-3xl font-light transition-colors ${isOpen ? 'text-brand-green' : 'text-brand-navy'}`}>{step.num}</span>
+                                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-navy">{step.label}</span>
+                                        </div>
+                                        <span className={`text-[8px] font-bold px-2 py-1 uppercase tracking-[0.1em] ${isSaved ? 'text-brand-green' : 'text-brand-navy/40'}`}>
                                             {step.status}
                                         </span>
                                     </button>
                                     {isOpen && !step.locked && (
-                                        <div className="p-4 bg-white border-t border-zinc-100 animate-in fade-in slide-in-from-top-4 duration-300">
-                                            {renderForm(step.id as any)}
+                                        <div className="pb-8 pt-2 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            {/* Renderizamos el form en un contenedor sutil */}
+                                            <div className="bg-soft-white/50 rounded-[1.5rem] p-5">
+                                                {renderForm(step.id as any)}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             );
                         })}
-
-                        {/* HISTORIAL ARCHIVO MÓVIL DIRECTO */}
                         <div className="border border-dashed border-zinc-300 rounded-2xl p-4 text-center mt-6">
                             <p className="text-[10px] font-bold text-zinc-500 uppercase mb-3">¿Deseas buscar o ver el archivo histórico?</p>
                             <div className="flex gap-2">

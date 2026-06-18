@@ -176,9 +176,12 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     let dynamicRestDays = 7;
 
     if (selectedLot) {
-        const d = Number(extraLotData.physical?.density_gl || selectedLot.physical_analysis?.[0]?.density_gl) || 710;
-        const m = Number(extraLotData.physical?.moisture_pct || selectedLot.physical_analysis?.[0]?.moisture_pct) || 11.2;
-        const s = Number(extraLotData.sca?.total_score || selectedLot.sca_cupping?.[0]?.total_score) || 0;
+        const draftPhysical = selectedLot.process_data?.raw_excel_data?.physicalAnalysis;
+        const finalPhysical = extraLotData.physical || selectedLot.physical_analysis?.[0] || draftPhysical;
+        
+        const d = Number(finalPhysical?.density_gl || finalPhysical?.density) || 710;
+        const m = Number(finalPhysical?.moisture_pct || finalPhysical?.moisturePct) || 11.2;
+        const s = Number(extraLotData.sca?.total_score || selectedLot.sca_cupping?.[0]?.total_score || selectedLot.process_data?.raw_excel_data?.cvaCupping?.cvaFinalScore) || 0;
         const p = (selectedLot.process || 'washed').toLowerCase();
 
         // 1. Charge Temp & Dry Time (based on density & moisture)
@@ -242,29 +245,48 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
     };
 
     const getMeshDistribution = (lot: any) => {
-        if (!lot?.physical_analysis?.length) return { under14: 0, m15_16: 0, m17_18: 0, m19: 0 };
-        const mesh = lot.physical_analysis[0].screen_size_distribution;
-        if (!mesh) return { under14: 15, m15_16: 45, m17_18: 30, m19: 10 }; // Fallback
+        const draftPhysical = lot?.process_data?.raw_excel_data?.physicalAnalysis;
+        const finalPhysical = extraLotData.physical || lot?.physical_analysis?.[0] || draftPhysical;
+        
+        if (!finalPhysical) return { items: [] };
+        
+        const mesh = finalPhysical.screen_size_distribution || finalPhysical.sieveAnalysis;
+        if (!mesh) return { items: [] }; // Fallback
 
-        const under14 = (Number(mesh.size14) || 0) + (Number(mesh.size13) || 0) + (Number(mesh.size12) || 0) + (Number(mesh.under12) || 0);
-        const m15_16 = (Number(mesh.size15) || 0) + (Number(mesh.size16) || 0);
-        const m17_18 = (Number(mesh.size17) || 0) + (Number(mesh.size18) || 0);
-        const m19 = 0; // The form top size is 18, so we leave 19+ at 0 or infer if it had size19. 
+        const rawItems = [
+            { label: '18', val: Number(mesh.m18) || Number(mesh.size18) || 0 },
+            { label: '17', val: Number(mesh.m17) || Number(mesh.size17) || 0 },
+            { label: '16', val: Number(mesh.m16) || Number(mesh.size16) || 0 },
+            { label: '15', val: Number(mesh.m15) || Number(mesh.size15) || 0 },
+            { label: '14', val: Number(mesh.m14) || Number(mesh.size14) || 0 },
+            { label: '13', val: Number(mesh.m13) || Number(mesh.size13) || 0 },
+            { label: '12', val: Number(mesh.m12) || Number(mesh.size12) || 0 },
+            { label: '<12', val: Number(mesh.menores) || Number(mesh.under12) || 0 }
+        ];
 
-        // Normalize for visual percentage heights (min 10%, max 100%)
-        const max = Math.max(under14, m15_16, m17_18, m19, 1);
-        return {
-            under14: Math.max((under14 / max) * 100, 10),
-            m15_16: Math.max((m15_16 / max) * 100, 10),
-            m17_18: Math.max((m17_18 / max) * 100, 10),
-            m19: Math.max((m19 / max) * 100, 10),
-        };
+        // Filter out zero values to only show what comes from the previous window
+        const validItems = rawItems.filter(item => item.val > 0).reverse(); // Reverse to show smaller meshes first if desired, or keep as is. Actually, standard is smaller to larger.
+        
+        const total = validItems.reduce((acc, curr) => acc + curr.val, 0);
+        const max = Math.max(...validItems.map(i => i.val), 1);
+
+        const items = validItems.map(item => {
+            const visualPct = Math.max((item.val / max) * 100, 10);
+            const realPct = total > 0 ? ((item.val / total) * 100).toFixed(0) : '0';
+            return {
+                label: item.label,
+                visualPct,
+                realPct
+            };
+        });
+
+        return { items };
     };
 
     const meshViz = getMeshDistribution(selectedLot);
 
     return (
-        <div className="space-y-12 animate-in fade-in duration-700">
+        <div className="max-w-5xl mx-auto w-full space-y-12 animate-in fade-in duration-700">
 
             {view === 'live' && (
                 <>
@@ -315,7 +337,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                     )}
 
                     {/* ENCABEZADO: IDENTIFICACIÓN DEL LOTE Y ACCIONES SIEMPRE VISIBLE */}
-                    <div className="pb-4 mb-2 flex flex-col md:flex-row md:items-end justify-between gap-6 w-full max-w-7xl mx-auto">
+                    <div className="pb-2 flex flex-col md:flex-row md:items-end justify-between gap-6 w-full max-w-7xl mx-auto">
                         <div className="w-full max-w-2xl flex flex-col gap-1">
                             <label className="text-[9px] text-brand-navy uppercase font-bold whitespace-nowrap">CHANGE TARGET LOT</label>
                             <div className="relative w-full">
@@ -373,10 +395,16 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                                 <span className="text-xs font-bold text-brand-navy uppercase">{selectedLot.variety || 'Caturra'}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-1 w-full md:flex-1">
+                                        <div className="flex flex-col gap-1 w-full md:w-1/4">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">BASE PROCESS</span>
                                             <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
                                                 <span className="text-xs font-bold text-brand-navy-bright uppercase truncate">{selectedLot.process || 'Lavado'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col gap-1 w-full md:w-1/4">
+                                            <span className="text-[9px] text-brand-navy font-bold uppercase">FERMENTATION</span>
+                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
+                                                <span className="text-xs font-bold text-brand-navy-bright uppercase truncate">{selectedLot.process_data?.fermentation_style || selectedLot.process_data?.raw_excel_data?.general?.fermentation_type || 'Estandar'}</span>
                                             </div>
                                         </div>
                                         <div className="flex flex-col gap-1 w-full md:w-1/4">
@@ -394,12 +422,14 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         <h4 className="text-[11px] font-bold text-brand-navy uppercase underline decoration-brand-navy/30 underline-offset-4">2. PHYSICAL PROPERTIES (CRITICAL & RAW)</h4>
                                         <p className="text-[10px] text-gray-500 font-medium uppercase">DICTATES CHARGE TEMP & CLEANNESS</p>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative z-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 relative z-10">
                                         {/* Densidad */}
                                         <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">DENSITY</span>
                                             <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
-                                                <span className="text-xs font-bold text-brand-navy uppercase">{extraLotData.physical?.density_gl || selectedLot.physical_analysis?.[0]?.density_gl || '--'} g/L</span>
+                                                <span className="text-xs font-bold text-brand-navy uppercase">
+                                                    {extraLotData.physical?.density_gl || selectedLot.physical_analysis?.[0]?.density_gl || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.densityGl || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.density || '--'} g/L
+                                                </span>
                                             </div>
                                         </div>
 
@@ -412,7 +442,9 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                                         ? `${extraLotData.physical.moisture_pct}%` 
                                                         : selectedLot.physical_analysis?.[0]?.moisture_pct 
                                                             ? `${selectedLot.physical_analysis[0].moisture_pct}%` 
-                                                            : '--'}
+                                                            : selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.moisturePct
+                                                                ? `${selectedLot.process_data.raw_excel_data.physicalAnalysis.moisturePct}%`
+                                                                : '--'}
                                                 </span>
                                             </div>
                                         </div>
@@ -422,7 +454,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">WATER ACTIVITY (AW)</span>
                                             <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
                                                 <span className="text-xs font-bold text-brand-navy uppercase">
-                                                    {extraLotData.physical?.aw || selectedLot.physical_analysis?.[0]?.aw || '0.58'}
+                                                    {extraLotData.physical?.water_activity || selectedLot.physical_analysis?.[0]?.water_activity || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.waterActivity || '--'}
                                                 </span>
                                             </div>
                                         </div>
@@ -430,26 +462,43 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         {/* Defectos */}
                                         <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">PHYSICAL DEFECTS</span>
-                                            <div className="w-full h-[30px] flex items-center justify-between bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
+                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm relative group">
                                                 <span className="text-xs font-bold text-brand-navy uppercase">
-                                                    {(selectedLot.physical_analysis && selectedLot.physical_analysis.length > 0)
-                                                        ? `${selectedLot.physical_analysis[0].total_defects_grams || 0}g`
-                                                        : '0g'}
+                                                    {(() => {
+                                                        const rawDefects = extraLotData.physical?.total_defects_grams || selectedLot.physical_analysis?.[0]?.total_defects_grams || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.defects;
+                                                        return typeof rawDefects === 'object' && rawDefects !== null 
+                                                            ? (Number(rawDefects.primary || 0) + Number(rawDefects.secondary || 0)) 
+                                                            : (Number(rawDefects) || 0);
+                                                    })()}
                                                 </span>
-                                                <div className="w-12 bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                                                    <div className="bg-brand-green h-full w-[5%]" />
+                                                <div className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2" style={{ right: '12px' }}>
+                                                    <span className="text-brand-navy font-semibold text-[11px] w-4 text-center">G</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* Mallas */}
-                                        <div className="flex flex-col gap-1 w-full">
+                                        <div className="flex flex-col gap-1 w-full md:col-span-2">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">MESH DISTRIBUTION</span>
-                                            <div className="w-full h-[30px] flex items-end gap-1 bg-white px-2 py-1.5 rounded-industrial-sm border border-gray-400 shadow-sm">
-                                                <div className="flex-1 bg-gray-200 hover:bg-gray-300 transition-all rounded-t-sm" style={{ height: `max(2px, ${meshViz.under14}%)` }} title="<14" />
-                                                <div className="flex-1 bg-brand-green/50 hover:bg-brand-green transition-all rounded-t-sm" style={{ height: `max(2px, ${meshViz.m15_16}%)` }} title="15-16" />
-                                                <div className="flex-1 bg-brand-green/70 hover:bg-brand-green transition-all rounded-t-sm" style={{ height: `max(2px, ${meshViz.m17_18}%)` }} title="17-18" />
-                                                <div className="flex-1 bg-gray-200 hover:bg-gray-300 transition-all rounded-t-sm" style={{ height: `max(2px, ${meshViz.m19}%)` }} title="19+" />
+                                            <div className="w-full h-[30px] bg-white px-2 py-0.5 rounded-industrial-sm border border-gray-400 shadow-sm flex flex-col justify-end">
+                                                {meshViz.items && meshViz.items.length > 0 ? (
+                                                    <>
+                                                        <div className="w-full h-[12px] flex items-end gap-0.5">
+                                                            {meshViz.items.map((item, idx) => (
+                                                                <div key={idx} className="flex-1 bg-brand-green/70 hover:bg-brand-green transition-all rounded-t-sm" style={{ height: `max(2px, ${item.visualPct}%)` }} title={item.label} />
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex w-full justify-between gap-0.5 text-[7px] md:text-[8px] font-mono leading-none mt-0.5 text-center">
+                                                            {meshViz.items.map((item, idx) => (
+                                                                <div key={idx} className="flex-1 text-brand-navy font-bold tracking-tight">
+                                                                    {item.label.startsWith('<') ? item.label : `M${item.label}`} ({item.realPct}%)
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-[9px] text-gray-400 font-bold uppercase tracking-wider">NO MESH DATA</div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
