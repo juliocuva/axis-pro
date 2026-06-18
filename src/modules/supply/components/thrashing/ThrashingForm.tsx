@@ -185,11 +185,9 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
     return (
         <div className="max-w-5xl mx-auto w-full space-y-6 relative overflow-hidden min-h-[300px]">
             {isLoading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-md rounded-industrial">
-                    <div className="flex flex-col items-center gap-4">
-                        <div className="w-12 h-12 border-4 border-black/20 border-t-black rounded-full animate-spin"></div>
-                        <p className="text-[11px] font-bold uppercase text-brand-navy animate-pulse">{t('thrashingForm', 'recuperando') || 'Loading milling data...'}</p>
-                    </div>
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent pointer-events-none gap-4">
+                    <div className="w-10 h-10 border-4 border-gray-200 border-t-brand-green rounded-full animate-spin"></div>
+                    <p className="text-[11px] font-bold uppercase text-brand-navy animate-pulse">{t('thrashingForm', 'recuperando') || 'Loading milling data...'}</p>
                 </div>
             )}
             

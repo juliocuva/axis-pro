@@ -562,8 +562,9 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
       
 
       {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-md rounded-industrial">
-          <p className="text-brand-navy font-black uppercase  text-brand-navy animate-pulse">Sincronizando con AXIS Cloud...</p>
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent pointer-events-none gap-4">
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-brand-green rounded-full animate-spin"></div>
+          <p className="text-[11px] font-bold uppercase text-brand-navy animate-pulse">Sincronizando con AXIS Cloud...</p>
         </div>
       )}
 
