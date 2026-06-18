@@ -82,7 +82,7 @@ export default function SupplyModuleContainer({
             return <PhysicalAnalysisForm key={selectedLot.id} inventoryId={selectedLot.id} user={user} isReadOnly={isReadOnly} onAnalysisComplete={fetchRecentLots} />;
         }
         if (tab === 'cupping' && selectedLot) {
-            return <CVAAssessmentForm key={selectedLot.id} inventoryId={selectedLot.id} lotData={selectedLot} user={user} isReadOnly={isReadOnly} onCuppingComplete={fetchRecentLots} />;
+            return <CVAAssessmentForm key={selectedLot.id} inventoryId={selectedLot.id} user={user} isReadOnly={isReadOnly} onCuppingComplete={fetchRecentLots} />;
         }
         if (tab === 'roast') {
             return <RoastIntelligenceContainer user={user} />;

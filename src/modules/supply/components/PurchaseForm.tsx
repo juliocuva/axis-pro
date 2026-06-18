@@ -204,7 +204,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                 farmerName: selectedLot.farmer_name || '',
                 farmName: selectedLot.farm_name || '',
                 farmSizeHectares: selectedLot.farm_size_hectares || undefined,
-                altitude: selectedLot.altitude ? Number(selectedLot.altitude) : undefined,
+                altitude: selectedLot.altitude ? Number(selectedLot.altitude) : '',
                 country: selectedLot.country || 'Colombia',
                 region: isRegionBase ? selectedLot.region : 'Otro',
                 municipality: isMunBase ? selectedLot.municipality : 'Otro',
