@@ -1,6 +1,15 @@
+'use client';
+
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname === '/signup' || pathname === '/login') {
+    return null;
+  }
+
   return (
     <footer className="w-full bg-bg-card border-t border-border-main py-8 mt-auto z-50">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8">

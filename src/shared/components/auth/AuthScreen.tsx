@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/shared/lib/supabase';
 
 interface AuthScreenProps {
@@ -379,14 +380,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         />
                     </div>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-                        <a 
-                            href="https://wa.me/573013970002?text=Hola,%20me%20interesa%20solicitar%20acceso%20a%20AxisOne%20Coffee" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
+                        <Link 
+                            href="/signup" 
                             className="w-full md:w-auto bg-brand-green text-white px-12 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/30 text-center"
                         >
                             {t.hero.cta}
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </main>
