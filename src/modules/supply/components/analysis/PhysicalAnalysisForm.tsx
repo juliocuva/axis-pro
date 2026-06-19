@@ -65,7 +65,8 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
         isAlreadyAnalyzed, 
         lotDetails, 
         initialFormData, 
-        initialPhysicochemicalData 
+        initialPhysicochemicalData,
+        millSievesAnalyzed
     } = usePhysicalAnalysisData(inventoryId, user?.companyId);
 
     useEffect(() => {
@@ -154,7 +155,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={0.01}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
+                            inputClassName="text-xs !h-[30px] font-bold uppercase"
                             unit="%"
                         />
                         <div className="mt-1 flex items-center justify-between">
@@ -171,7 +172,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={0.001}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
+                            inputClassName="text-xs !h-[30px] font-bold uppercase"
                         />
                         <div className="mt-1 flex items-center justify-between">
                             <span className="text-[9px] font-bold uppercase text-brand-navy ">{t('physicalAnalysisForm', 'waterActivityRange')}</span>
@@ -187,7 +188,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             step={1}
                             disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
                             variant="industrial"
-                            inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
+                            inputClassName="text-xs !h-[30px] font-bold uppercase"
                             unit="g/L"
                         />
                         <div className="mt-1 flex items-center justify-between">
@@ -204,6 +205,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     isReadOnly={isReadOnly || isAlreadyAnalyzed}
                     isSubmitting={isSubmitting}
                     showSyncButton={!isReadOnly && !isAlreadyAnalyzed}
+                    visibleSieves={millSievesAnalyzed?.length > 0 ? (millSievesAnalyzed as Array<keyof SieveData>) : undefined}
                     onSync={() => {
                         if (lotDetails?.process_data?.sieve_analysis) {
                             const sa = lotDetails.process_data.sieve_analysis;
@@ -239,7 +241,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
+                                inputClassName="text-xs !h-[30px] font-bold uppercase"
                                 unit="PTS"
                             />
                         </div>
@@ -251,7 +253,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 step={0.01}
                                 disabled={isSubmitting || isAlreadyAnalyzed}
                                 variant="industrial"
-                                inputClassName="h-[30px] px-3 py-1 text-xs font-bold text-brand-navy bg-white border border-gray-400 shadow-sm rounded-industrial-sm"
+                                inputClassName="text-xs !h-[30px] font-bold uppercase"
                                 unit="PTS"
                             />
                         </div>
@@ -260,7 +262,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             <select
                                 value={formData.grainColor}
                                 disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
-                                className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs font-bold text-brand-navy outline-none focus:border-black uppercase appearance-none transition-all shadow-inner bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat"
+                                className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                                 onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
                             >
                                 <option value="VERDE OLIVA">Verde Oliva (Optimum)</option>

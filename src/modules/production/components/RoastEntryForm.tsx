@@ -360,7 +360,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                     <div className="p-2 bg-white rounded-full shadow-sm">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     </div>
-                    Back to Main Dashboard
+                    Back to Main Roast
                 </button>
 
                 <h2 className="text-xl font-bold text-brand-navy uppercase absolute left-1/2 -translate-x-1/2 w-full text-center pointer-events-none">Roast Log</h2>
@@ -428,7 +428,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.batchId}
                             onChange={(e) => setFormData({ ...formData, batchId: e.target.value.toUpperCase() })}
                             placeholder="EX: AX-TOST-7721"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-lg text-brand-navy font-bold placeholder:text-gray-400"
+                            className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-mono text-lg text-brand-navy font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -439,14 +439,14 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             required
                             value={formData.roastDate}
                             onChange={(e) => setFormData({ ...formData, roastDate: e.target.value })}
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-bold text-brand-navy-bright scheme-light"
+                            className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-bold text-brand-navy-bright scheme-light"
                             disabled={isSubmitting}
                         />
                     </div>
                 </div>
 
-                <div className="mt-8">
-                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">1. ROASTING PARAMETERS (MANUAL)</h4>
+                <div className="mt-8 pt-8 border-t-2 border-brand-green/30">
+                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 w-fit">ROASTING PARAMETERS (MANUAL)</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-3 relative z-10">
 
                     <NumericInput
@@ -454,7 +454,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.chargeTemp}
                         onChange={(val) => setFormData({ ...formData, chargeTemp: val })}
                         step={0.1}
-                        unit="°C"
+                        unit="°C" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         disabled={isSubmitting}
                         variant="industrial"
                     />
@@ -465,7 +465,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.yellowingTime}
                             onChange={(e) => setFormData({ ...formData, yellowingTime: e.target.value })}
                             placeholder="Ex: 5:30"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
+                            className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -476,7 +476,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.fcTime}
                             onChange={(e) => setFormData({ ...formData, fcTime: e.target.value })}
                             placeholder="Ex: 9:15"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
+                            className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -485,7 +485,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.fcTemp}
                         onChange={(val) => setFormData({ ...formData, fcTemp: val })}
                         step={0.1}
-                        unit="°C"
+                        unit="°C" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         disabled={isSubmitting}
                         variant="industrial"
                     />
@@ -497,7 +497,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.developmentTime}
                             onChange={(e) => setFormData({ ...formData, developmentTime: e.target.value })}
                             placeholder="Ex: 1:45"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
+                            className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -506,7 +506,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.developmentPct}
                         onChange={(val) => setFormData({ ...formData, developmentPct: val })}
                         step={0.1}
-                        unit="%"
+                        unit="%" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         disabled={isSubmitting}
                         variant="industrial"
                     />
@@ -517,7 +517,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             value={formData.roastTime}
                             onChange={(e) => setFormData({ ...formData, roastTime: e.target.value })}
                             placeholder="Ex: 11:30"
-                            className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
+                            className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
                     </div>
@@ -526,15 +526,15 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.dropTemp}
                         onChange={(val) => setFormData({ ...formData, dropTemp: val })}
                         step={0.1}
-                        unit="°C"
+                        unit="°C" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         disabled={isSubmitting}
                         variant="industrial"
                     />
                 </div>
                 </div>
 
-                <div className="mt-8">
-                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 border-b-2 border-brand-green pb-0.5 w-fit">2. QUALITY RESULTS (SHRINKAGE & DEFECTS)</h4>
+                <div className="mt-8 pt-8 border-t-2 border-brand-green/30">
+                    <h4 className="text-[12px] font-black text-brand-green uppercase tracking-widest mb-4 w-fit">QUALITY RESULTS (SHRINKAGE & DEFECTS)</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 relative z-10">
                     
                     <NumericInput
@@ -542,7 +542,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.greenWeight}
                         onChange={(val) => setFormData({ ...formData, greenWeight: val })}
                         step={0.1}
-                        unit="KG"
+                        unit="KG" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         required
                         disabled={isSubmitting}
                         variant="industrial"
@@ -553,7 +553,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.roastedWeight}
                         onChange={(val) => setFormData({ ...formData, roastedWeight: val })}
                         step={0.1}
-                        unit="KG"
+                        unit="KG" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         placeholder="Ex: 20.80"
                         required
                         disabled={isSubmitting}
@@ -566,7 +566,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.selectedWeight}
                         onChange={(val) => setFormData({ ...formData, selectedWeight: val })}
                         step={0.1}
-                        unit="KG"
+                        unit="KG" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         placeholder="Ex: 20.72"
                         disabled={isSubmitting}
                         formatThousands={true}
@@ -576,20 +576,20 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                         value={formData.quakersGrams}
                         onChange={(val) => setFormData({ ...formData, quakersGrams: val })}
                         step={1}
-                        unit="G"
+                        unit="G" inputClassName="bg-transparent border-b-2 border-zinc-300 px-0 py-1 focus:border-brand-green outline-none font-bold text-brand-navy-bright appearance-none text-sm"
                         disabled={isSubmitting}
                         variant="orange"
                         formatThousands={true}
                     />
 
-                    <div className="col-span-1 md:col-span-2 mt-4 flex flex-col md:flex-row gap-6">
+                    <div className="col-span-1 md:col-span-2 mt-4 pt-6 border-t-2 border-brand-green/30 flex flex-col md:flex-row gap-6">
                         <div className="flex-1">
                             <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">Roaster Notes & Observations</label>
                             <textarea
                                 value={formData.notes}
                                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                 placeholder="Notes on development, machine incidents..."
-                                className="w-full bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 py-1.5 text-xs focus:border-black outline-none transition-all text-sm text-brand-navy resize-none h-24 placeholder:text-gray-400"
+                                className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all text-sm text-brand-navy resize-none h-24 placeholder:text-gray-400"
                                 disabled={isSubmitting}
                             />
                         </div>
@@ -641,4 +641,11 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         </div>
     );
 }
+
+
+
+
+
+
+
 

@@ -347,7 +347,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         const lot = availableLots.find(l => l.id === e.target.value);
                                         if (lot) setSelectedLot(lot);
                                     }}
-                                    className="w-full h-[30px] bg-white border border-gray-400 shadow-sm text-brand-navy text-xs py-1 px-3 rounded-industrial-sm appearance-none focus:outline-none focus:border-gray-400 shadow-sm cursor-pointer font-bold uppercase transition-all hover:bg-white"
+                                    className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-brand-navy text-xs appearance-none focus:outline-none focus:border-brand-green cursor-pointer font-bold uppercase transition-all hover:bg-white"
                                 >
                                     <option value="" disabled className="bg-white">SELECT LOT...</option>
                                     {availableLots.map(lot => (
@@ -385,32 +385,31 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 {/* 1. ESPECIFICACIONES DEL LOTE */}
                                 <div>
                                     <div className="flex items-baseline gap-2 mb-2 pl-1">
-                                        <h4 className="text-[11px] font-bold text-brand-navy uppercase underline decoration-brand-navy/30 underline-offset-4">1. LOT SPECIFICATIONS</h4>
-                                        <p className="text-[10px] text-gray-500 font-medium uppercase">DETERMINES PROFILE STRATEGY</p>
+                                        <h4 className="text-[11px] font-bold text-brand-navy uppercase">LOT SPECIFICATIONS</h4>
                                     </div>
-                                    <div className="w-full flex flex-col md:flex-row items-stretch gap-4 relative z-10">
-                                        <div className="flex flex-col gap-1 w-full md:w-1/4">
+                                    <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                                        <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">VARIETY</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1">
                                                 <span className="text-xs font-bold text-brand-navy uppercase">{selectedLot.variety || 'Caturra'}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-1 w-full md:w-1/4">
+                                        <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">BASE PROCESS</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1">
                                                 <span className="text-xs font-bold text-brand-navy-bright uppercase truncate">{selectedLot.process || 'Lavado'}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-1 w-full md:w-1/4">
-                                            <span className="text-[9px] text-brand-navy font-bold uppercase">FERMENTATION</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
-                                                <span className="text-xs font-bold text-brand-navy-bright uppercase truncate">{selectedLot.process_data?.fermentation_style || selectedLot.process_data?.raw_excel_data?.general?.fermentation_type || 'Estandar'}</span>
+                                        <div className="flex flex-col gap-1 w-full">
+                                            <span className="text-[9px] text-brand-navy font-bold uppercase">ALTITUDE</span>
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1">
+                                                <span className="text-xs font-bold text-brand-navy uppercase">{selectedLot.altitude ? Number(selectedLot.altitude).toLocaleString('es-CO') : '1.750'} MASL</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-1 w-full md:w-1/4">
-                                            <span className="text-[9px] text-brand-navy font-bold uppercase">ALTITUDE</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
-                                                <span className="text-xs font-bold text-brand-navy uppercase">{selectedLot.altitude ? Number(selectedLot.altitude).toLocaleString('es-CO') : '1.750'} MASL</span>
+                                        <div className="flex flex-col gap-1 w-full md:col-span-3">
+                                            <span className="text-[9px] text-brand-navy font-bold uppercase">FERMENTATION</span>
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1">
+                                                <span className="text-xs font-bold text-brand-navy-bright uppercase truncate">{selectedLot.process_data?.fermentation_style || selectedLot.process_data?.raw_excel_data?.general?.fermentation_type || 'Estandar'}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -419,14 +418,13 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                 {/* FILA 2: PROPIEDADES FÍSICAS (CRITICAL & RAW) */}
                                 <div>
                                     <div className="flex items-baseline gap-2 mb-2 pl-1 mt-4">
-                                        <h4 className="text-[11px] font-bold text-brand-navy uppercase underline decoration-brand-navy/30 underline-offset-4">2. PHYSICAL PROPERTIES (CRITICAL & RAW)</h4>
-                                        <p className="text-[10px] text-gray-500 font-medium uppercase">DICTATES CHARGE TEMP & CLEANNESS</p>
+                                        <h4 className="text-[11px] font-bold text-brand-navy uppercase">PHYSICAL PROPERTIES</h4>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 relative z-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
                                         {/* Densidad */}
                                         <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">DENSITY</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1">
                                                 <span className="text-xs font-bold text-brand-navy uppercase">
                                                     {extraLotData.physical?.density_gl || selectedLot.physical_analysis?.[0]?.density_gl || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.densityGl || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.density || '--'} g/L
                                                 </span>
@@ -436,7 +434,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         {/* Humedad */}
                                         <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">MOISTURE</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1">
                                                 <span className="text-xs font-bold text-brand-navy uppercase">
                                                     {extraLotData.physical?.moisture_pct 
                                                         ? `${extraLotData.physical.moisture_pct}%` 
@@ -452,7 +450,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         {/* aW */}
                                         <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">WATER ACTIVITY (AW)</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm">
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1">
                                                 <span className="text-xs font-bold text-brand-navy uppercase">
                                                     {extraLotData.physical?.water_activity || selectedLot.physical_analysis?.[0]?.water_activity || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.waterActivity || '--'}
                                                 </span>
@@ -462,7 +460,7 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         {/* Defectos */}
                                         <div className="flex flex-col gap-1 w-full">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">PHYSICAL DEFECTS</span>
-                                            <div className="w-full h-[30px] flex items-center bg-white px-3 py-1 rounded-industrial-sm border border-gray-400 shadow-sm relative group">
+                                            <div className="w-full h-[30px] flex items-center bg-transparent border-b-2 border-zinc-300 px-0 py-1 relative group">
                                                 <span className="text-xs font-bold text-brand-navy uppercase">
                                                     {(() => {
                                                         const rawDefects = extraLotData.physical?.total_defects_grams || selectedLot.physical_analysis?.[0]?.total_defects_grams || selectedLot.process_data?.raw_excel_data?.physicalAnalysis?.defects;
@@ -478,9 +476,9 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
                                         </div>
 
                                         {/* Mallas */}
-                                        <div className="flex flex-col gap-1 w-full md:col-span-2">
+                                        <div className="flex flex-col gap-1 w-full md:col-span-4">
                                             <span className="text-[9px] text-brand-navy font-bold uppercase">MESH DISTRIBUTION</span>
-                                            <div className="w-full h-[30px] bg-white px-2 py-0.5 rounded-industrial-sm border border-gray-400 shadow-sm flex flex-col justify-end">
+                                            <div className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 py-0.5 flex flex-col justify-end">
                                                 {meshViz.items && meshViz.items.length > 0 ? (
                                                     <>
                                                         <div className="w-full h-[12px] flex items-end gap-0.5">
@@ -593,3 +591,6 @@ export default function RoastIntelligenceContainer({ user }: RoastIntelligenceCo
         </div>
     );
 }
+
+
+

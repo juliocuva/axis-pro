@@ -120,17 +120,17 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
         if (almondWeight > 10) {
             if (lossPct < params.shrinkageMin) {
                 setWarning({
-                    message: `ANÁLISIS DE MERMA: Rendimiento Atípico (${lossPct.toFixed(1)}%). Menor al rango histórico esperado. (Posible alta humedad o error de báscula).`,
+                    message: `RENDIMIENTO ATÍPICO (POSIBLE ERROR)`,
                     type: 'low'
                 });
             } else if (lossPct > params.shrinkageMax) {
                 setWarning({
-                    message: `ALERTA DE PÉRDIDA: Merma (${lossPct.toFixed(1)}%) superior al rango teórico de control. Verificar pérdida por cascarilla.`,
+                    message: `ALERTA: EXCESO DE MERMA`,
                     type: 'high'
                 });
             } else {
                 setWarning({
-                    message: `VALIDACIÓN DE CONTROL: Merma (${lossPct.toFixed(1)}%) dentro de los parámetros de estándar ideal para proceso ${formData.processType}.`,
+                    message: `RENDIMIENTO ÓPTIMO (EN PARÁMETROS)`,
                     type: 'optimal'
                 });
             }
@@ -201,7 +201,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             value={formData.processType}
                             onChange={(e) => setFormData({ ...formData, processType: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat"
+                            className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
                             <option value="Lavado">LAVADO (18-20%)</option>
                             <option value="Semilavado">SEMILAVADO (19-21%)</option>
@@ -214,7 +214,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 </div>
                 <div className="space-y-0.5">
                     <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'initialWeight')}</label>
-                    <div className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 text-xs font-bold text-brand-navy flex justify-between items-center shadow-inner transition-all">
+                    <div className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 text-xs font-bold text-brand-navy flex justify-between items-center transition-all">
                         <span>{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
                         <span className="text-[9px] opacity-60 uppercase font-black ">Parchment</span>
                     </div>
@@ -238,7 +238,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             value={formData.preparationProtocol}
                             onChange={(e) => setFormData({ ...formData, preparationProtocol: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat"
+                            className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
                             <option value="EP">European Prep (EP) - Especialidad</option>
                             <option value="American">American Prep - Comercial Plus</option>
@@ -256,7 +256,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                             value={formData.sortingMethod}
                             onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
                             disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
-                            className="w-full h-[30px] bg-white border border-gray-400 shadow-sm rounded-industrial-sm px-3 focus:border-black outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0.5rem_center] bg-no-repeat shadow-sm"
+                            className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
                             <option value="Máquina Selectora Óptica">Máquina Selectora Óptica</option>
                             <option value="Manual (Hand-Sorted)">Manual (Hand-Sorted)</option>
@@ -275,30 +275,10 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                 showSyncButton={false}
             />
 
-            {/* Output Automático: Proyección */}
-            <div className="p-4 bg-white border border-gray-400 shadow-sm rounded-industrial-sm flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">
-                <div className="flex flex-col">
-                    <span className="text-[11px] font-bold text-brand-navy-bright uppercase ">{t('thrashingForm', 'expectedAlmond')}</span>
-                    <span className="text-[9px] text-brand-navy uppercase">({t('thrashingForm', 'conversionTip')} {PROCESS_PARAMS[formData.processType]?.conversion})</span>
-                </div>
-                <span className="text-2xl font-bold text-brand-navy-bright font-mono animate-pulse">
-                    ≈ {stats.theoreticalAlmond.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
-                </span>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6 relative z-10 border-t border-gray-400 shadow-sm pt-6">
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10 border-t border-gray-400 shadow-sm pt-6 mt-6">
                 {error && (
                     <div className="p-4 bg-brand-red/10 border border-brand-red/30 rounded-xl text-brand-red-bright text-[11px] font-bold uppercase">
                         {error}
-                    </div>
-                )}
-
-                {warning && (
-                    <div className={`p-4 border rounded-xl text-[11px] font-bold uppercase animate-bounce-subtle ${warning.type === 'optimal'
-                        ? 'bg-white border-gray-400 shadow-sm text-brand-navy-bright'
-                        : 'bg-white border-gray-400 shadow-sm text-brand-navy-bright'
-                        }`}>
-                        {warning.type !== 'optimal' ? 'ℹ️' : '✅'} {warning.message}
                     </div>
                 )}
 
@@ -339,67 +319,70 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     />
                 </div>
 
+
+
                 {stats.yieldFactor > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div className={`p-8 rounded-industrial border flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-white border-black shadow-[0_0_30px_rgba(0,223,154,0.15)]' : 'bg-white border-gray-400 shadow-sm'}`}>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:divide-x lg:divide-zinc-200 pt-8 mt-8 border-t-2 border-brand-green/30">
+                        <div className="py-4 flex flex-col items-center justify-center transition-all animate-in zoom-in duration-500 bg-transparent">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className={`text-[11px] font-bold uppercase  ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-navy/70' : 'text-brand-navy'}`}>{t('thrashingForm', 'yieldFactor')}</span>
+                                <span className={`text-[11px] font-bold uppercase text-brand-navy/80`}>{t('thrashingForm', 'yieldFactor')}</span>
                             </div>
-                            <span className={`text-7xl font-bold font-mono er ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-navy-bright' : 'text-brand-navy-bright'}`}>
+                            <span className={`text-2xl font-bold font-mono text-brand-navy-bright`}>
                                 {stats.yieldFactor.toFixed(2)}
                             </span>
                             <div className="mt-4 flex items-center gap-3">
-                                <div className={`w-2.5 h-2.5 rounded-full ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-brand-green-bright animate-pulse' : 'bg-brand-green/80'}`}></div>
-                                <p className={`text-[11px] uppercase font-bold  ${stats.yieldFactor >= (PROCESS_PARAMS[formData.processType]?.frMin || 88) && stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'text-brand-navy' : 'text-brand-navy'}`}>
+                                <div className={`w-2 h-2 rounded-full ${stats.yieldFactor <= (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? 'bg-emerald-400 animate-pulse' : 'bg-red-500 animate-pulse'}`}></div>
+                                <p className={`text-[11px] uppercase font-bold text-brand-navy/80`}>
                                     {t('thrashingForm', 'target')} {formData.processType}: {PROCESS_PARAMS[formData.processType]?.frMin}-{PROCESS_PARAMS[formData.processType]?.frMax}
                                 </p>
                             </div>
-                            <div className="mt-6 text-[11px] text-brand-navy leading-relaxed text-center px-4">
+                            <div className="mt-6 text-[11px] text-center">
                                 {stats.yieldFactor < (PROCESS_PARAMS[formData.processType]?.frMin || 88) ? (
-                                    <span className="text-brand-navy-bright font-bold  block mb-1">¡ALTA CALIDAD (Bonificable)!</span>
+                                    <span className="text-emerald-600 font-bold">¡ALTA CALIDAD (Bonificable)!</span>
                                 ) : stats.yieldFactor > (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? (
-                                    <span className="text-red-400 font-bold  block mb-1">BAJA CALIDAD (Posible Descuento)</span>
+                                    <span className="text-red-500 font-bold">BAJA CALIDAD (Posible Descuento)</span>
                                 ) : (
-                                    <span className="text-brand-navy font-bold  block mb-1">CALIDAD ESTÁNDAR DENTRO DE META</span>
+                                    <span className="text-brand-navy font-bold">CALIDAD ESTÁNDAR DENTRO DE META</span>
                                 )}
-                                {t('thrashingForm', 'yieldTip')}<strong className="text-brand-navy">menos</strong> materia prima para obtener 70kg de excelso, lo que representa mayor rentabilidad.
                             </div>
                         </div>
 
                         {/* Reporte de Eficiencia */}
-                        <div className="bg-white border border-gray-400 shadow-sm p-6 rounded-industrial space-y-4 relative group overflow-hidden">
-                            <h4 className="text-[11px] font-bold text-brand-navy uppercase  flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
-                                {t('thrashingForm', 'efficiencyReport')}
-                            </h4>
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center text-[11px] uppercase">
-                                    <span className="text-brand-navy">{t('thrashingForm', 'inputMass')}</span>
-                                    <span className="text-brand-navy font-mono">{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG</span>
+                        <div className="pl-0 lg:pl-8 py-4 space-y-2 relative group overflow-hidden bg-transparent">
+                            <div className="space-y-0">
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase border-b-2 border-brand-green/20 py-3">
+                                    <span className="text-brand-navy/80">EXPECTED MASS</span>
+                                    <span className="text-xs text-brand-navy-bright font-mono">
+                                        ≈ {stats.theoreticalAlmond.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
+                                    </span>
                                 </div>
-                                <div className="flex justify-between items-center text-[11px] uppercase">
-                                    <span className="text-brand-navy">{t('thrashingForm', 'outputMass')}</span>
-                                    <span className={`font-mono font-bold ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-brand-navy-bright' : 'text-brand-navy-bright'}`}>
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase border-b-2 border-zinc-100 py-3">
+                                    <span className="text-brand-navy/80">{t('thrashingForm', 'inputMass')}</span>
+                                    <span className="text-xs text-brand-navy font-mono">{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase border-b-2 border-zinc-100 py-3">
+                                    <span className="text-brand-navy/80">{t('thrashingForm', 'outputMass')}</span>
+                                    <span className={`text-xs font-mono ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-brand-green' : 'text-brand-navy'}`}>
                                         {stats.almondWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center text-[11px] uppercase border-t border-gray-400 shadow-sm pt-2">
-                                    <span className="text-brand-navy">{t('thrashingForm', 'realLoss')}</span>
-                                    <span className={`font-mono font-bold ${warning ? 'text-brand-navy-bright' : 'text-brand-navy'}`}>
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase border-b-2 border-zinc-100 py-3">
+                                    <span className="text-brand-navy/80">{t('thrashingForm', 'realLoss')}</span>
+                                    <span className={`text-xs font-mono ${warning?.type === 'high' ? 'text-red-500' : warning?.type === 'low' ? 'text-emerald-600' : 'text-brand-navy'}`}>
                                         {stats.lossPct.toFixed(1)}%
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center text-[11px] uppercase">
-                                    <span className="text-brand-navy">{t('thrashingForm', 'theoreticalLoss')}</span>
-                                    <span className="text-brand-navy font-mono">
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase py-3">
+                                    <span className="text-brand-navy/80">{t('thrashingForm', 'theoreticalLoss')}</span>
+                                    <span className="text-xs text-brand-navy font-mono">
                                         {PROCESS_PARAMS[formData.processType]?.shrinkageMin}-{PROCESS_PARAMS[formData.processType]?.shrinkageMax}%
                                     </span>
                                 </div>
 
                                 <div className="pt-2">
-                                    <div className="w-full bg-white h-1.5 rounded-full overflow-hidden border border-gray-400 shadow-sm">
+                                    <div className="w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-1000 ${warning ? 'bg-brand-green/80' : 'bg-brand-green shadow-[0_0_10px_rgba(0,223,154,0.5)]'}`}
+                                            className={`h-full rounded-full transition-all duration-1000 ${warning?.type === 'high' ? 'bg-red-500' : 'bg-emerald-400'}`}
                                             style={{ width: `${Math.min(100, (stats.lossPct / stats.theoreticalLossPct) * 100)}%` }}
                                         ></div>
                                     </div>

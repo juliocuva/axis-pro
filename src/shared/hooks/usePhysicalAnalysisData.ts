@@ -7,6 +7,7 @@ export function usePhysicalAnalysisData(inventoryId: string | undefined, userCom
     const [lotDetails, setLotDetails] = useState<any>(null);
     const [initialFormData, setInitialFormData] = useState<any>(null);
     const [initialPhysicochemicalData, setInitialPhysicochemicalData] = useState<any>(null);
+    const [millSievesAnalyzed, setMillSievesAnalyzed] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -78,22 +79,37 @@ export function usePhysicalAnalysisData(inventoryId: string | undefined, userCom
                     const pd = lotData.process_data;
                     
                     // Pre-fill screen size from thrashing data if not already analyzed or if analyzed but empty
-                    if (pd?.sieve_analysis && formDataToSet) {
+                    if (pd?.sieve_analysis) {
                         const sa = pd.sieve_analysis;
-                        const currentValues = Object.values(formDataToSet.sieveAnalysis);
-                        const isCurrentlyEmpty = currentValues.length === 0 || currentValues.every(v => Number(v) === 0);
                         
-                        if (isCurrentlyEmpty) {
-                            formDataToSet.sieveAnalysis = {
-                                m18: Number(sa.m18) || 0,
-                                m17: Number(sa.m17) || 0,
-                                m16: Number(sa.m16) || 0,
-                                m15: Number(sa.m15) || 0,
-                                m14: Number(sa.caracol) || Number(sa.m14) || 0,
-                                m13: Number(sa.m13) || 0,
-                                m12: Number(sa.m12) || 0,
-                                menores: Number(sa.menores) || 0
-                            };
+                        // Extract which sieves were actually recorded in mill
+                        const activeSieves = [];
+                        if (Number(sa.m18) > 0) activeSieves.push('m18');
+                        if (Number(sa.m17) > 0) activeSieves.push('m17');
+                        if (Number(sa.m16) > 0) activeSieves.push('m16');
+                        if (Number(sa.m15) > 0) activeSieves.push('m15');
+                        if (Number(sa.caracol) > 0 || Number(sa.m14) > 0) activeSieves.push('m14');
+                        if (Number(sa.m13) > 0) activeSieves.push('m13');
+                        if (Number(sa.m12) > 0) activeSieves.push('m12');
+                        if (Number(sa.menores) > 0) activeSieves.push('menores');
+                        setMillSievesAnalyzed(activeSieves);
+
+                        if (formDataToSet) {
+                            const currentValues = Object.values(formDataToSet.sieveAnalysis);
+                            const isCurrentlyEmpty = currentValues.length === 0 || currentValues.every(v => Number(v) === 0);
+                            
+                            if (isCurrentlyEmpty) {
+                                formDataToSet.sieveAnalysis = {
+                                    m18: Number(sa.m18) || 0,
+                                    m17: Number(sa.m17) || 0,
+                                    m16: Number(sa.m16) || 0,
+                                    m15: Number(sa.m15) || 0,
+                                    m14: Number(sa.caracol) || Number(sa.m14) || 0,
+                                    m13: Number(sa.m13) || 0,
+                                    m12: Number(sa.m12) || 0,
+                                    menores: Number(sa.menores) || 0
+                                };
+                            }
                         }
                     }
 
@@ -126,5 +142,5 @@ export function usePhysicalAnalysisData(inventoryId: string | undefined, userCom
         fetchAnalysis();
     }, [inventoryId, userCompanyId]);
 
-    return { isLoading, error, isAlreadyAnalyzed, lotDetails, initialFormData, initialPhysicochemicalData };
+    return { isLoading, error, isAlreadyAnalyzed, lotDetails, initialFormData, initialPhysicochemicalData, millSievesAnalyzed };
 }
