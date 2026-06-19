@@ -350,12 +350,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         >
                             <span className="text-xs font-black uppercase tracking-widest">{language === 'en' ? 'ES' : 'EN'}</span>
                         </button>
-                        <button
-                            onClick={() => setShowLoginModal(true)}
+                        <Link
+                            href="/signup"
                             className="bg-brand-green text-white px-6 py-3 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-green/90 transition-all shadow-xl shadow-brand-green/10"
                         >
                             {t.nav.login}
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </header>
