@@ -207,10 +207,10 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-bg-main p-4 md:p-6 transition-colors duration-400 print:p-0 print:bg-white">
-            <header className="relative z-[50] mb-6 flex justify-between items-center w-full px-2 h-16 print:hidden animate-in fade-in duration-500">
+            <header className="relative z-[50] mb-6 flex justify-between items-center w-full px-2 py-2 print:hidden animate-in fade-in duration-500">
                 {/* Left side: Logo */}
                 <div onClick={handleLogoClick} className="cursor-pointer group select-none flex items-center h-full">
-                    <img src="/logo.png" alt="AXISONE" className="h-8 md:h-10 object-contain drop-shadow-sm group-hover:scale-105 transition-transform" />
+                    <img src="/logo.png" alt="AXISONE" className="h-24 md:h-[120px] object-contain drop-shadow-sm group-hover:scale-105 transition-transform" />
                 </div>
 
                 {/* Center: Navigation Buttons */}
