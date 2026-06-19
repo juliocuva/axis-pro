@@ -533,7 +533,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
     }
 
     return (
-        <div className="flex h-screen bg-neutral-50 overflow-hidden font-sans text-neutral-800">
+        <div className="flex h-screen bg-[#0a0a0a] overflow-hidden font-sans text-neutral-200">
             <style jsx global>{`
                 .pulse-container {
                     position: relative;
@@ -578,10 +578,10 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                     justify-content: center;
                 }
                 .custom-map-tooltip {
-                    background: rgba(255, 255, 255, 0.9) !important;
-                    border: 1px solid rgba(12, 96, 86, 0.3) !important;
-                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
-                    color: #0C6056 !important;
+                    background: rgba(23, 23, 23, 0.9) !important;
+                    border: 1px solid rgba(0, 255, 178, 0.3) !important;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+                    color: #00FFB2 !important;
                     font-family: inherit !important;
                     font-size: 8px !important;
                     font-weight: 900 !important;
@@ -594,7 +594,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                     display: none !important;
                 }
                 .leaflet-container {
-                    background: #f4f5f7 !important;
+                    background: #0a0a0a !important;
                     cursor: crosshair !important;
                 }
                 .leaflet-interactive {
@@ -611,16 +611,16 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                     scrollbar-width: none;
                 }
                 .custom-popup .leaflet-popup-content-wrapper {
-                    background: rgba(255, 255, 255, 0.95) !important;
-                    color: #1a1a1a !important;
-                    border: 1.5px solid rgba(12, 96, 86, 0.5);
+                    background: rgba(23, 23, 23, 0.95) !important;
+                    color: #e5e5e5 !important;
+                    border: 1.5px solid rgba(0, 255, 178, 0.5);
                     backdrop-filter: blur(12px);
                     border-radius: 12px !important;
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
                 }
                 .custom-popup .leaflet-popup-tip {
-                    background: rgba(255, 255, 255, 0.95) !important;
-                    border: 1.5px solid rgba(12, 96, 86, 0.5);
+                    background: rgba(23, 23, 23, 0.95) !important;
+                    border: 1.5px solid rgba(0, 255, 178, 0.5);
                 }
                 /* Sleek Neon Zoom Controls */
                 .leaflet-bar {
@@ -628,9 +628,9 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                     box-shadow: none !important;
                 }
                 .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-                    background-color: rgba(255, 255, 255, 0.95) !important;
-                    color: #0C6056 !important;
-                    border: 1px solid rgba(12, 96, 86, 0.3) !important;
+                    background-color: rgba(23, 23, 23, 0.95) !important;
+                    color: #00FFB2 !important;
+                    border: 1px solid rgba(0, 255, 178, 0.3) !important;
                     transition: all 0.2s ease-in-out !important;
                     width: 30px !important;
                     height: 30px !important;
@@ -648,10 +648,10 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                     border-bottom-right-radius: 8px !important;
                 }
                 .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
-                    background-color: #0C6056 !important;
-                    color: #ffffff !important;
-                    box-shadow: 0 0 15px rgba(12, 96, 86, 0.4) !important;
-                    border-color: #0C6056 !important;
+                    background-color: #00FFB2 !important;
+                    color: #0a0a0a !important;
+                    box-shadow: 0 0 15px rgba(0, 255, 178, 0.4) !important;
+                    border-color: #00FFB2 !important;
                 }
                 /* Animate dashed maritime and shipping lines gracefully */
                 @keyframes dash-flow {
@@ -669,14 +669,14 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
             `}</style>
 
             {/* Side Control Tower (Métricas) */}
-            <aside className={`${showSidebar ? 'w-96 p-6 border-r border-gray-200/80' : 'w-0 p-0 border-r-0 overflow-hidden'} bg-white flex flex-col gap-4 z-[2000] shadow-xl relative transition-all duration-300 sidebar-scroll text-neutral-800`}>
+            <aside className={`${showSidebar ? 'w-96 p-6 border-r border-neutral-800/80' : 'w-0 p-0 border-r-0 overflow-hidden'} bg-neutral-900/95 backdrop-blur-xl flex flex-col gap-4 z-[2000] shadow-2xl relative transition-all duration-300 sidebar-scroll text-neutral-200`}>
                 {showSidebar && (
                     <div className="flex flex-col gap-4 h-full">
-                        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                        <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setShowSidebar(false)}
-                                    className="w-8 h-8 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center text-[12px] transition-all font-bold shadow-sm"
+                                    className="w-8 h-8 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 flex items-center justify-center text-[12px] transition-all font-bold shadow-sm"
                                     title="Ocultar Panel"
                                 >
                                     ◀
@@ -684,7 +684,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                                 {onClose && (
                                     <button 
                                         onClick={onClose}
-                                        className="px-3 py-1.5 bg-red-50 hover:bg-red-500 hover:text-white text-red-600 rounded-lg text-[9px] font-black uppercase transition-all shadow-sm border border-red-100 hover:border-red-500"
+                                        className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-500 rounded-lg text-[9px] font-black uppercase transition-all shadow-sm border border-red-500/20 hover:border-red-500"
                                         title="Cerrar Radar"
                                     >
                                         Cerrar Radar
@@ -694,92 +694,92 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                             
                             <div className="flex items-center gap-3 text-right">
                                 <div>
-                                    <h2 className="text-xs font-black uppercase text-neutral-900 tracking-wider">Control Center</h2>
+                                    <h2 className="text-xs font-black uppercase text-white tracking-wider">Control Center</h2>
                                     <p className="text-[9px] text-brand-green font-bold uppercase tracking-widest">Global Logistics</p>
                                 </div>
                             </div>
                         </div>
 
                 {/* 1. CONFIGURACIONES (TOP) */}
-                <div className="bg-neutral-50/80 border border-gray-200/60 p-5 rounded-2xl space-y-4 backdrop-blur-md">
+                <div className="bg-neutral-800/50 border border-neutral-700/60 p-5 rounded-2xl space-y-4 backdrop-blur-md">
                     <div>
-                        <h4 className="text-[9px] font-black uppercase text-brand-green tracking-wider mb-3">Preestablecidos</h4>
+                        <h4 className="text-[9px] font-black uppercase text-[#00FFB2] tracking-wider mb-3">Preestablecidos</h4>
                         <div className="grid grid-cols-2 gap-2">
                             <button
                                 onClick={() => setFilterPreset('SIMULACION')}
-                                className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'SIMULACION' ? 'bg-brand-green border-brand-green text-white' : 'bg-white border-gray-200 text-neutral-700 hover:border-brand-green hover:bg-brand-green/5'}`}
+                                className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'SIMULACION' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
                             >
                                 <p className="text-[9px] font-black uppercase tracking-wide">Simulación</p>
                             </button>
                             <button
                                 onClick={() => setFilterPreset('COMPETENCIA')}
-                                className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'COMPETENCIA' ? 'bg-brand-green border-brand-green text-white' : 'bg-white border-gray-200 text-neutral-700 hover:border-brand-green hover:bg-brand-green/5'}`}
+                                className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'COMPETENCIA' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
                             >
                                 <p className="text-[9px] font-black uppercase tracking-wide">Competencia</p>
                             </button>
                             <button
                                 onClick={() => setFilterPreset('ALL')}
-                                className={`col-span-2 text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'ALL' ? 'bg-brand-green border-brand-green text-white' : 'bg-white border-gray-200 text-neutral-700 hover:border-brand-green hover:bg-brand-green/5'}`}
+                                className={`col-span-2 text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'ALL' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
                             >
                                 <p className="text-[9px] font-black uppercase tracking-wide">Mostrar Todos</p>
                             </button>
                         </div>
                     </div>
 
-                    <div className="pt-2 grid grid-cols-2 gap-2 border-t border-gray-200/80">
+                    <div className="pt-2 grid grid-cols-2 gap-2 border-t border-neutral-700/80">
                         <div className="space-y-1">
-                            <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wide">Varietal</label>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide">Varietal</label>
                             <select 
                                 value={filterVariety}
                                 onChange={(e) => setFilterVariety(e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-lg p-1.5 text-[9px] font-bold text-neutral-800 outline-none focus:border-brand-green transition-all"
+                                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-1.5 text-[9px] font-bold text-neutral-200 outline-none focus:border-[#00FFB2] transition-all"
                             >
-                                <option value="ALL" className="bg-white">ALL</option>
-                                <option value="GEISHA" className="bg-white">Geisha</option>
-                                <option value="BOURBON" className="bg-white">Bourbon</option>
-                                <option value="CATURRA" className="bg-white">Caturra</option>
-                                <option value="CASTILLO" className="bg-white">Castillo</option>
+                                <option value="ALL" className="bg-neutral-900">ALL</option>
+                                <option value="GEISHA" className="bg-neutral-900">Geisha</option>
+                                <option value="BOURBON" className="bg-neutral-900">Bourbon</option>
+                                <option value="CATURRA" className="bg-neutral-900">Caturra</option>
+                                <option value="CASTILLO" className="bg-neutral-900">Castillo</option>
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wide">Proceso</label>
+                            <label className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide">Proceso</label>
                             <select 
                                 value={filterProcess}
                                 onChange={(e) => setFilterProcess(e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-lg p-1.5 text-[9px] font-bold text-neutral-800 outline-none focus:border-brand-green transition-all"
+                                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg p-1.5 text-[9px] font-bold text-neutral-200 outline-none focus:border-[#00FFB2] transition-all"
                             >
-                                <option value="ALL" className="bg-white">ALL</option>
-                                <option value="LAVADO" className="bg-white">Lavado</option>
-                                <option value="HONEY" className="bg-white">Honey</option>
-                                <option value="NATURAL" className="bg-white">Natural</option>
+                                <option value="ALL" className="bg-neutral-900">ALL</option>
+                                <option value="LAVADO" className="bg-neutral-900">Lavado</option>
+                                <option value="HONEY" className="bg-neutral-900">Honey</option>
+                                <option value="NATURAL" className="bg-neutral-900">Natural</option>
                             </select>
                         </div>
                     </div>
 
-                    <div className="pt-2 flex flex-col gap-2 border-t border-gray-200/80">
+                    <div className="pt-2 flex flex-col gap-2 border-t border-neutral-700/80">
                         <div className="flex gap-2">
                             <button 
                                 onClick={() => setViewMode('ORIGEN')} 
-                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'ORIGEN' ? 'bg-brand-green text-white border-brand-green shadow-[0_0_15px_rgba(12,96,86,0.3)]' : 'border-gray-200 text-gray-500 hover:text-brand-green hover:border-brand-green/45'}`}
+                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'ORIGEN' ? 'bg-[#00FFB2]/20 text-[#00FFB2] border-[#00FFB2] shadow-[0_0_15px_rgba(0,255,178,0.2)]' : 'border-neutral-700 text-neutral-400 hover:text-[#00FFB2] hover:border-[#00FFB2]/50 bg-neutral-900/50'}`}
                             >
                                 Origen
                             </button>
                             <button 
                                 onClick={() => setViewMode('LOGISTICA')} 
-                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'LOGISTICA' ? 'bg-brand-green text-white border-brand-green shadow-[0_0_15px_rgba(12,96,86,0.3)]' : 'border-gray-200 text-gray-500 hover:text-brand-green hover:border-brand-green/45'}`}
+                                className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'LOGISTICA' ? 'bg-[#00FFB2]/20 text-[#00FFB2] border-[#00FFB2] shadow-[0_0_15px_rgba(0,255,178,0.2)]' : 'border-neutral-700 text-neutral-400 hover:text-[#00FFB2] hover:border-[#00FFB2]/50 bg-neutral-900/50'}`}
                             >
                                 Logística
                             </button>
                         </div>
                         <button 
                             onClick={() => setViewMode('CONSUMO')} 
-                            className={`w-full py-2 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'CONSUMO' ? 'bg-brand-green text-white border-brand-green shadow-[0_0_20px_rgba(12,96,86,0.4)]' : 'border-gray-200 text-gray-500 hover:text-brand-green hover:border-brand-green/45'}`}
+                            className={`w-full py-2 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'CONSUMO' ? 'bg-[#00FFB2]/20 text-[#00FFB2] border-[#00FFB2] shadow-[0_0_20px_rgba(0,255,178,0.2)]' : 'border-neutral-700 text-neutral-400 hover:text-[#00FFB2] hover:border-[#00FFB2]/50 bg-neutral-900/50'}`}
                         >
                             Deep Trace (Escaneos)
                         </button>
                         <button 
                             onClick={() => setViewMode('MARKET')} 
-                            className={`w-full py-2.5 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'MARKET' ? 'bg-amber-600 text-white border-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.4)]' : 'border-gray-200 text-amber-700 hover:text-amber-600 hover:border-amber-600/45'}`}
+                            className={`w-full py-2.5 rounded-lg text-[9px] font-black uppercase border transition-all ${viewMode === 'MARKET' ? 'bg-amber-500/20 text-amber-400 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]' : 'border-neutral-700 text-neutral-400 hover:text-amber-400 hover:border-amber-500/50 bg-neutral-900/50'}`}
                         >
                             ⚡ Coffee Radar Terminal
                         </button>
@@ -788,20 +788,20 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
 
                 {/* 2. MÉTRICAS (SMALLER & COMPACT) */}
                 <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-sm">
-                        <p className="text-gray-500 text-[9px] font-black uppercase mb-1">Masa Crítica</p>
-                        <p className="text-lg font-black text-neutral-900">{(stats.totalWeight / 1000).toFixed(1)} <span className="text-[11px] text-brand-green font-bold">T</span></p>
+                    <div className="bg-neutral-800/50 p-4 rounded-xl border border-neutral-700/80 shadow-sm">
+                        <p className="text-neutral-400 text-[9px] font-black uppercase mb-1">Masa Crítica</p>
+                        <p className="text-lg font-black text-white">{(stats.totalWeight / 1000).toFixed(1)} <span className="text-[11px] text-[#00FFB2] font-bold">T</span></p>
                     </div>
-                    <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-sm">
-                        <p className="text-gray-500 text-[9px] font-black uppercase mb-1">Calidad (AVG)</p>
-                        <p className="text-lg font-black text-neutral-900">{stats.avgScore} <span className="text-[11px] text-brand-green font-bold">PTS</span></p>
+                    <div className="bg-neutral-800/50 p-4 rounded-xl border border-neutral-700/80 shadow-sm">
+                        <p className="text-neutral-400 text-[9px] font-black uppercase mb-1">Calidad (AVG)</p>
+                        <p className="text-lg font-black text-white">{stats.avgScore} <span className="text-[11px] text-[#00FFB2] font-bold">PTS</span></p>
                     </div>
-                    <div className="bg-white p-4 rounded-xl border border-gray-200/80 col-span-2 flex justify-between items-center shadow-sm">
+                    <div className="bg-neutral-800/50 p-4 rounded-xl border border-neutral-700/80 col-span-2 flex justify-between items-center shadow-sm">
                         <div>
-                            <p className="text-gray-500 text-[9px] font-black uppercase mb-0.5">Cumplimiento Regulatorio</p>
-                            <p className="text-sm font-black text-neutral-900">{stats.complianceRate}% <span className="text-[9px] text-[#0C6056] font-bold">EUDR</span></p>
+                            <p className="text-neutral-400 text-[9px] font-black uppercase mb-0.5">Cumplimiento Regulatorio</p>
+                            <p className="text-sm font-black text-white">{stats.complianceRate}% <span className="text-[9px] text-[#00FFB2] font-bold">EUDR</span></p>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-[#0C6056]/10 text-[#0C6056] flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-[#00FFB2]/10 text-[#00FFB2] flex items-center justify-center border border-[#00FFB2]/30">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="20 6 9 17 4 12" />
                             </svg>
@@ -1164,7 +1164,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                     >
                         <MapController />
                         <TileLayer
-                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                         />
 
                         {projectedLots.map((lot, index) => {
@@ -1192,35 +1192,35 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                                         }}
                                     >
                                         <Popup className="custom-popup">
-                                            <div className="p-3 text-neutral-900 max-w-xs space-y-2">
-                                                <p className="text-[12px] font-black uppercase text-brand-green tracking-wider border-b border-brand-green/20 pb-1">
-                                                    {lot.lot_number} {isGlobal && <span className="text-[8px] bg-[#00FFB2]/10 text-brand-green px-1.5 py-0.5 rounded font-black float-right uppercase tracking-wider">Global</span>}
+                                            <div className="p-3 text-white max-w-xs space-y-2">
+                                                <p className="text-[12px] font-black uppercase text-[#00FFB2] tracking-wider border-b border-[#00FFB2]/20 pb-1">
+                                                    {lot.lot_number} {isGlobal && <span className="text-[8px] bg-[#00FFB2]/10 text-[#00FFB2] px-1.5 py-0.5 rounded font-black float-right uppercase tracking-wider">Global</span>}
                                                 </p>
                                                 <div className="text-[10px] space-y-1">
-                                                    <p><span className="text-gray-500 font-bold uppercase">Productor:</span> <span className="font-black text-neutral-800">{lot.farmer_name}</span></p>
-                                                    <p><span className="text-gray-500 font-bold uppercase">Finca:</span> <span className="font-black text-neutral-800">{lot.farm_name}</span></p>
-                                                    <p><span className="text-gray-500 font-bold uppercase">Variedad:</span> <span className="font-bold text-brand-green">{lot.variety}</span></p>
-                                                    <p><span className="text-gray-500 font-bold uppercase">Proceso:</span> <span className="font-bold text-brand-green">{lot.process}</span></p>
-                                                    <p><span className="text-gray-500 font-bold uppercase">Peso:</span> <span className="font-black text-neutral-800">{lot.purchase_weight} kg</span></p>
+                                                    <p><span className="text-neutral-400 font-bold uppercase">Productor:</span> <span className="font-black text-white">{lot.farmer_name}</span></p>
+                                                    <p><span className="text-neutral-400 font-bold uppercase">Finca:</span> <span className="font-black text-white">{lot.farm_name}</span></p>
+                                                    <p><span className="text-neutral-400 font-bold uppercase">Variedad:</span> <span className="font-bold text-[#00FFB2]">{lot.variety}</span></p>
+                                                    <p><span className="text-neutral-400 font-bold uppercase">Proceso:</span> <span className="font-bold text-[#00FFB2]">{lot.process}</span></p>
+                                                    <p><span className="text-neutral-400 font-bold uppercase">Peso:</span> <span className="font-black text-white">{lot.purchase_weight} kg</span></p>
                                                     {isGlobal && lot.q_score && (
-                                                        <p><span className="text-gray-500 font-bold uppercase">Calidad Q-Score:</span> <span className="font-black text-brand-green">{lot.q_score} PTS</span></p>
+                                                        <p><span className="text-neutral-400 font-bold uppercase">Calidad Q-Score:</span> <span className="font-black text-[#00FFB2]">{lot.q_score} PTS</span></p>
                                                     )}
                                                 </div>
                                                 
                                                 {isGlobal && lot.attributes ? (
-                                                    <div className="text-[9px] bg-gray-50 p-2 rounded-lg border border-brand-green/10 space-y-0.5">
-                                                        <p className="text-[8px] font-black text-brand-green uppercase tracking-widest mb-1">Especificación Origen</p>
-                                                        <p><span className="text-gray-400 font-bold">Fermentación:</span> <span className="text-gray-700 font-semibold">{lot.attributes.fermentation}</span></p>
-                                                        <p><span className="text-gray-400 font-bold">pH / Brix:</span> <span className="text-gray-700 font-semibold">{lot.attributes.ph}</span></p>
-                                                        <p><span className="text-gray-400 font-bold">Secado:</span> <span className="text-gray-700 font-semibold">{lot.attributes.secado}</span></p>
-                                                        <p className="text-[8px] text-brand-green italic mt-1.5 font-bold">"{lot.attributes.notes}"</p>
+                                                    <div className="text-[9px] bg-neutral-800/80 p-2 rounded-lg border border-[#00FFB2]/20 space-y-0.5">
+                                                        <p className="text-[8px] font-black text-[#00FFB2] uppercase tracking-widest mb-1">Especificación Origen</p>
+                                                        <p><span className="text-neutral-400 font-bold">Fermentación:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.fermentation}</span></p>
+                                                        <p><span className="text-neutral-400 font-bold">pH / Brix:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.ph}</span></p>
+                                                        <p><span className="text-neutral-400 font-bold">Secado:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.secado}</span></p>
+                                                        <p className="text-[8px] text-[#00FFB2] italic mt-1.5 font-bold">"{lot.attributes.notes}"</p>
                                                     </div>
                                                 ) : lot.process_data ? (
-                                                    <div className="text-[9px] bg-gray-50 p-2 rounded-lg border border-brand-green/10 space-y-0.5">
-                                                        <p className="text-[8px] font-black text-brand-green uppercase tracking-widest mb-1">Parámetros Críticos</p>
-                                                        <p><span className="text-gray-400 font-bold">Fermentación:</span> <span className="text-gray-700 font-semibold">{lot.process_data.duracion_fermentacion_horas}h ({lot.process_data.fermentation_style})</span></p>
-                                                        <p><span className="text-gray-400 font-bold">pH final / Brix:</span> <span className="text-gray-700 font-semibold">{lot.process_data.ph_final} / {lot.process_data.brix_inicial}°Bx</span></p>
-                                                        <p><span className="text-gray-400 font-bold">Secado:</span> <span className="text-gray-700 font-semibold">{lot.process_data.tipo_secado} ({lot.process_data.duracion_secado})</span></p>
+                                                    <div className="text-[9px] bg-neutral-800/80 p-2 rounded-lg border border-[#00FFB2]/20 space-y-0.5">
+                                                        <p className="text-[8px] font-black text-[#00FFB2] uppercase tracking-widest mb-1">Parámetros Críticos</p>
+                                                        <p><span className="text-neutral-400 font-bold">Fermentación:</span> <span className="text-neutral-200 font-semibold">{lot.process_data.duracion_fermentacion_horas}h ({lot.process_data.fermentation_style})</span></p>
+                                                        <p><span className="text-neutral-400 font-bold">pH final / Brix:</span> <span className="text-neutral-200 font-semibold">{lot.process_data.ph_final} / {lot.process_data.brix_inicial}°Bx</span></p>
+                                                        <p><span className="text-neutral-400 font-bold">Secado:</span> <span className="text-neutral-200 font-semibold">{lot.process_data.tipo_secado} ({lot.process_data.duracion_secado})</span></p>
                                                     </div>
                                                 ) : null}
                                             </div>

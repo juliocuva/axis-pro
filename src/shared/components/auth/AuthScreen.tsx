@@ -27,64 +27,51 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
     const content = {
         en: {
-            nav: { infra: "Infrastructure", vision: "Vision", login: "Validate Asset" },
+            nav: { infra: "Infrastructure", vision: "Vision", login: "Request Demo" },
             hero: {
-                tag: "AOC v3.0 DIGITAL WALK PROTOCOL",
-                headline: "Sensory certainty<br/>from origin to <span class='text-brand-green'>roastery.</span>",
-                subheadline: "AxisOne Coffee eliminates sensory surprises and quality variance in specialty coffee imports. By securing unalterable origin logs, CVA cupping data, and industrial stabilization records into structured digital certificates.<br/><strong class='text-brand-green font-black block mt-4 text-lg md:text-xl tracking-tight'>We give you absolute quality control before containers set sail.</strong>",
-                cta: "Request Early Access"
+                tag: "Coffee Intelligence Layer",
+                headline: "You know what the coffee tasted like<br/>at origin. <span class='text-brand-green'>Prove it.</span>",
+                subheadline: "AxisOne gives international importers and roasters unalterable digital certificates — origin logs, CVA cupping data, stabilization records — before containers set sail.<br/><strong class='text-brand-green font-black block mt-4 text-base md:text-lg tracking-tight'>No more sensory surprises at the roastery.</strong>",
+                cta: "Schedule a Demo or validate first with the Pilot · USD 100"
             },
             problem: {
-                headline: "Most coffee knowledge disappears after harvest.",
-                intro: "Specialty coffee operations generate extraordinary technical knowledge every season.",
-                outro: "But most of it remains lost in fragmented formats:",
-                list: ["spreadsheets", "scattered PDFs", "handwritten notebooks", "WhatsApp chats", "disconnected files", "human memory"],
-                conclusion: "AxisOne replaces these fragmented sources with a single point of structured manual entry."
+                headline: "The coffee you bought and the coffee that arrives are rarely the same story.",
+                intro: "Every season, extraordinary technical knowledge is generated at origin — and lost before it reaches you.",
+                outro: "By the time the container lands, the data that justified your purchase exists only in:",
+                list: ["producer spreadsheets", "scattered PDFs", "handwritten notebooks", "WhatsApp messages", "disconnected files", "human memory"],
+                conclusion: "AxisOne replaces all of that with a single, immutable, structured digital record — verifiable before you commit to the purchase."
             },
             concept: {
-                headline: "Every coffee lot has a technical DNA.",
+                headline: "Every lot gets a technical DNA before it leaves origin.",
+                intro: "Six structured stages. One digital certificate. Zero ambiguity.",
                 list: [
-                    "Sourcing & Identification", 
-                    "Industrial Thrashing", 
-                    "Storage & Stabilization", 
-                    "Roast Intelligence", 
-                    "Cupping Protocol (CVA)", 
-                    "Digital Certification"
+                    { title: "I. Sourcing & Identification", desc: "farm · variety · altitude" },
+                    { title: "II. Industrial Thrashing", desc: "process · fermentation · drying" },
+                    { title: "III. Storage & Stabilization", desc: "humidity · temperature · rest" },
+                    { title: "IV. Roast Intelligence", desc: "profile · development · color" },
+                    { title: "V. Cupping Protocol (CVA)", desc: "sensory · score · attributes" },
+                    { title: "VI. Digital Certification", desc: "QR · immutable · shareable" }
                 ],
-                conclusion: "AxisOne Coffee structures that intelligence through precise, manual data logging."
+                conclusion: "Total structural memory for high-stakes coffee operations."
             },
             features: {
-                headline: "One structured memory system for specialty coffee.",
+                headline: "Certainty that travels with every container.",
                 items: [
-                    { title: "Technical Lot Profiles", desc: "Build a complete digital identity for every coffee lot through structured data entry." },
-                    { title: "Protocol Digitization", desc: "Map your fermentation and drying processes directly into our high-precision fields." },
-                    { title: "Lab & Cupping Records", desc: "Convert sensory and laboratory findings into structured, searchable digital data." },
-                    { title: "Keyboard-Driven Logging", desc: "Eliminate external spreadsheets by capturing all technical parameters directly into the system." },
-                    { title: "Historical Traceability", desc: "Access years of operational memory built from your manual logs across harvests." }
+                    { title: "Immutable Records", desc: "Data logged at origin cannot be altered retroactively. What was entered is what you receive." },
+                    { title: "QR Technical Passport", desc: "Each lot generates a scannable certificate with the full technical record attached." },
+                    { title: "Pre-Shipment Visibility", desc: "Review the complete lot profile before the container sets sail. Approve or flag before it's too late." }
                 ]
-            },
-            target: {
-                headline: "Built for quality-driven coffee operations.",
-                list: ["Specialty farms", "Coffee labs", "Premium exporters", "Experimental processing operations", "Roasters focused on traceability", "Competition coffee producers"]
             },
             pricing: {
                 headline: "Founding Partner Program",
+                subheadline: "Start where you are. Scale as you grow.",
+                intro: "Every plan includes the same core technology. The difference is scope, volume, and support.",
                 tiers: [
-                    { name: "Pilot", price: "USD 100", desc: "Technical validation of trust.", features: ["Setup: USD 0 (one-time)", "Full audit of 4 coffee lots", "Demonstrate data inmutability", "No subscription commitment"] },
-                    { name: "Starter", price: "USD 450/month", desc: "For single-origin specialty operations.", features: ["Setup: USD 2,500 (one-time)", "Single Country Focus (Colombia/etc.)", "Up to 3 Connected Associations", "20 Free QR Certificates / month", "Private 'Alchemy' Farmer Portal"] },
-                    { name: "Professional", price: "USD 750/month", desc: "For global specialty importers.", features: ["Setup: USD 2,500 (one-time)", "Up to 3 Active Origin Countries", "Up to 10 Connected Associations", "50 Free QR Certificates / month", "Coffee Radar Module Included", "Grateful Ledger Enabled"] },
-                    { name: "Enterprise", price: "Custom Pricing", desc: "For global multi-origin scale.", features: ["Setup: Customized Onboarding", "Unlimited Origin Countries", "Unlimited Associations", "Custom Lot Certificate Volume", "24/7 Dedicated Priority Support", "Advanced API & ERP Integrations"] }
+                    { name: "Pilot", price: "USD 100", desc: "one-time · no subscription · no commitment", features: ["Setup: USD 0", "Full audit of 4 coffee lots", "Live proof of data immutability", "Decide after you see it work"], button: "Start with the Pilot", tag: "START HERE" },
+                    { name: "Starter", price: "USD 450/mo", desc: "For single-origin specialty operations.", features: ["Setup: USD 2,500 one-time", "Single country focus (Colombia / etc.)", "Up to 3 connected associations", "20 free QR certificates / month", "Private 'Alchemy' Farmer Portal"], button: "Join Program" },
+                    { name: "Professional", price: "USD 750/mo", desc: "For global specialty importers.", features: ["Setup: USD 2,500 one-time", "Up to 3 active origin countries", "Up to 10 connected associations", "50 free QR certificates / month", "Coffee Radar Module included", "Grateful Ledger enabled"], button: "Join Program" },
+                    { name: "Enterprise", price: "Custom", desc: "For global multi-origin scale.", features: ["Customized onboarding", "Unlimited origin countries", "Unlimited associations", "Custom lot certificate volume", "24/7 dedicated priority support", "Advanced API & ERP integrations"], button: "Contact Us" }
                 ]
-            },
-            vision: {
-                headline: "The future of specialty coffee will depend on structured intelligence.",
-                copy1: "The industry already produces exceptional coffee.",
-                copy2: "The next step is capturing and preserving the technical knowledge behind it.",
-                copy3: "AxisOne Coffee is the infrastructure where that manual intelligence lives."
-            },
-            footer: {
-                headline: "Technical coffee knowledge should not die inside spreadsheets.",
-                cta: "Become an Early Adopter"
             },
             login: {
                 title: "Access",
@@ -95,12 +82,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 verifying: "Verifying..."
             },
             contact: {
-                headline: "Get in Touch",
-                subheadline: "Let's digitize your specialty coffee operations. Request a demo or drop us a line.",
-                name: "Your Name",
+                headline: "Contact Us",
+                subheadline: "See it work on your actual lots. Julio will walk you through the system using real data from your operation.",
+                name: "Your name & company",
                 email: "Email Address",
-                company: "Company / Farm Name",
-                phone: "WhatsApp / Phone Number",
+                company: "Company Name",
+                phone: "WhatsApp or email",
                 role: "Your Role / Operation Type",
                 rolePlaceholder: "Select your operation type...",
                 roles: [
@@ -113,74 +100,61 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     "Other"
                 ],
                 message: "How can we help you?",
-                button: "Submit Inquiry",
+                button: "Request Demo →",
                 successTitle: "Inquiry Submitted Successfully!",
-                successSubtitle: "Thank you for reaching out. We will analyze your operation and get in touch via email or WhatsApp within 24 hours.",
+                successSubtitle: "Julio responds within 24 hours.",
                 successCta: "Chat directly on WhatsApp",
-                submitting: "Submitting Inquiry...",
+                submitting: "Submitting Request...",
                 directContact: "Direct Channels",
                 directContactDesc: "Want to bypass the form? Reach out directly via our secure messaging lines or email.",
             }
         },
         es: {
-            nav: { infra: "Infraestructura", vision: "Visión", login: "Validar Activo" },
+            nav: { infra: "Infraestructura", vision: "Visión", login: "Agendar Demo" },
             hero: {
-                tag: "PROTOCOLO DIGITAL WALK AOC v3.0",
-                headline: "Certeza sensorial<br/>desde el origen hasta la <span class='text-brand-green'>tostadora.</span>",
-                subheadline: "AxisOne Coffee elimina las sorpresas sensoriales y la variabilidad de calidad en las importaciones de especialidad. Al asegurar registros inalterables de origen, cataciones CVA y protocolos de estabilización en certificados digitales estructurados.<br/><strong class='text-brand-green font-black block mt-4 text-lg md:text-xl tracking-tight'>Te damos control absoluto de la calidad antes de que los contenedores zarpen.</strong>",
-                cta: "Solicitar Acceso"
+                tag: "Capa de Inteligencia de Café",
+                headline: "Sabes a qué sabía el café<br/>en origen. <span class='text-brand-green'>Pruébalo.</span>",
+                subheadline: "AxisOne brinda a importadores y tostadores internacionales certificados digitales inalterables — bitácoras de origen, catas CVA, registros de estabilización — antes de que zarpen los contenedores.<br/><strong class='text-brand-green font-black block mt-4 text-base md:text-lg tracking-tight'>No más sorpresas sensoriales en la tostaduría.</strong>",
+                cta: "Agendar Demo o valida primero con el Piloto · USD 100"
             },
             problem: {
-                headline: "La mayoría del conocimiento del café desaparece tras la cosecha.",
-                intro: "Las operaciones de café de especialidad generan un conocimiento técnico extraordinario cada temporada.",
-                outro: "Pero la mayor parte permanece perdida en formatos fragmentados:",
-                list: ["hojas de cálculo", "PDFs dispersos", "cuadernos escritos a mano", "chats de WhatsApp", "archivos desconectados", "memoria humana"],
-                conclusion: "AxisOne reemplaza estas fuentes fragmentadas con un punto único de entrada manual estructurada."
+                headline: "El café que compraste y el que llega rara vez cuentan la misma historia.",
+                intro: "Cada temporada, se genera un conocimiento técnico extraordinario en origen — y se pierde antes de llegar a ti.",
+                outro: "Para cuando el contenedor aterriza, los datos que justificaron tu compra existen solo en:",
+                list: ["excels del productor", "PDFs dispersos", "libretas a mano", "mensajes de WhatsApp", "archivos desconectados", "memoria humana"],
+                conclusion: "AxisOne reemplaza todo eso con un registro digital estructurado, único e inmutable — verificable antes de que comprometas la compra."
             },
             concept: {
-                headline: "Cada lote de café tiene un ADN técnico.",
+                headline: "Cada lote obtiene un ADN técnico antes de salir de origen.",
+                intro: "Seis etapas estructuradas. Un certificado digital. Cero ambigüedad.",
                 list: [
-                    "Identificación y Compra", 
-                    "Trilla Industrial", 
-                    "Almacenamiento", 
-                    "Tostión Predictiva", 
-                    "Protocolo de Catación (CVA)", 
-                    "Certificación Digital"
+                    { title: "I. Origen e Identificación", desc: "finca · variedad · altura" },
+                    { title: "II. Trilla Industrial", desc: "proceso · fermentación · secado" },
+                    { title: "III. Almacenamiento y Estabilización", desc: "humedad · temperatura · reposo" },
+                    { title: "IV. Inteligencia de Tueste", desc: "perfil · desarrollo · color" },
+                    { title: "V. Protocolo de Catación (CVA)", desc: "sensorial · puntaje · atributos" },
+                    { title: "VI. Certificación Digital", desc: "QR · inmutable · compartible" }
                 ],
-                conclusion: "AxisOne Coffee estructura esa inteligencia mediante el registro manual preciso de datos."
+                conclusion: "Memoria estructural total para operaciones de café de alta complejidad."
             },
             features: {
-                headline: "Un sistema de memoria estructurado para café de especialidad.",
+                headline: "Certeza que viaja con cada contenedor.",
                 items: [
-                    { title: "Perfiles Técnicos de Lote", desc: "Construye una identidad digital completa para cada lote mediante entrada de datos estructurada." },
-                    { title: "Digitalización de Protocolos", desc: "Mapea tus procesos de fermentación y secado directamente en nuestros campos de alta precisión." },
-                    { title: "Registros de Lab y Cata", desc: "Convierte hallazgos sensoriales y de laboratorio en datos digitales estructurados." },
-                    { title: "Registro por Teclado", desc: "Elimina Excels externos capturando todos los parámetros técnicos directamente en el sistema." },
-                    { title: "Trazabilidad Histórica", desc: "Accede a años de memoria operativa construida desde tus registros manuales." }
+                    { title: "Registros Inmutables", desc: "Los datos registrados en origen no pueden ser alterados retroactivamente. Lo que se ingresó es lo que recibes." },
+                    { title: "Pasaporte Técnico QR", desc: "Cada lote genera un certificado escaneable con el registro técnico completo adjunto." },
+                    { title: "Visibilidad Pre-Embarque", desc: "Revisa el perfil completo del lote antes de que el contenedor zarpe. Aprueba o marca alertas a tiempo." }
                 ]
-            },
-            target: {
-                headline: "Construido para operaciones enfocadas en la calidad.",
-                list: ["Fincas de especialidad", "Laboratorios de café", "Exportadores premium", "Procesamiento experimental", "Tostadores con foco en trazabilidad", "Productores de competencia"]
             },
             pricing: {
                 headline: "Programa de Socios Fundadores",
+                subheadline: "Empieza donde estás. Escala a medida que creces.",
+                intro: "Todos los planes incluyen la misma tecnología base. La diferencia es el alcance, volumen y soporte.",
                 tiers: [
-                    { name: "Piloto", price: "USD 100", desc: "Validación técnica de confianza.", features: ["Setup: USD 0 (único)", "Auditoría completa de 4 lotes", "Demostrar inmutabilidad de datos", "Sin compromiso de suscripción"] },
-                    { name: "Starter", price: "USD 450/mes", desc: "Para importadores de especialidad mono-origen.", features: ["Setup: USD 2,500 (único)", "Foco en un Solo País (Colombia/etc.)", "Hasta 3 Asociaciones Conectadas", "20 Certificados QR gratis / mes", "Portal Privado de 'Alquimia'"] },
-                    { name: "Professional", price: "USD 750/mes", desc: "Para importadores globales de especialidad.", features: ["Setup: USD 2,500 (único)", "Hasta 3 Países de Origen Activos", "Hasta 10 Asociaciones Conectadas", "50 Certificados QR gratis / mes", "Módulo Coffee Radar Incluido", "Grateful Ledger Habilitado"] },
-                    { name: "Enterprise", price: "Precio Personalizado", desc: "Para escala global multi-origen.", features: ["Setup: Onboarding Personalizado", "Países de Origen Ilimitados", "Asociaciones Conectadas Ilimitadas", "Volumen de Certificados a Medida", "Soporte Prioritario Dedicado 24/7", "Integraciones API y ERP Avanzadas"] }
+                    { name: "Piloto", price: "USD 100", desc: "pago único · sin suscripción · sin compromiso", features: ["Setup: USD 0", "Auditoría completa de 4 lotes", "Prueba en vivo de inmutabilidad", "Decide después de verlo funcionar"], button: "Iniciar Piloto", tag: "COMIENZA AQUÍ" },
+                    { name: "Starter", price: "USD 450/mes", desc: "Para importadores de especialidad mono-origen.", features: ["Setup: USD 2,500 pago único", "Foco en un solo país (Colombia / etc.)", "Hasta 3 asociaciones conectadas", "20 certificados QR gratis / mes", "Portal Privado de 'Alquimia'"], button: "Unirse al Programa" },
+                    { name: "Professional", price: "USD 750/mes", desc: "Para importadores globales de especialidad.", features: ["Setup: USD 2,500 pago único", "Hasta 3 países de origen activos", "Hasta 10 asociaciones conectadas", "50 certificados QR gratis / mes", "Módulo Coffee Radar incluido", "Grateful Ledger habilitado"], button: "Unirse al Programa" },
+                    { name: "Enterprise", price: "Custom", desc: "Para escala global multi-origen.", features: ["Onboarding personalizado", "Países de origen ilimitados", "Asociaciones ilimitadas", "Volumen de certificados a medida", "Soporte prioritario 24/7", "Integraciones API y ERP avanzadas"], button: "Contáctanos" }
                 ]
-            },
-            vision: {
-                headline: "El futuro del café de especialidad dependerá de la inteligencia estructurada.",
-                copy1: "La industria ya produce café excepcional.",
-                copy2: "El siguiente paso es capturar y preservar el conocimiento técnico detrás de él.",
-                copy3: "AxisOne Coffee es la infraestructura donde vive esa inteligencia manual."
-            },
-            footer: {
-                headline: "El conocimiento técnico no debería morir en hojas de cálculo.",
-                cta: "Sé un Adoptante Temprano"
             },
             login: {
                 title: "Acceso",
@@ -191,12 +165,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 verifying: "Verificando..."
             },
             contact: {
-                headline: "Ponte en Contacto",
-                subheadline: "Digitalicemos juntos tus operaciones de café de especialidad. Solicita una demo o envíanos un mensaje.",
-                name: "Tu Nombre",
+                headline: "Contáctanos",
+                subheadline: "Míralo funcionar con tus propios lotes. Julio te guiará por el sistema usando datos reales de tu operación.",
+                name: "Tu nombre y empresa",
                 email: "Correo Electrónico",
-                company: "Nombre de Finca / Empresa",
-                phone: "WhatsApp / Teléfono",
+                company: "Nombre de Empresa",
+                phone: "WhatsApp o email",
                 role: "Tu Rol / Tipo de Operación",
                 rolePlaceholder: "Selecciona tu tipo de operación...",
                 roles: [
@@ -209,11 +183,11 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     "Otro"
                 ],
                 message: "¿Cómo podemos ayudarte?",
-                button: "Enviar Consulta",
-                successTitle: "¡Consulta Enviada Exitosamente!",
-                successSubtitle: "Gracias por contactarnos. Analizaremos tu operación y nos comunicaremos contigo vía email o WhatsApp en menos de 24 horas.",
+                button: "Solicitar Demo →",
+                successTitle: "¡Solicitud Enviada Exitosamente!",
+                successSubtitle: "Julio te responderá en menos de 24 horas.",
                 successCta: "Chatear directamente por WhatsApp",
-                submitting: "Enviando Consulta...",
+                submitting: "Enviando Solicitud...",
                 directContact: "Canales Directos",
                 directContactDesc: "¿Prefieres saltarte el formulario? Escríbenos directamente a través de nuestras líneas seguras o correo.",
             }
@@ -288,12 +262,11 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
     const steps = [
         { id: 'step-01', label: '01', title: language === 'en' ? 'Start' : 'Inicio' },
-        { id: 'step-02', label: '02', title: language === 'en' ? 'The Leak' : 'La Fuga' },
-        { id: 'step-03', label: '03', title: language === 'en' ? 'Technical DNA' : 'ADN Técnico' },
-        { id: 'step-04', label: '04', title: language === 'en' ? 'The Engine' : 'El Motor' },
-        { id: 'step-05', label: '05', title: language === 'en' ? 'Ecosystem' : 'Ecosistema' },
-        { id: 'step-06', label: '06', title: language === 'en' ? 'Commitment' : 'Compromiso' },
-        { id: 'step-07', label: '07', title: language === 'en' ? 'Get in Touch' : 'Contacto' },
+        { id: 'step-02', label: '02', title: language === 'en' ? 'The Problem' : 'El Problema' },
+        { id: 'step-03', label: '03', title: language === 'en' ? 'The Solution' : 'La Solución' },
+        { id: 'step-04', label: '04', title: language === 'en' ? 'What You Get' : 'Lo Que Obtienes' },
+        { id: 'step-05', label: '05', title: language === 'en' ? 'Low-Risk Entry' : 'Entrada Bajo Riesgo' },
+        { id: 'step-06', label: '06', title: language === 'en' ? 'Get in Touch' : 'Contacto' },
     ];
 
     React.useEffect(() => {
@@ -371,11 +344,11 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
                         <img src="/logo.png" alt="AXISONE" className="h-48 mx-auto mb-4" />
                         <h1 
-                            className="text-6xl lg:text-7xl font-black leading-[1.05] max-w-4xl mx-auto text-brand-navy tracking-tighter uppercase"
+                            className="text-5xl lg:text-6xl font-black leading-[1.05] max-w-4xl mx-auto text-brand-navy tracking-tighter uppercase"
                             dangerouslySetInnerHTML={{ __html: t.hero.headline }}
                         />
                         <p 
-                            className="text-base text-brand-navy/80 font-medium max-w-3xl mx-auto leading-relaxed"
+                            className="text-sm text-brand-navy/80 font-medium max-w-3xl mx-auto leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: t.hero.subheadline }}
                         />
                     </div>
@@ -396,13 +369,13 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
                 
                 <div className="max-w-7xl mx-auto px-8 relative z-10">
-                    <div className="mb-20 space-y-4 text-center max-w-4xl mx-auto">
+                    <div className="mb-20 space-y-6 text-center max-w-4xl mx-auto">
                         <div className="flex flex-col items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
-                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">02</span>
-                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">{language === 'en' ? 'The Leak' : 'La Fuga'}</span>
+                            <span className="text-[80px] md:text-[100px] font-thin text-brand-green leading-none tracking-tighter">02</span>
+                            <span className="text-[10px] font-semibold text-brand-green uppercase tracking-ultra-wide">{language === 'en' ? 'The Leak' : 'La Fuga'}</span>
                         </div>
-                        <h2 className="text-[50px] font-black uppercase text-brand-navy tracking-tighter leading-none">
+                        <h2 className="text-3xl md:text-4xl font-black uppercase text-brand-navy tracking-tighter leading-none">
                             {t.problem.headline}
                         </h2>
                     </div>
@@ -410,13 +383,13 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start">
                         <div className="space-y-12">
                             <div className="space-y-8">
-                                <p className="text-base font-bold text-brand-navy/80 leading-relaxed uppercase tracking-tight">{t.problem.intro}</p>
-                                <p className="text-xs text-brand-navy/60 font-medium uppercase tracking-widest leading-loose">{t.problem.outro}</p>
+                                <p className="text-sm font-bold text-brand-navy/80 leading-relaxed uppercase tracking-tight">{t.problem.intro}</p>
+                                <p className="text-[10px] text-brand-navy/60 font-medium uppercase tracking-widest leading-loose">{t.problem.outro}</p>
                                 <div className="flex flex-col gap-4">
                                     {t.problem.list.map((item, i) => (
                                         <div key={i} className="flex items-center gap-6 group">
                                             <div className="w-2 h-px bg-brand-green/45 group-hover:w-8 group-hover:bg-brand-green transition-all duration-500"></div>
-                                            <span className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-brand-navy/75 group-hover:text-brand-navy group-hover:translate-x-2 transition-all duration-500">{item}</span>
+                                            <span className="text-xl md:text-2xl font-black uppercase tracking-tighter text-brand-navy/75 group-hover:text-brand-navy group-hover:translate-x-2 transition-all duration-500">{item}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -439,7 +412,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
                     {/* SOLUTION PHRASE - CENTERED BOTTOM */}
                     <div className="mt-32 pt-16 border-t border-brand-gray/50 text-center">
-                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                        <p className="text-xl md:text-2xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
                             {t.problem.conclusion}
                         </p>
                     </div>
@@ -451,13 +424,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
                 
                 <div className="max-w-7xl mx-auto px-8 relative z-10 text-center">
-                    <div className="mb-12 space-y-2 text-center">
-                        <div className="flex flex-col items-center gap-1">
-                            <div className="w-2.5 h-2.5 rounded-full bg-brand-green mb-1"></div>
-                            <span className="text-[80px] font-thin text-brand-green leading-none tracking-tighter">03</span>
+                    <div className="mb-20 space-y-6 text-center max-w-4xl mx-auto">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
+                            <span className="text-[80px] md:text-[100px] font-thin text-brand-green leading-none tracking-tighter">03</span>
                             <span className="text-[10px] font-semibold text-brand-green uppercase tracking-ultra-wide">The Solution</span>
                         </div>
                         <h2 className="text-3xl md:text-4xl font-black uppercase text-brand-navy tracking-tighter max-w-4xl mx-auto leading-none">{t.concept.headline}</h2>
+                        <p className="text-sm md:text-base font-bold text-brand-navy/60 uppercase tracking-widest mt-4">{t.concept.intro}</p>
                         <div className="w-16 h-1 bg-brand-green mx-auto mt-4"></div>
                     </div>
 
@@ -486,7 +460,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                                         {i === 4 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>}
                                         {i === 5 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>}
                                     </div>
-                                    <span className="text-[11px] font-black uppercase tracking-wider text-brand-navy/60 group-hover:text-brand-navy transition-colors leading-tight">{item}</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black uppercase tracking-wider text-brand-navy/60 group-hover:text-brand-navy transition-colors leading-tight">{item.title}</span>
+                                        <span className="text-[8px] text-brand-navy/40 uppercase tracking-widest">{item.desc}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -494,7 +471,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
                     {/* SOLUTION PHRASE - CENTERED BOTTOM */}
                     <div className="pt-8 border-t border-brand-gray/50 text-center">
-                        <p className="text-xl md:text-2xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                        <p className="text-lg md:text-xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
                             {t.concept.conclusion}
                         </p>
                     </div>
@@ -506,56 +483,34 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
                 
                 <div className="max-w-7xl mx-auto px-8 relative z-10">
-                    <div className="mb-24 space-y-4 text-center">
-                        <div className="flex flex-col items-center gap-2 mb-8">
+                    <div className="mb-20 space-y-6 text-center max-w-4xl mx-auto">
+                        <div className="flex flex-col items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
-                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">04</span>
-                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">The Engine</span>
+                            <span className="text-[80px] md:text-[100px] font-thin text-brand-green leading-none tracking-tighter">04</span>
+                            <span className="text-[10px] font-semibold text-brand-green uppercase tracking-ultra-wide">The Engine</span>
                         </div>
-                        <h2 className="text-[50px] font-black uppercase text-brand-navy tracking-tighter leading-none">{t.features.headline}</h2>
+                        <h2 className="text-3xl md:text-4xl font-black uppercase text-brand-navy tracking-tighter leading-none">{t.features.headline}</h2>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-32">
-                        {t.features.items.map((item, i) => (
-                            <div key={i} className="group p-8 bg-white border border-brand-gray/50 rounded-industrial-sm hover:border-brand-green transition-all hover:shadow-2xl hover:shadow-brand-green/5">
-                                <div className="text-brand-green mb-8 group-hover:scale-110 transition-transform duration-500">
-                                    {i === 0 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 11l2 2 4-4"/></svg>}
-                                    {i === 1 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>}
-                                    {i === 2 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 1v22M5 5h14M5 19h14M2 12h4M18 12h4"/></svg>}
-                                    {i === 3 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"/></svg>}
-                                    {i === 4 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center mb-32 max-w-6xl mx-auto">
+                        {/* FEATURES LIST LEFT */}
+                        <div className="lg:col-span-7 flex flex-col gap-6">
+                            {t.features.items.map((item, i) => (
+                                <div key={i} className="group p-8 bg-white border border-brand-gray/50 rounded-industrial-sm hover:border-brand-green transition-all hover:shadow-2xl hover:shadow-brand-green/5 flex gap-6 items-start">
+                                    <div className="text-brand-green shrink-0 group-hover:scale-110 transition-transform duration-500">
+                                        {i === 0 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 11l2 2 4-4"/></svg>}
+                                        {i === 1 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>}
+                                        {i === 2 && <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 1v22M5 5h14M5 19h14M2 12h4M18 12h4"/></svg>}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-black uppercase text-brand-navy mb-2 tracking-tight">{item.title}</h3>
+                                        <p className="text-xs text-brand-navy/60 leading-relaxed font-light">{item.desc}</p>
+                                    </div>
                                 </div>
-                                <h3 className="text-base font-black uppercase text-brand-navy mb-4 tracking-tight">{item.title}</h3>
-                                <p className="text-base text-brand-navy/60 leading-relaxed font-light">{item.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                    {/* SOLUTION PHRASE - CENTERED BOTTOM */}
-                    <div className="pt-16 border-t border-brand-gray/50 text-center">
-                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
-                            {language === 'en' ? "Total structural memory for high-stakes coffee operations." : "Memoria estructural total para operaciones de café de alta complejidad."}
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            {/* 6. PARA QUIÉN */}
-            <section id="step-05" className="relative py-16 my-6 bg-soft-white border-y border-brand-gray/50">
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
-                
-                <div className="max-w-7xl mx-auto px-8 relative z-10 text-center">
-                    <div className="mb-12 space-y-2 text-center">
-                        <div className="flex flex-col items-center gap-1">
-                            <div className="w-2.5 h-2.5 rounded-full bg-brand-green mb-1"></div>
-                            <span className="text-[80px] font-thin text-brand-green leading-none tracking-tighter">05</span>
-                            <span className="text-[10px] font-semibold text-brand-green uppercase tracking-ultra-wide">The Ecosystem</span>
+                            ))}
                         </div>
-                        <h2 className="text-3xl md:text-4xl font-black uppercase text-brand-navy tracking-tighter max-w-4xl mx-auto leading-none">{t.target.headline}</h2>
-                        <div className="w-16 h-1 bg-brand-green mx-auto mt-4"></div>
-                    </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-16">
-                        {/* GLOBAL MAP LEFT */}
-                        <div className="relative group aspect-square max-w-sm mx-auto">
+                        {/* GLOBAL MAP RIGHT */}
+                        <div className="lg:col-span-5 relative group aspect-square max-w-sm mx-auto w-full hidden lg:block">
                             <div className="absolute inset-0 bg-brand-green/5 blur-3xl rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
                             <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-brand-green bg-white shadow-2xl flex items-center justify-center">
                                 <img 
@@ -566,63 +521,55 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                             </div>
                             <div className="absolute inset-0 bg-gradient-to-r from-soft-white via-transparent to-soft-white pointer-events-none opacity-10"></div>
                         </div>
-
-                        {/* CLIENT PROFILES RIGHT */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                            {t.target.list.map((item, i) => (
-                                <div key={i} className="group p-4 bg-white border border-brand-gray/50 rounded-industrial-sm hover:border-brand-green/30 transition-all hover:shadow-md hover:shadow-brand-green/5 flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green shrink-0 group-hover:bg-brand-green group-hover:text-white transition-all duration-500">
-                                        {i === 0 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>}
-                                        {i === 1 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>}
-                                        {i === 2 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>}
-                                        {i === 3 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>}
-                                        {i === 4 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
-                                        {i === 5 && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>}
-                                    </div>
-                                    <span className="text-[11px] font-black uppercase tracking-wider text-brand-navy/60 group-hover:text-brand-navy transition-colors leading-tight">{item}</span>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                     {/* SOLUTION PHRASE - CENTERED BOTTOM */}
-                    <div className="pt-8 border-t border-brand-gray/50 text-center">
+                    <div className="pt-16 border-t border-brand-gray/50 text-center">
                         <p className="text-xl md:text-2xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
-                            {language === 'en' ? "A unified standard for the entire specialty value chain." : "Un estándar unificado para toda la cadena de valor de especialidad."}
+                            {language === 'en' ? "Total structural memory for high-stakes coffee operations." : "Memoria estructural total para operaciones de café de alta complejidad."}
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* 7. PROPUESTA ECONÓMICA */}
-            <section id="step-06" className="relative py-32 my-12 bg-white border-y border-brand-gray/50">
+
+
+            {/* 5. PROPUESTA ECONÓMICA */}
+            <section id="step-05" className="relative py-32 my-12 bg-white border-y border-brand-gray/50">
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
                 
                 <div className="max-w-7xl mx-auto px-8 text-center relative z-10">
-                    <div className="space-y-4 mb-20">
-                        <div className="flex flex-col items-center gap-2 mb-8">
+                    <div className="mb-20 space-y-6 text-center max-w-4xl mx-auto">
+                        <div className="flex flex-col items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
-                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">06</span>
-                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">The Commitment</span>
+                            <span className="text-[80px] md:text-[100px] font-thin text-brand-green leading-none tracking-tighter">05</span>
+                            <span className="text-[10px] font-semibold text-brand-green uppercase tracking-ultra-wide">The Commitment</span>
                         </div>
-                        <h2 className="text-[50px] font-black uppercase text-brand-navy tracking-tighter leading-none">{t.pricing.headline}</h2>
+                        <h2 className="text-3xl md:text-4xl font-black uppercase text-brand-navy tracking-tighter leading-none">{t.pricing.headline}</h2>
+                        <p className="text-lg md:text-xl font-bold text-brand-navy/60 leading-relaxed whitespace-pre-line">{t.pricing.subheadline}</p>
+                        <p className="text-xs font-bold text-brand-navy/40 uppercase tracking-widest mt-4">{t.pricing.intro}</p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-32">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-32 max-w-7xl mx-auto">
                         {t.pricing.tiers.map((tier, i) => (
-                            <div key={i} className={`p-6 md:p-8 rounded-industrial border transition-all duration-500 text-left space-y-6 group ${i === 2 ? 'border-brand-green shadow-2xl shadow-brand-green/10 bg-soft-white lg:scale-105 z-10' : 'border-brand-gray/50 bg-white hover:-translate-y-4 hover:shadow-2xl hover:shadow-black/5'}`}>
+                            <div key={i} className={`p-6 md:p-8 rounded-industrial border transition-all duration-500 text-left space-y-6 flex flex-col relative group ${i === 0 ? 'border-brand-green shadow-2xl shadow-brand-green/10 bg-soft-white lg:scale-105 z-10' : 'border-brand-gray/50 bg-white hover:-translate-y-4 hover:shadow-2xl hover:shadow-black/5'}`}>
+                                {tier.tag && (
+                                    <div className="absolute -top-3 left-6 bg-brand-green text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                                        {tier.tag}
+                                    </div>
+                                )}
                                 <div className="space-y-2">
-                                    <h3 className="text-base font-black uppercase text-brand-navy group-hover:text-brand-green transition-colors">{tier.name}</h3>
-                                    <p className="text-[10px] text-brand-navy/60 font-medium uppercase tracking-widest leading-snug">{tier.desc}</p>
+                                    <h3 className="text-sm font-black uppercase text-brand-navy group-hover:text-brand-green transition-colors">{tier.name}</h3>
+                                    <p className="text-[9px] text-brand-navy/60 font-medium uppercase tracking-widest leading-snug">{tier.desc}</p>
                                 </div>
-                                <div className="text-xl font-black text-brand-green tracking-tighter">{tier.price}</div>
+                                <div className="text-lg font-black text-brand-green tracking-tighter">{tier.price}</div>
                                 <ul className="space-y-3 pt-6 border-t border-brand-gray/50">
                                     {tier.features.map((f, j) => (
-                                        <li key={j} className="flex items-start gap-2.5 text-[11px] font-normal normal-case text-brand-navy leading-relaxed">
+                                        <li key={j} className="flex items-start gap-2.5 text-[10px] font-normal normal-case text-brand-navy leading-relaxed">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="text-brand-green shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
                                             {f}
                                         </li>
                                     ))}
                                 </ul>
-                                <button className={`w-full py-3.5 rounded-industrial-sm text-[10px] font-bold uppercase transition-all duration-500 ${i === 2 ? 'bg-brand-green text-white hover:bg-black' : 'border border-brand-green text-brand-green hover:bg-brand-green hover:text-white hover:shadow-lg hover:shadow-brand-green/20'}`}>Join Program</button>
+                                <button className={`w-full mt-auto py-3.5 rounded-industrial-sm text-[9px] font-bold uppercase transition-all duration-500 bg-brand-green text-white hover:bg-black`}>{tier.button}</button>
                             </div>
                         ))}
                     </div>
@@ -633,29 +580,29 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     </p>
                     {/* SOLUTION PHRASE - CENTERED BOTTOM */}
                     <div className="pt-16 border-t border-brand-gray/50 text-center">
-                        <p className="text-2xl md:text-3xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
+                        <p className="text-xl md:text-2xl font-black text-brand-green uppercase tracking-tighter max-w-4xl mx-auto leading-none">
                             {language === 'en' ? "Scalable infrastructure for sovereign digital operations." : "Infraestructura escalable para operaciones digitales soberanas."}
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* 7. CONTACTO / GET IN TOUCH */}
-            <section id="step-07" className="relative py-32 bg-brand-navy border-t border-white/10 overflow-hidden">
+            {/* 6. CONTACTO / GET IN TOUCH */}
+            <section id="step-06" className="relative py-32 bg-brand-navy border-t border-white/10 overflow-hidden">
                 {/* Visual Connector Line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-green/20 hidden lg:block -translate-x-1/2 z-0"></div>
                 
                 <div className="max-w-7xl mx-auto px-8 relative z-10">
-                    <div className="mb-20 space-y-4 text-center max-w-4xl mx-auto">
+                    <div className="mb-20 space-y-6 text-center max-w-4xl mx-auto">
                         <div className="flex flex-col items-center gap-2">
                             <div className="w-3 h-3 rounded-full bg-brand-green mb-2"></div>
-                            <span className="text-[120px] font-thin text-brand-green leading-none tracking-tighter">07</span>
-                            <span className="text-xs font-semibold text-brand-green uppercase tracking-ultra-wide">{language === 'en' ? 'Get In Touch' : 'Contacto'}</span>
+                            <span className="text-[80px] md:text-[100px] font-thin text-brand-green leading-none tracking-tighter">06</span>
+                            <span className="text-[10px] font-semibold text-brand-green uppercase tracking-ultra-wide">{language === 'en' ? 'Get In Touch' : 'Contacto'}</span>
                         </div>
-                        <h2 className="text-[50px] font-black uppercase text-white tracking-tighter leading-none">
+                        <h2 className="text-3xl md:text-4xl font-black uppercase text-white tracking-tighter leading-none">
                             {t.contact.headline}
                         </h2>
-                        <p className="text-base text-white/60 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
+                        <p className="text-sm text-white/60 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
                             {t.contact.subheadline}
                         </p>
                     </div>
@@ -826,8 +773,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                             )}
                         </div>
                     </div>
+                </div>
 
-
+                {/* FOOTER TEXT */}
+                <div className="max-w-7xl mx-auto px-8 mt-16 pt-8 border-t border-white/10 text-center relative z-10 pb-12">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/30">
+                        © 2026 Mouselab — AXISONE COFFEE is a trademark of Mouselab. <br className="md:hidden" />
+                        <span className="text-brand-green/50 ml-2">IP Protected · OMPI / WIPO</span>
+                    </p>
                 </div>
             </section>
 
@@ -856,6 +809,21 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     </div>
                 </div>
             )}
+            {/* FLOATING WHATSAPP BUTTON */}
+            <a 
+                href="https://api.whatsapp.com/send?phone=573013970002&text=Hi!%20I%20have%20some%20questions%20about%20AxisOne%20and%20would%20like%20to%20chat." 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="fixed bottom-8 right-8 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 hover:shadow-brand-green/30 transition-all duration-300 group flex items-center justify-center"
+            >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
+                </svg>
+                {/* Tooltip */}
+                <span className="absolute right-16 top-1/2 -translate-y-1/2 bg-brand-navy text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-industrial-sm opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none translate-x-2 group-hover:translate-x-0 shadow-lg hidden md:block">
+                    {language === 'en' ? 'Chat with us' : 'Chatea con nosotros'}
+                </span>
+            </a>
         </div>
     );
 }
