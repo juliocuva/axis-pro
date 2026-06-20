@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/shared/lib/supabase';
+import DemoTourModal from '../demo/DemoTourModal';
 
 interface AuthScreenProps {
     onLogin: (userData: { email: string, name: string, companyId: string, role?: string }) => void;
@@ -10,10 +11,11 @@ interface AuthScreenProps {
 
 export default function AuthScreen({ onLogin }: AuthScreenProps) {
     const [language, setLanguage] = useState<'en' | 'es'>('en');
-    const [identifier, setIdentifier] = useState('');
-    const [password, setPassword] = useState('');
+    const [identifier, setIdentifier] = useState('demo@axisone.coffee');
+    const [password, setPassword] = useState('axisone2026');
     const [isLoading, setIsLoading] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
+    const [showDemoModal, setShowDemoModal] = useState(false);
 
     // Contact Form States
     const [contactName, setContactName] = useState('');
@@ -198,6 +200,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // INTERCEPT DEMO LOGIN
+        if (identifier.toLowerCase() === 'demo@axisone.coffee') {
+            setShowLoginModal(false);
+            setShowDemoModal(true);
+            return;
+        }
+
         setIsLoading(true);
 
         const isNumeric = /^\d+$/.test(identifier);
@@ -809,6 +819,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                     </div>
                 </div>
             )}
+
+            {/* DEMO TOUR MODAL */}
+            {showDemoModal && (
+                <DemoTourModal onClose={() => setShowDemoModal(false)} />
+            )}
+
             {/* FLOATING WHATSAPP BUTTON */}
             <a 
                 href="https://api.whatsapp.com/send?phone=573013970002&text=Hi!%20I%20have%20some%20questions%20about%20AxisOne%20and%20would%20like%20to%20chat." 
