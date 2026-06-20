@@ -31,7 +31,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             hero: {
                 tag: "Reduce uncertainty before coffee leaves origin.",
                 headline: "You know what the coffee tasted like<br/>at origin. <span class='text-brand-green'>Prove it.</span>",
-                subheadline: "AxisOne gives international importers and roasters unalterable digital certificates — origin logs, CVA cupping data, stabilization records — before containers set sail.<br/><strong class='text-brand-green font-black block mt-4 text-base md:text-lg tracking-tight'>No more sensory surprises at the roastery.</strong><span class='block mt-2 font-bold uppercase tracking-widest text-xs'>Reduce uncertainty before coffee leaves origin.</span>",
+                subheadline: "AxisOne gives international importers and roasters unalterable digital certificates — origin logs, CVA cupping data, stabilization records — before containers set sail.<br/><strong class='text-brand-green font-black block mt-4 text-base md:text-lg tracking-tight'>No more sensory surprises at the roastery.</strong><span class='text-brand-green font-black block mt-2 text-base md:text-lg tracking-tight'>Reduce uncertainty before coffee leaves origin.</span>",
                 cta: "Schedule a Demo or validate first with the Pilot · USD 100"
             },
             problem: {
@@ -114,7 +114,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             hero: {
                 tag: "Reduce la incertidumbre antes de que el café salga de origen.",
                 headline: "Sabes a qué sabía el café<br/>en origen. <span class='text-brand-green'>Pruébalo.</span>",
-                subheadline: "AxisOne brinda a importadores y tostadores internacionales certificados digitales inalterables — bitácoras de origen, catas CVA, registros de estabilización — antes de que zarpen los contenedores.<br/><strong class='text-brand-green font-black block mt-4 text-base md:text-lg tracking-tight'>No más sorpresas sensoriales en la tostaduría.</strong><span class='block mt-2 font-bold uppercase tracking-widest text-xs'>Reduce la incertidumbre antes de que el café salga de origen.</span>",
+                subheadline: "AxisOne brinda a importadores y tostadores internacionales certificados digitales inalterables — bitácoras de origen, catas CVA, registros de estabilización — antes de que zarpen los contenedores.<br/><strong class='text-brand-green font-black block mt-4 text-base md:text-lg tracking-tight'>No más sorpresas sensoriales en la tostaduría.</strong><span class='text-brand-green font-black block mt-2 text-base md:text-lg tracking-tight'>Reduce la incertidumbre antes de que el café salga de origen.</span>",
                 cta: "Agendar Demo o valida primero con el Piloto · USD 100"
             },
             problem: {
