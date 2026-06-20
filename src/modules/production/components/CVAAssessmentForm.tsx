@@ -416,18 +416,29 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
 
         if (existing && existing.length > 0) {
           const record = existing[0];
-          if (record.cva_descriptive) {
+          if (record.cva_descriptive || record.cva_affective) {
             setData(prev => ({
               ...prev,
               descriptive: {
                 ...prev.descriptive,
-                ...record.cva_descriptive,
+                ...(record.cva_descriptive || {}),
                 descriptors: {
                   ...prev.descriptive.descriptors,
                   ...(record.cva_descriptive?.descriptors || {})
+                },
+                notes: {
+                  ...prev.descriptive.notes,
+                  ...(record.cva_descriptive?.notes || {})
                 }
               },
-              affective: record.cva_affective || prev.affective,
+              affective: {
+                ...prev.affective,
+                ...(record.cva_affective || {}),
+                notes: {
+                  ...prev.affective.notes,
+                  ...(record.cva_affective?.notes || {})
+                }
+              },
               defects: record.cva_descriptive?.defects || prev.defects,
               notes: record.notes || '',
               tasterName: record.taster_name || 'Q-Grader Senior',
@@ -444,9 +455,30 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
           
           setData(prev => ({
             ...prev,
-            descriptive: excelCupping?.descriptive || prev.descriptive,
-            affective: excelCupping?.affective || prev.affective,
-            defects: excelCupping?.defects || prev.defects,
+            descriptive: {
+                ...prev.descriptive,
+                ...(excelCupping?.descriptive || {}),
+                descriptors: {
+                    ...prev.descriptive.descriptors,
+                    ...(excelCupping?.descriptive?.descriptors || {})
+                },
+                notes: {
+                    ...prev.descriptive.notes,
+                    ...(excelCupping?.descriptive?.notes || {})
+                }
+            },
+            affective: {
+                ...prev.affective,
+                ...(excelCupping?.affective || {}),
+                notes: {
+                    ...prev.affective.notes,
+                    ...(excelCupping?.affective?.notes || {})
+                }
+            },
+            defects: {
+                ...prev.defects,
+                ...(excelCupping?.defects || {})
+            },
             notes: excelCupping?.notes || prev.notes,
             extrinsic: {
               ...prev.extrinsic,
