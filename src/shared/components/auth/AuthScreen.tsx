@@ -29,7 +29,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
     const content = {
         en: {
-            nav: { infra: "Infrastructure", vision: "Vision", login: "Request Demo" },
+            nav: { infra: "Infrastructure", vision: "Vision", login: "Login", demo: "Live Demo" },
             hero: {
                 tag: "Reduce uncertainty before coffee leaves origin.",
                 headline: "You know what the coffee tasted like<br/>at origin. <span class='text-brand-green'>Prove it.</span>",
@@ -112,7 +112,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             }
         },
         es: {
-            nav: { infra: "Infraestructura", vision: "Visión", login: "Agendar Demo" },
+            nav: { infra: "Infraestructura", vision: "Visión", login: "Acceso", demo: "Ver Demo" },
             hero: {
                 tag: "Reduce la incertidumbre antes de que el café salga de origen.",
                 headline: "Sabes a qué sabía el café<br/>en origen. <span class='text-brand-green'>Pruébalo.</span>",
@@ -333,6 +333,13 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         >
                             <span className="text-xs font-black uppercase tracking-widest">{language === 'en' ? 'ES' : 'EN'}</span>
                         </button>
+                        <Link
+                            href="/pitch"
+                            target="_blank"
+                            className="bg-brand-navy text-white px-6 py-3 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-navy/90 transition-all shadow-xl shadow-brand-navy/10"
+                        >
+                            {t.nav.demo}
+                        </Link>
                         <button
                             onClick={() => setShowLoginModal(true)}
                             className="bg-brand-green text-white px-6 py-3 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-green/90 transition-all shadow-xl shadow-brand-green/10"
