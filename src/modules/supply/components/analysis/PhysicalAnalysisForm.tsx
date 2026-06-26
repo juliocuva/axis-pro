@@ -153,7 +153,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.moisture}
                             onChange={(val) => setFormData({ ...formData, moisture: val })}
                             step={0.01}
-                            disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
+                            disabled={isSubmitting || isReadOnly}
                             variant="industrial"
                             inputClassName="text-xs !h-[30px] font-bold uppercase"
                             unit="%"
@@ -170,7 +170,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.waterActivity}
                             onChange={(val) => setFormData({ ...formData, waterActivity: val })}
                             step={0.001}
-                            disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
+                            disabled={isSubmitting || isReadOnly}
                             variant="industrial"
                             inputClassName="text-xs !h-[30px] font-bold uppercase"
                         />
@@ -186,7 +186,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             value={formData.density}
                             onChange={(val) => setFormData({ ...formData, density: val })}
                             step={1}
-                            disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
+                            disabled={isSubmitting || isReadOnly}
                             variant="industrial"
                             inputClassName="text-xs !h-[30px] font-bold uppercase"
                             unit="g/L"
@@ -198,33 +198,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     </div>
                 </div>
 
-                {/* 2. Granulometría (Sieve Instrument) */}
-                <SieveDistributionTable 
-                    data={formData.sieveAnalysis}
-                    onChange={(newData: SieveData) => setFormData({ ...formData, sieveAnalysis: newData })}
-                    isReadOnly={isReadOnly || isAlreadyAnalyzed}
-                    isSubmitting={isSubmitting}
-                    showSyncButton={!isReadOnly && !isAlreadyAnalyzed}
-                    visibleSieves={millSievesAnalyzed?.length > 0 ? (millSievesAnalyzed as Array<keyof SieveData>) : undefined}
-                    onSync={() => {
-                        if (lotDetails?.process_data?.sieve_analysis) {
-                            const sa = lotDetails.process_data.sieve_analysis;
-                            setFormData(prev => ({
-                                ...prev,
-                                sieveAnalysis: {
-                                    m18: Number(sa.m18) || 0,
-                                    m17: Number(sa.m17) || 0,
-                                    m16: Number(sa.m16) || 0,
-                                    m15: Number(sa.m15) || 0,
-                                    m14: Number(sa.caracol) || Number(sa.m14) || 0,
-                                    m13: Number(sa.m13) || 0,
-                                    m12: Number(sa.m12) || 0,
-                                    menores: Number(sa.menores) || 0
-                                }
-                            }));
-                        }
-                    }}
-                />
+
 
                 {/* 3. Defectos & Color (Visual Analysis) */}
                 <div className="mt-4 pt-4 border-t border-gray-400 shadow-sm space-y-4 relative z-10">
@@ -239,7 +213,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 value={formData.defects.primary}
                                 onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, primary: val } })}
                                 step={0.01}
-                                disabled={isSubmitting || isAlreadyAnalyzed}
+                                disabled={isSubmitting}
                                 variant="industrial"
                                 inputClassName="text-xs !h-[30px] font-bold uppercase"
                                 unit="PTS"
@@ -251,7 +225,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                 value={formData.defects.secondary}
                                 onChange={(val) => setFormData({ ...formData, defects: { ...formData.defects, secondary: val } })}
                                 step={0.01}
-                                disabled={isSubmitting || isAlreadyAnalyzed}
+                                disabled={isSubmitting}
                                 variant="industrial"
                                 inputClassName="text-xs !h-[30px] font-bold uppercase"
                                 unit="PTS"
@@ -261,7 +235,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                             <label className="text-[11px] font-bold text-brand-navy uppercase mb-1 block">{t('physicalAnalysisForm', 'colorDescriptor')}</label>
                             <select
                                 value={formData.grainColor}
-                                disabled={isSubmitting || isAlreadyAnalyzed || isReadOnly}
+                                disabled={isSubmitting || isReadOnly}
                                 className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                                 onChange={(e) => setFormData({ ...formData, grainColor: e.target.value })}
                             >
@@ -280,8 +254,8 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                     <div></div>
                     <div className="flex justify-center w-full">
                         <button
-                            type={isAlreadyAnalyzed || isReadOnly ? "button" : "submit"}
-                            disabled={isSubmitting || isAlreadyAnalyzed || !isScreenValid || isReadOnly}
+                            type={isReadOnly ? "button" : "submit"}
+                            disabled={isSubmitting || !isScreenValid || isReadOnly}
                             className={`w-full font-bold py-2.5 rounded-industrial-sm transition-all flex items-center justify-center gap-2 group uppercase text-[11px] shadow-sm ${
                                 isAlreadyAnalyzed 
                                 ? 'bg-white text-brand-navy border border-gray-400 shadow-sm cursor-default' 
@@ -297,7 +271,7 @@ export default function PhysicalAnalysisForm({ inventoryId, lotDestination = 'in
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     <span>SINCRONIZANDO...</span>
                                 </div>
-                            ) : isAlreadyAnalyzed ? (
+                            ) : false ? (
                                 <>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />

@@ -200,7 +200,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <select
                             value={formData.processType}
                             onChange={(e) => setFormData({ ...formData, processType: e.target.value })}
-                            disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
+                            disabled={isSubmitting || isReadOnly}
                             className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
                             <option value="Lavado">LAVADO (18-20%)</option>
@@ -224,7 +224,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     value={formData.humidity}
                     onChange={(val) => setFormData({ ...formData, humidity: val })}
                     step={0.1}
-                    disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
+                    disabled={isSubmitting || isReadOnly}
                     variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'default'}
                     inputClassName="text-xs !h-[30px] font-bold uppercase"
                 />
@@ -237,7 +237,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <select
                             value={formData.preparationProtocol}
                             onChange={(e) => setFormData({ ...formData, preparationProtocol: e.target.value })}
-                            disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
+                            disabled={isSubmitting || isReadOnly}
                             className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
                             <option value="EP">European Prep (EP) - Especialidad</option>
@@ -255,7 +255,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         <select
                             value={formData.sortingMethod}
                             onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
-                            disabled={isSubmitting || isAlreadyThrashed || isReadOnly}
+                            disabled={isSubmitting || isReadOnly}
                             className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
                             <option value="Máquina Selectora Óptica">Máquina Selectora Óptica</option>
@@ -270,7 +270,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
             <SieveDistributionTable 
                 data={formData.sieveAnalysis}
                 onChange={(newData: SieveData) => setFormData({ ...formData, sieveAnalysis: newData })}
-                isReadOnly={isReadOnly || isAlreadyThrashed}
+                isReadOnly={isReadOnly}
                 isSubmitting={isSubmitting}
                 showSyncButton={false}
             />
@@ -290,7 +290,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         step={0.1}
                         unit="KG"
                         required
-                        disabled={isSubmitting || isAlreadyThrashed}
+                        disabled={isSubmitting}
                         variant="industrial"
                         inputClassName="text-xs !h-[30px] font-bold uppercase"
                         formatThousands={true}
@@ -301,7 +301,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         onChange={(val) => setFormData({ ...formData, pasillaWeight: val })}
                         step={0.1}
                         unit="KG"
-                        disabled={isSubmitting || isAlreadyThrashed}
+                        disabled={isSubmitting}
                         variant="industrial"
                         inputClassName="text-xs !h-[30px] font-bold uppercase"
                         formatThousands={true}
@@ -312,7 +312,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         onChange={(val) => setFormData({ ...formData, ciscoWeight: val })}
                         step={0.1}
                         unit="KG"
-                        disabled={isSubmitting || isAlreadyThrashed}
+                        disabled={isSubmitting}
                         variant="industrial"
                         inputClassName="text-xs !h-[30px] opacity-60 font-bold uppercase"
                         formatThousands={true}
@@ -397,7 +397,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                     <div className="flex justify-center w-full">
                         <button
                             type="submit"
-                            disabled={isSubmitting || !formData.excelsoWeight || isAlreadyThrashed || isReadOnly}
+                            disabled={isSubmitting || !formData.excelsoWeight || isReadOnly}
                             className="w-full font-bold py-2.5 rounded-industrial-sm transition-all flex items-center justify-center gap-2 group uppercase text-[11px] shadow-sm bg-brand-green text-white hover:bg-opacity-90 disabled:opacity-50 border border-brand-green"
                         >
                             {isSubmitting ? (
@@ -405,7 +405,7 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     SINCRONIZANDO...
                                 </div>
-                            ) : isAlreadyThrashed ? (
+                            ) : false ? (
                                 <>
                                     {t('thrashingForm', 'sealing')}
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

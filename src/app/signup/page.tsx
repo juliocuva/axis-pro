@@ -14,6 +14,7 @@ export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [activeSlide, setActiveSlide] = useState(0);
     const [activeLangIndex, setActiveLangIndex] = useState(0);
+    const [step, setStep] = useState<1 | 2>(1);
 
     const slides = [
         "Eliminate uncertainty when purchasing coffee.",
@@ -53,7 +54,7 @@ export default function SignupPage() {
         const role = isMasterAuditor ? 'auditor' : (isNumeric ? 'producer' : ((email.includes('julio') || isTatama) ? 'gerente' : 'visitante'));
 
         try {
-            const { data: existingProfile } = await supabase.from('profiles').select('company_id, role, full_name').eq('email', email).single();
+            const { data: existingProfile } = await supabase.from('profiles').select('company_id, role, full_name, id').eq('email', email).single();
             let finalCompanyId = companyId, finalRole = role, finalName = userName;
             if (existingProfile) {
                 finalCompanyId = existingProfile.company_id || companyId;
@@ -64,10 +65,44 @@ export default function SignupPage() {
             
             const userData = { email, name: finalName, companyId: finalCompanyId, role: finalRole };
             localStorage.setItem('axis-user', JSON.stringify(userData));
-            router.push('/');
+            
+            // Proceed to Step 2 to select coffee_type
+            setIsLoading(false);
+            setStep(2);
         } catch (e) {
+            console.error("Signup error:", e);
             const userData = { email, name: userName, companyId, role };
             localStorage.setItem('axis-user', JSON.stringify(userData));
+            
+            setIsLoading(false);
+            setStep(2);
+        }
+    };
+
+    const handleSelectMode = async (type: 'specialty' | 'commercial') => {
+        setIsLoading(true);
+        const userDataStr = localStorage.getItem('axis-user');
+        if (userDataStr) {
+            const userData = JSON.parse(userDataStr);
+            try {
+                // Update profile with selected mode
+                await supabase.from('profiles').update({ coffee_type: type }).eq('email', userData.email.toLowerCase());
+                
+                // Also update local storage
+                userData.coffeeType = type;
+                localStorage.setItem('axis-user', JSON.stringify(userData));
+                
+                // Redirect based on type
+                if (type === 'commercial') {
+                    router.push('/commercial');
+                } else {
+                    router.push('/');
+                }
+            } catch (err) {
+                console.error("Error updating coffee_type:", err);
+                router.push('/');
+            }
+        } else {
             router.push('/');
         }
     };
@@ -166,97 +201,130 @@ export default function SignupPage() {
                         </div>
                     </div>
 
-                    <p className="text-brand-navy/60 mb-6 text-xs text-center">
-                        Already have an account? <Link href="/login" className="text-brand-green hover:text-brand-green/80 font-semibold transition-colors">Log in</Link>
-                    </p>
+                    {step === 1 ? (
+                        <>
+                            <p className="text-brand-navy/60 mb-6 text-xs text-center">
+                                Already have an account? <Link href="/login" className="text-brand-green hover:text-brand-green/80 font-semibold transition-colors">Log in</Link>
+                            </p>
 
-                    <form onSubmit={handleSubmit} className="space-y-3">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2 group">
-                                <input 
-                                    type="text" 
-                                    placeholder="First name" 
-                                    value={identifier}
-                                    onChange={(e) => setIdentifier(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 hover:border-brand-gray"
-                                />
-                            </div>
-                            <div className="space-y-2 group">
-                                <input 
-                                    type="text" 
-                                    placeholder="Last name" 
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 hover:border-brand-gray"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2 group">
-                            <input 
-                                type="text" 
-                                placeholder="Email or ID" 
-                                value={identifier}
-                                onChange={(e) => setIdentifier(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 hover:border-brand-gray"
-                            />
-                        </div>
-
-                        <div className="relative group">
-                            <input 
-                                type={showPassword ? "text" : "password"} 
-                                placeholder="Enter your password" 
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 pr-12 hover:border-brand-gray"
-                            />
-                            <button 
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-navy/40 hover:text-brand-navy/80 transition-colors focus:outline-none"
-                            >
-                                {showPassword ? (
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"/></svg>
-                                ) : (
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                )}
-                            </button>
-                        </div>
-
-                        <div className="flex items-center gap-3 pt-2">
-                            <label className="relative flex items-center cursor-pointer group">
-                                <input type="checkbox" className="peer sr-only" />
-                                <div className="w-4 h-4 bg-transparent border border-brand-gray/50 rounded flex items-center justify-center peer-checked:bg-brand-green peer-checked:border-brand-green transition-all group-hover:border-brand-gray">
-                                    <svg className="w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <form onSubmit={handleSubmit} className="space-y-3">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2 group">
+                                        <input 
+                                            type="text" 
+                                            placeholder="First name" 
+                                            value={identifier}
+                                            onChange={(e) => setIdentifier(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 hover:border-brand-gray"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 group">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Last name" 
+                                            value={lastName}
+                                            onChange={(e) => setLastName(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 hover:border-brand-gray"
+                                        />
+                                    </div>
                                 </div>
-                            </label>
-                            <span className="text-xs text-brand-navy/60 select-none">
-                                I agree to the <a href="#" className="text-brand-green hover:underline hover:text-brand-green/80 transition-colors">Terms & Conditions</a>
-                            </span>
+
+                                <div className="space-y-2 group">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Email or ID" 
+                                        value={identifier}
+                                        onChange={(e) => setIdentifier(e.target.value)}
+                                        className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 hover:border-brand-gray"
+                                    />
+                                </div>
+
+                                <div className="relative group">
+                                    <input 
+                                        type={showPassword ? "text" : "password"} 
+                                        placeholder="Enter your password" 
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full px-4 py-2.5 bg-transparent border border-brand-gray/50 rounded-xl focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green/20 transition-all text-xs text-brand-navy placeholder-brand-navy/40 pr-12 hover:border-brand-gray"
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-navy/40 hover:text-brand-navy/80 transition-colors focus:outline-none"
+                                    >
+                                        {showPassword ? (
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"/></svg>
+                                        ) : (
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-3 pt-2">
+                                    <label className="relative flex items-center cursor-pointer group">
+                                        <input type="checkbox" className="peer sr-only" />
+                                        <div className="w-4 h-4 bg-transparent border border-brand-gray/50 rounded flex items-center justify-center peer-checked:bg-brand-green peer-checked:border-brand-green transition-all group-hover:border-brand-gray">
+                                            <svg className="w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </div>
+                                    </label>
+                                    <span className="text-xs text-brand-navy/60 select-none">
+                                        I agree to the <a href="#" className="text-brand-green hover:underline hover:text-brand-green/80 transition-colors">Terms & Conditions</a>
+                                    </span>
+                                </div>
+
+                                <button 
+                                    type="submit" 
+                                    disabled={isLoading}
+                                    className="w-full mt-4 py-2.5 bg-brand-green hover:bg-brand-green/90 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_4px_14px_rgba(0,96,86,0.2)] hover:shadow-[0_6px_20px_rgba(0,96,86,0.3)] transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0"
+                                >
+                                    {isLoading ? 'Creating account...' : 'Create account'}
+                                </button>
+                            </form>
+
+                            <div className="my-6 flex items-center gap-4 opacity-80">
+                                <div className="h-px bg-brand-navy/20 flex-1"></div>
+                                <span className="text-[10px] text-brand-navy/70 font-semibold uppercase tracking-wider">Or register with</span>
+                                <div className="h-px bg-brand-navy/20 flex-1"></div>
+                            </div>
+
+                            <div className="flex flex-col gap-4">
+                                <button className="flex items-center justify-center gap-3 py-2.5 bg-transparent hover:bg-black/5 border border-brand-gray/50 rounded-xl transition-all group hover:border-brand-gray shadow-sm hover:shadow-md w-full">
+                                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                                    <span className="text-xs font-medium text-brand-navy">Continue with Google</span>
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="animate-in fade-in slide-in-from-right-8 duration-500">
+                            <h3 className="text-2xl font-bold text-brand-navy mb-2 text-center tracking-tight">¿Qué tipo de operación manejas?</h3>
+                            <p className="text-xs text-brand-navy/60 text-center mb-8">
+                                Selecciona el flujo que mejor se adapte a tu necesidad diaria. Podrás cambiar esto más adelante en la configuración.
+                            </p>
+                            
+                            <div className="grid grid-cols-1 gap-4">
+                                <button 
+                                    onClick={() => handleSelectMode('specialty')}
+                                    disabled={isLoading}
+                                    className="flex flex-col items-center justify-center p-6 border-2 border-brand-gray rounded-2xl hover:border-brand-green hover:bg-brand-green/5 transition-all text-brand-navy group"
+                                >
+                                    <span className="text-xl mb-2 group-hover:scale-110 transition-transform">🌿</span>
+                                    <span className="font-bold tracking-wide uppercase text-sm mb-1">Specialty Coffee</span>
+                                    <span className="text-xs text-brand-navy/60 text-center">Microlotes · Laboratorio · Fermentación · CVA</span>
+                                </button>
+                                
+                                <button 
+                                    onClick={() => handleSelectMode('commercial')}
+                                    disabled={isLoading}
+                                    className="flex flex-col items-center justify-center p-6 border-2 border-brand-gray rounded-2xl hover:border-amber-500 hover:bg-amber-500/5 transition-all text-brand-navy group"
+                                >
+                                    <span className="text-xl mb-2 group-hover:scale-110 transition-transform">🚢</span>
+                                    <span className="font-bold tracking-wide uppercase text-sm mb-1">Commercial Coffee</span>
+                                    <span className="text-xs text-brand-navy/60 text-center">Blends · Cooperativas · Volumen · Exportación</span>
+                                </button>
+                            </div>
                         </div>
-
-                        <button 
-                            type="submit" 
-                            disabled={isLoading}
-                            className="w-full mt-4 py-2.5 bg-brand-green hover:bg-brand-green/90 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_4px_14px_rgba(0,96,86,0.2)] hover:shadow-[0_6px_20px_rgba(0,96,86,0.3)] transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:hover:translate-y-0"
-                        >
-                            {isLoading ? 'Creating account...' : 'Create account'}
-                        </button>
-                    </form>
-
-                    <div className="my-6 flex items-center gap-4 opacity-80">
-                        <div className="h-px bg-brand-navy/20 flex-1"></div>
-                        <span className="text-[10px] text-brand-navy/70 font-semibold uppercase tracking-wider">Or register with</span>
-                        <div className="h-px bg-brand-navy/20 flex-1"></div>
-                    </div>
-
-                    <div className="flex flex-col gap-4">
-                        <button className="flex items-center justify-center gap-3 py-2.5 bg-transparent hover:bg-black/5 border border-brand-gray/50 rounded-xl transition-all group hover:border-brand-gray shadow-sm hover:shadow-md w-full">
-                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                            <span className="text-xs font-medium text-brand-navy">Continue with Google</span>
-                        </button>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -55,7 +55,7 @@ export function useThrashingData(inventoryId: string | undefined, userCompanyId:
                         humidity: Number(data.humidity) || data.process_data?.raw_excel_data?.physicalAnalysis?.moisturePct || 11.0,
                         preparationProtocol: data.process_data?.preparation_protocol || 'EP',
                         sortingMethod: data.process_data?.sorting_method || 'Máquina Selectora Óptica',
-                        sieveAnalysis: data.process_data?.sieve_analysis || { m18: 50, m17: 50, m16: 0, m15: 0, m14: 0, m13: 0, m12: 0, menores: 0 }
+                        sieveAnalysis: data.process_data?.sieve_analysis || data.process_data?.raw_excel_data?.physicalAnalysis?.sieveAnalysis || { m18: 50, m17: 50, m16: 0, m15: 0, m14: 0, m13: 0, m12: 0, menores: 0 }
                     });
 
                     if (thrashedW > 0) {

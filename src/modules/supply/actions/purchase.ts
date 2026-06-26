@@ -158,19 +158,19 @@ export async function createCoffeePurchase(formData: PurchaseFormData) {
             message: `Lote ${cleanLotNumber} registrado exitosamente en AXIS COFFEE PRO. Trazabilidad vinculada.`
         };
 
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error("CRITICAL BACKEND ERROR:", error.message);
-            const userMessage = error.message.includes("ERROR INDUSTRIAL") || error.message.includes("Fallo en guardado")
-                ? error.message
-                : `Error de Sincronización Industrial: ${error.message}`;
+    } catch (error: any) {
+        console.error("CRITICAL BACKEND ERROR:", error);
+        
+        const errorMessage = error?.message || (typeof error === 'string' ? error : JSON.stringify(error));
+        
+        const userMessage = errorMessage.includes("ERROR INDUSTRIAL") || errorMessage.includes("Fallo en guardado")
+            ? errorMessage
+            : `Error de Sincronización Industrial: ${errorMessage}`;
 
-            return {
-                success: false,
-                message: userMessage
-            };
-        }
-        return { success: false, message: "Error desconocido" };
+        return {
+            success: false,
+            message: userMessage
+        };
     }
 }
 
@@ -271,14 +271,12 @@ export async function updateCoffeePurchase(lotId: string, formData: PurchaseForm
             data: updateResponse.data,
             message: `Lote ${cleanLotNumber} actualizado correctamente.`
         };
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error("UPDATE ERROR:", error);
-            return {
-                success: false,
-                message: `Fallo al actualizar lote: ${error.message}`
-            };
-        }
-        return { success: false, message: "Error desconocido al actualizar lote" };
+    } catch (error: any) {
+        console.error("UPDATE ERROR:", error);
+        const errorMessage = error?.message || (typeof error === 'string' ? error : JSON.stringify(error));
+        return {
+            success: false,
+            message: `Fallo al actualizar lote: ${errorMessage}`
+        };
     }
 }

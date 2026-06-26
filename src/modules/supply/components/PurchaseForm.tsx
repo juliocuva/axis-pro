@@ -200,7 +200,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
             const isMunBase = COMMON_MUNICIPALITIES.includes((selectedLot.municipality || '') as string);
 
             setFormData({
-                sicaId: selectedLot.process_data?.sica_id || '',
+                sicaId: selectedLot.sica_id || selectedLot.process_data?.sica_id || '',
                 farmerName: selectedLot.farmer_name || '',
                 farmName: selectedLot.farm_name || '',
                 farmSizeHectares: selectedLot.farm_size_hectares || undefined,
@@ -685,19 +685,42 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                                 
                                                                 // 1. Populate formData with inventory part
                                                                 const inv = excelData.inventory;
-                                                                const finalVariety = inv.variety || formData.variety;
-                                                                const finalRegion = inv.region || formData.region;
-                                                                const finalMunicipality = formData.municipality;
+                                                                
+                                                                const matchedVariety = COFFEE_VARIETIES_BASE.find(v => v.toLowerCase() === (inv.variety || '').toLowerCase());
+                                                                const finalVariety = matchedVariety ? matchedVariety : (inv.variety ? 'Otro' : formData.variety);
+                                                                if (finalVariety === 'Otro' && inv.variety) setCustomVariety(inv.variety);
 
+                                                                const matchedRegion = COLOMBIAN_REGIONS.find(r => r.toLowerCase() === (inv.region || '').toLowerCase());
+                                                                const finalRegion = matchedRegion ? matchedRegion : (inv.region ? 'Otro' : formData.region);
+                                                                if (finalRegion === 'Otro' && inv.region) setCustomRegion(inv.region);
+
+                                                                const matchedMun = COMMON_MUNICIPALITIES.find(m => m.toLowerCase() === (inv.municipality || '').toLowerCase());
+                                                                const finalMunicipality = matchedMun ? matchedMun : (inv.municipality ? 'Otro' : formData.municipality);
+                                                                if (finalMunicipality === 'Otro' && inv.municipality) setCustomMunicipality(inv.municipality);
+
+                                                                const matchedProcess = PROCESS_TYPES.find(p => (inv.process || '').toLowerCase().includes(p.toLowerCase()));
+                                                                const finalProcess = matchedProcess ? matchedProcess : formData.process;
+
+                                                                const finalLat = inv.latitude || formData.latitude;
+                                                                const finalLng = inv.longitude || formData.longitude;
+
+                                                                const finalLotNumber = inv.lotNumber || formData.lotNumber;
                                                                 const newData = {
                                                                     ...formData,
-                                                                    lotNumber: inv.lotNumber || formData.lotNumber,
+                                                                    lotNumber: finalLotNumber,
                                                                     farmerName: inv.farmerName || formData.farmerName,
+                                                                    harvestDate: inv.harvestDate || formData.harvestDate,
+                                                                    sicaId: (inv.processData?.sicaId as string) || formData.sicaId,
                                                                     farmName: inv.farmName || formData.farmName,
                                                                     altitude: inv.altitude || formData.altitude,
                                                                     region: finalRegion,
+                                                                    municipality: finalMunicipality,
+                                                                    latitude: finalLat,
+                                                                    longitude: finalLng,
                                                                     variety: finalVariety,
-                                                                    process: inv.process || formData.process,
+                                                                    process: finalProcess,
+                                                                    purchaseDate: formData.purchaseDate,
+                                                                    purchaseValue: formData.purchaseValue,
                                                                     purchaseWeight: inv.purchaseWeight || formData.purchaseWeight,
                                                                     processData: {
                                                                         ...formData.processData,
@@ -706,31 +729,34 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                                     }
                                                                 };
                                                                 setFormData(newData);
+                                                                if (inv.purchaseWeight) setDisplayWeight(formatWeight(String(inv.purchaseWeight).replace('.', ',')));
+                                                                // if (inv.purchaseValue) setDisplayValue(formatCOP(String(inv.purchaseValue))); // Excel doesn't extract purchaseValue currently
                                                                 
                                                                 // 2. AUTO-SAVE to DB so other tabs can be unlocked and read from DB
                                                                 const payload = {
                                                                     ...newData,
-                                                                    variety: finalVariety,
-                                                                    region: finalRegion,
-                                                                    municipality: finalMunicipality,
+                                                                    variety: finalVariety === 'Otro' ? (inv.variety || 'Otro') : finalVariety,
+                                                                    region: finalRegion === 'Otro' ? (inv.region || 'Otro') : finalRegion,
+                                                                    municipality: finalMunicipality === 'Otro' ? (inv.municipality || 'Otro') : finalMunicipality,
                                                                     processData: newData.processData,
                                                                     companyId: user?.companyId || '99999999-9999-9999-9999-999999999999'
                                                                 };
                                                                 
-                                                                let result;
-                                                                if (selectedLot?.id) {
-                                                                    result = await updateCoffeePurchase(selectedLot.id, payload, user as any);
-                                                                } else {
-                                                                    result = await createCoffeePurchase(payload);
-                                                                }
-                                                                
-                                                                if (result.success) {
-                                                                    setStatus({ type: 'success', message: 'Ficha precargada y borrador guardado. Ya puedes navegar a las demás pestañas.' });
-                                                                    if (onPurchaseComplete) {
-                                                                        onPurchaseComplete(result.data);
+                                                                // Siempre usamos createCoffeePurchase al subir Excel porque
+                                                                // tiene lógica de Upsert y validación de lote por número.
+                                                                try {
+                                                                    let result = await createCoffeePurchase(payload);
+                                                                    
+                                                                    if (result.success) {
+                                                                        setStatus({ type: 'success', message: 'Ficha precargada y borrador guardado. Revisa y completa los datos antes de finalizar.' });
+                                                                        // IMPORTANTE: No llamamos a onPurchaseComplete aquí para evitar
+                                                                        // que el componente padre salte automáticamente a la pestaña de Trilla.
+                                                                    } else {
+                                                                        setStatus({ type: 'error', message: 'Error guardando borrador: ' + result.message });
                                                                     }
-                                                                } else {
-                                                                    setStatus({ type: 'error', message: 'Error guardando borrador: ' + result.message });
+                                                                } catch (err: any) {
+                                                                    console.warn("Auto-save failed, continuing locally:", err);
+                                                                    setStatus({ type: 'success', message: 'Excel procesado localmente. No se pudo guardar el borrador en la nube automáticamente, pero puedes revisarlo.' });
                                                                 }
                                                             } catch (error: any) {
                                                                 setStatus({ type: 'error', message: 'Error procesando Excel: ' + error.message });
@@ -1055,7 +1081,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                             <input
                                                 type="text"
                                                 placeholder="Especificar Municipio"
-                                                value={customMunicipality}
+                                                value={customMunicipality || ''}
                                                 onChange={(e) => setCustomMunicipality(e.target.value)}
                                                 className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                                 required
@@ -1068,7 +1094,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                         type="text"
                                         placeholder="Ej. Buon Ma Thuot o Choche"
                                         required
-                                        value={formData.municipality === 'Otro' ? customMunicipality : formData.municipality}
+                                        value={(formData.municipality === 'Otro' ? customMunicipality : formData.municipality) || ''}
                                         onChange={(e) => setFormData({ ...formData, municipality: e.target.value })}
                                         className="w-full uppercase border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
                                         disabled={isSubmitting}
@@ -1229,8 +1255,23 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                     >
                                         <option value="">Select</option>
                                         {dynamicVarieties.map(v => <option key={v} value={v}>{v}</option>)}
-                                        <option value="Other" className="text-brand-navy font-bold">+ OTHER (ENTER NEW)</option>
+                                        <option value="Otro" className="text-brand-navy font-bold">+ OTHER (ENTER NEW)</option>
                                     </select>
+                                    
+                                    {formData.variety === 'Otro' && (
+                                        <div className="animate-in slide-in-from-top-2 duration-300 mt-2 border-t-2 border-brand-green pt-2 shadow-sm">
+                                            <label className="text-[11px] font-bold text-brand-navy uppercase ">Specify Variety</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Ej. Sidra Salvaje"
+                                                required
+                                                value={customVariety}
+                                                onChange={(e) => setCustomVariety(e.target.value)}
+                                                className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
+                                                disabled={isSubmitting}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Proceso */}
@@ -1336,7 +1377,7 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                      DETECTED VARIETY (ORIGIN)
                                  </label>
                                  <div className="w-full h-[30px] border-b border-brand-navy/30 px-2 flex items-center justify-between bg-transparent">
-                                     <span className="text-xs font-bold text-brand-navy uppercase">{formData.variety || '---'}</span>
+                                     <span className="text-xs font-bold text-brand-navy uppercase">{(formData.variety === 'Otro' && customVariety) ? customVariety : (formData.variety || '---')}</span>
                                  </div>
                              </div>
 
@@ -1530,21 +1571,6 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                 />
                             </div>
                         </div>
-
-                        {formData.variety === 'Otro' && (
-                            <div className="animate-in slide-in-from-top-2 duration-300 max-w-md pt-6 border-t-2 border-brand-green shadow-sm">
-                                <label className="text-[11px] font-bold text-brand-navy uppercase ">Nombre Variedad Especial</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej. Sidra Salvaje"
-                                    required
-                                    value={customVariety}
-                                    onChange={(e) => setCustomVariety(e.target.value)}
-                                    className="w-full border-b border-brand-navy/30 px-2 py-2 h-[30px] focus:border-brand-green bg-transparent outline-none transition-all font-medium text-brand-navy text-xs placeholder-gray-400 placeholder:font-light"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                        )}
 
 
                     </section>

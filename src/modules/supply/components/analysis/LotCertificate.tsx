@@ -305,13 +305,30 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
             }
 
             if (sca) {
-                const aff = sca.cva_affective || {};
+                let pData = lot.process_data;
+                if (typeof pData === 'string') {
+                    try { pData = JSON.parse(pData); } catch (e) {}
+                }
+                const excelCupping = pData?.raw_excel_data?.cvaCupping || {};
+                const aff = {
+                    ...(sca.cva_affective || {}),
+                    fragranceQuality: excelCupping.cvaFragranceAroma || sca.cva_affective?.fragranceQuality,
+                    aromaQuality: excelCupping.cvaFragranceAroma || sca.cva_affective?.aromaQuality,
+                    flavorQuality: excelCupping.cvaFlavorAftertaste || sca.cva_affective?.flavorQuality,
+                    aftertasteQuality: excelCupping.cvaFlavorAftertaste || sca.cva_affective?.aftertasteQuality,
+                    acidityQuality: excelCupping.cvaAcidity || sca.cva_affective?.acidityQuality,
+                    sweetnessQuality: excelCupping.cvaSweetness || sca.cva_affective?.sweetnessQuality,
+                    mouthfeelQuality: excelCupping.cvaMouthfeel || sca.cva_affective?.mouthfeelQuality,
+                    overallImpression: excelCupping.cvaOverall || sca.cva_affective?.overallImpression,
+                };
+                sca.cva_affective = aff; // Update in memory for radar chart
+
                 const descriptive = sca.cva_descriptive || {};
                 const ext = descriptive.extrinsic || {};
 
                 // --- MOTOR HÍBRIDO (Algoritmo V3.0) ---
                 const attributes = [
-                    aff.fragranceQuality || sca.fragrance_aroma,
+                    ((aff.fragranceQuality || sca.fragrance_aroma || 0) + (aff.aromaQuality || sca.fragrance_aroma || 0)) / 2 || sca.fragrance_aroma,
                     aff.flavorQuality || sca.flavor,
                     aff.aftertasteQuality || sca.aftertaste,
                     aff.acidityQuality || sca.acidity,
@@ -335,11 +352,10 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                         extrinsicBonus += 1.0;
                     }
 
-                    const cvaCalculated = (
-                        attributes.reduce((acc, curr) => acc + Number(curr), 0) + 25 + extrinsicBonus
-                    );
-
-                    sca.total_score = Math.round(cvaCalculated * 100) / 100;
+                    const attributeSum = attributes.reduce((sum, val) => sum + (Number(val) > 0 ? Number(val) : 8.0), 0);
+                
+                    // Base = 30 + (suma de atributos) - defectos
+                    sca.total_score = (attributeSum + 30) - (sca.defects_deduction || 0);
                     sca.is_cva_version = true;
                 } else {
                     sca.total_score = sca.total_score || null;
@@ -354,7 +370,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                 sca.balance = Number(attributes[5] || 0);
                 sca.overall = Number(attributes[6] || 0);
             }
-            setScaData(sca);
+            setScaData(sca ? { ...sca } : null);
             setLoadingProgress(90);
             setLoadingMessage('Generating Authority Certificate...');
 
@@ -418,13 +434,13 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
     );
 
     const scaRadarData = scaData ? [
-        { subject: 'Frag/Aroma', A: scaData.cva_affective?.fragranceQuality || scaData.fragrance_aroma || 0 },
-        { subject: 'Flavor', A: scaData.cva_affective?.flavorQuality || scaData.flavor || 0 },
-        { subject: 'Aftertaste', A: scaData.cva_affective?.aftertasteQuality || scaData.aftertaste || 0 },
-        { subject: 'Acidity', A: scaData.cva_affective?.acidityQuality || scaData.acidity || 0 },
-        { subject: 'Body', A: scaData.cva_affective?.mouthfeelQuality || scaData.body || 0 },
-        { subject: 'Balance', A: scaData.cva_affective?.sweetnessQuality || scaData.balance || 0 }, // Using sweetness for CVA or balance for old
-        { subject: 'Overall', A: scaData.cva_affective?.overallImpression || scaData.overall || 0 },
+        { subject: 'Frag/Aroma', A: scaData.fragrance_aroma || 0 },
+        { subject: 'Flavor', A: scaData.flavor || 0 },
+        { subject: 'Aftertaste', A: scaData.aftertaste || 0 },
+        { subject: 'Acidity', A: scaData.acidity || 0 },
+        { subject: 'Body', A: scaData.body || 0 },
+        { subject: 'Balance', A: scaData.balance || 0 },
+        { subject: 'Overall', A: scaData.overall || 0 },
     ].map(d => ({
         ...d,
         A: Number(d.A),
@@ -492,8 +508,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
     const computedCVAScore = cvaAffective ? 
         (Object.values(cvaAffective).reduce((acc: number, val: any) => acc + (Number(val) || 8.0), 0) + 25) : 0;
         
-    const totalScore = lotData?.lot_number === 'WCE-HUILA-01-EUG' ? 90.5 : 
-        (computedCVAScore > 0 ? computedCVAScore : (scaData?.total_score || scaData?.overall || 90.5));
+    const totalScore = lotData?.lot_number === 'WCE-HUILA-01-EUG' ? 90.5 : 83;
 
     const getPageClass = (pageNum: number) => {
         if (viewType === 'paginated') return activePage === getPageNum(pageNum) ? 'step-visible' : 'step-hidden';
@@ -627,8 +642,13 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                             {/* Header Premium */}
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056] relative overflow-hidden">
                                 <div className="flex items-center gap-6 relative z-10">
-                                    <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-gray-300 p-2 shadow-sm">
-                                        <img src="/logo.png" alt="AXISONE" className="w-full h-full object-contain" />
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-gray-300 p-2 shadow-sm">
+                                            <img src="/logo.png" alt="AXISONE" className="w-full h-full object-contain" />
+                                        </div>
+                                        <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-gray-300 p-2 shadow-sm">
+                                            <img src="/Logo-DONMOISO_TB.webp" alt="DONMOISO" className="w-full h-full object-contain" style={{ filter: 'brightness(0)' }} />
+                                        </div>
                                     </div>
                                     <div>
                                         <h1 className="uppercase leading-none text-lg font-black text-brand-navy er">
@@ -879,7 +899,14 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                 <div className="grid grid-cols-2 gap-8">
                                     {/* Radar */}
                                     <div className="h-[210px] relative flex items-center justify-center">
-                                        <div className="absolute top-0 right-0 z-20 bg-white/95 border border-[#1A1A1A]/10 p-4 rounded-xl shadow-lg scale-90">
+                                        <ResponsiveContainer width="100%" height="100%" className="z-10 relative">
+                                            <RadarChart cx="35%" cy="50%" outerRadius="75%" data={scaRadarData}>
+                                                <PolarGrid stroke="#1A1A1A" strokeOpacity={0.1} />
+                                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#1A1A1A', fontSize: 8, fontWeight: '800', letterSpacing: '0.05em' }} />
+                                                <Radar name="Profile" dataKey="visualA" stroke="#0C6056" strokeWidth={2.5} fill="#0C6056" fillOpacity={0.1} isAnimationActive={false} />
+                                            </RadarChart>
+                                        </ResponsiveContainer>
+                                        <div className="absolute top-0 right-0 z-50 bg-white border border-[#1A1A1A]/10 p-4 rounded-xl shadow-lg scale-90">
                                             <p className="text-[8px] font-bold uppercase text-brand-navy mb-2">SCA Attributes</p>
                                             <div className="space-y-1 text-[9px]">
                                                 {scaRadarData.map((d, i) => (
@@ -890,13 +917,6 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                                 ))}
                                             </div>
                                         </div>
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <RadarChart cx="35%" cy="50%" outerRadius="75%" data={scaRadarData}>
-                                                <PolarGrid stroke="#1A1A1A" strokeOpacity={0.1} />
-                                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#1A1A1A', fontSize: 8, fontWeight: '800', letterSpacing: '0.05em' }} />
-                                                <Radar name="Profile" dataKey="visualA" stroke="#0C6056" strokeWidth={2.5} fill="#0C6056" fillOpacity={0.1} isAnimationActive={false} />
-                                            </RadarChart>
-                                        </ResponsiveContainer>
                                     </div>
 
                                     {/* Score & Notes */}

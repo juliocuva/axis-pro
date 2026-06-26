@@ -217,7 +217,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                                 notes: formData.notes
                             }
                         },
-                        company_id: user?.companyId
+                        company_id: user?.companyId || '99999999-9999-9999-9999-999999999999'
                     }
                 ]);
 
@@ -247,6 +247,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 else if (typeof err === 'string') errorMsg = err;
                 else errorMsg = Object.getOwnPropertyNames(err).map(k => `${k}: ${err[k]}`).join(', ') || JSON.stringify(err);
             }
+            alert(`ERROR AL GUARDAR TUESTE:\n\n${errorMsg}\n\nSi no sabes cómo solucionarlo, envíame un pantallazo de esto.`);
             setStatus({ type: 'error', message: `DB Error: ${errorMsg}` });
         } finally {
             setIsSubmitting(false);

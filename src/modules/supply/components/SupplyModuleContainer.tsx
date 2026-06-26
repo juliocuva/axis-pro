@@ -57,7 +57,7 @@ export default function SupplyModuleContainer({
         else setActiveTab('roast');
     };
 
-    const isReadOnly = selectedLot && user?.companyId !== selectedLot.company_id && !user?.email?.toLowerCase().includes('julio');
+    const isReadOnly = Boolean(selectedLot && user?.companyId && selectedLot.company_id && user.companyId !== selectedLot.company_id && selectedLot.company_id !== '99999999-9999-9999-9999-999999999999' && !user?.email?.toLowerCase().includes('julio'));
 
     const renderForm = (tab: typeof activeTab) => {
         if (tab === 'transparency') {

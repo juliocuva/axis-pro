@@ -470,6 +470,14 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
             affective: {
                 ...prev.affective,
                 ...(excelCupping?.affective || {}),
+                fragranceQuality: excelCupping?.cvaFragranceAroma || excelCupping?.affective?.fragranceQuality || prev.affective.fragranceQuality,
+                aromaQuality: excelCupping?.cvaFragranceAroma || excelCupping?.affective?.aromaQuality || prev.affective.aromaQuality,
+                flavorQuality: excelCupping?.cvaFlavorAftertaste || excelCupping?.affective?.flavorQuality || prev.affective.flavorQuality,
+                aftertasteQuality: excelCupping?.cvaFlavorAftertaste || excelCupping?.affective?.aftertasteQuality || prev.affective.aftertasteQuality,
+                acidityQuality: excelCupping?.cvaAcidity || excelCupping?.affective?.acidityQuality || prev.affective.acidityQuality,
+                sweetnessQuality: excelCupping?.cvaSweetness || excelCupping?.affective?.sweetnessQuality || prev.affective.sweetnessQuality,
+                mouthfeelQuality: excelCupping?.cvaMouthfeel || excelCupping?.affective?.mouthfeelQuality || prev.affective.mouthfeelQuality,
+                overallImpression: excelCupping?.cvaOverall || excelCupping?.affective?.overallImpression || prev.affective.overallImpression,
                 notes: {
                     ...prev.affective.notes,
                     ...(excelCupping?.affective?.notes || {})
@@ -559,8 +567,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   };
 
   const affectiveScores = [
-    data.affective.fragranceQuality,
-    data.affective.aromaQuality,
+    (data.affective.fragranceQuality + data.affective.aromaQuality) / 2,
     data.affective.flavorQuality,
     data.affective.aftertasteQuality,
     data.affective.acidityQuality,
@@ -569,7 +576,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
     data.affective.overallImpression
   ];
   const totalAffectiveScore = affectiveScores.reduce((acc, val) => acc + (Number(val) > 0 ? Number(val) : 8.0), 0);
-  const totalScore = totalAffectiveScore + 25;
+  const totalScore = totalAffectiveScore + 30;
 
   const isExtrinsicFilled = (() => {
     const sca = data.extrinsicSCA;
@@ -704,19 +711,19 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 flex-1 w-full">
                     <div className="flex items-end gap-2 border-b border-gray-400 pb-1">
                         <label className="text-[12px] font-bold text-brand-navy whitespace-nowrap">Nombre</label>
-                        <input type="text" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isAlreadySealed} />
+                        <input type="text" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})}  />
                     </div>
                     <div className="flex items-end gap-2 border-b border-gray-400 pb-1">
                         <label className="text-[12px] font-bold text-brand-navy whitespace-nowrap">Fecha</label>
-                        <input type="date" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.date || new Date().toISOString().split('T')[0]} onChange={(e) => setData({...data, date: e.target.value})} disabled={isAlreadySealed} />
+                        <input type="date" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.date || new Date().toISOString().split('T')[0]} onChange={(e) => setData({...data, date: e.target.value})}  />
                     </div>
                     <div className="flex items-end gap-2 border-b border-gray-400 pb-1">
                         <label className="text-[12px] font-bold text-brand-navy whitespace-nowrap">Objetivo</label>
-                        <input type="text" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.objective || ''} onChange={(e) => setData({...data, objective: e.target.value})} disabled={isAlreadySealed} />
+                        <input type="text" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.objective || ''} onChange={(e) => setData({...data, objective: e.target.value})}  />
                     </div>
                     <div className="flex items-end gap-2 border-b border-gray-400 pb-1">
                         <label className="text-[12px] font-bold text-brand-navy whitespace-nowrap">N° de muestra</label>
-                        <input type="text" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.extrinsicSCA.sampleNumber} onChange={(e) => setData({...data, extrinsicSCA: {...data.extrinsicSCA, sampleNumber: e.target.value}})} disabled={isAlreadySealed} />
+                        <input type="text" className="flex-1 bg-transparent outline-none text-[12px] font-bold text-brand-navy px-2" value={data.extrinsicSCA.sampleNumber} onChange={(e) => setData({...data, extrinsicSCA: {...data.extrinsicSCA, sampleNumber: e.target.value}})}  />
                     </div>
                 </div>
 
@@ -745,19 +752,19 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     {/* Fragancia Sub-row */}
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] border-b border-black/10">
                         <div className="p-3 lg:p-4 border-b lg:border-b-0 lg:border-r border-black/20 flex flex-col justify-center">
-                            <IntensitySlider label={t('cuppingForm', 'fragrance')} value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'fragrance')} value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isReadOnly} />
                         </div>
                         <div className="p-3 lg:p-4 flex items-center">
-                            <QualityCircles label="Fragancia" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)} disabled={isAlreadySealed} />
+                            <QualityCircles label="Fragancia" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)}  />
                         </div>
                     </div>
                     {/* Aroma Sub-row */}
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] border-b border-black/10">
                         <div className="p-3 lg:p-4 border-b lg:border-b-0 lg:border-r border-black/20 flex flex-col justify-center">
-                            <IntensitySlider label={t('cuppingForm', 'aroma')} value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'aroma')} value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isReadOnly} />
                         </div>
                         <div className="p-3 lg:p-4 flex items-center">
-                            <QualityCircles label="Aroma" value={data.affective.aromaQuality} onChange={(v) => handleQualityChange('aromaQuality', v)} disabled={isAlreadySealed} />
+                            <QualityCircles label="Aroma" value={data.affective.aromaQuality} onChange={(v) => handleQualityChange('aromaQuality', v)}  />
                         </div>
                     </div>
                     {/* Notes Sub-row */}
@@ -779,7 +786,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     ]}
                                     selected={data.descriptive.descriptors.fragrance}
                                     onToggle={(v) => toggleDescriptor('fragrance', v)}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -788,13 +795,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]"
                                     value={data.descriptive.notes.fragranceAroma}
                                     onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, fragranceAroma: e.target.value } } })}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                         </div>
                         <div className="p-4 flex flex-col">
                             <label className="text-[10px] font-bold text-brand-navy uppercase mb-1">NOTES</label>
-                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.fragranceAroma} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, fragranceAroma: e.target.value } } })} disabled={isAlreadySealed} />
+                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.fragranceAroma} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, fragranceAroma: e.target.value } } })}  />
                         </div>
                     </div>
                 </div>
@@ -804,19 +811,19 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     {/* Flavor Sub-row */}
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] border-b border-black/10">
                         <div className="p-3 lg:p-4 border-b lg:border-b-0 lg:border-r border-black/20 flex flex-col justify-center">
-                            <IntensitySlider label={t('cuppingForm', 'flavor')} value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'flavor')} value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isReadOnly} />
                         </div>
                         <div className="p-3 lg:p-4 flex items-center">
-                            <QualityCircles label={t('cuppingForm', 'flavor')} value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isAlreadySealed} />
+                            <QualityCircles label={t('cuppingForm', 'flavor')} value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)}  />
                         </div>
                     </div>
                     {/* Aftertaste Sub-row */}
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] border-b border-black/10">
                         <div className="p-3 lg:p-4 border-b lg:border-b-0 lg:border-r border-black/20 flex flex-col justify-center">
-                            <IntensitySlider label={t('cuppingForm', 'aftertaste')} value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'aftertaste')} value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isReadOnly} />
                         </div>
                         <div className="p-3 lg:p-4 flex items-center">
-                            <QualityCircles label={t('cuppingForm', 'aftertaste')} value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isAlreadySealed} />
+                            <QualityCircles label={t('cuppingForm', 'aftertaste')} value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)}  />
                         </div>
                     </div>
                     {/* Notes Sub-row */}
@@ -835,14 +842,14 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     ]}
                                     selected={data.descriptive.descriptors.flavor}
                                     onToggle={(v) => toggleDescriptor('flavor', v)}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                                 <DescriptiveMarkerGroup 
                                     label={t('cuppingForm', 'predominantGusts')}
                                     options={['Salty', 'Sour', 'Sweet', 'Bitter', 'Umami']}
                                     selected={data.descriptive.predominantGusts}
                                     onToggle={toggleGust}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -851,13 +858,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]"
                                     value={data.descriptive.notes.flavorAftertaste}
                                     onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, flavorAftertaste: e.target.value } } })}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                         </div>
                         <div className="p-4 flex flex-col">
                             <label className="text-[10px] font-bold text-brand-navy uppercase mb-1">NOTES</label>
-                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.flavor} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, flavor: e.target.value } } })} disabled={isAlreadySealed} />
+                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.flavor} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, flavor: e.target.value } } })}  />
                         </div>
                     </div>
                 </div>
@@ -866,10 +873,10 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 <div className="flex flex-col border-b border-black/20">
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] border-b border-black/10">
                         <div className="p-3 lg:p-4 border-b lg:border-b-0 lg:border-r border-black/20 flex flex-col justify-center">
-                            <IntensitySlider label={t('cuppingForm', 'acidity')} value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'acidity')} value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isReadOnly} />
                         </div>
                         <div className="p-3 lg:p-4 flex items-center">
-                            <QualityCircles label={t('cuppingForm', 'acidity')} value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isAlreadySealed} />
+                            <QualityCircles label={t('cuppingForm', 'acidity')} value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)}  />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%]">
@@ -880,7 +887,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     options={['Citrus', 'Malic', 'Phosphoric', 'Acetic', 'Lactic', 'Vibrant', 'Complex']}
                                     selected={data.descriptive.descriptors.acidity}
                                     onToggle={(v) => toggleDescriptor('acidity', v)}
-                                    disabled={isAlreadySealed || isReadOnly}
+                                    disabled={isReadOnly}
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -889,13 +896,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]"
                                     value={data.descriptive.notes.acidity}
                                     onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, acidity: e.target.value } } })}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                         </div>
                         <div className="p-4 flex flex-col">
                             <label className="text-[10px] font-bold text-brand-navy uppercase mb-1">NOTES</label>
-                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.acidity} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, acidity: e.target.value } } })} disabled={isAlreadySealed} />
+                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.acidity} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, acidity: e.target.value } } })}  />
                         </div>
                     </div>
                 </div>
@@ -904,10 +911,10 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 <div className="flex flex-col border-b border-black/20">
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] border-b border-black/10">
                         <div className="p-3 lg:p-4 border-b lg:border-b-0 lg:border-r border-black/20 flex flex-col justify-center">
-                            <IntensitySlider label={t('cuppingForm', 'sweetness')} value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'sweetness')} value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isReadOnly} />
                         </div>
                         <div className="p-3 lg:p-4 flex items-center">
-                            <QualityCircles label={t('cuppingForm', 'sweetness')} value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isAlreadySealed} />
+                            <QualityCircles label={t('cuppingForm', 'sweetness')} value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)}  />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%]">
@@ -918,7 +925,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     options={['Honey', 'Brown Sugar', 'Syrup', 'Molasses', 'Floral', 'Fruity']}
                                     selected={data.descriptive.descriptors.sweetness}
                                     onToggle={(v) => toggleDescriptor('sweetness', v)}
-                                    disabled={isAlreadySealed || isReadOnly}
+                                    disabled={isReadOnly}
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -927,13 +934,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]"
                                     value={data.descriptive.notes.sweetness}
                                     onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, sweetness: e.target.value } } })}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                         </div>
                         <div className="p-4 flex flex-col">
                             <label className="text-[10px] font-bold text-brand-navy uppercase mb-1">NOTES</label>
-                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.sweetness} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, sweetness: e.target.value } } })} disabled={isAlreadySealed} />
+                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.sweetness} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, sweetness: e.target.value } } })}  />
                         </div>
                     </div>
                 </div>
@@ -942,10 +949,10 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 <div className="flex flex-col border-b border-black/20">
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] border-b border-black/10">
                         <div className="p-3 lg:p-4 border-b lg:border-b-0 lg:border-r border-black/20 flex flex-col justify-center">
-                            <IntensitySlider label={t('cuppingForm', 'mouthfeel')} value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isAlreadySealed || isReadOnly} />
+                            <IntensitySlider label={t('cuppingForm', 'mouthfeel')} value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isReadOnly} />
                         </div>
                         <div className="p-3 lg:p-4 flex items-center">
-                            <QualityCircles label="Sensación en boca" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)} disabled={isAlreadySealed} />
+                            <QualityCircles label="Sensación en boca" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)}  />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%]">
@@ -956,7 +963,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     options={['Rough', 'Oily', 'Smooth', 'Astringent', 'Metallic', 'Creamy', 'Silky', 'Syrupy']}
                                     selected={data.descriptive.descriptors.mouthfeel}
                                     onToggle={(v) => toggleDescriptor('mouthfeel', v)}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                             <div className="flex flex-col">
@@ -965,13 +972,13 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                     className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]"
                                     value={data.descriptive.notes.mouthfeel}
                                     onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, mouthfeel: e.target.value } } })}
-                                    disabled={isAlreadySealed}
+                                    
                                 />
                             </div>
                         </div>
                         <div className="p-4 flex flex-col">
                             <label className="text-[10px] font-bold text-brand-navy uppercase mb-1">NOTES</label>
-                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.mouthfeel} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, mouthfeel: e.target.value } } })} disabled={isAlreadySealed} />
+                            <textarea className="flex-1 bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[80px]" value={data.affective.notes.mouthfeel} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, mouthfeel: e.target.value } } })}  />
                         </div>
                     </div>
                 </div>
@@ -985,7 +992,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                             className="flex-1 bg-gray-100 border-none rounded-none p-3 text-xs text-brand-navy resize-none outline-none focus:border-black min-h-[120px]"
                             value={data.descriptive.notes.other}
                             onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, other: e.target.value } } })}
-                            disabled={isAlreadySealed}
+                            
                         />
                     </div>
                     {/* Right: Overall & Defects */}
@@ -994,11 +1001,11 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                         <div className="flex flex-col gap-4 flex-1">
                             <div className="flex flex-col gap-2">
                                 <label className="text-[10px] font-bold text-brand-navy uppercase">OVERALL IMPRESSION</label>
-                                <QualityCircles label={t('cuppingForm', 'overallImpression')} value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isAlreadySealed} />
+                                <QualityCircles label={t('cuppingForm', 'overallImpression')} value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)}  />
                             </div>
                             <div className="flex flex-col flex-1">
                                 <label className="text-[10px] font-bold text-brand-navy uppercase mb-1">NOTES</label>
-                                <textarea className="w-full h-full min-h-[60px] bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black" value={data.affective.notes.overall} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, overall: e.target.value } } })} disabled={isAlreadySealed} />
+                                <textarea className="w-full h-full min-h-[60px] bg-gray-100 border-none rounded-none p-2 text-xs text-brand-navy resize-none outline-none focus:border-black" value={data.affective.notes.overall} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, overall: e.target.value } } })}  />
                             </div>
                         </div>
                         {/* Defects */}
@@ -1013,7 +1020,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                                 key={num}
                                                 type="button"
                                                 onClick={() => setData({...data, defects: {...data.defects, nonUniformCups: data.defects.nonUniformCups === num ? 0 : num}})}
-                                                disabled={isAlreadySealed}
+                                                
                                                 className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border border-brand-navy transition-all ${
                                                     num <= data.defects.nonUniformCups ? 'bg-brand-navy' : 'bg-white hover:bg-gray-100'
                                                 }`}
@@ -1029,7 +1036,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                                 key={num}
                                                 type="button"
                                                 onClick={() => setData({...data, defects: {...data.defects, defectiveCups: data.defects.defectiveCups === num ? 0 : num}})}
-                                                disabled={isAlreadySealed}
+                                                
                                                 className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border border-brand-navy transition-all ${
                                                     num <= data.defects.defectiveCups ? 'bg-brand-red border-brand-red' : 'bg-white hover:bg-gray-100'
                                                 }`}
@@ -1048,7 +1055,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                                             key={defect.id}
                                             type="button"
                                             onClick={() => toggleDefectType(defect.id)}
-                                            disabled={isAlreadySealed}
+                                            
                                             className="flex items-center gap-1.5 text-left"
                                         >
                                             <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full flex-shrink-0 border transition-all ${
@@ -1095,17 +1102,17 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 <div className="flex flex-col gap-6 pt-6">
                     <div className="space-y-2">
                         <label className="text-[11px] font-bold text-brand-navy uppercase block">Head Taster</label>
-                        <input type="text" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isAlreadySealed} className="w-full bg-gray-100 border-none rounded-none px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none focus:border-black" />
+                        <input type="text" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})}  className="w-full bg-gray-100 border-none rounded-none px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none focus:border-black" />
                     </div>
                     <div className="space-y-2 flex-1 flex flex-col">
                         <label className="text-[11px] font-bold text-brand-navy uppercase block">Lab Notes</label>
-                        <textarea value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})} disabled={isAlreadySealed} className="w-full flex-1 bg-gray-100 border-none rounded-none px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none resize-none focus:border-black min-h-[120px]" placeholder="Escriba aquí los descriptores finales..." />
+                        <textarea value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})}  className="w-full flex-1 bg-gray-100 border-none rounded-none px-4 py-3 text-xs font-bold text-brand-navy font-black outline-none resize-none focus:border-black min-h-[120px]" placeholder="Escriba aquí los descriptores finales..." />
                     </div>
                 </div>
             </div> {/* END RESULTADOS Y NOTAS */}
 
             {/* BOTÓN DE NAVEGACIÓN A EXTRÍNSECO */}
-            {!isAlreadySealed && (
+            {true && (
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={() => setActiveTab('extrinsic')}
@@ -1143,7 +1150,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 info={data.extrinsicSCA.cultivo.info}
                 onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, cultivo: {...p.extrinsicSCA.cultivo, items: {...p.extrinsicSCA.cultivo.items, [key]: !p.extrinsicSCA.cultivo.items[key]}}}}))} 
                 onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, cultivo: {...p.extrinsicSCA.cultivo, info: val}}}))}
-                disabled={isAlreadySealed || isReadOnly}
+                disabled={isReadOnly}
               />
               <SCAExtrinsicSection
                 title="Processing"
@@ -1164,7 +1171,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 info={data.extrinsicSCA.procesamiento.info}
                 onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, procesamiento: {...p.extrinsicSCA.procesamiento, items: {...p.extrinsicSCA.procesamiento.items, [key]: !p.extrinsicSCA.procesamiento.items[key]}}}}))} 
                 onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, procesamiento: {...p.extrinsicSCA.procesamiento, info: val}}}))}
-                disabled={isAlreadySealed || isReadOnly}
+                disabled={isReadOnly}
               />
             </div>
           </div>
@@ -1188,7 +1195,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 info={data.extrinsicSCA.comercio.info}
                 onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, comercio: {...p.extrinsicSCA.comercio, items: {...p.extrinsicSCA.comercio.items, [key]: !p.extrinsicSCA.comercio.items[key]}}}}))} 
                 onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, comercio: {...p.extrinsicSCA.comercio, info: val}}}))}
-                disabled={isAlreadySealed || isReadOnly}
+                disabled={isReadOnly}
               />
               <SCAExtrinsicSection
                 title="Certifications"
@@ -1205,7 +1212,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 info={data.extrinsicSCA.certificaciones.info}
                 onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, certificaciones: {...p.extrinsicSCA.certificaciones, items: {...p.extrinsicSCA.certificaciones.items, [key]: !p.extrinsicSCA.certificaciones.items[key]}}}}))} 
                 onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, certificaciones: {...p.extrinsicSCA.certificaciones, info: val}}}))}
-                disabled={isAlreadySealed || isReadOnly}
+                disabled={isReadOnly}
               />
             </div>
           </div>
@@ -1223,7 +1230,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                 info={data.extrinsicSCA.otro.info}
                 onToggle={(key) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, otro: {...p.extrinsicSCA.otro, items: {...p.extrinsicSCA.otro.items, [key]: !p.extrinsicSCA.otro.items[key]}}}}))} 
                 onInfoChange={(val) => setData(p => ({...p, extrinsicSCA: {...p.extrinsicSCA, otro: {...p.extrinsicSCA.otro, info: val}}}))}
-                disabled={isAlreadySealed || isReadOnly}
+                disabled={isReadOnly}
               />
               <div className="p-4 bg-white flex items-center justify-center">
                 <p className="text-[9px] font-bold text-brand-navy/40 uppercase text-center">ADDITIONAL FIELDS AVAILABLE<br />IN THE ALQUIMIA PROTOCOL MODULE</p>
@@ -1232,7 +1239,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
           </div>
 
           {/* BOTÓN SELLAR EN TAB EXTRÍNSECO */}
-          {!isAlreadySealed && !isReadOnly && (
+          {!isReadOnly && (
             <button
               onClick={handleSave}
               disabled={isSaving || !isExtrinsicFilled}

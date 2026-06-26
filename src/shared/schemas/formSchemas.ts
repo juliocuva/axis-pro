@@ -11,7 +11,7 @@ export const purchaseSchema = z.object({
     variety: z.string().min(2, "La variedad es requerida"),
     process: z.string().min(2, "El proceso es requerido"),
     purchaseWeight: z.preprocess((a) => Number(a), z.number().positive("El peso debe ser mayor a 0")),
-    purchaseValue: z.preprocess((a) => Number(a), z.number().positive("El valor de compra debe ser mayor a 0")),
+    purchaseValue: z.preprocess((a) => Number(a), z.number().min(0, "El valor de compra no puede ser negativo")),
     purchaseDate: z.string().min(10, "La fecha de compra es inválida"),
     harvestDate: z.string().min(10, "La fecha de cosecha es inválida"),
     destination: z.string().optional(),

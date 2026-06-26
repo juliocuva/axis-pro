@@ -334,18 +334,11 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                             <span className="text-xs font-black uppercase tracking-widest">{language === 'en' ? 'ES' : 'EN'}</span>
                         </button>
                         <Link
-                            href="/pitch"
-                            target="_blank"
-                            className="bg-brand-navy text-white px-6 py-3 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-navy/90 transition-all shadow-xl shadow-brand-navy/10"
-                        >
-                            {t.nav.demo}
-                        </Link>
-                        <button
-                            onClick={() => setShowLoginModal(true)}
+                            href="/login"
                             className="bg-brand-green text-white px-6 py-3 rounded-industrial-sm text-xs font-black uppercase hover:bg-brand-green/90 transition-all shadow-xl shadow-brand-green/10"
                         >
                             {t.nav.login}
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </header>
@@ -370,12 +363,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                         />
                     </div>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-                        <button 
-                            onClick={() => setShowLoginModal(true)}
-                            className="w-full md:w-auto bg-brand-green text-white px-12 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/30 text-center"
+                        <Link 
+                            href="/login"
+                            className="w-full md:w-auto bg-brand-green text-white px-12 py-5 rounded-industrial-sm text-xs font-black uppercase hover:scale-105 transition-all shadow-2xl shadow-brand-green/30 text-center inline-block"
                         >
                             {t.hero.cta}
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </main>
