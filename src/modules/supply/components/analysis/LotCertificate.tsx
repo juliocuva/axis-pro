@@ -791,21 +791,21 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                         <div className="grid grid-cols-3 gap-2">
                                             <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
                                                 <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Roast</p>
-                                                <p className="text-xs font-black">City+</p>
+                                                <p className="text-xs font-black">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastLevel || 'City+'}</p>
                                             </div>
                                             <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
                                                 <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Time</p>
-                                                <p className="text-xs font-black">10:42 Min</p>
+                                                <p className="text-xs font-black">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime} Min` : '10:42 Min'}</p>
                                             </div>
                                             <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
-                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">DTR</p>
-                                                <p className="text-xs font-black">14.5%</p>
+                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Weight Loss</p>
+                                                <p className="text-xs font-black">{lotData?.process_data?.raw_excel_data?.roastBatch?.greenWeight && lotData?.process_data?.raw_excel_data?.roastBatch?.roastedWeight ? (((lotData.process_data.raw_excel_data.roastBatch.greenWeight - lotData.process_data.raw_excel_data.roastBatch.roastedWeight) / lotData.process_data.raw_excel_data.roastBatch.greenWeight) * 100).toFixed(1) + '%' : '14.5%'}</p>
                                             </div>
                                         </div>
                                         <div className="bg-[#0C6056]/5 border border-[#0C6056]/10 p-3 rounded-xl flex items-center justify-between text-[10px] px-4">
                                             <div>
                                                 <p className="text-[7.5px] text-[#0C6056] font-bold uppercase">Roast Master</p>
-                                                <p className="font-black uppercase">JULIO UVA</p>
+                                                <p className="font-black uppercase">{lotData?.process_data?.raw_excel_data?.roastBatch?.roasterName || 'JULIO UVA'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[7.5px] text-[#0C6056] font-bold uppercase text-right">Sorting Method</p>
