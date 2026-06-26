@@ -15,6 +15,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
         selectedWeight: 0,
         quakersGrams: 0,
         roastTime: '',
+        roastLevel: 'City+',
         developmentTime: '',
         developmentPct: 0,
         dropTemp: 0,
@@ -114,7 +115,8 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                 selectedWeight: prev.selectedWeight || parseFloat(predRoasted.toFixed(2)),
                 quakersGrams: prev.quakersGrams || 0,
                 chargeTemp: excelData?.chargeTemp || prev.chargeTemp || 200,
-                dropTemp: excelData?.dropTemp || prev.dropTemp || predDrop,
+                dropTemp: excelData?.maxTemp || excelData?.dropTemp || prev.dropTemp || predDrop,
+                roastLevel: excelData?.roastLevel || prev.roastLevel || 'City+',
                 developmentPct: prev.developmentPct || predDevPct,
                 roastTime: excelData?.roastTime || prev.roastTime || '11:00',
                 developmentTime: prev.developmentTime || '1:45'
@@ -211,6 +213,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                                 fcTime: formData.fcTime,
                                 fcTemp: formData.fcTemp,
                                 roastTime: formData.roastTime,
+                                roastLevel: formData.roastLevel,
                                 developmentTime: formData.developmentTime,
                                 developmentPct: formData.developmentPct,
                                 dropTemp: formData.dropTemp,
@@ -521,6 +524,21 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
                             className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400"
                             disabled={isSubmitting}
                         />
+                    </div>
+                    <div>
+                        <label className="text-[11px] font-bold text-brand-green uppercase mb-1 block">Roast Level</label>
+                        <select
+                            value={formData.roastLevel}
+                            onChange={(e) => setFormData({ ...formData, roastLevel: e.target.value })}
+                            className="w-full bg-transparent border-b-2 border-zinc-300 px-0 py-1 text-xs focus:border-brand-green outline-none transition-all font-mono text-brand-navy text-sm font-bold placeholder:text-gray-400 appearance-none cursor-pointer"
+                            disabled={isSubmitting}
+                        >
+                            <option value="Cinnamon">Cinnamon (Light)</option>
+                            <option value="City">City (Medium-Light)</option>
+                            <option value="City+">City+ (Medium)</option>
+                            <option value="Full City">Full City (Medium-Dark)</option>
+                            <option value="Dark Roast">Dark Roast (Vienna/French)</option>
+                        </select>
                     </div>
                     <NumericInput
                         label="Drop Temp (°C)"

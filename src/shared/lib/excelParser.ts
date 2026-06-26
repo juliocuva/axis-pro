@@ -79,7 +79,13 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
   // y el valor a llenar está en la columna B (índice 1)
   for (const row of rows) {
     const key = row[0];
-    const val = row[1];
+    let val = row[1];
+    
+    // Si la columna B est vaca, intentar leer de la columna C (ndice 2)
+    // Esto previene errores si el usuario escribi en C o si hay celdas combinadas.
+    if ((val === undefined || val === null || val === '') && row.length > 2) {
+        val = row[2];
+    }
     
     if (typeof key === 'string' && key.trim() !== '') {
       dataMap[key.trim()] = val;
@@ -89,6 +95,18 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
   const getString = (key: string): string => {
     const val = dataMap[key];
     return val !== undefined && val !== null ? String(val) : '';
+  };
+
+  const parseTimeStr = (key: string): string => {
+    const val = dataMap[key];
+    if (val === undefined || val === null || val === '') return '';
+    if (typeof val === 'number') {
+        const total = Math.round(val * 1440);
+        const m = Math.floor(total / 60);
+        const s = total % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+    return String(val);
   };
 
   // --- FUNCIONES AUXILIARES PARA COORDENADAS ---
@@ -235,7 +253,7 @@ export function parseFichaDeLote(buffer: Buffer | ArrayBuffer): ExcelParsedPaylo
     roasterName: getString('Operario_Tueste'),
     agtronBean: parseNum(dataMap['Agtron_Grano']),
     agtronGround: parseNum(dataMap['Agtron_Molido']),
-    roastTime: getString('Tiempo_Tueste_min'),
+    roastTime: parseTimeStr('Tiempo_Tueste_min'),
     maxTemp: parseNum(dataMap['Temperatura_Max_C']),
     roastLevel: getString('Nivel_Tueste'),
     notes: getString('Perfil_Tueste_Notas')

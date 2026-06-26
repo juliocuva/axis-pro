@@ -642,22 +642,20 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                             {/* Header Premium */}
                             <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056] relative overflow-hidden">
                                 <div className="flex items-center gap-6 relative z-10">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-gray-300 p-2 shadow-sm">
-                                            <img src="/logo.png" alt="AXISONE" className="w-full h-full object-contain" />
-                                        </div>
-                                        <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-gray-300 p-2 shadow-sm">
-                                            <img src="/Logo-DONMOISO_TB.webp" alt="DONMOISO" className="w-full h-full object-contain" style={{ filter: 'brightness(0)' }} />
-                                        </div>
+                                    <div className="flex items-center gap-5">
+                                        <img src="/logo.png" alt="AXISONE" className="h-14 object-contain" />
+                                        <img src="/Logo-DONMOISO_TB.webp" alt="DONMOISO" className="h-16 object-contain" style={{ filter: 'brightness(0)' }} />
                                     </div>
                                     <div>
                                         <h1 className="uppercase leading-none text-lg font-black text-brand-navy er">
                                             DIGITAL <span className="text-[#0C6056]">COFFEE PASSPORT</span>
                                         </h1>
-                                        <p className="uppercase mt-1 text-[#0C6056] text-[10px] font-bold">
-                                            AUDITED BY: {associationData?.full_name || 'AXISONE COFFEE'}
+                                        <h2 className="uppercase leading-none text-sm font-black text-brand-navy mt-1">
+                                            Don Moiso Coffee
+                                        </h2>
+                                        <p className="italic text-[#0C6056] text-[10px] font-medium mt-1">
+                                            "Reduce uncertainty before coffee leaves origin."
                                         </p>
-                                        <p className="text-brand-navy/40 text-[8px] font-medium uppercase mt-0.5">Origin, Milling, Processing & Physical Analysis • Page 1 of 2</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -704,9 +702,17 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                             <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Incoming Weight</p>
                                             <p className="text-xs font-black text-brand-navy">{lotData?.purchase_weight || '0'} KG</p>
                                         </div>
-                                        <div className="col-span-2">
+                                        <div>
                                             <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">EUDR Cryptographic Seal</p>
                                             <p className="text-[9px] font-mono font-bold text-[#0C6056] break-all">{ddsReference || passportData.eudrHash || 'VERIFIED ORIGIN'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">GPS Coordinates</p>
+                                            <p className="uppercase text-[10px] font-mono font-black text-[#0C6056]">
+                                                {(lotData?.latitude || lotData?.process_data?.raw_excel_data?.inventory?.latitude) && (lotData?.longitude || lotData?.process_data?.raw_excel_data?.inventory?.longitude)
+                                                    ? `${lotData?.latitude || lotData?.process_data?.raw_excel_data?.inventory?.latitude}, ${lotData?.longitude || lotData?.process_data?.raw_excel_data?.inventory?.longitude}` 
+                                                    : 'PENDING'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -788,18 +794,26 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     {/* Tostión */}
                                     <div className="space-y-3 border-l border-black/5 pl-6">
                                         <h3 className="text-[9px] font-black uppercase text-[#0C6056] tracking-wider">Roast Parameters</h3>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
-                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Roast</p>
-                                                <p className="text-xs font-black">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastLevel || 'City+'}</p>
+                                        <div className="grid grid-cols-5 gap-1.5">
+                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Roast</p>
+                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastLevel || 'City+'}</p>
                                             </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
-                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Time</p>
-                                                <p className="text-xs font-black">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime} Min` : '10:42 Min'}</p>
+                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Time</p>
+                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime}m` : '10m'}</p>
                                             </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
-                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Weight Loss</p>
-                                                <p className="text-xs font-black">{lotData?.process_data?.raw_excel_data?.roastBatch?.greenWeight && lotData?.process_data?.raw_excel_data?.roastBatch?.roastedWeight ? (((lotData.process_data.raw_excel_data.roastBatch.greenWeight - lotData.process_data.raw_excel_data.roastBatch.roastedWeight) / lotData.process_data.raw_excel_data.roastBatch.greenWeight) * 100).toFixed(1) + '%' : '14.5%'}</p>
+                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">End Temp</p>
+                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.maxTemp ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.maxTemp}°` : '204°'}</p>
+                                            </div>
+                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Agtron</p>
+                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.agtronBean || '58'}</p>
+                                            </div>
+                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Wt Loss</p>
+                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.greenWeight && lotData?.process_data?.raw_excel_data?.roastBatch?.roastedWeight ? (((lotData.process_data.raw_excel_data.roastBatch.greenWeight - lotData.process_data.raw_excel_data.roastBatch.roastedWeight) / lotData.process_data.raw_excel_data.roastBatch.greenWeight) * 100).toFixed(1) + '%' : '14.5%'}</p>
                                             </div>
                                         </div>
                                         <div className="bg-[#0C6056]/5 border border-[#0C6056]/10 p-3 rounded-xl flex items-center justify-between text-[10px] px-4">
@@ -877,13 +891,28 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                             style={getPageStyle(2)}>
 
                             {/* Header Premium Page 2 */}
-                            <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056]">
-                                <div className="flex items-center gap-4">
-                                    <img src="/logo.png" alt="AXISONE" className="h-8 w-auto" />
-                                    <span className="h-4 w-px bg-black/20"></span>
-                                    <p className="uppercase text-brand-navy/80 text-[11px] font-bold">Stage 05 & 06: Sensory Verdict & Final Seal</p>
+                            <div className="bg-white px-10 py-6 flex justify-between items-center border-b-4 border-[#0C6056] relative overflow-hidden">
+                                <div className="flex items-center gap-6 relative z-10">
+                                    <div className="flex items-center gap-5">
+                                        <img src="/logo.png" alt="AXISONE" className="h-14 object-contain" />
+                                        <img src="/Logo-DONMOISO_TB.webp" alt="DONMOISO" className="h-16 object-contain" style={{ filter: 'brightness(0)' }} />
+                                    </div>
+                                    <div>
+                                        <h1 className="uppercase leading-none text-lg font-black text-brand-navy er">
+                                            DIGITAL <span className="text-[#0C6056]">COFFEE PASSPORT</span>
+                                        </h1>
+                                        <h2 className="uppercase leading-none text-sm font-black text-brand-navy mt-1">
+                                            Don Moiso Coffee
+                                        </h2>
+                                        <p className="italic text-[#0C6056] text-[10px] font-medium mt-1">
+                                            "Reduce uncertainty before coffee leaves origin."
+                                        </p>
+                                    </div>
                                 </div>
-                                <p className="text-[11px] font-bold text-[#0C6056] uppercase er">{lotData?.lot_number}</p>
+                                <div className="text-right">
+                                    <p className="uppercase text-brand-navy/30 text-[8px] font-bold">Lot ID</p>
+                                    <p className="mt-0.5 text-[#0C6056] text-lg font-black er">{lotData?.lot_number || 'LOT-AXIS'}</p>
+                                </div>
                             </div>
 
                             {/* SECCIÓN: CATACIÓN SCA */}

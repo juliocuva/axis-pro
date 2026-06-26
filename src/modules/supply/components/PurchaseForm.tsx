@@ -698,8 +698,16 @@ export default function PurchaseForm({ onPurchaseComplete, selectedLot, user, is
                                                                 const finalMunicipality = matchedMun ? matchedMun : (inv.municipality ? 'Otro' : formData.municipality);
                                                                 if (finalMunicipality === 'Otro' && inv.municipality) setCustomMunicipality(inv.municipality);
 
-                                                                const matchedProcess = PROCESS_TYPES.find(p => (inv.process || '').toLowerCase().includes(p.toLowerCase()));
-                                                                const finalProcess = matchedProcess ? matchedProcess : formData.process;
+                                                                const matchProcessStr = (raw: string) => {
+                                                                    const s = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
+                                                                    if (s.includes('semilavado') || s.includes('semiwashed') || s.includes('semi')) return 'semilavado';
+                                                                    if (s.includes('lavado') || s.includes('washed')) return 'lavado';
+                                                                    if (s.includes('honey') || s.includes('miel')) return 'honey';
+                                                                    if (s.includes('natural') || s.includes('seco')) return 'natural';
+                                                                    if (s.includes('sumergido') || s.includes('submerged')) return 'sumergido';
+                                                                    return '';
+                                                                };
+                                                                const finalProcess = matchProcessStr(inv.process || '') || formData.process;
 
                                                                 const finalLat = inv.latitude || formData.latitude;
                                                                 const finalLng = inv.longitude || formData.longitude;
