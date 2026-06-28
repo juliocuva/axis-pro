@@ -50,6 +50,7 @@ export default function RoastEntryForm({ user, lotData, initialTelemetry }: { us
             selectedWeight: 20.72,
             quakersGrams: 8,
             roastTime: '10:45',
+            roastLevel: 'MEDIUM',
             developmentTime: '2:15',
             developmentPct: 18.5,
             dropTemp: 204,
