@@ -434,7 +434,7 @@ function LabelGenerator() {
                     <div className="flex items-end justify-between">
                         <div className="w-24 h-24 bg-white flex items-center justify-center p-2 rounded-lg shadow-sm border border-black">
                             <img
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? window.location.origin : 'https://axis-coffee.pro') + '/trace/AX-DEMO')}`}
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((typeof window !== 'undefined' ? (window.location.hostname === 'localhost' ? 'https://axisone.coffee' : window.location.origin) : 'https://axisone.coffee') + '/trace/AX-DEMO')}`}
                                 alt="QR Tracking"
                                 className="w-full h-full"
                             />

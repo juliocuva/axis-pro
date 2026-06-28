@@ -108,7 +108,7 @@ export default function GratefulModule({ user, selectedLot }: GratefulModuleProp
                     
                     <div className="flex-1 bg-black/40 rounded-2xl p-8 border border-gray-400 shadow-sm flex flex-col items-center text-center justify-center space-y-6">
                         <div className="w-24 h-24 bg-white p-2 rounded-xl shadow-2xl">
-                             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin + '/verify/lot/' + (selectedLot?.id || 'DEMO'))}`} alt="Axis Portal QR" className="w-full h-full" />
+                             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent((window.location.hostname === 'localhost' ? 'https://axisone.coffee' : window.location.origin) + '/verify/lot/' + (selectedLot?.id || 'DEMO'))}`} alt="Axis Portal QR" className="w-full h-full" />
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-lg font-black text-brand-navy uppercase leading-tight er">Portal de Educación AXIS</h4>

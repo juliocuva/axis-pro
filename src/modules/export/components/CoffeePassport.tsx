@@ -624,7 +624,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                             {/* Trazabilidad digital */}
                             <div className="flex items-start gap-6 p-5 rounded-xl bg-white border border-gray-400">
                                 <div className="bg-white p-2 border border-gray-400 rounded-lg shrink-0 shadow-sm">
-                                    <QRCodeSVG value={`${window.location.origin}/verify/lot/${batchId}`} size={72} level="H" />
+                                    <QRCodeSVG value={`${typeof window !== 'undefined' ? (window.location.hostname === 'localhost' ? 'https://axisone.coffee' : window.location.origin) : 'https://axisone.coffee'}/verify/lot/${batchId}`} size={72} level="H" />
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-[11px] font-bold text-brand-navy uppercase  mb-2">Trazabilidad Digital Inmutable</p>
@@ -829,7 +829,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
 
                             <div className="flex justify-between items-center mt-4">
                                 <div className="flex items-center gap-3">
-                                    <QRCodeSVG value={`${typeof window !== 'undefined' ? window.location.origin : 'https://axisone.coffee'}/verify/lot/${lotNum}`} size={64} />
+                                    <QRCodeSVG value={`${typeof window !== 'undefined' ? (window.location.hostname === 'localhost' ? 'https://axisone.coffee' : window.location.origin) : 'https://axisone.coffee'}/verify/lot/${lotNum}`} size={64} />
                                     <div>
                                         <p className="text-[9px] font-black uppercase text-brand-navy">Verificación Satelital</p>
                                         <p className="text-[9px] text-brand-navy uppercase">Escanea para ver el mapa interactivo</p>
@@ -930,7 +930,7 @@ export default function CoffeePassport({ lotData: initialLotData, scaData: initi
                                     Envía un reconocimiento directo al productor y ayuda a dignificar su labor en el campo.
                                 </p>
                                 <div className="bg-white p-4 rounded-2xl shadow-xl">
-                                    <QRCodeSVG value={`${window.location.origin}/verify/lot/${batchId}`} size={120} level="H" />
+                                    <QRCodeSVG value={`${typeof window !== 'undefined' ? (window.location.hostname === 'localhost' ? 'https://axisone.coffee' : window.location.origin) : 'https://axisone.coffee'}/verify/lot/${batchId}`} size={120} level="H" />
                                 </div>
                                 <p className="mt-4 text-[9px] font-black uppercase  text-brand-navy/60 text-center">Escanea para aprender y agradecer</p>
                             </div>

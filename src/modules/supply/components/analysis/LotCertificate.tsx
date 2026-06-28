@@ -66,9 +66,14 @@ const translationMap: Record<string, string> = {
     "Compleja": "Complex",
     "Floral": "Floral",
     "Vibrante": "Vibrant",
+    "DULCE , ESPECIAS MARRONES, NUECES Y CACAO": "Sweet, Brown Spices, Nuts and Cocoa",
+    "DULCE, ESPECIAS MARRONES, NUECES Y CACAO": "Sweet, Brown Spices, Nuts and Cocoa",
     "Óptica": "Optical",
     "Mecánica": "Mechanical",
     "Manual": "Manual",
+    "LIGERO/MEDIO": "City+",
+    "Semi-lavado": "Semi-washed",
+    "SEMI-LAVADO": "SEMI-WASHED",
     "Doble Fermentación Lavado": "Double Wash Fermentation",
     "Acidez málica y tartárica estratificada, maracuyá, jalea de piña, lavanda, consistencia táctil sedosa. Reconstrucción técnica fidedigna del lote utilizado oficialmente por Diego Campos en WBC Milán.":
         "Stratified malic and tartaric acidity, passion fruit, pineapple jelly, lavender, silky mouthfeel. Accurate technical reconstruction of the lot officially used by Diego Campos in WBC Milan.",
@@ -101,7 +106,9 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            setOrigin(window.location.origin);
+            if (window.location.hostname !== 'localhost') {
+                setOrigin(window.location.origin);
+            }
         }
     }, []);
 
@@ -644,7 +651,6 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                 <div className="flex items-center gap-6 relative z-10">
                                     <div className="flex items-center gap-5">
                                         <img src="/logo.png" alt="AXISONE" className="h-14 object-contain" />
-                                        <img src="/Logo-DONMOISO_TB.webp" alt="DONMOISO" className="h-16 object-contain" style={{ filter: 'brightness(0)' }} />
                                     </div>
                                     <div>
                                         <h1 className="uppercase leading-none text-lg font-black text-brand-navy er">
@@ -658,10 +664,6 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                         </p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="uppercase text-brand-navy/30 text-[8px] font-bold">Lot ID</p>
-                                    <p className="mt-0.5 text-[#0C6056] text-lg font-black er">{lotData?.lot_number || 'LOT-AXIS'}</p>
-                                </div>
                             </div>
 
                             {/* SECCIÓN: ORIGEN Y INGRESO */}
@@ -674,8 +676,12 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     <span className="text-[8px] font-bold text-brand-navy/30 uppercase">General Data</span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-8">
-                                    <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-[3fr_1fr] gap-6">
+                                    <div className="grid grid-cols-3 gap-y-10 gap-x-4 pr-6 py-2">
+                                        <div>
+                                            <p className="uppercase text-brand-navy/40 text-[8px] font-bold mb-0.5">Lot ID</p>
+                                            <p className="text-[#0C6056] text-[11px] font-black er">{lotData?.lot_number || 'LOT-AXIS'}</p>
+                                        </div>
                                         <div>
                                             <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Producer</p>
                                             <p className="uppercase text-xs font-black text-brand-navy">{productor}</p>
@@ -692,20 +698,6 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                             <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Altitude</p>
                                             <p className="uppercase text-[11px] font-black text-brand-navy">{lotData?.altitude || '1650'} MASL</p>
                                         </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 border-l border-black/5 pl-6">
-                                        <div>
-                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Variety</p>
-                                            <p className="uppercase text-xs font-black text-brand-navy">{translate(lotData?.variety) || 'Caturra'}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Incoming Weight</p>
-                                            <p className="text-xs font-black text-brand-navy">{lotData?.purchase_weight || '0'} KG</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">EUDR Cryptographic Seal</p>
-                                            <p className="text-[9px] font-mono font-bold text-[#0C6056] break-all">{ddsReference || passportData.eudrHash || 'VERIFIED ORIGIN'}</p>
-                                        </div>
                                         <div>
                                             <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">GPS Coordinates</p>
                                             <p className="uppercase text-[10px] font-mono font-black text-[#0C6056]">
@@ -714,6 +706,21 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                                     : 'PENDING'}
                                             </p>
                                         </div>
+                                        <div>
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Incoming Weight</p>
+                                            <p className="text-xs font-black text-brand-navy">{lotData?.purchase_weight || '0'} KG</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Variety</p>
+                                            <p className="uppercase text-xs font-black text-brand-navy">{translate(lotData?.variety) || 'Caturra'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Process</p>
+                                            <p className="uppercase text-xs font-black text-brand-navy">{translate(lotData?.process_data?.raw_excel_data?.inventory?.process) || 'SEMIWASHED'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-center justify-center border-l border-[#1A1A1A]/10 pl-6 pr-8 h-full w-full py-2 overflow-visible">
+                                        <img src="/Logo-DONMOISO_TB.webp" alt="DONMOISO" className="w-full h-full object-contain scale-[1.35]" style={{ filter: 'brightness(0)' }} />
                                     </div>
                                 </div>
                             </div>
@@ -728,16 +735,18 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     <span className="text-[8px] font-bold text-brand-navy/30 uppercase">Industrial Yield</span>
                                 </div>
 
-                                <div className="grid grid-cols-4 gap-4">
+                                <div className="grid grid-cols-3 gap-y-4 gap-x-4">
                                     {[
+                                        { label: 'Preparation Protocol', val: lotData?.process_data?.preparation_protocol || 'European Prep (EP) - Especialidad', unit: '' },
+                                        { label: 'Milling Protocol', val: translate(lotData?.process_data?.sorting_method) || 'Optical', unit: '' },
                                         { label: 'Parchment Weight', val: lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight || '--', unit: 'KG' },
                                         { label: 'Green Coffee Weight', val: lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight || '--', unit: 'KG' },
                                         { label: 'Yield Factor', val: (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) && (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight) ? (((lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) * 70) / (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight)).toFixed(1) : '--', unit: 'FR' },
                                         { label: 'Milling Loss', val: (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) && (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight) ? ((( (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight) - (lotData?.thrashed_weight || lotData?.process_data?.raw_excel_data?.inventory?.thrashedWeight)) / (lotData?.purchase_weight || lotData?.process_data?.raw_excel_data?.inventory?.purchaseWeight)) * 100).toFixed(1) : '--', unit: '%' }
                                     ].map((item, i) => (
-                                        <div key={i} className="bg-white border border-gray-400 p-3 rounded-xl text-center">
+                                        <div key={i} className="text-left">
                                             <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-1">{item.label}</p>
-                                            <p className="text-lg font-black text-brand-navy er">{item.val} <span className="text-[8px] font-bold text-[#0C6056]">{item.unit}</span></p>
+                                            <p className="text-[11px] font-black text-brand-navy uppercase">{item.val} {item.unit && <span className="text-[8px] font-bold text-[#0C6056]">{item.unit}</span>}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -754,87 +763,42 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-8">
-                                    {/* Laboratorio */}
+                                {/* Laboratorio */}
                                     <div className="space-y-3">
-                                        <h3 className="text-[9px] font-black uppercase text-[#0C6056] tracking-wider">Green Coffee Metrics</h3>
+                                        <h3 className="text-[9px] font-black uppercase text-[#0C6056] tracking-wider mb-4">Green Coffee Metrics</h3>
                                         <div className="grid grid-cols-3 gap-2">
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
-                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Moisture</p>
-                                                <p className="text-xs font-black">{physicalData?.moisture_pct || '--'}%</p>
+                                            <div className="text-center">
+                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase mb-0.5">Moisture</p>
+                                                <p className="text-[11px] font-black text-brand-navy">{physicalData?.moisture_pct || '--'}%</p>
                                             </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
-                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Water Activity</p>
-                                                <p className="text-xs font-black">{physicalData?.water_activity || '--'} aw</p>
+                                            <div className="text-center">
+                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase mb-0.5">Water Activity</p>
+                                                <p className="text-[11px] font-black text-brand-navy">{physicalData?.water_activity || '--'} aw</p>
                                             </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-2 rounded-lg text-center">
-                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase">Density</p>
-                                                <p className="text-xs font-black">{physicalData?.density_gl || '--'} g/L</p>
+                                            <div className="text-center">
+                                                <p className="text-[7.5px] text-brand-navy/50 font-bold uppercase mb-0.5">Density</p>
+                                                <p className="text-[11px] font-black text-brand-navy">{physicalData?.density_gl || '--'} g/L</p>
                                             </div>
                                         </div>
-                                        <div className="bg-[#0C6056]/5 border border-[#0C6056]/10 p-3 rounded-xl grid grid-cols-4 gap-2 text-center text-[10px]">
+                                        <div className="grid grid-cols-3 gap-2 text-center mt-4">
                                             <div>
-                                                <p className="text-[7.5px] text-[#0C6056] font-bold uppercase">Brix</p>
-                                                <p className="font-black">{brixVal}°</p>
+                                                <p className="text-[7.5px] text-[#0C6056]/70 font-bold uppercase mb-0.5">Brix</p>
+                                                <p className="text-[11px] font-black text-brand-navy">{brixVal}°</p>
                                             </div>
                                             <div>
-                                                <p className="text-[7.5px] text-[#0C6056] font-bold uppercase">pH Ev.</p>
-                                                <p className="font-black">{phVal}</p>
+                                                <p className="text-[7.5px] text-[#0C6056]/70 font-bold uppercase mb-0.5">pH Ev.</p>
+                                                <p className="text-[11px] font-black text-brand-navy">{phVal}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[7.5px] text-[#0C6056] font-bold uppercase">Ferm.</p>
-                                                <p className="font-black">{fermVal}h</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[7.5px] text-[#0C6056] font-bold uppercase">Temp.</p>
-                                                <p className="font-black">{tempVal}°</p>
+                                                <p className="text-[7.5px] text-[#0C6056]/70 font-bold uppercase mb-0.5">Temp.</p>
+                                                <p className="text-[11px] font-black text-brand-navy">{tempVal}°</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Tostión */}
-                                    <div className="space-y-3 border-l border-black/5 pl-6">
-                                        <h3 className="text-[9px] font-black uppercase text-[#0C6056] tracking-wider">Roast Parameters</h3>
-                                        <div className="grid grid-cols-5 gap-1.5">
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
-                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Roast</p>
-                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastLevel || 'City+'}</p>
-                                            </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
-                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Time</p>
-                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime}m` : '10m'}</p>
-                                            </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
-                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">End Temp</p>
-                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.maxTemp ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.maxTemp}°` : '204°'}</p>
-                                            </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
-                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Agtron</p>
-                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.agtronBean || '58'}</p>
-                                            </div>
-                                            <div className="bg-[#1A1A1A]/[0.02] border border-[#1A1A1A]/10 p-1.5 rounded-lg text-center flex flex-col justify-center">
-                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate">Wt Loss</p>
-                                                <p className="text-[10px] font-black truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.greenWeight && lotData?.process_data?.raw_excel_data?.roastBatch?.roastedWeight ? (((lotData.process_data.raw_excel_data.roastBatch.greenWeight - lotData.process_data.raw_excel_data.roastBatch.roastedWeight) / lotData.process_data.raw_excel_data.roastBatch.greenWeight) * 100).toFixed(1) + '%' : '14.5%'}</p>
-                                            </div>
-                                        </div>
-                                        <div className="bg-[#0C6056]/5 border border-[#0C6056]/10 p-3 rounded-xl flex items-center justify-between text-[10px] px-4">
-                                            <div>
-                                                <p className="text-[7.5px] text-[#0C6056] font-bold uppercase">Roast Master</p>
-                                                <p className="font-black uppercase">{lotData?.process_data?.raw_excel_data?.roastBatch?.roasterName || 'JULIO UVA'}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[7.5px] text-[#0C6056] font-bold uppercase text-right">Sorting Method</p>
-                                                <p className="font-black uppercase text-right">{translate(lotData?.process_data?.sorting_method) || 'Optical'}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* SECCIÓN: COMPONENTES GRÁFICOS (SIDE BY SIDE) */}
-                            <div className="px-8 py-3 flex-1 flex flex-col justify-end">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="h-[260px] relative bg-white border border-black/5 rounded-2xl p-4 flex flex-col shadow-inner">
-                                        <p className="text-[8px] font-bold uppercase text-brand-navy/40 mb-3 border-l-2 border-[#0C6056] pl-3">Screen Size Distribution (Sieves)</p>
+                                    {/* Screen Size Distribution */}
+                                    <div className="h-[140px] relative flex flex-col pl-4">
+                                        <h3 className="text-[9px] font-black uppercase text-[#0C6056] tracking-wider mb-2">Screen Size Distribution (Sieves)</h3>
                                         <div className="flex-1 w-full flex justify-center">
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <BarChart data={screenData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }} barCategoryGap="25%">
@@ -847,7 +811,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                                 </BarChart>
                                             </ResponsiveContainer>
                                         </div>
-                                        <div className="grid grid-cols-8 gap-0 mt-3 pt-1 border-t border-black/5">
+                                        <div className="grid grid-cols-8 gap-0 mt-1 pt-1 border-t border-black/5">
                                             {screenData.map((d, i) => (
                                                 <div key={i} className="text-center">
                                                     <p className="text-[8px] font-bold text-brand-navy">{Number(d.val).toFixed(0)}%</p>
@@ -855,9 +819,47 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                             ))}
                                         </div>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <div className="h-[260px] relative bg-white border border-black/5 rounded-2xl p-4 flex flex-col shadow-inner">
-                                        <p className="text-[8px] font-bold uppercase text-brand-navy/40 mb-3 border-l-2 border-[#0C6056] pl-3">Thermal Roast Curve</p>
+                            <div className="mx-8 border-t border-[#1A1A1A]/10 mt-2 pt-2"></div>
+
+                            {/* SECCIÓN: COMPONENTES GRÁFICOS (SIDE BY SIDE) */}
+                            <div className="px-8 py-3 flex-1 flex flex-col justify-end">
+                                <div className="grid grid-cols-2 gap-6">
+                                    {/* Tostión */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-[9px] font-black uppercase text-[#0C6056] tracking-wider mb-4">Roast Parameters</h3>
+                                        <div className="grid grid-cols-3 gap-y-6 gap-x-2">
+                                            <div className="text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate mb-0.5">Roast Master</p>
+                                                <p className="text-[11px] font-black text-brand-navy uppercase">{lotData?.process_data?.raw_excel_data?.roastBatch?.roasterName || 'JULIO UVA'}</p>
+                                            </div>
+                                            <div className="text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate mb-0.5">Roast</p>
+                                                <p className="text-[11px] font-black text-brand-navy truncate">{translate(lotData?.process_data?.raw_excel_data?.roastBatch?.roastLevel) || 'City+'}</p>
+                                            </div>
+                                            <div className="text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate mb-0.5">Time</p>
+                                                <p className="text-[11px] font-black text-brand-navy truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.roastTime}m` : '10m'}</p>
+                                            </div>
+                                            <div className="text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate mb-0.5">End Temp</p>
+                                                <p className="text-[11px] font-black text-brand-navy truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.maxTemp ? `${lotData?.process_data?.raw_excel_data?.roastBatch?.maxTemp}°` : '204°'}</p>
+                                            </div>
+                                            <div className="text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate mb-0.5">Agtron</p>
+                                                <p className="text-[11px] font-black text-brand-navy truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.agtronBean || '58'}</p>
+                                            </div>
+                                            <div className="text-center flex flex-col justify-center">
+                                                <p className="text-[6.5px] text-brand-navy/50 font-bold uppercase truncate mb-0.5">Wt Loss</p>
+                                                <p className="text-[11px] font-black text-brand-navy truncate">{lotData?.process_data?.raw_excel_data?.roastBatch?.greenWeight && lotData?.process_data?.raw_excel_data?.roastBatch?.roastedWeight ? (((lotData.process_data.raw_excel_data.roastBatch.greenWeight - lotData.process_data.raw_excel_data.roastBatch.roastedWeight) / lotData.process_data.raw_excel_data.roastBatch.greenWeight) * 100).toFixed(1) + '%' : '14.5%'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="h-[260px] relative flex flex-col pl-4">
+                                        <h3 className="text-[9px] font-black uppercase text-[#0C6056] tracking-wider mb-4">Thermal Roast Curve</h3>
                                         <div className="flex-1 w-full">
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <LineChart data={roastCurveData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
@@ -925,7 +927,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     <span className="text-[8px] font-bold text-brand-navy/40 uppercase">Professional Organoleptic Analysis</span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-8">
+                                <div className="grid grid-cols-[6fr_4fr] gap-12 items-center">
                                     {/* Radar */}
                                     <div className="h-[210px] relative flex items-center justify-center">
                                         <ResponsiveContainer width="100%" height="100%" className="z-10 relative">
@@ -949,20 +951,20 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     </div>
 
                                     {/* Score & Notes */}
-                                    <div className="flex flex-col justify-between space-y-4">
-                                        <div className="p-6 bg-white border-2 border-[#0C6056] rounded-2xl text-center relative shadow-sm">
-                                            <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#0C6056] text-brand-navy px-6 py-1 rounded-full text-[8px] font-bold uppercase shadow-sm -mt-2.5 z-10">
+                                    <div className="flex flex-col justify-center items-center space-y-6">
+                                        <div className="text-center">
+                                            <p className="text-[10px] font-black uppercase text-[#0C6056] tracking-wider mb-2">
                                                 AXIS LAB SCORE
-                                            </div>
-                                            <p className="text-5xl font-black text-[#1A1A1A] er leading-none mt-2">
+                                            </p>
+                                            <p className="text-6xl font-black text-[#1A1A1A] er leading-none">
                                                 {typeof totalScore === 'number' ? Number(totalScore).toFixed(2) : totalScore}
                                             </p>
-                                            <p className="text-[7.5px] font-bold text-[#0C6056] uppercase mt-2">
+                                            <p className="text-[8px] font-bold text-brand-navy/60 uppercase mt-3">
                                                 {scaData?.is_incomplete ? 'SENSORY AUDIT IN PROGRESS' : 'SCA CVA Protocol • Seal of Authority'}
                                             </p>
                                         </div>
-                                        <div className="p-4 bg-white border-l-4 border-[#0C6056] rounded-lg italic text-[10px] text-brand-navy/70 leading-relaxed shadow-sm">
-                                            <span className="text-[8px] font-bold block mb-1 uppercase text-[#0C6056] not-italic">Master Cupper Notes:</span>
+                                        <div className="italic text-[10px] text-brand-navy/80 leading-relaxed text-center max-w-sm">
+                                            <span className="text-[8px] font-bold block mb-1.5 uppercase text-[#0C6056] not-italic">Master Cupper Notes:</span>
                                             "{translate(lotData?.sca_cupping?.[0]?.notes || scaData?.notes) || 'Balanced sensory profile with vibrant complexity characteristic of its protected origin.'}"
                                         </div>
                                     </div>
@@ -979,56 +981,35 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     <span className="text-[8px] font-bold text-brand-navy/30 uppercase">Final Stage</span>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-6">
-                                    {/* Resumen */}
-                                    <div className="bg-white border border-black/5 p-4 rounded-xl space-y-2.5 shadow-sm text-[10px]">
-                                        <h3 className="font-black uppercase text-brand-navy text-[10px]">Operational Summary</h3>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between border-b border-black/5 pb-1">
-                                                <span className="text-brand-navy/40 font-bold">Origin</span>
-                                                <span className="font-black text-brand-navy">CONFIRMED</span>
-                                            </div>
-                                            <div className="flex justify-between border-b border-black/5 pb-1">
-                                                <span className="text-brand-navy/40 font-bold">Milling Purity</span>
-                                                <span className="font-black text-brand-navy">{lotData?.yield_percentage || '100'}%</span>
-                                            </div>
-                                            <div className="flex justify-between border-b border-black/5 pb-1">
-                                                <span className="text-brand-navy/40 font-bold">Final SCA</span>
-                                                <span className="font-black text-brand-navy">{typeof totalScore === 'number' ? Number(totalScore).toFixed(2) : totalScore} PTS</span>
-                                            </div>
+                                {/* Logistics, Signature & QR */}
+                                <div className="grid grid-cols-3 gap-6 pt-4 items-center">
+                                    <div className="col-span-2 grid grid-cols-2 gap-y-6 gap-x-6">
+                                        <div>
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Destination Route</p>
+                                            <p className="text-[11px] font-bold text-brand-navy uppercase">MARITIME (PORT OF GENOA, ITALY)</p>
                                         </div>
-                                    </div>
-
-                                    {/* Competencia Especial / Autenticidad */}
-                                    <div className="col-span-2 bg-[#0C6056]/5 border border-[#0C6056]/10 p-4 rounded-xl relative overflow-hidden text-[9.5px] leading-relaxed">
-                                        <p className="font-extrabold text-brand-navy uppercase mb-1">Digital Signature & Resolution</p>
-                                        <p className="text-brand-navy/70 uppercase font-medium">
-                                            {translate(lotData?.process_data?.anotacion_especial || lotData?.process_data?.metadata_validacion_sistema?.anotacion_especial) || 
-                                             "This document certifies that the referenced lot has been monitored through the AXISONE protocol end-to-end, guaranteeing the immutable integrity of the presented information."}
-                                        </p>
-                                        <p className="text-[7.5px] font-mono text-brand-navy/30 mt-2 break-all">HASH: {inventoryId.toUpperCase()}</p>
-                                    </div>
-                                </div>
-
-                                {/* Firmas */}
-                                <div className="grid grid-cols-3 gap-6 pt-2">
-                                    <div className="text-center">
-                                        <div className="h-10 border-b border-black/10 flex items-end justify-center pb-1">
-                                            <span className="font-mono text-[9px] text-brand-navy/20">{user?.name || 'MASTER AUDITOR'}</span>
+                                        <div>
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Exclusive Client</p>
+                                            <p className="text-[11px] font-bold text-brand-navy uppercase">ILLYCAFFÈ S.P.A.</p>
                                         </div>
-                                        <p className="text-[8px] font-bold text-[#0C6056] uppercase mt-1">Specialty Evaluator</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="h-10 border-b border-black/10 flex items-end justify-center pb-1">
-                                            <span className="font-mono text-[9px] text-brand-navy/20">AXISONE CRYPTO SECURE</span>
+                                        <div>
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">EUDR Cryptographic Seal</p>
+                                            <p className="text-[10px] font-mono font-black text-[#0C6056] break-all">{ddsReference || passportData.eudrHash || 'VERIFIED ORIGIN'}</p>
                                         </div>
-                                        <p className="text-[8px] font-bold text-[#0C6056] uppercase mt-1">Technical Lead</p>
+                                        <div className="col-span-2">
+                                            <p className="text-brand-navy/40 text-[8px] font-bold uppercase mb-0.5">Digital Signature & Resolution</p>
+                                            <p className="text-[9.5px] text-brand-navy/70 uppercase font-medium leading-relaxed">
+                                                {translate(lotData?.process_data?.anotacion_especial || lotData?.process_data?.metadata_validacion_sistema?.anotacion_especial) || 
+                                                 "This document certifies that the referenced lot has been monitored through the AXISONE protocol end-to-end, guaranteeing the immutable integrity of the presented information."}
+                                            </p>
+                                            <p className="text-[7.5px] font-mono text-brand-navy/40 mt-1.5 break-all">HASH: {inventoryId.toUpperCase()}</p>
+                                        </div>
                                     </div>
                                     <div className="flex flex-col items-center justify-center text-center">
                                         <div className="qr-container p-2 bg-white border border-black/10 rounded-xl shadow-md">
                                             <QRCodeSVG
-                                                value={`${origin}/verify/${inventoryId}`}
-                                                size={200}
+                                                value={`https://axisone.coffee/verify/${inventoryId}`}
+                                                size={160}
                                                 level="H"
                                                 includeMargin={false}
                                             />

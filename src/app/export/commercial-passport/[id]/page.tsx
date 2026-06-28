@@ -47,7 +47,7 @@ export default function CommercialPassportViewer({ params }: { params: Promise<{
     if (error || !lot) return <div className="min-h-screen flex items-center justify-center bg-gray-100 text-red-500 font-bold">Lote no encontrado o inválido.</div>;
 
     const issueDate = lot.closed_at ? new Date(lot.closed_at).toLocaleString() : 'PENDIENTE DE CIERRE';
-    const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://axisone.pro/export/commercial-passport/${lotId}`;
+    const currentUrl = typeof window !== 'undefined' ? (window.location.hostname === 'localhost' ? `https://axisone.coffee/export/commercial-passport/${lotId}` : window.location.href) : `https://axisone.coffee/export/commercial-passport/${lotId}`;
 
     // Calculate Averages
     const totalKg = entries.reduce((acc, curr) => acc + Number(curr.kg_received), 0);
