@@ -1008,7 +1008,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
                                     <div className="flex flex-col items-center justify-center text-center">
                                         <div className="qr-container p-2 bg-white border border-black/10 rounded-xl shadow-md">
                                             <QRCodeSVG
-                                                value={`https://axisone.coffee/verify/${inventoryId}`}
+                                                value={`https://axisone.coffee/verify/lot/${inventoryId}`}
                                                 size={160}
                                                 level="H"
                                                 includeMargin={false}
