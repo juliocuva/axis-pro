@@ -1,5 +1,7 @@
+'use client';
+
 import HeroSection from '../HeroSection';
 
 export default function PitchHeroPage() {
-    return <HeroSection />;
+    return <HeroSection onLoginClick={() => window.location.href = '/login'} />;
 }
