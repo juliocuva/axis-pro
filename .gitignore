@@ -44,6 +44,7 @@ scripts/
 !tsconfig.json
 !next.config.js
 !fincas_cafe.json
+!src/data/commercialInventory.json
 
 # images
 IMP/
