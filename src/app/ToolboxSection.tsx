@@ -179,21 +179,26 @@ export default function ToolboxSection() {
                                     <div className="mt-8 flex items-center justify-between pt-4 border-t border-gray-200/60">
                                         <div className="flex items-center gap-2">
                                             {tool.status === 'Online' ? (
-                                                <span className="relative flex h-2.5 w-2.5">
-                                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
-                                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green"></span>
-                                                </span>
+                                                <>
+                                                    <span className="relative flex h-2.5 w-2.5">
+                                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
+                                                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green"></span>
+                                                    </span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 group-hover:text-brand-navy transition-colors">
+                                                        {tool.status}
+                                                    </span>
+                                                </>
                                             ) : (
-                                                <span className="relative flex h-2.5 w-2.5">
-                                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green/30"></span>
+                                                <span className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200 shadow-sm">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-navy">
+                                                        {tool.status}
+                                                    </span>
                                                 </span>
                                             )}
-                                            <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${tool.status === 'Online' ? 'text-gray-600 group-hover:text-brand-navy' : 'text-gray-400'}`}>
-                                                {tool.status}
-                                            </span>
                                         </div>
 
-                                        <span className={`inline-flex items-center gap-1.5 ${tool.status === 'Online' ? 'bg-brand-navy/10 group-hover:bg-brand-green group-hover:text-white text-brand-navy' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'} text-xs font-black py-2 px-4 rounded-xl transition-all duration-300 shadow-sm ${tool.status === 'Online' ? 'group-hover:shadow-md' : ''}`}>
+                                        <span className={`inline-flex items-center gap-1.5 ${tool.status === 'Online' ? 'bg-brand-navy/10 group-hover:bg-brand-green group-hover:text-white text-brand-navy' : 'bg-gray-200 text-gray-600 border border-gray-300'} text-xs font-black py-2 px-4 rounded-xl transition-all duration-300 shadow-sm ${tool.status === 'Online' ? 'group-hover:shadow-md' : ''}`}>
                                             <span>{tool.status === 'Online' ? 'LAUNCH' : 'COMING SOON'}</span>
                                             {tool.status === 'Online' && (
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
