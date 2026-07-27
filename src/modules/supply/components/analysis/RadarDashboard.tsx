@@ -1,10 +1,37 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/shared/lib/supabase';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from 'recharts';
+
+const MapControllerInternal = React.memo(({ useMap, useMapEvents, isGlobalProjection, viewMode }: any) => {
+    const map = useMap();
+    
+    useEffect(() => {
+        if (isGlobalProjection) {
+            map.setView([20.0, 0.0], 2);
+        } else if (viewMode === 'ORIGEN') {
+            map.setView([4.5709, -74.2973], 6);
+        } else {
+            map.setView([20.0, 0.0], 2);
+        }
+    }, [viewMode, isGlobalProjection, map]);
+
+    useMapEvents({
+        zoomend: () => {
+            const currentZoom = map.getZoom();
+            if (currentZoom <= 2) {
+                map.dragging.disable();
+            } else {
+                map.dragging.enable();
+            }
+        },
+    });
+    return null;
+});
+
 
 const HUB_BOGOTA = [4.711, -74.072];
 const PORT_BUENAVENTURA = [3.880, -77.031];
@@ -21,7 +48,8 @@ const PORTS_GLOBAL = {
     DUBAI: [25.0112, 55.0611],
     SINGAPORE: [1.2762, 103.8000],
     LONDON: [51.5074, 0.1278],
-    SYDNEY: [-33.8688, 151.2093]
+    SYDNEY: [-33.8688, 151.2093],
+    GENOA: [44.4056, 8.9211]
 };
 
 const CONSUMER_NODES = {
@@ -209,7 +237,7 @@ const GLOBAL_ORIGINS = [
         latitude: 2.152,
         longitude: -75.954,
         is_global: true,
-        destinations: ['TOKYO', 'ROTTERDAM'],
+        destinations: ['GENOA', 'ROTTERDAM'],
         attributes: {
             fermentation: '48h Cereza Entera + 24h Mucílago',
             ph: '3.75 / 19.5°Bx',
@@ -273,19 +301,19 @@ const getLotCoordinates = (lot: any, seedIndex: number) => {
     const seedLon = Math.cos(seedIndex * 78.233) * 43758.5453;
     const jitterLon = (seedLon - Math.floor(seedLon) - 0.5) * 0.22;
     
-    // Prioritize high-precision department coordinates dictionary for simulated lots
-    for (const [dept, coords] of Object.entries(REGION_COORDINATES)) {
-        if (regionStr.includes(dept)) {
-            return { lat: coords.lat + jitterLat, lon: coords.lon + jitterLon };
-        }
-    }
-
-    // Explicit manual coordinates fallback (if explicitly given)
+    // 1. Explicit manual coordinates fallback (highest priority)
     if (lot.latitude && lot.longitude) {
         return { lat: Number(lot.latitude), lon: Number(lot.longitude) };
     }
     if (lot.process_data?.latitude && lot.process_data?.longitude) {
         return { lat: Number(lot.process_data.latitude), lon: Number(lot.process_data.longitude) };
+    }
+
+    // 2. Prioritize high-precision department coordinates dictionary for simulated lots
+    for (const [dept, coords] of Object.entries(REGION_COORDINATES)) {
+        if (regionStr.includes(dept)) {
+            return { lat: coords.lat + jitterLat, lon: coords.lon + jitterLon };
+        }
     }
 
     // Default to the Central Colombian Coffee Axis with a wider default spread
@@ -348,7 +376,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
     // Filtros Avanzados
     const [filterVariety, setFilterVariety] = useState('ALL');
     const [filterProcess, setFilterProcess] = useState('ALL');
-    const [filterPreset, setFilterPreset] = useState<'ALL' | 'SIMULACION' | 'COMPETENCIA'>('ALL');
+    const [filterPreset, setFilterPreset] = useState<'ALL' | 'SIMULACION' | 'COMPETENCIA' | 'REAL'>('ALL');
 
     // Vista: ORIGEN (Colombia), LOGISTICA (Puertos), CONSUMO (Escaneos Deep), MARKET (Terminal de Datos)
     const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO' | 'MARKET'>('LOGISTICA');
@@ -373,39 +401,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
         });
     };
 
-    // Controlador para bloquear el pan en zoom mínimo y flyTo automático en proyecciones
-    const MapController = () => {
-        const { useMap: _useMap, useMapEvents: _useMapEvents } = leafletHooks || {};
-        if (!_useMap || !_useMapEvents) return null;
 
-        return <MapControllerInternal useMap={_useMap} useMapEvents={_useMapEvents} />;
-    };
-
-    const MapControllerInternal = ({ useMap, useMapEvents }: any) => {
-        const map = useMap();
-        
-        useEffect(() => {
-            if (isGlobalProjection) {
-                map.setView([20.0, 0.0], 2);
-            } else if (viewMode === 'ORIGEN') {
-                map.setView([4.5709, -74.2973], 6);
-            } else {
-                map.setView([20.0, 0.0], 2);
-            }
-        }, [viewMode, isGlobalProjection, map]);
-
-        useMapEvents({
-            zoomend: () => {
-                const currentZoom = map.getZoom();
-                if (currentZoom <= 2) {
-                    map.dragging.disable();
-                } else {
-                    map.dragging.enable();
-                }
-            },
-        });
-        return null;
-    };
 
     // Seguridad: Admin, Julio o Auditor (Viewer)
     const hasAccess = user?.role === 'admin' || user?.role === 'auditor' || user?.email?.toLowerCase().includes('julio') || user?.email?.toLowerCase().includes('main');
@@ -427,7 +423,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
         try {
             const { data, error } = await supabase
                 .from('coffee_purchase_inventory')
-                .select('*')
+                .select('*, physical_analysis(*)')
                 .order('created_at', { ascending: false });
 
             if (data) {
@@ -448,6 +444,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
             .filter(lot => {
                 if (filterPreset === 'SIMULACION') return lot.is_simulated === true || lot.lot_number?.includes('SIM-');
                 if (filterPreset === 'COMPETENCIA') return lot.lot_number?.includes('WCE-HUILA-');
+                if (filterPreset === 'REAL') return lot.lot_number?.includes('DM-');
                 return true;
             });
             
@@ -716,6 +713,12 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                                 className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'COMPETENCIA' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
                             >
                                 <p className="text-[9px] font-black uppercase tracking-wide">Competencia</p>
+                            </button>
+                            <button
+                                onClick={() => setFilterPreset('REAL')}
+                                className={`col-span-2 text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'REAL' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
+                            >
+                                <p className="text-[9px] font-black uppercase tracking-wide">Lote Real (Don Moiso)</p>
                             </button>
                             <button
                                 onClick={() => setFilterPreset('ALL')}
@@ -1162,7 +1165,14 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                         attributionControl={false}
                         worldCopyJump={true}
                     >
-                        <MapController />
+                        {leafletHooks?.useMap && leafletHooks?.useMapEvents && (
+                            <MapControllerInternal 
+                                useMap={leafletHooks.useMap} 
+                                useMapEvents={leafletHooks.useMapEvents} 
+                                isGlobalProjection={isGlobalProjection} 
+                                viewMode={viewMode} 
+                            />
+                        )}
                         <TileLayer
                             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                         />
@@ -1179,7 +1189,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                             const destName = destNames[index % destNames.length];
                             
                             // Los orígenes globales admiten múltiples puertos de destino simultáneamente para exhibir cobertura masiva
-                            const destinationsToRender = isGlobal ? (lot.destinations || [destName]) : [destName];
+                            const destinationsToRender = isGlobal ? (lot.destinations || [destName]) : (lot.lot_number?.includes('DM-') ? ['GENOA'] : [destName]);
 
                             return (
                                 <React.Fragment key={lot.id}>
@@ -1191,40 +1201,9 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                                             click: () => setSelectedLotId(lot.id === selectedLotId ? null : lot.id)
                                         }}
                                     >
-                                        <Popup className="custom-popup">
-                                            <div className="p-3 text-white max-w-xs space-y-2">
-                                                <p className="text-[12px] font-black uppercase text-[#00FFB2] tracking-wider border-b border-[#00FFB2]/20 pb-1">
-                                                    {lot.lot_number} {isGlobal && <span className="text-[8px] bg-[#00FFB2]/10 text-[#00FFB2] px-1.5 py-0.5 rounded font-black float-right uppercase tracking-wider">Global</span>}
-                                                </p>
-                                                <div className="text-[10px] space-y-1">
-                                                    <p><span className="text-neutral-400 font-bold uppercase">Productor:</span> <span className="font-black text-white">{lot.farmer_name}</span></p>
-                                                    <p><span className="text-neutral-400 font-bold uppercase">Finca:</span> <span className="font-black text-white">{lot.farm_name}</span></p>
-                                                    <p><span className="text-neutral-400 font-bold uppercase">Variedad:</span> <span className="font-bold text-[#00FFB2]">{lot.variety}</span></p>
-                                                    <p><span className="text-neutral-400 font-bold uppercase">Proceso:</span> <span className="font-bold text-[#00FFB2]">{lot.process}</span></p>
-                                                    <p><span className="text-neutral-400 font-bold uppercase">Peso:</span> <span className="font-black text-white">{lot.purchase_weight} kg</span></p>
-                                                    {isGlobal && lot.q_score && (
-                                                        <p><span className="text-neutral-400 font-bold uppercase">Calidad Q-Score:</span> <span className="font-black text-[#00FFB2]">{lot.q_score} PTS</span></p>
-                                                    )}
-                                                </div>
-                                                
-                                                {isGlobal && lot.attributes ? (
-                                                    <div className="text-[9px] bg-neutral-800/80 p-2 rounded-lg border border-[#00FFB2]/20 space-y-0.5">
-                                                        <p className="text-[8px] font-black text-[#00FFB2] uppercase tracking-widest mb-1">Especificación Origen</p>
-                                                        <p><span className="text-neutral-400 font-bold">Fermentación:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.fermentation}</span></p>
-                                                        <p><span className="text-neutral-400 font-bold">pH / Brix:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.ph}</span></p>
-                                                        <p><span className="text-neutral-400 font-bold">Secado:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.secado}</span></p>
-                                                        <p className="text-[8px] text-[#00FFB2] italic mt-1.5 font-bold">"{lot.attributes.notes}"</p>
-                                                    </div>
-                                                ) : lot.process_data ? (
-                                                    <div className="text-[9px] bg-neutral-800/80 p-2 rounded-lg border border-[#00FFB2]/20 space-y-0.5">
-                                                        <p className="text-[8px] font-black text-[#00FFB2] uppercase tracking-widest mb-1">Parámetros Críticos</p>
-                                                        <p><span className="text-neutral-400 font-bold">Fermentación:</span> <span className="text-neutral-200 font-semibold">{lot.process_data.duracion_fermentacion_horas}h ({lot.process_data.fermentation_style})</span></p>
-                                                        <p><span className="text-neutral-400 font-bold">pH final / Brix:</span> <span className="text-neutral-200 font-semibold">{lot.process_data.ph_final} / {lot.process_data.brix_inicial}°Bx</span></p>
-                                                        <p><span className="text-neutral-400 font-bold">Secado:</span> <span className="text-neutral-200 font-semibold">{lot.process_data.tipo_secado} ({lot.process_data.duracion_secado})</span></p>
-                                                    </div>
-                                                ) : null}
-                                            </div>
-                                        </Popup>
+                                        <Tooltip direction="top" className="custom-map-tooltip">
+                                            <span className="font-bold">{lot.lot_number}</span>
+                                        </Tooltip>
                                     </Marker>
 
                                     {/* Mapeo de múltiples destinos marítimos asignados */}
@@ -1367,6 +1346,72 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                     </MapContainer>
                     )
                 )}
+
+                {/* PANEL LATERAL DERECHO ESTÁTICO (Side Panel) */}
+                {selectedLotId && (
+                    <div className="absolute top-10 right-10 w-80 bg-neutral-900/90 border border-[#00FFB2]/30 rounded-2xl p-5 shadow-2xl z-[1000] backdrop-blur-md overflow-y-auto max-h-[85vh] animate-in slide-in-from-right-10 duration-300">
+                        {(() => {
+                            const lot = projectedLots.find(l => l.id === selectedLotId);
+                            if (!lot) return null;
+                            const isGlobal = !!lot.destinations;
+                            // Recalcular destinationsToRender igual que en el marcador
+                            const destNames = Object.keys(PORTS_GLOBAL);
+                            const index = projectedLots.indexOf(lot);
+                            const dName = isGlobal ? lot.destinations?.[0] : (lot.lot_number?.includes('DM-') ? 'GENOA' : 'ROTTERDAM');
+                            const destinationsToRender = isGlobal ? (lot.destinations || [dName]) : (lot.lot_number?.includes('DM-') ? ['GENOA'] : [dName]);
+                            
+                            return (
+                                <div className="space-y-4 text-white">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-xs font-black uppercase text-[#00FFB2] tracking-wider border-b border-[#00FFB2]/20 pb-1">
+                                                {lot.lot_number} {isGlobal && <span className="text-[9px] bg-[#00FFB2]/10 text-[#00FFB2] px-1.5 py-0.5 rounded font-black ml-2 uppercase tracking-wider">Global</span>}
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setSelectedLotId(null)} className="text-gray-400 hover:text-white cursor-pointer bg-neutral-800 rounded p-1">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                    <div className="text-xs space-y-1.5">
+                                        <p><span className="text-neutral-400 font-bold uppercase">Productor:</span> <span className="font-black text-white">{lot.farmer_name}</span></p>
+                                        <p><span className="text-neutral-400 font-bold uppercase">Finca:</span> <span className="font-black text-white">{lot.farm_name}</span></p>
+                                        <p><span className="text-neutral-400 font-bold uppercase">Variedad:</span> <span className="font-bold text-[#00FFB2]">{lot.variety}</span></p>
+                                        <p><span className="text-neutral-400 font-bold uppercase">Proceso:</span> <span className="font-bold text-[#00FFB2]">{lot.process}</span></p>
+                                        <p><span className="text-neutral-400 font-bold uppercase">Peso:</span> <span className="font-black text-white">{lot.purchase_weight} kg</span></p>
+                                        {isGlobal && lot.q_score && (
+                                            <p><span className="text-neutral-400 font-bold uppercase">Calidad Q-Score:</span> <span className="font-black text-[#00FFB2]">{lot.q_score} PTS</span></p>
+                                        )}
+                                        <div className="pt-2 border-t border-neutral-700/50 mt-2 space-y-1.5">
+                                            <p><span className="text-neutral-400 font-bold uppercase">Salida:</span> <span className="font-bold text-white">{isGlobal ? 'Origen Directo' : (['TOKYO', 'SHANGHAI', 'SINGAPORE', 'SYDNEY', 'SAN_FRANCISCO'].some(d => destinationsToRender.includes(d)) ? 'Buenaventura' : 'Cartagena')}</span></p>
+                                            <p><span className="text-neutral-400 font-bold uppercase">Llegada:</span> <span className="font-bold text-white">{destinationsToRender.join(', ')}</span></p>
+                                        </div>
+                                    </div>
+                                    
+                                    {(isGlobal && lot.attributes) || lot.process_data ? (
+                                        <div className="text-[10px] bg-neutral-950/80 p-3 rounded-lg border border-[#00FFB2]/20 space-y-1 mt-4 shadow-inner">
+                                            <p className="text-[9px] font-black text-[#00FFB2] uppercase tracking-widest mb-1.5">Parámetros Críticos</p>
+                                            {isGlobal && lot.attributes ? (
+                                                <>
+                                                    <p><span className="text-neutral-400 font-bold">Fermentación:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.fermentation}</span></p>
+                                                    <p><span className="text-neutral-400 font-bold">pH / Brix:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.ph}</span></p>
+                                                    <p><span className="text-neutral-400 font-bold">Secado:</span> <span className="text-neutral-200 font-semibold">{lot.attributes.secado}</span></p>
+                                                    <p className="text-[9px] text-[#00FFB2] italic mt-1.5 font-bold">"{lot.attributes.notes}"</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <p><span className="text-neutral-400 font-bold">Humedad:</span> <span className="text-neutral-200 font-semibold">{Array.isArray(lot.physical_analysis) ? lot.physical_analysis[0]?.moisture_pct : lot.physical_analysis?.moisture_pct ?? 'N/A'}%</span></p>
+                                                    <p><span className="text-neutral-400 font-bold">aW:</span> <span className="text-neutral-200 font-semibold">{Array.isArray(lot.physical_analysis) ? lot.physical_analysis[0]?.water_activity : lot.physical_analysis?.water_activity ?? 'N/A'}</span></p>
+                                                    <p><span className="text-neutral-400 font-bold">Densidad:</span> <span className="text-neutral-200 font-semibold">{Array.isArray(lot.physical_analysis) ? lot.physical_analysis[0]?.density_gl : lot.physical_analysis?.density_gl ?? 'N/A'} g/L</span></p>
+                                                </>
+                                            )}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            );
+                        })()}
+                    </div>
+                )}
+
 
                 {/* MODAL COMPARTIR ESTILO DRIVE */}
                 {showShareModal && (

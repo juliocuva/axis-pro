@@ -11,7 +11,7 @@ import { useThrashingData } from '@/shared/hooks/useThrashingData';
 import EUDRComplianceBadge from '../EUDRComplianceBadge';
 
 interface ThrashingFormProps {
-    inventoryId: string;
+    inventoryId?: string;
     parchmentWeight: number;
     onThrashingComplete: () => void;
     user: { 
@@ -21,9 +21,21 @@ interface ThrashingFormProps {
         role?: string;
     } | null;
     isReadOnly?: boolean;
+    isPublic?: boolean;
+    onPublicSubmit?: (data: any) => void;
+    onChangeParchmentWeight?: (val: number) => void;
 }
 
-export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashingComplete, user, isReadOnly }: ThrashingFormProps) {
+export default function ThrashingForm({ 
+    inventoryId, 
+    parchmentWeight, 
+    onThrashingComplete, 
+    user, 
+    isReadOnly,
+    isPublic,
+    onPublicSubmit,
+    onChangeParchmentWeight
+}: ThrashingFormProps) {
     const { t } = useLanguage();
     const PROCESS_PARAMS: Record<string, { shrinkageMin: number; shrinkageMax: number; conversion: number; frMin: number; frMax: number }> = {
         'Lavado': { shrinkageMin: 18.0, shrinkageMax: 20.0, conversion: 0.81, frMin: 88, frMax: 94 },
@@ -149,10 +161,27 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (isPublic && onPublicSubmit) {
+            onPublicSubmit({
+                excelsoWeight: formData.excelsoWeight,
+                pasillaWeight: formData.pasillaWeight,
+                ciscoWeight: formData.ciscoWeight,
+                processType: formData.processType,
+                humidity: formData.humidity,
+                preparationProtocol: formData.preparationProtocol,
+                sortingMethod: formData.sortingMethod,
+                sieveAnalysis: formData.sieveAnalysis,
+                stats
+            });
+            return;
+        }
+
         setIsSubmitting(true);
         setError(null);
 
         try {
+            if (!inventoryId) throw new Error("No inventory ID provided");
             const result = await processThrashingAction(
                 inventoryId,
                 formData.excelsoWeight,
@@ -212,13 +241,26 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                         </select>
                     </div>
                 </div>
-                <div className="space-y-0.5">
-                    <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'initialWeight')}</label>
-                    <div className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 text-xs font-bold text-brand-navy flex justify-between items-center transition-all">
-                        <span>{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-                        <span className="text-[9px] opacity-60 uppercase font-black ">Parchment</span>
+                {isPublic ? (
+                    <NumericInput
+                        label={t('thrashingForm', 'initialWeight')}
+                        value={parchmentWeight}
+                        onChange={(val) => onChangeParchmentWeight?.(val)}
+                        step={0.1}
+                        unit="KG"
+                        disabled={isSubmitting || isReadOnly}
+                        inputClassName="text-xs !h-[30px] font-bold uppercase"
+                        formatThousands={true}
+                    />
+                ) : (
+                    <div className="space-y-0.5">
+                        <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'initialWeight')}</label>
+                        <div className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 text-xs font-bold text-brand-navy flex justify-between items-center transition-all">
+                            <span>{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                            <span className="text-[9px] opacity-60 uppercase font-black ">Parchment</span>
+                        </div>
                     </div>
-                </div>
+                )}
                 <NumericInput
                     label={t('thrashingForm', 'humidity')}
                     value={formData.humidity}
@@ -411,6 +453,13 @@ export default function ThrashingForm({ inventoryId, parchmentWeight, onThrashin
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                         <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                </>
+                            ) : isPublic ? (
+                                <>
+                                    GENERAR REPORTE CERTIFICADO
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                                     </svg>
                                 </>
                             ) : (

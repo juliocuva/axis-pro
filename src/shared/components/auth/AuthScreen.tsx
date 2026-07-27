@@ -16,6 +16,15 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showDemoModal, setShowDemoModal] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+
+    React.useEffect(() => {
+        const saved = localStorage.getItem('axis-remembered-user');
+        if (saved) {
+            setIdentifier(saved);
+            setRememberMe(true);
+        }
+    }, []);
 
     // Contact Form States
     const [contactName, setContactName] = useState('');
@@ -206,6 +215,12 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             setShowLoginModal(false);
             setShowDemoModal(true);
             return;
+        }
+
+        if (rememberMe) {
+            localStorage.setItem('axis-remembered-user', identifier);
+        } else {
+            localStorage.removeItem('axis-remembered-user');
         }
 
         setIsLoading(true);

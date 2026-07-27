@@ -13,6 +13,15 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [activeSlide, setActiveSlide] = useState(0);
     const [activeLangIndex, setActiveLangIndex] = useState(0);
+    const [rememberMe, setRememberMe] = useState(false);
+
+    useEffect(() => {
+        const savedIdentifier = localStorage.getItem('axis-remembered-user');
+        if (savedIdentifier) {
+            setIdentifier(savedIdentifier);
+            setRememberMe(true);
+        }
+    }, []);
 
     const slides = [
         "Eliminate uncertainty when purchasing coffee.",
@@ -39,6 +48,12 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+
+        if (rememberMe) {
+            localStorage.setItem('axis-remembered-user', identifier);
+        } else {
+            localStorage.removeItem('axis-remembered-user');
+        }
 
         const isNumeric = /^\d+$/.test(identifier);
         const email = isNumeric ? `${identifier}@cedula.axisone.pro` : identifier.toLowerCase();
@@ -205,7 +220,12 @@ export default function LoginPage() {
 
                         <div className="flex items-center justify-between pt-1 pb-2">
                             <label className="relative flex items-center cursor-pointer group gap-3">
-                                <input type="checkbox" className="peer sr-only" />
+                                <input 
+                                    type="checkbox" 
+                                    className="peer sr-only" 
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                />
                                 <div className="w-4 h-4 bg-transparent border border-brand-gray/50 rounded flex items-center justify-center peer-checked:bg-brand-green peer-checked:border-brand-green transition-all group-hover:border-brand-gray">
                                     <svg className="w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                                 </div>

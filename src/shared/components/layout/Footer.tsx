@@ -11,7 +11,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full bg-bg-card border-t border-border-main py-8 mt-auto z-50">
+    <footer className="w-full bg-brand-dark-navy border-t border-white/10 py-10 mt-auto z-50 text-white font-sans">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-8">
         
         {/* Logos Section */}
@@ -23,35 +23,38 @@ export default function Footer() {
               width={140} 
               height={45} 
               priority
-              className="object-contain filter grayscale invert opacity-80 hover:opacity-100 transition-opacity duration-300 ease-in-out" 
+              className="object-contain filter brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-300 ease-in-out" 
             />
           </div>
           
-          <div className="h-10 w-px bg-white hidden sm:block"></div>
+          <div className="h-10 w-px bg-white/20 hidden sm:block"></div>
           
           <div className="flex flex-col items-center gap-2">
             <Image 
-              src="/logo-axisone.png" 
-              alt="AXISONE COFFEE Logo" 
+              src="/logo.png" 
+              alt="axisONE COFFEE Logo" 
               width={120} 
               height={40}
               priority 
-              className="object-contain opacity-80 hover:opacity-100 transition-opacity duration-300 ease-in-out" 
+              className="object-contain filter brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-300 ease-in-out" 
             />
           </div>
         </div>
 
         {/* Text Section */}
-        <div className="flex-1 text-[11px] sm:text-xs text-zinc-500 lg:text-right space-y-2 leading-relaxed max-w-4xl text-justify lg:text-right">
-          <p className="font-semibold text-zinc-400 text-sm">
-            Aviso de Propiedad Intelectual &copy; 2026 Mouselab. Todos los derechos reservados.
+        <div className="flex-1 text-[11px] sm:text-xs text-white/70 lg:text-right space-y-2 leading-relaxed max-w-4xl text-justify lg:text-right font-medium">
+          <p className="font-bold text-white text-sm">
+            Intellectual Property Notice © {new Date().getFullYear()} Mouselab. All rights reserved.
           </p>
-          <p>
-            Mouselab es la entidad titular de todos los derechos de propiedad intelectual, secretos industriales y derechos de autor sobre la arquitectura de software, algoritmos de Inteligencia Artificial y diseños visuales presentados.
+          <p className="text-white/70">
+            Mouselab is the sole owner of all intellectual property rights, trade secrets, and copyrights covering the software architecture, Artificial Intelligence algorithms, and visual designs presented herein.
           </p>
-          <p>
-            AXISONE COFFEE es una marca comercial propiedad de Mouselab. El acceso a este material, demostración o enlaces no constituye una licencia de uso, transferencia de derechos ni permiso para la ingeniería inversa o reproducción total o parcial. Cualquier uso no autorizado será perseguido bajo las leyes de propiedad intelectual globales y los tratados internacionales de la OMPI (WIPO).
-
+          <p className="text-white/60">
+            <span className="inline-block">
+              <span className="font-azonix text-white text-[0.92em]">AXIS</span>
+              <span className="font-montserrat-black text-white">one</span>
+            </span>{' '}
+            COFFEE is a registered trademark of Mouselab. Access to this material, demonstration, or links does not constitute a license of use, transfer of rights, or authorization for reverse engineering, total, or partial reproduction. Any unauthorized use will be prosecuted under global intellectual property laws and WIPO international treaties.
           </p>
         </div>
 

@@ -1,6 +1,37 @@
+@import url('https://fonts.cdnfonts.com/css/azonix');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.font-azonix {
+    font-family: 'Azonix', 'Montserrat', sans-serif;
+    font-weight: 100;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    display: inline-block;
+    transform: scaleX(1.15) scaleY(1.00);
+    transform-origin: left center;
+    margin-right: 0.38em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.azonix-thin-gray {
+    -webkit-text-stroke: 0.8px #d4d8e0;
+}
+
+.azonix-thin-green {
+    -webkit-text-stroke: 0.8px #006056;
+}
+
+.font-montserrat-black {
+    font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 1.25em;
+    text-transform: lowercase;
+    letter-spacing: -0.03em;
+    display: inline-block;
+}
 
 html {
     scroll-behavior: smooth;

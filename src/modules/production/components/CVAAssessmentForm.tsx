@@ -98,6 +98,8 @@ interface CVAAssessmentFormProps {
   onSave?: () => void;
   onCuppingComplete?: () => void;
   isReadOnly?: boolean;
+  isPublic?: boolean;
+  onPublicSubmit?: (data: any) => void;
 }
 
 const IntensitySlider = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => {
@@ -276,7 +278,7 @@ const QualityCircles = ({ label, value, onChange, disabled }: { label: string, v
     );
 };
 
-export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave, onCuppingComplete, isReadOnly }: CVAAssessmentFormProps) {
+export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave, onCuppingComplete, isReadOnly, isPublic, onPublicSubmit }: CVAAssessmentFormProps) {
   const { t } = useLanguage();
   const resolvedCompanyId = companyId || user?.companyId || '';
   const [isSaving, setIsSaving] = useState(false);
@@ -626,6 +628,16 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   };
 
   const handleSave = async () => {
+    if (isPublic && onPublicSubmit) {
+      onPublicSubmit({
+        cva_descriptive: { ...data.descriptive, defects: data.defects, extrinsic: data.extrinsic, extrinsicSCA: data.extrinsicSCA },
+        cva_affective: data.affective,
+        notes: data.notes,
+        taster_name: data.tasterName
+      });
+      return;
+    }
+
     if (!inventoryId) return;
 
     // Validación: el tab extrínseco debe estar completo antes de sellar
@@ -1242,9 +1254,9 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
           {!isReadOnly && (
             <button
               onClick={handleSave}
-              disabled={isSaving || !isExtrinsicFilled}
+              disabled={isSaving || (!isPublic && !isExtrinsicFilled)}
               className={`w-full py-5 rounded-2xl font-black uppercase text-xs transition-all flex items-center justify-center gap-3 ${
-                isExtrinsicFilled
+                (isPublic || isExtrinsicFilled)
                   ? 'bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-[0_0_30px_rgba(0,166,81,0.2)] active:scale-[0.98]'
                   : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
               }`}
@@ -1254,7 +1266,7 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
               ) : (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               )}
-              {isExtrinsicFilled ? 'SEAL COMPLETE PROTOCOL' : 'FILL AT LEAST ONE FIELD'}
+              {isPublic ? 'GENERAR REPORTE CVA CERTIFICADO' : (isExtrinsicFilled ? 'SEAL COMPLETE PROTOCOL' : 'FILL AT LEAST ONE FIELD')}
             </button>
           )}
 

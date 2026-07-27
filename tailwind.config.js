@@ -26,7 +26,9 @@ module.exports = {
                 brand: {
                     green: "#006056",
                     navy: "#001430",
+                    "dark-navy": "#020814",
                     gray: "#d1d3d4",
+                    "industrial-gray": "#d4d8e0",
                 },
                 carbon: "#1A1A1A",
                 "soft-white": "#F8FAF9",

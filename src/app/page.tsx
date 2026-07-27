@@ -16,14 +16,23 @@ import PurchaseForm from '@/modules/supply/components/PurchaseForm';
 import StatsDashboard from '@/modules/admin/components/StatsDashboard';
 import QuickCaptureContainer from '@/modules/supply/components/QuickCaptureContainer';
 import ProcessPipelineDashboard from '@/modules/supply/components/ProcessPipelineDashboard';
+import HeroSection from './HeroSection';
+import TargetAudienceSection from './TargetAudienceSection';
+import ToolboxSection from './ToolboxSection';
+import ContactSection from './ContactSection';
 
 import { supabase } from '@/shared/lib/supabase';
 import UserDropdown from '@/shared/components/layout/UserDropdown';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import { useRouter } from 'next/navigation';
+
+import FooterSection from './FooterSection';
 
 export default function Home() {
+    const router = useRouter();
     const { t, language, setLanguage } = useLanguage();
     const [user, setUser] = useState<{ name: string, email: string, companyId: string, role?: string } | null>(null);
+    const [showAuth, setShowAuth] = useState(false);
     const [view, setView] = useState<'ecosystem' | 'supply' | 'trilla' | 'master' | 'production' | 'grateful' | 'radar' | 'stats' | 'quick-capture'>('supply');
     const [batches, setBatches] = useState<any[]>([]);
     const [latestLotDestination, setLatestLotDestination] = useState<'internal' | 'export_green' | 'export_roasted' | null>(null);
@@ -198,11 +207,24 @@ export default function Home() {
         syncCurrentPage * itemsPerPage
     );
 
-    if (!user) {
+    if (showAuth) {
         return <AuthScreen onLogin={(userData) => {
             setUser(userData);
             localStorage.setItem('axis-user', JSON.stringify(userData));
+            setShowAuth(false);
         }} />;
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-white">
+                <HeroSection onLoginClick={() => router.push('/login')} />
+                <TargetAudienceSection />
+                <ToolboxSection />
+                <ContactSection />
+                <FooterSection />
+            </div>
+        );
     }
 
     return (

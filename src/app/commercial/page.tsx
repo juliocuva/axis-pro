@@ -16,7 +16,7 @@ export default function CommercialDashboard() {
         buyer: '',
         exporter: '',
         target_kg: '',
-        variety: 'Blend',
+        variety: 'Blend / Regional',
         process: 'Lavado',
         preparation_protocol: 'Excelso EP'
     });
@@ -57,7 +57,7 @@ export default function CommercialDashboard() {
         
         if (!error && data) {
             setIsCreating(false);
-            setNewLot({ lot_code: '', buyer: '', exporter: '', target_kg: '', variety: 'Blend', process: 'Lavado', preparation_protocol: 'Excelso EP' });
+            setNewLot({ lot_code: '', buyer: '', exporter: '', target_kg: '', variety: 'Blend / Regional', process: 'Lavado', preparation_protocol: 'Excelso EP' });
             router.push(`/commercial/lot/${data.id}`);
         } else {
             alert("Error creando lote. Asegúrate de haber corrido las migraciones SQL.");
@@ -68,12 +68,20 @@ export default function CommercialDashboard() {
         <div>
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-xl font-bold tracking-tight text-brand-navy uppercase">Consolidación Comercial</h1>
-                <button 
-                    onClick={() => setIsCreating(true)}
-                    className="bg-brand-navy text-white px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-brand-navy/90 transition-colors flex items-center gap-2 shadow-sm"
-                >
-                    + NUEVO LOTE COMERCIAL
-                </button>
+                <div className="flex gap-4">
+                    <Link 
+                        href="/commercial/inventory"
+                        className="bg-gray-100 text-brand-navy px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-sm"
+                    >
+                        VER INVENTARIO SIMULADO
+                    </Link>
+                    <button 
+                        onClick={() => setIsCreating(true)}
+                        className="bg-brand-navy text-white px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-brand-navy/90 transition-colors flex items-center gap-2 shadow-sm"
+                    >
+                        + NUEVO LOTE COMERCIAL
+                    </button>
+                </div>
             </div>
 
                 <main>
@@ -122,7 +130,7 @@ export default function CommercialDashboard() {
                                             
                                             <div className="col-span-1">
                                                 <div className="text-[9px] font-bold text-gray-400 uppercase mb-1">Preparación / Variedad</div>
-                                                <div className="text-xs font-bold text-brand-navy truncate">{lot.preparation_protocol || 'EP'} - {lot.variety || 'Blend'}</div>
+                                                <div className="text-xs font-bold text-brand-navy truncate">{lot.preparation_protocol || 'EP'} - {lot.variety || 'Blend / Regional'}</div>
                                             </div>
 
                                             <div className="col-span-1">
@@ -175,7 +183,7 @@ export default function CommercialDashboard() {
                                 <div>
                                     <label className="block text-[10px] font-bold text-brand-navy uppercase tracking-wide mb-1">VARIEDAD DEL LOTE</label>
                                     <select required className="w-full bg-transparent border-b border-gray-300 py-2 text-sm text-brand-navy uppercase focus:outline-none focus:border-brand-green transition-colors cursor-pointer appearance-none" value={newLot.variety} onChange={e => setNewLot({...newLot, variety: e.target.value})}>
-                                        <option value="Blend">Blend (Mezcla)</option>
+                                        <option value="Blend / Regional">Blend / Regional</option>
                                         <option value="Castillo">Castillo</option>
                                         <option value="Caturra">Caturra</option>
                                         <option value="Colombia">Colombia</option>
