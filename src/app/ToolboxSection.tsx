@@ -161,7 +161,7 @@ export default function ToolboxSection() {
                                     <img 
                                         src={tool.image} 
                                         alt={tool.title} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                        className={`w-full h-full object-cover transition-transform duration-700 ${tool.status === 'Online' ? 'group-hover:scale-105' : 'grayscale opacity-80 group-hover:scale-100'}`}
                                     />
                                 </div>
                                 {/* Icon Overlapping */}
