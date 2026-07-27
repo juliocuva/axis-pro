@@ -18,18 +18,6 @@ const activeTools = [
         status: 'Online'
     },
     {
-        title: 'CVA Cupping',
-        href: '/cva',
-        image: '/cva_cupping_topdown.png',
-        icon: (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path><line x1="6" x2="6" y1="2" y2="4"></line><line x1="10" x2="10" y1="2" y2="4"></line><line x1="14" x2="14" y1="2" y2="4"></line>
-            </svg>
-        ),
-        description: 'Evaluate, log, and compare cuppings with CVA standards.',
-        status: 'Online'
-    },
-    {
         title: 'Milling',
         href: '/trilla',
         image: '/optical_coffee_sorter.png',
@@ -42,6 +30,18 @@ const activeTools = [
         status: 'Online'
     },
     {
+        title: 'CVA Cupping',
+        href: '/cva',
+        image: '/cva_cupping_topdown.png',
+        icon: (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1"></path><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path><line x1="6" x2="6" y1="2" y2="4"></line><line x1="10" x2="10" y1="2" y2="4"></line><line x1="14" x2="14" y1="2" y2="4"></line>
+            </svg>
+        ),
+        description: 'Evaluate, log, and compare cuppings with CVA standards.',
+        status: 'Aug 2'
+    },
+    {
         title: 'Digital Walk (EUDR)',
         href: '/caminata-digital',
         image: '/digital_walk_coffee_mountain.png',
@@ -51,7 +51,7 @@ const activeTools = [
             </svg>
         ),
         description: 'Map your lots and comply with EUDR easily.',
-        status: 'Online'
+        status: 'Aug 9'
     }
 ];
 
@@ -178,27 +178,35 @@ export default function ToolboxSection() {
                                     </div>
                                     <div className="mt-8 flex items-center justify-between pt-4 border-t border-gray-200/60">
                                         <div className="flex items-center gap-2">
-                                            <span className="relative flex h-2.5 w-2.5">
-                                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
-                                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green"></span>
-                                            </span>
-                                            <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest group-hover:text-brand-navy transition-colors">
+                                            {tool.status === 'Online' ? (
+                                                <span className="relative flex h-2.5 w-2.5">
+                                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
+                                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green"></span>
+                                                </span>
+                                            ) : (
+                                                <span className="relative flex h-2.5 w-2.5">
+                                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green/30"></span>
+                                                </span>
+                                            )}
+                                            <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${tool.status === 'Online' ? 'text-gray-600 group-hover:text-brand-navy' : 'text-gray-400'}`}>
                                                 {tool.status}
                                             </span>
                                         </div>
 
-                                        <span className="inline-flex items-center gap-1.5 bg-brand-navy/10 group-hover:bg-brand-green group-hover:text-white text-brand-navy text-xs font-black py-2 px-4 rounded-xl transition-all duration-300 shadow-sm group-hover:shadow-md">
-                                            <span>LAUNCH</span>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
-                                                <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
-                                            </svg>
+                                        <span className={`inline-flex items-center gap-1.5 ${tool.status === 'Online' ? 'bg-brand-navy/10 group-hover:bg-brand-green group-hover:text-white text-brand-navy' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'} text-xs font-black py-2 px-4 rounded-xl transition-all duration-300 shadow-sm ${tool.status === 'Online' ? 'group-hover:shadow-md' : ''}`}>
+                                            <span>{tool.status === 'Online' ? 'LAUNCH' : 'COMING SOON'}</span>
+                                            {tool.status === 'Online' && (
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
+                                                    <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+                                                </svg>
+                                            )}
                                         </span>
                                     </div>
                                 </div>
                             </>
                         );
 
-                        return tool.href !== '#' ? (
+                        return tool.status === 'Online' ? (
                             <Link key={idx} href={tool.href} className={cardClasses} {...(tool.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
                                 {CardContent}
                             </Link>

@@ -111,13 +111,17 @@ export default function PublicTrillaPage() {
             </header>
 
             <main className="max-w-5xl mx-auto px-6 py-12">
-                <div className="mb-12 text-center max-w-2xl mx-auto">
-                    <h1 className="text-3xl md:text-4xl font-black text-brand-navy uppercase tracking-tight mb-4">
-                        Calculadora de Trilla
-                    </h1>
-                    <p className="text-gray-600 font-medium">
-                        Ingresa tus parámetros para calcular el factor de rendimiento, mermas y balances de masa de tu lote. Prueba la herramienta gratis.
+                <div className="mb-12 max-w-4xl mx-auto text-center">
+                    <div className="inline-block mb-6">
+                        <h1 className="text-2xl md:text-4xl font-black text-white bg-brand-navy px-8 py-4 rounded-2xl shadow-xl border border-white/10 uppercase tracking-tight flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
+                            Milling Calculator
+                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-white/20 border border-white/40 text-[10px] font-black text-white uppercase tracking-widest shadow-inner">Free Tool</span>
+                        </h1>
+                    </div>
+                    <p className="text-gray-600 font-medium max-w-xl mx-auto text-sm md:text-base">
+                        Enter your parameters to calculate the yield factor, physical losses, and mass balances of your lot.
                     </p>
+                    <div className="mt-10 max-w-4xl mx-auto border-t-[3px] border-gray-300 w-11/12 rounded-full"></div>
                 </div>
 
                 <div className="bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-gray-100">

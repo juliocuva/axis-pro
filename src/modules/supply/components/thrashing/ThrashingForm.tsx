@@ -232,13 +232,19 @@ export default function ThrashingForm({
                             disabled={isSubmitting || isReadOnly}
                             className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
-                            <option value="Lavado">LAVADO (18-20%)</option>
-                            <option value="Semilavado">SEMILAVADO (19-21%)</option>
+                            <option value="Lavado">WASHED (18-20%)</option>
+                            <option value="Semilavado">SEMI-WASHED (19-21%)</option>
                             <option value="Honey">HONEY (22-24%)</option>
                             <option value="Natural">NATURAL (28-32%)</option>
-                            <option value="Sumergido">SUMERGIDO (21-23%)</option>
-                            <option value="Anaerobico">ANAERÓBICO (21-23%)</option>
+                            <option value="Sumergido">SUBMERGED (21-23%)</option>
+                            <option value="Anaerobico">ANAEROBIC (21-23%)</option>
                         </select>
+                    </div>
+                    <div className="mt-1.5">
+                         <span className="text-[9px] font-bold uppercase text-brand-navy/60">Input Material:</span>
+                         <span className="text-[10px] ml-1 font-bold text-brand-navy">
+                             {formData.processType === 'Natural' ? 'Dried Cherry' : 'Parchment Coffee'}
+                         </span>
                     </div>
                 </div>
                 {isPublic ? (
@@ -282,11 +288,11 @@ export default function ThrashingForm({
                             disabled={isSubmitting || isReadOnly}
                             className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
-                            <option value="EP">European Prep (EP) - Especialidad</option>
-                            <option value="American">American Prep - Comercial Plus</option>
-                            <option value="Zero Defect">Zero Defect - Microlote Oro</option>
-                            <option value="Supremo">Supremo - Malla 17/18</option>
-                            <option value="UGQ">UGQ - Estándar FNC</option>
+                            <option value="EP">European Prep (EP) - Specialty</option>
+                            <option value="American">American Prep - Commercial Plus</option>
+                            <option value="Zero Defect">Zero Defect - Gold Microlot</option>
+                            <option value="Supremo">Supremo - Screen 17/18</option>
+                            <option value="UGQ">UGQ - FNC Standard</option>
                         </select>
                     </div>
                 </div>
@@ -300,10 +306,10 @@ export default function ThrashingForm({
                             disabled={isSubmitting || isReadOnly}
                             className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
                         >
-                            <option value="Máquina Selectora Óptica">Máquina Selectora Óptica</option>
+                            <option value="Máquina Selectora Óptica">Optical Sorter Machine</option>
                             <option value="Manual (Hand-Sorted)">Manual (Hand-Sorted)</option>
-                            <option value="Mixto (Óptica + Repaso Manual)">Mixto (Óptica + Repaso Manual)</option>
-                            <option value="Solo Densimétrica">Solo Densimétrica</option>
+                            <option value="Mixto (Óptica + Repaso Manual)">Mixed (Optical + Manual Review)</option>
+                            <option value="Solo Densimétrica">Densimetric Only</option>
                         </select>
                     </div>
                 </div>
@@ -326,7 +332,7 @@ export default function ThrashingForm({
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <NumericInput
-                        label="Peso Excelso (Almendra)"
+                        label="Excelso Weight (Almond)"
                         value={formData.excelsoWeight}
                         onChange={(val) => setFormData({ ...formData, excelsoWeight: val })}
                         step={0.1}
@@ -338,7 +344,7 @@ export default function ThrashingForm({
                         formatThousands={true}
                     />
                     <NumericInput
-                        label="Pasilla (Consumo)"
+                        label="Pasilla (Low Grade)"
                         value={formData.pasillaWeight}
                         onChange={(val) => setFormData({ ...formData, pasillaWeight: val })}
                         step={0.1}
@@ -349,7 +355,7 @@ export default function ThrashingForm({
                         formatThousands={true}
                     />
                     <NumericInput
-                        label="Cisco/Cascarilla"
+                        label="Husk/Loss (Cisco)"
                         value={formData.ciscoWeight}
                         onChange={(val) => setFormData({ ...formData, ciscoWeight: val })}
                         step={0.1}
@@ -378,13 +384,13 @@ export default function ThrashingForm({
                                     {t('thrashingForm', 'target')} {formData.processType}: {PROCESS_PARAMS[formData.processType]?.frMin}-{PROCESS_PARAMS[formData.processType]?.frMax}
                                 </p>
                             </div>
-                            <div className="mt-6 text-[11px] text-center">
+                            <div className="mt-6 text-[11px] text-center px-4">
                                 {stats.yieldFactor < (PROCESS_PARAMS[formData.processType]?.frMin || 88) ? (
-                                    <span className="text-emerald-600 font-bold">¡ALTA CALIDAD (Bonificable)!</span>
+                                    <span className="text-emerald-600 font-bold">Excellent physical efficiency.<br/><span className="text-[9px] font-normal">The obtained yield exceeds the expected behavior for this process.</span></span>
                                 ) : stats.yieldFactor > (PROCESS_PARAMS[formData.processType]?.frMax || 94) ? (
-                                    <span className="text-red-500 font-bold">BAJA CALIDAD (Posible Descuento)</span>
+                                    <span className="text-red-500 font-bold">Lower yield than expected.<br/><span className="text-[9px] font-normal">The lot shows losses higher than estimated. Review of processing, drying, or preparation is recommended.</span></span>
                                 ) : (
-                                    <span className="text-brand-navy font-bold">CALIDAD ESTÁNDAR DENTRO DE META</span>
+                                    <span className="text-brand-navy font-bold">Yield within expected range.<br/><span className="text-[9px] font-normal">The lot shows normal behavior for the selected process.</span></span>
                                 )}
                             </div>
                         </div>
@@ -408,6 +414,13 @@ export default function ThrashingForm({
                                         {stats.almondWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
                                     </span>
                                 </div>
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase border-b-2 border-zinc-100 py-3 bg-zinc-50 px-2 -mx-2 rounded-md">
+                                    <span className="text-brand-navy/80">DIFFERENCE</span>
+                                    <span className={`text-xs font-mono ${(stats.almondWeight - stats.theoreticalAlmond) >= 0 ? 'text-brand-green' : 'text-red-500'}`}>
+                                        {(stats.almondWeight - stats.theoreticalAlmond) > 0 ? '+' : ''}{(stats.almondWeight - stats.theoreticalAlmond).toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG 
+                                        <span className="ml-1 opacity-70">({((stats.almondWeight - stats.theoreticalAlmond) / (stats.theoreticalAlmond || 1) * 100).toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%)</span>
+                                    </span>
+                                </div>
                                 <div className="flex justify-between items-center text-[11px] font-bold uppercase border-b-2 border-zinc-100 py-3">
                                     <span className="text-brand-navy/80">{t('thrashingForm', 'realLoss')}</span>
                                     <span className={`text-xs font-mono ${warning?.type === 'high' ? 'text-red-500' : warning?.type === 'low' ? 'text-emerald-600' : 'text-brand-navy'}`}>
@@ -421,7 +434,7 @@ export default function ThrashingForm({
                                     </span>
                                 </div>
 
-                                <div className="pt-2">
+                                <div className="pt-2 mb-4">
                                     <div className="w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
                                         <div
                                             className={`h-full rounded-full transition-all duration-1000 ${warning?.type === 'high' ? 'bg-red-500' : 'bg-emerald-400'}`}
@@ -429,10 +442,28 @@ export default function ThrashingForm({
                                         ></div>
                                     </div>
                                 </div>
+
+                                { (stats.yieldFactor < (PROCESS_PARAMS[formData.processType]?.frMin || 88) || stats.yieldFactor > (PROCESS_PARAMS[formData.processType]?.frMax || 94)) && (
+                                    <div className="mt-4 p-3 bg-zinc-100 rounded-lg border border-zinc-200">
+                                        <span className="text-[10px] font-bold text-brand-navy uppercase mb-1 block">POSSIBLE CAUSES (TECHNICAL OBSERVATIONS):</span>
+                                        <ul className="text-[9px] text-brand-navy/80 list-disc pl-4 space-y-0.5">
+                                            <li>Excessive drying or high percentage of dry pulp</li>
+                                            <li>Poor cherry selection</li>
+                                            <li>High physical losses during processing</li>
+                                            <li>Variety characteristics</li>
+                                            <li>Preparation protocol deviations</li>
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 ) : null}
+
+                <div className="mt-8 p-4 bg-brand-navy/5 border-l-4 border-brand-green text-[10px] text-brand-navy/80 font-medium relative z-20">
+                    <span className="font-bold uppercase block mb-1">Technical Note:</span>
+                    The Yield Factor evaluates the physical efficiency of the milling process. It is not a measurement of sensory quality. Final coffee quality must be interpreted together with cupping, physical grading and laboratory analysis.
+                </div>
 
                 <div className="grid grid-cols-3 items-center pt-6 border-t border-gray-400 relative z-20 mt-6">
                     <div></div>
@@ -445,7 +476,7 @@ export default function ThrashingForm({
                             {isSubmitting ? (
                                 <div className="flex items-center gap-3">
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    SINCRONIZANDO...
+                                    SYNCHRONIZING...
                                 </div>
                             ) : false ? (
                                 <>
@@ -457,14 +488,14 @@ export default function ThrashingForm({
                                 </>
                             ) : isPublic ? (
                                 <>
-                                    GENERAR REPORTE CERTIFICADO
+                                    GENERATE CERTIFIED REPORT
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
                                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                                     </svg>
                                 </>
                             ) : (
                                 <>
-                                    {t('thrashingForm', 'submit') || 'GUARDAR DATOS'}
+                                    {t('thrashingForm', 'submit') || 'SAVE DATA'}
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:translate-x-1 transition-transform">
                                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                                         <polyline points="17 21 17 13 7 13 7 21" />

@@ -34,14 +34,14 @@ export function SieveDistributionTable({
     const { t } = useLanguage();
 
     const meshSizes: { label: string; key: keyof SieveData }[] = [
-        { label: 'Malla 18', key: 'm18' },
-        { label: 'Malla 17', key: 'm17' },
-        { label: 'Malla 16', key: 'm16' },
-        { label: 'Malla 15', key: 'm15' },
-        { label: 'Malla 14', key: 'm14' },
-        { label: 'Malla 13', key: 'm13' },
-        { label: 'Malla 12', key: 'm12' },
-        { label: 'Fondo', key: 'menores' },
+        { label: 'Screen 18', key: 'm18' },
+        { label: 'Screen 17', key: 'm17' },
+        { label: 'Screen 16', key: 'm16' },
+        { label: 'Screen 15', key: 'm15' },
+        { label: 'Screen 14', key: 'm14' },
+        { label: 'Screen 13', key: 'm13' },
+        { label: 'Screen 12', key: 'm12' },
+        { label: 'Bottom', key: 'menores' },
     ];
 
     const filteredMeshSizes = visibleSieves && visibleSieves.length > 0 
