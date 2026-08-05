@@ -14,6 +14,7 @@ export default function PublicCVACuppingPage() {
     
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successLotId, setSuccessLotId] = useState<string | null>(null);
+    const [successLotNumber, setSuccessLotNumber] = useState<string | null>(null);
 
     const handlePublicSubmit = (data: any) => {
         setCvaData(data);
@@ -30,7 +31,7 @@ export default function PublicCVACuppingPage() {
             const lotId = `CVA-${dateStr}-${randomCode}`;
 
             // Save to coffee_purchase_inventory as a public lead
-            const { error: invError } = await supabase.from('coffee_purchase_inventory').insert({
+            const { data: invData, error: invError } = await supabase.from('coffee_purchase_inventory').insert({
                 company_id: 'PUBLIC_LEAD',
                 lot_number: lotId,
                 purchase_date: new Date().toISOString().split('T')[0],
@@ -53,13 +54,15 @@ export default function PublicCVACuppingPage() {
                     lead_email: leadData.email,
                     source: 'public_cva_cupping'
                 }
-            });
+            }).select().single();
 
             if (invError) throw invError;
+            
+            const inventoryId = invData.id; // This is the real UUID
 
             // Save to sca_cupping for the report view
             const { error: cuppingError } = await supabase.from('sca_cupping').insert({
-                inventory_id: lotId,
+                inventory_id: inventoryId,
                 company_id: 'PUBLIC_LEAD',
                 cva_descriptive: cvaData.cva_descriptive,
                 cva_affective: cvaData.cva_affective,
@@ -70,7 +73,8 @@ export default function PublicCVACuppingPage() {
             if (cuppingError) throw cuppingError;
 
             setFinalLeadData(leadData);
-            setSuccessLotId(lotId);
+            setSuccessLotId(inventoryId); // Pass the UUID to the child form
+            setSuccessLotNumber(lotId); // Display the readable code to the user
         } catch (err: any) {
             console.error("Error generating public lot:", err);
             const msg = err?.message || err?.details || err?.hint || err?.code || JSON.stringify(err);
@@ -93,7 +97,7 @@ export default function PublicCVACuppingPage() {
                     </div>
                     <h2 className="text-3xl font-black text-white mb-2 uppercase">Report Secured</h2>
                     <p className="text-white/70 mb-2 font-medium">
-                        Your data has been processed. You have been assigned lot code: <strong className="text-brand-green">{successLotId}</strong>
+                        Your data has been processed. You have been assigned lot code: <strong className="text-brand-green">{successLotNumber}</strong>
                     </p>
                     <p className="text-sm text-white/40 max-w-2xl mx-auto mb-6">
                         Save this ID. You will use it later to connect with Axis One Coffee and attach cupping information.
@@ -103,7 +107,7 @@ export default function PublicCVACuppingPage() {
                         <Link href="/" className="px-6 py-4 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors uppercase text-[11px] tracking-wider flex items-center">
                             Back to Home
                         </Link>
-                        <ExportReportButton elementId="public-cupping-report" fileName={successLotId} />
+                        <ExportReportButton elementId="public-cupping-report" fileName={successLotNumber || 'report'} />
                     </div>
                 </div>
 
@@ -111,7 +115,7 @@ export default function PublicCVACuppingPage() {
                     <div className="mb-6 flex flex-col items-center justify-center text-center pb-6 border-b border-gray-200">
                         <img src="/logo.png" alt="AXISONE" className="h-10 w-auto mb-4" />
                         <h2 className="text-2xl font-black uppercase text-brand-navy">CVA Cupping Report</h2>
-                        <p className="text-xs uppercase font-bold text-gray-500">ID: {successLotId}</p>
+                        <p className="text-xs uppercase font-bold text-gray-500">ID: {successLotNumber}</p>
                         <p className="text-[10px] uppercase font-bold text-gray-400">Produced for: {finalLeadData.name} ({finalLeadData.company})</p>
                     </div>
                     <PublicCuppingForm 
