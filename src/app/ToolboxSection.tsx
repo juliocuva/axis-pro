@@ -39,7 +39,7 @@ const activeTools = [
             </svg>
         ),
         description: 'Evaluate, log, and compare cuppings with CVA standards.',
-        status: 'Launches Aug 2'
+        status: 'Online'
     },
     {
         title: 'Digital Walk (EUDR)',

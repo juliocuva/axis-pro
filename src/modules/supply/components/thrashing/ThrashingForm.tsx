@@ -12,7 +12,7 @@ import EUDRComplianceBadge from '../EUDRComplianceBadge';
 
 interface ThrashingFormProps {
     inventoryId?: string;
-    parchmentWeight: number;
+    parchmentWeight: number | '';
     onThrashingComplete: () => void;
     user: { 
         email?: string;
@@ -50,13 +50,16 @@ export default function ThrashingForm({
         excelsoWeight: 0,
         pasillaWeight: 0,
         ciscoWeight: 0,
-        processType: 'Lavado',
-        humidity: 11.0,
-        preparationProtocol: 'EP',
-        sortingMethod: 'Máquina Selectora Óptica',
+        processType: '',
+        varietal: '',
+        customVarietal: '',
+        millingDate: new Date().toISOString().split('T')[0],
+        humidity: '' as unknown as number,
+        preparationProtocol: '',
+        sortingMethod: '',
         sieveAnalysis: {
-            m18: 50,
-            m17: 50,
+            m18: 0,
+            m17: 0,
             m16: 0,
             m15: 0,
             m14: 0,
@@ -103,19 +106,20 @@ export default function ThrashingForm({
     });
 
     useEffect(() => {
-        const excelso = Number(formData.excelsoWeight) || 0;
-        const pasilla = Number(formData.pasillaWeight) || 0;
-        const cisco = Number(formData.ciscoWeight) || 0;
+        const pw = Number(parchmentWeight) || 0;
+        const hw = Number(formData.excelsoWeight) || 0;
+        const pw2 = Number(formData.pasillaWeight) || 0;
+        const cw = Number(formData.ciscoWeight) || 0;
 
-        const almondWeight = excelso + pasilla;
-        const totalOut = almondWeight + cisco;
-        const loss = Math.max(0, parchmentWeight - totalOut);
-        const lossPct = parchmentWeight > 0 ? ((parchmentWeight - almondWeight) / parchmentWeight) * 100 : 0;
-        const yieldPct = parchmentWeight > 0 ? (excelso / parchmentWeight) * 100 : 0;
-        const factor = excelso > 0 ? (parchmentWeight / excelso) * 70 : 0;
+        const totalOut = hw + pw2 + cw;
+        const almondWeight = hw + pw2;
+        const loss = pw - totalOut;
+        const lossPct = pw > 0 ? (loss / pw) * 100 : 0;
+        const yieldPct = pw > 0 ? (hw / pw) * 100 : 0;
+        const yF = hw > 0 ? (pw / hw) * 70 : 0;
 
         const params = PROCESS_PARAMS[formData.processType] || PROCESS_PARAMS['Lavado'];
-        const theoreticalAlmond = parchmentWeight * params.conversion;
+        const theoreticalAlmond = pw * params.conversion;
         const theoreticalLossPct = ((params.shrinkageMin + params.shrinkageMax) / 2);
 
         setStats({
@@ -124,7 +128,7 @@ export default function ThrashingForm({
             loss,
             lossPct,
             yieldPct,
-            yieldFactor: factor,
+            yieldFactor: yF,
             theoreticalAlmond,
             theoreticalLossPct
         });
@@ -168,6 +172,8 @@ export default function ThrashingForm({
                 pasillaWeight: formData.pasillaWeight,
                 ciscoWeight: formData.ciscoWeight,
                 processType: formData.processType,
+                varietal: formData.varietal === 'Other' ? formData.customVarietal : formData.varietal,
+                millingDate: formData.millingDate,
                 humidity: formData.humidity,
                 preparationProtocol: formData.preparationProtocol,
                 sortingMethod: formData.sortingMethod,
@@ -194,7 +200,9 @@ export default function ThrashingForm({
                 formData.sortingMethod,
                 {
                     ...lotDetails?.process_data,
-                    sieve_analysis: formData.sieveAnalysis
+                    sieve_analysis: formData.sieveAnalysis,
+                    varietal: formData.varietal === 'Other' ? formData.customVarietal : formData.varietal,
+                    millingDate: formData.millingDate
                 } as any
             );
 
@@ -224,20 +232,56 @@ export default function ThrashingForm({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
                 <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">VARIETAL</label>
+                    <div className="flex flex-col gap-2">
+                        <div className="relative group/select w-full">
+                        <select
+                                value={formData.varietal}
+                                onChange={(e) => setFormData({ ...formData, varietal: e.target.value })}
+                                disabled={isSubmitting || isReadOnly}
+                                className={`w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold transition-all appearance-none pr-8 disabled:opacity-100 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat ${!formData.varietal ? 'text-zinc-400' : 'text-brand-navy disabled:text-brand-navy'}`}
+                            >
+                                <option value="" disabled className="text-zinc-400">SELECT...</option>
+                                <option value="Castillo" className="text-brand-navy">CASTILLO</option>
+                                <option value="Caturra" className="text-brand-navy">CATURRA</option>
+                                <option value="Colombia" className="text-brand-navy">COLOMBIA</option>
+                                <option value="Bourbon" className="text-brand-navy">BOURBON</option>
+                                <option value="Gesha" className="text-brand-navy">GESHA</option>
+                                <option value="Pink Bourbon" className="text-brand-navy">PINK BOURBON</option>
+                                <option value="Typica" className="text-brand-navy">TYPICA</option>
+                                <option value="Blend" className="text-brand-navy">BLEND (MEZCLA)</option>
+                                <option value="Other" className="text-brand-navy">OTRO</option>
+                            </select>
+                        </div>
+                        {formData.varietal === 'Other' && (
+                            <input
+                                type="text"
+                                placeholder="Escribe el varietal..."
+                                value={formData.customVarietal}
+                                onChange={(e) => setFormData({ ...formData, customVarietal: e.target.value })}
+                                disabled={isSubmitting || isReadOnly}
+                                className="w-full h-[30px] bg-transparent border-b-2 border-brand-green px-0 focus:border-brand-navy outline-none font-bold text-brand-navy transition-all uppercase text-xs"
+                                autoFocus
+                            />
+                        )}
+                    </div>
+                </div>
+                <div className="space-y-0.5">
                     <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'processType')}</label>
                     <div className="relative group/select">
                         <select
                             value={formData.processType}
                             onChange={(e) => setFormData({ ...formData, processType: e.target.value })}
                             disabled={isSubmitting || isReadOnly}
-                            className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
+                            className={`w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold transition-all appearance-none pr-8 disabled:opacity-100 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat ${!formData.processType ? 'text-zinc-400' : 'text-brand-navy disabled:text-brand-navy'}`}
                         >
-                            <option value="Lavado">WASHED (18-20%)</option>
-                            <option value="Semilavado">SEMI-WASHED (19-21%)</option>
-                            <option value="Honey">HONEY (22-24%)</option>
-                            <option value="Natural">NATURAL (28-32%)</option>
-                            <option value="Sumergido">SUBMERGED (21-23%)</option>
-                            <option value="Anaerobico">ANAEROBIC (21-23%)</option>
+                            <option value="" disabled className="text-zinc-400">SELECT...</option>
+                            <option value="Lavado" className="text-brand-navy">WASHED (18-20%)</option>
+                            <option value="Semilavado" className="text-brand-navy">SEMI-WASHED (19-21%)</option>
+                            <option value="Honey" className="text-brand-navy">HONEY (22-24%)</option>
+                            <option value="Natural" className="text-brand-navy">NATURAL (28-32%)</option>
+                            <option value="Sumergido" className="text-brand-navy">SUBMERGED (21-23%)</option>
+                            <option value="Anaerobico" className="text-brand-navy">ANAEROBIC (21-23%)</option>
                         </select>
                     </div>
                     <div className="mt-1.5">
@@ -247,69 +291,87 @@ export default function ThrashingForm({
                          </span>
                     </div>
                 </div>
+                <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">FECHA DE TRILLA</label>
+                    <div className="relative">
+                        <input
+                            type="date"
+                            value={formData.millingDate}
+                            onChange={(e) => setFormData({ ...formData, millingDate: e.target.value })}
+                            disabled={isSubmitting || isReadOnly}
+                            className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all uppercase text-xs"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-6 relative z-10 mt-4">
                 {isPublic ? (
-                    <NumericInput
-                        label={t('thrashingForm', 'initialWeight')}
-                        value={parchmentWeight}
-                        onChange={(val) => onChangeParchmentWeight?.(val)}
-                        step={0.1}
-                        unit="KG"
-                        disabled={isSubmitting || isReadOnly}
-                        inputClassName="text-xs !h-[30px] font-bold uppercase"
-                        formatThousands={true}
-                    />
+                    <div className="md:col-span-1">
+                        <NumericInput
+                            label={t('thrashingForm', 'initialWeight')}
+                            value={parchmentWeight}
+                            onChange={(val) => onChangeParchmentWeight?.(val)}
+                            step={0.1}
+                            unit="KG"
+                            disabled={isSubmitting || isReadOnly}
+                            inputClassName="text-xs !h-[30px] font-bold uppercase"
+                            formatThousands={true}
+                        />
+                    </div>
                 ) : (
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 md:col-span-1">
                         <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'initialWeight')}</label>
                         <div className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 text-xs font-bold text-brand-navy flex justify-between items-center transition-all">
-                            <span>{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                            <span>{Number(parchmentWeight || 0).toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
                             <span className="text-[9px] opacity-60 uppercase font-black ">Parchment</span>
                         </div>
                     </div>
                 )}
-                <NumericInput
-                    label={t('thrashingForm', 'humidity')}
-                    value={formData.humidity}
-                    onChange={(val) => setFormData({ ...formData, humidity: val })}
-                    step={0.1}
-                    disabled={isSubmitting || isReadOnly}
-                    variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'default'}
-                    inputClassName="text-xs !h-[30px] font-bold uppercase"
-                />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10 mt-2">
-                <div className="space-y-0.5">
+                <div className="md:col-span-1">
+                    <NumericInput
+                        label={t('thrashingForm', 'humidity')}
+                        value={formData.humidity}
+                        onChange={(val) => setFormData({ ...formData, humidity: val })}
+                        step={0.1}
+                        disabled={isSubmitting || isReadOnly}
+                        variant={formData.humidity >= 10 && formData.humidity <= 11.5 ? 'industrial' : 'default'}
+                        inputClassName="text-xs !h-[30px] font-bold uppercase"
+                    />
+                </div>
+                <div className="space-y-0.5 md:col-span-2">
                     <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'preparationProtocol')}</label>
                     <div className="relative group/select">
                         <select
                             value={formData.preparationProtocol}
                             onChange={(e) => setFormData({ ...formData, preparationProtocol: e.target.value })}
                             disabled={isSubmitting || isReadOnly}
-                            className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
+                            className={`w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold transition-all appearance-none pr-8 disabled:opacity-100 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat ${!formData.preparationProtocol ? 'text-zinc-400' : 'text-brand-navy disabled:text-brand-navy'}`}
                         >
-                            <option value="EP">European Prep (EP) - Specialty</option>
-                            <option value="American">American Prep - Commercial Plus</option>
-                            <option value="Zero Defect">Zero Defect - Gold Microlot</option>
-                            <option value="Supremo">Supremo - Screen 17/18</option>
-                            <option value="UGQ">UGQ - FNC Standard</option>
+                            <option value="" disabled className="text-zinc-400">SELECT...</option>
+                            <option value="EP" className="text-brand-navy">European Prep (EP) - Specialty</option>
+                            <option value="American" className="text-brand-navy">American Prep - Commercial Plus</option>
+                            <option value="Zero Defect" className="text-brand-navy">Zero Defect - Gold Microlot</option>
+                            <option value="Supremo" className="text-brand-navy">Supremo - Screen 17/18</option>
+                            <option value="UGQ" className="text-brand-navy">UGQ - FNC Standard</option>
                         </select>
                     </div>
                 </div>
 
-                <div className="space-y-0.5">
+                <div className="space-y-0.5 md:col-span-2">
                     <label className="text-[11px] font-bold text-brand-navy uppercase flex items-center gap-1.5 mb-1">{t('thrashingForm', 'sortingMethod')}</label>
                     <div className="relative group/select">
                         <select
                             value={formData.sortingMethod}
                             onChange={(e) => setFormData({ ...formData, sortingMethod: e.target.value })}
                             disabled={isSubmitting || isReadOnly}
-                            className="w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold text-brand-navy transition-all appearance-none pr-8 disabled:opacity-100 disabled:text-brand-navy uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat"
+                            className={`w-full h-[30px] bg-transparent border-b-2 border-zinc-300 px-0 focus:border-brand-green outline-none font-bold transition-all appearance-none pr-8 disabled:opacity-100 uppercase text-xs bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%230c6056%22%20stroke-width%3D%223%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem_1rem] bg-[position:right_0_center] bg-no-repeat ${!formData.sortingMethod ? 'text-zinc-400' : 'text-brand-navy disabled:text-brand-navy'}`}
                         >
-                            <option value="Máquina Selectora Óptica">Optical Sorter Machine</option>
-                            <option value="Manual (Hand-Sorted)">Manual (Hand-Sorted)</option>
-                            <option value="Mixto (Óptica + Repaso Manual)">Mixed (Optical + Manual Review)</option>
-                            <option value="Solo Densimétrica">Densimetric Only</option>
+                            <option value="" disabled className="text-zinc-400">SELECT...</option>
+                            <option value="Máquina Selectora Óptica" className="text-brand-navy">Optical Sorter Machine</option>
+                            <option value="Manual (Hand-Sorted)" className="text-brand-navy">Manual (Hand-Sorted)</option>
+                            <option value="Mixto (Óptica + Repaso Manual)" className="text-brand-navy">Mixed (Optical + Manual Review)</option>
+                            <option value="Solo Densimétrica" className="text-brand-navy">Densimetric Only</option>
                         </select>
                     </div>
                 </div>
@@ -330,7 +392,7 @@ export default function ThrashingForm({
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <NumericInput
                         label="Excelso Weight (Almond)"
                         value={formData.excelsoWeight}
@@ -352,17 +414,6 @@ export default function ThrashingForm({
                         disabled={isSubmitting}
                         variant="industrial"
                         inputClassName="text-xs !h-[30px] font-bold uppercase"
-                        formatThousands={true}
-                    />
-                    <NumericInput
-                        label="Husk/Loss (Cisco)"
-                        value={formData.ciscoWeight}
-                        onChange={(val) => setFormData({ ...formData, ciscoWeight: val })}
-                        step={0.1}
-                        unit="KG"
-                        disabled={isSubmitting}
-                        variant="industrial"
-                        inputClassName="text-xs !h-[30px] opacity-60 font-bold uppercase"
                         formatThousands={true}
                     />
                 </div>
@@ -409,7 +460,7 @@ export default function ThrashingForm({
                                     <span className="text-xs text-brand-navy font-mono">{parchmentWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG</span>
                                 </div>
                                 <div className="flex justify-between items-center text-[11px] font-bold uppercase border-b-2 border-zinc-100 py-3">
-                                    <span className="text-brand-navy/80">{t('thrashingForm', 'outputMass')}</span>
+                                    <span className="text-brand-navy/80">ALMOND OUTPUT (GREEN)</span>
                                     <span className={`text-xs font-mono ${stats.almondWeight >= stats.theoreticalAlmond ? 'text-brand-green' : 'text-brand-navy'}`}>
                                         {stats.almondWeight.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} KG
                                     </span>
@@ -443,7 +494,7 @@ export default function ThrashingForm({
                                     </div>
                                 </div>
 
-                                { (stats.yieldFactor < (PROCESS_PARAMS[formData.processType]?.frMin || 88) || stats.yieldFactor > (PROCESS_PARAMS[formData.processType]?.frMax || 94)) && (
+                                { stats.yieldFactor > (PROCESS_PARAMS[formData.processType]?.frMax || 94) && (
                                     <div className="mt-4 p-3 bg-zinc-100 rounded-lg border border-zinc-200">
                                         <span className="text-[10px] font-bold text-brand-navy uppercase mb-1 block">POSSIBLE CAUSES (TECHNICAL OBSERVATIONS):</span>
                                         <ul className="text-[9px] text-brand-navy/80 list-disc pl-4 space-y-0.5">

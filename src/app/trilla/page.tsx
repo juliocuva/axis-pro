@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import ThrashingForm from '@/modules/supply/components/thrashing/ThrashingForm';
 import { supabase } from '@/shared/lib/supabase';
+import PublicLeadModal, { PublicLeadData } from '@/shared/components/ui/PublicLeadModal';
+import PublicMillingReport from '@/modules/export/components/PublicMillingReport';
+import ExportReportButton from '@/shared/components/ui/ExportReportButton';
 
 export default function PublicTrillaPage() {
-    const [publicWeight, setPublicWeight] = useState(400);
+    const [publicWeight, setPublicWeight] = useState<number | ''>('');
     const [showLeadModal, setShowLeadModal] = useState(false);
     const [trillaData, setTrillaData] = useState<any>(null);
-
-    const [leadName, setLeadName] = useState('');
-    const [leadPhone, setLeadPhone] = useState('');
-    const [leadCompany, setLeadCompany] = useState('');
+    const [finalLeadData, setFinalLeadData] = useState<PublicLeadData | null>(null);
     
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successLotId, setSuccessLotId] = useState<string | null>(null);
@@ -22,8 +22,7 @@ export default function PublicTrillaPage() {
         setShowLeadModal(true);
     };
 
-    const handleGenerateLot = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleGenerateLot = async (leadData: PublicLeadData) => {
         setIsSubmitting(true);
 
         try {
@@ -37,58 +36,75 @@ export default function PublicTrillaPage() {
                 company_id: 'PUBLIC_LEAD',
                 lot_number: lotId,
                 purchase_date: new Date().toISOString().split('T')[0],
-                farm_name: leadCompany || 'Público',
-                farmer_name: leadName,
-                purchase_weight: publicWeight,
-                thrashed_weight: trillaData.excelsoWeight,
-                pasilla_weight: trillaData.pasillaWeight,
-                cisco_weight: trillaData.ciscoWeight,
-                process: trillaData.processType,
-                humidity: trillaData.humidity,
-                status: 'trilla_completed',
+                farm_name: leadData.company || 'Público',
+                farmer_name: leadData.name,
+                purchase_weight: Number(publicWeight) || 0,
+                thrashed_weight: Number(trillaData.excelsoWeight) || 0,
+                pasilla_weight: Number(trillaData.pasillaWeight) || 0,
+                cisco_weight: Number(trillaData.ciscoWeight) || 0,
+                process: trillaData.processType || 'Sin Especificar',
+                region: 'Sin Especificar',
+                country: 'Colombia',
+                variety: trillaData.varietal || 'Blend',
+                altitude: 0,
+                purchase_value: 0,
+                harvest_date: new Date().toISOString().split('T')[0],
+                status: 'thrashed',
                 process_data: {
                     ...trillaData,
-                    lead_phone: leadPhone,
-                    source: 'public_landing_page'
+                    lead_phone: leadData.phone,
+                    lead_email: leadData.email,
+                    source: 'public_milling_calculator'
                 }
             });
 
             if (error) throw error;
 
+            setFinalLeadData(leadData);
             setSuccessLotId(lotId);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error generating public lot:", err);
-            alert("Hubo un error generando el lote. Por favor intenta de nuevo.");
+            const msg = err?.message || err?.details || err?.hint || err?.code || JSON.stringify(err);
+            alert(`Hubo un error generando el lote: ${msg}`);
         } finally {
             setIsSubmitting(false);
+            setShowLeadModal(false);
         }
     };
 
-    if (successLotId) {
+    if (successLotId && finalLeadData) {
         return (
-            <div className="min-h-screen bg-brand-navy flex flex-col items-center justify-center p-6 text-white text-center">
-                <div className="bg-[#0b1727] p-10 rounded-3xl border border-brand-green/20 max-w-lg w-full shadow-2xl">
-                    <div className="w-20 h-20 bg-brand-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand-green">
+            <div className="min-h-screen bg-brand-navy flex flex-col items-center justify-start p-6 text-white text-center pb-20">
+                <div className="max-w-4xl mx-auto mb-8 mt-4 text-center">
+                    <div className="w-16 h-16 bg-brand-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-brand-green">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                             <polyline points="22 4 12 14.01 9 11.01"></polyline>
                         </svg>
                     </div>
-                    <h2 className="text-3xl font-black mb-4">Reporte Asegurado</h2>
-                    <p className="text-white/70 mb-8 font-medium">
-                        Tus datos han sido procesados. Se te ha asignado el siguiente código de lote único en nuestro sistema:
+                    <h2 className="text-3xl font-black text-white mb-2 uppercase">Report Secured</h2>
+                    <p className="text-white/70 mb-2 font-medium">
+                        Your data has been processed. You have been assigned lot code: <strong className="text-brand-green">{successLotId}</strong>
                     </p>
-                    <div className="bg-brand-navy border border-white/10 py-4 px-6 rounded-xl mb-8">
-                        <span className="text-2xl font-mono font-black text-brand-green">{successLotId}</span>
+                    <p className="text-sm text-white/40 max-w-2xl mx-auto mb-6">
+                        Save this ID. You will use it later to connect with Axis One Coffee and attach cupping information.
+                    </p>
+                    
+                    <div className="flex justify-center gap-4">
+                        <Link href="/" className="px-6 py-4 border border-white/20 text-white font-bold rounded-2xl hover:bg-white/10 transition-colors uppercase text-[11px] tracking-wider flex items-center">
+                            Back to Home
+                        </Link>
+                        <ExportReportButton elementId="public-milling-report" fileName={successLotId} />
                     </div>
-                    <p className="text-sm text-white/50 mb-8">
-                        Guarda este ID. Te servirá más adelante para conectarte con Axis One Coffee y anexar información de fermentación o catación a este mismo lote.
-                        <br/><br/>
-                        * La pasarela para descargar el certificado PDF con Hash criptográfico estará disponible muy pronto.
-                    </p>
-                    <Link href="/" className="inline-block bg-white text-brand-navy font-black uppercase text-sm px-8 py-3 rounded-xl hover:bg-gray-200 transition-colors">
-                        Volver al Inicio
-                    </Link>
+                </div>
+
+                <div className="scale-[0.8] md:scale-100 origin-top">
+                    <PublicMillingReport 
+                        lotId={successLotId} 
+                        trillaData={trillaData} 
+                        leadData={finalLeadData}
+                        purchaseWeight={Number(publicWeight) || 0} 
+                    />
                 </div>
             </div>
         );
@@ -137,67 +153,12 @@ export default function PublicTrillaPage() {
             </main>
 
             {/* Lead Capture Modal */}
-            {showLeadModal && (
-                <div className="fixed inset-0 z-[100] bg-brand-navy/90 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl p-8 md:p-10 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-300">
-                        <button 
-                            onClick={() => setShowLeadModal(false)}
-                            className="absolute top-6 right-6 text-gray-400 hover:text-brand-navy"
-                        >
-                            ✕
-                        </button>
-                        
-                        <h3 className="text-2xl font-black text-brand-navy mb-2 uppercase tracking-tight">Obtener Certificado</h3>
-                        <p className="text-sm text-gray-500 mb-8 font-medium">
-                            Para generar tu reporte con Hash Criptográfico y asegurar estos datos, regístrate a continuación.
-                        </p>
-
-                        <form onSubmit={handleGenerateLot} className="space-y-5">
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Nombre Completo</label>
-                                <input 
-                                    type="text" 
-                                    required
-                                    value={leadName}
-                                    onChange={e => setLeadName(e.target.value)}
-                                    className="w-full border-b-2 border-gray-200 py-2 focus:border-brand-green outline-none transition-colors font-bold text-brand-navy text-sm"
-                                    placeholder="Ej: Julio César"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Empresa / Finca</label>
-                                <input 
-                                    type="text" 
-                                    required
-                                    value={leadCompany}
-                                    onChange={e => setLeadCompany(e.target.value)}
-                                    className="w-full border-b-2 border-gray-200 py-2 focus:border-brand-green outline-none transition-colors font-bold text-brand-navy text-sm"
-                                    placeholder="Ej: Finca El Paraíso"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">WhatsApp / Teléfono</label>
-                                <input 
-                                    type="tel" 
-                                    required
-                                    value={leadPhone}
-                                    onChange={e => setLeadPhone(e.target.value)}
-                                    className="w-full border-b-2 border-gray-200 py-2 focus:border-brand-green outline-none transition-colors font-bold text-brand-navy text-sm"
-                                    placeholder="+57 300 000 0000"
-                                />
-                            </div>
-
-                            <button 
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full bg-brand-green text-white font-black uppercase tracking-widest text-sm py-4 rounded-xl mt-4 hover:bg-brand-navy transition-colors disabled:opacity-50"
-                            >
-                                {isSubmitting ? 'GENERANDO...' : 'REGISTRAR Y CONTINUAR'}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <PublicLeadModal 
+                isOpen={showLeadModal}
+                onClose={() => setShowLeadModal(false)}
+                onSubmit={handleGenerateLot}
+                isSubmitting={isSubmitting}
+            />
         </div>
     );
 }

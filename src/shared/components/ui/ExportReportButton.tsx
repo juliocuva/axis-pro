@@ -7,7 +7,7 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
         e.preventDefault();
         e.stopPropagation();
         const btn = document.getElementById('btn-export-text');
-        if (btn) btn.innerText = 'GENERANDO REPORTE...';
+        if (btn) btn.innerText = 'GENERATING REPORT...';
 
         try {
             const html2canvas = (await import('html2canvas')).default;
@@ -161,11 +161,11 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                 console.error('Error saving to IMP folder:', saveErr);
             }
 
-            if (btn) btn.innerText = 'IMAGEN GENERADA ✓';
-            setTimeout(() => { if (btn) btn.innerText = 'DESCARGAR REPORTE INDUSTRIAL'; }, 2000);
+            if (btn) btn.innerText = 'IMAGE GENERATED ✓';
+            setTimeout(() => { if (btn) btn.innerText = 'DOWNLOAD INDUSTRIAL REPORT'; }, 2000);
         } catch (error) {
             console.error('Error generating Image:', error);
-            if (btn) btn.innerText = 'ERROR AL GENERAR';
+            if (btn) btn.innerText = 'ERROR GENERATING';
         } finally {
             const element = document.getElementById(elementId);
             if (element) {
@@ -179,12 +179,12 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
         <button
             type="button"
             onClick={handleDownload}
-            className="px-8 py-4 bg-white hover:bg-white border border-gray-400 shadow-sm text-brand-navy-bright font-bold rounded-2xl transition-all flex items-center justify-center gap-3 group shadow-xl"
+            className="px-8 py-4 bg-white hover:bg-gray-50 border border-gray-400 shadow-sm text-brand-navy font-black rounded-2xl transition-all flex items-center justify-center gap-3 group shadow-xl"
         >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:translate-y-0.5 transition-transform">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
             </svg>
-            <span id="btn-export-text">DESCARGAR REPORTE INDUSTRIAL</span>
+            <span id="btn-export-text">DOWNLOAD INDUSTRIAL REPORT</span>
         </button>
     );
 }
