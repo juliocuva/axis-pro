@@ -172,6 +172,13 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                         >
                             Contact
                         </button>
+                        
+                        <a 
+                            href="/commercial/evidence"
+                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand-green hover:text-brand-navy transition-colors bg-brand-green/10 px-4 py-1.5 rounded-full"
+                        >
+                            Commercial Evidence
+                        </a>
 
                         {/* Primary CTA Button */}
                         <button 
@@ -218,14 +225,14 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
 
                 {/* Main Heading - All White */}
                 <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6 w-full px-4 drop-shadow-sm">
-                    Your toolbox<br />
-                    for every coffee process.
+                    Commercial Coffee<br />
+                    Traceability & EUDR.
                 </h1>
 
                 {/* Subheading - All White */}
                 <p className="text-lg md:text-xl text-white font-medium max-w-5xl mb-6 leading-relaxed">
-                    Simple, independent digital tools that solve real problems<br />
-                    at the farm, dry mill, lab, roastery, and export.
+                    Turn volume coffee into verified, transparent, and EUDR-compliant<br />
+                    digital packages for international buyers.
                 </p>
 
                 {/* Bullet Point - All White */}
@@ -236,7 +243,7 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                         </svg>
                     </div>
                     <p className="font-bold text-sm md:text-base text-white">
-                        Use them independently or connect them in{' '}
+                        Stop reacting to compliance requests. Be proactive with{' '}
                         <span className="inline-block">
                             <span className="font-azonix text-white text-[0.92em]">AXIS</span>
                             <span className="font-montserrat-black text-white">one</span>

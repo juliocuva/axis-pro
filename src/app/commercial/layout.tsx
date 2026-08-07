@@ -2,8 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function CommercialLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const isEvidence = pathname === '/commercial/evidence';
+
+    if (isEvidence) {
+        return <div className="w-full h-full flex flex-col flex-1">{children}</div>;
+    }
+
     return (
         <div className="min-h-screen bg-white text-brand-navy font-sans">
             {/* Top Navbar from Screenshot */}

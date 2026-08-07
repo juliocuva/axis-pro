@@ -78,6 +78,27 @@ const REGION_COORDINATES: Record<string, { lat: number; lon: number }> = {
 // Orígenes Globales de Proyección para Presentación de Julio César
 const GLOBAL_ORIGINS = [
     {
+        id: 'global-evidence-dash',
+        lot_number: 'PO-2026-08-001',
+        farmer_name: 'Consolidated Commercial Blend',
+        farm_name: 'Axis One Export Network',
+        region: 'COLOMBIA MULTI-REGION',
+        variety: 'COMMERCIAL BLEND',
+        process: 'Excelso EP 10',
+        purchase_weight: 21000,
+        q_score: 84.5,
+        latitude: 4.5709,
+        longitude: -74.2973,
+        is_global: true,
+        destinations: ['HAMBURG'],
+        attributes: {
+            fermentation: 'Standard Washed',
+            ph: '4.00 / 14.5°Bx',
+            secado: 'Silo Secado Mecánico',
+            notes: 'Perfil limpio, chocolate con leche, acidez media.'
+        }
+    },
+    {
         id: 'global-ethiopia',
         lot_number: 'AX1-ETH-YIRG-09',
         farmer_name: 'Abebe Bikila',
@@ -376,7 +397,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
     // Filtros Avanzados
     const [filterVariety, setFilterVariety] = useState('ALL');
     const [filterProcess, setFilterProcess] = useState('ALL');
-    const [filterPreset, setFilterPreset] = useState<'ALL' | 'SIMULACION' | 'COMPETENCIA' | 'REAL'>('ALL');
+    const [filterPreset, setFilterPreset] = useState<'ALL' | 'SIMULACION' | 'COMPETENCIA' | 'REAL' | 'EVIDENCE_DASH'>('EVIDENCE_DASH');
 
     // Vista: ORIGEN (Colombia), LOGISTICA (Puertos), CONSUMO (Escaneos Deep), MARKET (Terminal de Datos)
     const [viewMode, setViewMode] = useState<'ORIGEN' | 'LOGISTICA' | 'CONSUMO' | 'MARKET'>('LOGISTICA');
@@ -445,6 +466,7 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                 if (filterPreset === 'SIMULACION') return lot.is_simulated === true || lot.lot_number?.includes('SIM-');
                 if (filterPreset === 'COMPETENCIA') return lot.lot_number?.includes('WCE-HUILA-');
                 if (filterPreset === 'REAL') return lot.lot_number?.includes('DM-');
+                if (filterPreset === 'EVIDENCE_DASH') return lot.lot_number?.includes('PO-2026-');
                 return true;
             });
             
@@ -703,6 +725,12 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                         <h4 className="text-[9px] font-black uppercase text-[#00FFB2] tracking-wider mb-3">Preestablecidos</h4>
                         <div className="grid grid-cols-2 gap-2">
                             <button
+                                onClick={() => setFilterPreset('EVIDENCE_DASH')}
+                                className={`col-span-2 text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'EVIDENCE_DASH' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
+                            >
+                                <p className="text-[9px] font-black uppercase tracking-wide">Evidence Dashboard</p>
+                            </button>
+                            <button
                                 onClick={() => setFilterPreset('SIMULACION')}
                                 className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'SIMULACION' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
                             >
@@ -713,12 +741,6 @@ export default function RadarDashboard({ user, onClose }: { user: any; onClose?:
                                 className={`text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'COMPETENCIA' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
                             >
                                 <p className="text-[9px] font-black uppercase tracking-wide">Competencia</p>
-                            </button>
-                            <button
-                                onClick={() => setFilterPreset('REAL')}
-                                className={`col-span-2 text-center px-3 py-2 rounded-lg border transition-all ${filterPreset === 'REAL' ? 'bg-[#00FFB2] border-[#00FFB2] text-black shadow-[0_0_15px_rgba(0,255,178,0.3)]' : 'bg-neutral-900/80 border-neutral-700 text-neutral-300 hover:border-[#00FFB2] hover:text-[#00FFB2]'}`}
-                            >
-                                <p className="text-[9px] font-black uppercase tracking-wide">Lote Real (Don Moiso)</p>
                             </button>
                             <button
                                 onClick={() => setFilterPreset('ALL')}
