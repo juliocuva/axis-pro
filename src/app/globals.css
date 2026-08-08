@@ -158,6 +158,25 @@ input, textarea, select {
     animation-name: slideUp;
 }
 
+@keyframes bounceHorizontalSubtle {
+    0%, 80%, 100% {
+        transform: translateX(0);
+    }
+    85% {
+        transform: translateX(-6px);
+    }
+    90% {
+        transform: translateX(0);
+    }
+    95% {
+        transform: translateX(-3px);
+    }
+}
+
+.animate-bounce-x-subtle {
+    animation: bounceHorizontalSubtle 5s ease-in-out infinite;
+}
+
 /* Text Masking Utilities */
 .bg-clip-text {
     -webkit-background-clip: text;
@@ -379,8 +398,8 @@ input, textarea, select {
 }
 
 /* ── GLOBAL SCROLLBAR (Dashboard specific classes) ── */
-.custom-scrollbar::-webkit-scrollbar        { width: 10px; height: 10px; }
-.custom-scrollbar::-webkit-scrollbar-track  { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb  { background-color: rgba(255,255,255,0.2); border-radius: 10px; border: 2px solid var(--color-panel-bg); }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: var(--color-brand-green); border-width: 2px; }
+.custom-scrollbar::-webkit-scrollbar        { width: 12px; height: 12px; }
+.custom-scrollbar::-webkit-scrollbar-track  { background: rgba(15, 30, 56, 0.04); border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb  { background-color: rgba(15, 30, 56, 0.7); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(15, 30, 56, 1); border: 2px solid transparent; background-clip: padding-box; }
 

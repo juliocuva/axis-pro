@@ -58,129 +58,90 @@ export async function POST(request: Request) {
         }
         const processedRecords = [];
 
+        // AGRUPAR DATOS (Idempotencia)
+        // Si hay filas duplicadas en el excel (mismo PO, mismo Lote, mismo Productor, mismo Varietal), sumamos su volumen.
+        const deliveriesMap = new Map<string, any>();
+
         for (const rowData of allData) {
-            // Ignorar filas vacías o sin ID
             if (!rowData || !rowData[0]) continue;
             
-            // Limpiar y normalizar el PO Number, usar el del frontend si existe
             let poRaw = rowData[0].toString().trim();
-            // Si el frontend envia el PO, usamos ese para ignorar lo que diga la hoja
             const poNumber = frontendPoId || poRaw;
-            
-            // Si no pasamos poId del frontend, validar el de la hoja
             if (!frontendPoId && !poRaw.toUpperCase().startsWith('PO-')) continue;
+
             const lotCode = rowData[1] ? rowData[1].toString().trim() : '';
-            const farmerName = rowData[2];
-            const farmName = rowData[3];
+            const farmerName = rowData[2] ? rowData[2].toString().trim() : '';
+            const farmName = rowData[3] ? rowData[3].toString().trim() : '';
+            const municipality = rowData[4] ? rowData[4].toString().trim() : '';
+            const coffeeVariety = rowData[5] ? rowData[5].toString().trim() : 'Blend';
             const volumeRaw = rowData[6];
             const volume = volumeRaw ? parseFloat(String(volumeRaw).replace(/,/g, '')) : 0;
+            const basePrice = rowData[7] ? parseFloat(String(rowData[7]).replace(/,/g, '')) : 0;
 
             if (!poNumber || !lotCode || !farmerName) continue;
 
-            // 1. Encontrar o crear el Purchase Order
-            const { data: po, error: poErr } = await supabase.from('purchase_orders')
-                .select('id')
-                .eq('po_number', poNumber)
-                .single();
-            
+            const key = `${poNumber}|${lotCode}|${farmerName}|${coffeeVariety}`;
+            if (deliveriesMap.has(key)) {
+                deliveriesMap.get(key).volume += volume;
+            } else {
+                deliveriesMap.set(key, { poNumber, lotCode, farmerName, farmName, municipality, coffeeVariety, volume, basePrice });
+            }
+        }
+
+
+        for (const delivery of Array.from(deliveriesMap.values())) {
+            const { poNumber, lotCode, farmerName, coffeeVariety, volume } = delivery;
+
+            // 1. PO
+            let { data: po } = await supabase.from('purchase_orders').select('id').eq('po_number', poNumber).single();
             let poId = po?.id;
             if (!poId) {
-                // Crear PO ficticio para que no falle la llave foránea
-                const { data: newPo } = await supabase.from('purchase_orders')
-                    .insert({ po_number: poNumber, target_volume_kg: 20000, status: 'IN_PROGRESS' })
-                    .select('id')
-                    .single();
+                const { data: newPo } = await supabase.from('purchase_orders').insert({ po_number: poNumber, target_volume_kg: 20000, status: 'IN_PROGRESS' }).select('id').single();
                 poId = newPo?.id;
-                
                 if (poId) {
-                    // Inicializar Compliance y Shipment
-                    await supabase.from('compliance_evidence').insert({
-                        po_id: poId,
-                        eudr_cleared: true,
-                        deforestation_ha: 0.0,
-                        risk_assessment_url: 'https://registry.axisone.com/eudr/clearance'
-                    });
-                    
-                    await supabase.from('shipment_evidence').insert({
-                        po_id: poId,
-                        container_status: 'PENDING',
-                        docs_ready: true
-                    });
+                    await supabase.from('compliance_evidence').insert({ po_id: poId, eudr_cleared: true, deforestation_ha: 0.0, risk_assessment_url: 'https://registry.axisone.com/eudr/clearance' });
+                    await supabase.from('shipment_evidence').insert({ po_id: poId, container_status: 'PENDING', docs_ready: true });
                 }
             }
 
-            // 2. Encontrar o crear al Productor (Farmer)
-            const { data: farmer, error: fError } = await supabase.from('farmers')
-                .select('id')
-                .eq('name', farmerName)
-                .single();
-            
+            // 2. Farmer
+            let { data: farmer } = await supabase.from('farmers').select('id').eq('name', farmerName).single();
             let farmerId = farmer?.id;
             if (!farmerId) {
-                const { data: newFarmer } = await supabase.from('farmers')
-                    .insert({ name: farmerName })
-                    .select('id')
-                    .single();
+                const { data: newFarmer } = await supabase.from('farmers').insert({ name: farmerName }).select('id').single();
                 farmerId = newFarmer?.id;
             }
 
-                // 3. Crear el Lote
+            // 3. Lot (Determinístico)
             if (poId && farmerId) {
-                // Verificar si el lote ya existe para no duplicarlo
-                const { data: existingLot } = await supabase.from('lots')
-                    .select('id')
-                    .eq('name', lotCode)
-                    .eq('po_id', poId)
-                    .single();
+                // Buscamos si ya existe este lote exacto para este productor
+                const { data: existingLotFarmer } = await supabase.from('lot_farmers')
+                    .select('lot_id, lots!inner(po_id, name, coffee_type)')
+                    .eq('farmer_id', farmerId)
+                    .eq('lots.name', lotCode)
+                    .eq('lots.po_id', poId)
+                    .eq('lots.coffee_type', coffeeVariety)
+                    .maybeSingle();
 
-                let lotId = existingLot?.id;
+                let lotId = existingLotFarmer?.lot_id;
 
                 if (!lotId) {
+                    // Crear nuevo lote
                     const { data: lot, error: lotError } = await supabase.from('lots')
-                        .insert({
-                            name: lotCode,
-                            po_id: poId,
-                            coffee_type: rowData[5] || 'Blend',
-                            volume_kg: volume || 0
-                        })
-                        .select('id')
-                        .single();
+                        .insert({ name: lotCode, po_id: poId, coffee_type: coffeeVariety, volume_kg: volume })
+                        .select('id').single();
                         
                     if (lotError) console.error("Error inserting lot:", lotError);
                     lotId = lot?.id;
 
                     if (lotId) {
-                        // Auto-Generar evidencia de procesamiento
-                        await supabase.from('processing_evidence').insert({
-                            lot_id: lotId,
-                            yield_pct: parseFloat((88 + Math.random() * 4).toFixed(1)), // Ej: 90.2
-                            moisture_pct: parseFloat((10.5 + Math.random() * 1).toFixed(1)), // Ej: 11.2
-                            water_activity: parseFloat((0.60 + Math.random() * 0.05).toFixed(2)) // Ej: 0.62
-                        });
-                        
-                        // Auto-Generar evidencia de calidad
-                        await supabase.from('quality_evidence').insert({
-                            lot_id: lotId,
-                            roast_profile: 'Omni',
-                            cva_score: parseFloat((82 + Math.random() * 4).toFixed(1)) // Ej: 84.5
-                        });
+                        await supabase.from('lot_farmers').insert({ lot_id: lotId, farmer_id: farmerId });
+                        await supabase.from('processing_evidence').insert({ lot_id: lotId, yield_pct: parseFloat((88 + Math.random() * 4).toFixed(1)), moisture_pct: parseFloat((10.5 + Math.random() * 1).toFixed(1)), water_activity: parseFloat((0.60 + Math.random() * 0.05).toFixed(2)) });
+                        await supabase.from('quality_evidence').insert({ lot_id: lotId, roast_profile: 'Omni', cva_score: parseFloat((82 + Math.random() * 4).toFixed(1)) });
                     }
-                }
-                
-                if (lotId) {
-                    // Verificar si ya existe la relacion
-                    const { data: existingRel } = await supabase.from('lot_farmers')
-                        .select('lot_id')
-                        .eq('lot_id', lotId)
-                        .eq('farmer_id', farmerId)
-                        .single();
-                        
-                    if (!existingRel) {
-                        await supabase.from('lot_farmers').insert({
-                            lot_id: lotId,
-                            farmer_id: farmerId
-                        });
-                    }
+                } else {
+                    // Upsert: Si el lote ya existe, actualizamos su volumen para que refleje el Excel exactamente
+                    await supabase.from('lots').update({ volume_kg: volume }).eq('id', lotId);
                 }
             }
 

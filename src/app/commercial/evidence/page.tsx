@@ -199,7 +199,8 @@ export default function EvidenceDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Live Data
-  const [liveFarmers, setLiveFarmers] = useState<any[]>([]);
+  const [liveLots, setLiveLots] = useState<any[]>([]);
+  const [livePoData, setLivePoData] = useState<any>(null);
   const [liveVolume, setLiveVolume] = useState(0);
   const [liveAverages, setLiveAverages] = useState<any>(null);
   const [targetPo, setTargetPo] = useState("PO-2026-08-001");
@@ -213,63 +214,188 @@ export default function EvidenceDashboard() {
 
     const fetchLiveData = async () => {
       try {
-        const { data: po } = await supabase.from('purchase_orders').select('id').eq('po_number', poQuery).single();
-        if (!po) {
-          setIsLoading(false);
-          return;
-        }
+        const { data: po } = await supabase.from('purchase_orders').select('id, target_volume_kg, expected_lots').eq('po_number', poQuery).single();
+        if (!po) { setIsLoading(false); return; }
+        setLivePoData(po);
 
-        const { data: lots } = await supabase.from('lots').select('id, name, volume_kg, lot_farmers(farmers(name)), processing_evidence(yield_pct, moisture_pct, water_activity), quality_evidence(roast_profile, cva_score)').eq('po_id', po.id);
+        const { data: lots } = await supabase.from('lots').select('id, name, volume_kg, coffee_type, lot_farmers(farmers(name)), processing_evidence(yield_pct, moisture_pct, water_activity), quality_evidence(roast_profile, cva_score)').eq('po_id', po.id);
         const { data: compliance } = await supabase.from('compliance_evidence').select('*').eq('po_id', po.id).single();
         const { data: shipment } = await supabase.from('shipment_evidence').select('*').eq('po_id', po.id).single();
 
         if (lots && lots.length > 0) {
-          let sumYield = 0, sumMoisture = 0, sumWaterActivity = 0, sumScore = 0;
-          let countProcessing = 0, countQuality = 0;
+          let sumYield = 0, sumMoisture = 0, sumWaterActivity = 0, sumScore = 0, countP = 0, countQ = 0;
 
-          const formatted = lots.flatMap((lot: any) => {
-            if (lot.processing_evidence && lot.processing_evidence[0]) {
-               const proc = lot.processing_evidence[0];
-               sumYield += Number(proc.yield_pct || 0);
-               sumMoisture += Number(proc.moisture_pct || 0);
-               sumWaterActivity += Number(proc.water_activity || 0);
-               countProcessing++;
-            }
-            if (lot.quality_evidence && lot.quality_evidence[0]) {
-               const qual = lot.quality_evidence[0];
-               sumScore += Number(qual.cva_score || 0);
-               countQuality++;
-            }
+          // Group lots by coffee_type (varietal)
+          const grouped: Record<string, any[]> = {};
+          
+          // Pre-populate with expected lots from PO
+          if (po.expected_lots && Array.isArray(po.expected_lots)) {
+            po.expected_lots.forEach((el: any) => {
+              if (el.variety) {
+                const normVariety = el.variety.trim().toLowerCase();
+                grouped[normVariety] = [];
+                // We store the target volume for this specific varietal so we can display it correctly
+                grouped[normVariety].targetVolume = Number(el.volume_kg) || 0;
+                grouped[normVariety].originalName = el.variety.trim();
+                grouped[normVariety].process = el.process || 'Washed';
+              }
+            });
+          }
 
-            const farmersInLot = lot.lot_farmers || [];
-            if (farmersInLot.length === 0) return [];
-            return farmersInLot.map((rel: any) => ({
-              name: rel.farmers?.name || 'Unknown',
-              farm: `Lote: ${lot.name}`,
-              volume: `${(lot.volume_kg / farmersInLot.length).toFixed(0)} kg`,
-              moisture: lot.processing_evidence?.[0]?.moisture_pct ? `${lot.processing_evidence[0].moisture_pct}%` : "11.2%",
-              yield: lot.processing_evidence?.[0]?.yield_pct ? `${lot.processing_evidence[0].yield_pct}%` : "90.2%",
-              score: lot.quality_evidence?.[0]?.cva_score ? `${lot.quality_evidence[0].cva_score}` : "85.0",
-              altitude: "1850",
-              source: "Google Sheets"
-            }));
+          (lots || []).forEach((lot: any) => {
+            const key = lot.coffee_type || 'Unknown';
+            if (key === 'Unknown') return; // Ignorar lotes sin varietal definido
+            const normKey = key.trim().toLowerCase();
+            if (!grouped[normKey]) {
+              grouped[normKey] = [];
+              grouped[normKey].targetVolume = 0;
+              grouped[normKey].originalName = key.trim();
+            }
+            grouped[normKey].push(lot);
           });
 
-          setLiveFarmers(formatted);
-          setLiveVolume(lots.reduce((acc, lot) => acc + (lot.volume_kg || 0), 0));
-          setLiveAverages({
-             yield: countProcessing ? (sumYield / countProcessing).toFixed(1) : "90.2",
-             moisture: countProcessing ? (sumMoisture / countProcessing).toFixed(1) : "11.2",
-             waterActivity: countProcessing ? (sumWaterActivity / countProcessing).toFixed(2) : "0.62",
-             score: countQuality ? (sumScore / countQuality).toFixed(1) : "85.0",
-             eudrCleared: compliance?.eudr_cleared ? "100%" : "0%",
-             deforestation: compliance ? `${compliance.deforestation_ha} ha` : "0.0 ha",
-             docsReady: shipment?.docs_ready ? "Yes" : "No",
-             containerStatus: shipment?.container_status === 'PENDING' ? "Pending" : "Sealed"
+          const formattedLots = Object.entries(grouped)
+            .filter(([variety]) => variety !== 'unknown') // Doble seguridad para no mostrar 'Unknown'
+            .map(([normVariety, varietalLots]: [string, any]) => {
+            const variety = varietalLots.originalName || normVariety;
+            const totalVolumeKg = varietalLots.reduce((s: number, l: any) => s + (l.volume_kg || 0), 0);
+            const targetVolumeKg = varietalLots.targetVolume || po.target_volume_kg || 1;
+
+            // Aggregate processing and quality from all lots in this varietal
+            let yieldSum = 0, moistureSum = 0, waSum = 0, scoreSum = 0, pCount = 0, qCount = 0;
+            const allFarmers: any[] = [];
+
+            varietalLots.forEach((lot: any) => {
+              const proc = lot.processing_evidence?.[0];
+              const qual = lot.quality_evidence?.[0];
+              if (proc) { yieldSum += Number(proc.yield_pct||0); moistureSum += Number(proc.moisture_pct||0); waSum += Number(proc.water_activity||0); pCount++; sumYield += Number(proc.yield_pct||0); sumMoisture += Number(proc.moisture_pct||0); sumWaterActivity += Number(proc.water_activity||0); countP++; }
+              if (qual) { scoreSum += Number(qual.cva_score||0); qCount++; sumScore += Number(qual.cva_score||0); countQ++; }
+              (lot.lot_farmers || []).forEach((rel: any) => {
+                const farmerName = rel.farmers?.name || 'Unknown';
+                const farmMap: Record<string, string> = {
+                  "Juan Carlos Perez": "La Esperanza",
+                  "Maria Elena Giraldo": "El Ocaso",
+                  "Carlos Arturo Lopez": "Buena Vista",
+                  "Julio Uva": "La Alejandria",
+                  "Catalina Perez": "La Alejandria",
+                  "Alejandra Perez": "La Alejandria",
+                  "Sebastian Perez": "La Alejandria",
+                  "Alejandra Saraza": "Las Orquideas"
+                };
+                const farmName = farmMap[farmerName] || `Finca ${farmerName.split(' ')[0] || 'El Paraíso'}`;
+                
+                // Solo agregamos si no existe ya para que no cuente duplicados por historiales de sync
+                if (!allFarmers.find(f => f.name === farmerName)) {
+                  allFarmers.push({
+                    name: farmerName,
+                    farm: `${farmName} - Lote: ${lot.name}`,
+                    volume: `${lot.volume_kg || 0} kg`,
+                    moisture: proc?.moisture_pct ? `${proc.moisture_pct}%` : '11.2%',
+                    yield: proc?.yield_pct ? `${proc.yield_pct}%` : '90.2%',
+                    score: qual?.cva_score ? `${qual.cva_score}` : '0',
+                    altitude: '1850', source: 'Google Sheets'
+                  });
+                }
+              });
+            });
+
+            const avgYield = pCount ? (yieldSum / pCount).toFixed(1) : '0';
+            const avgMoisture = pCount ? (moistureSum / pCount).toFixed(1) : '0';
+            const avgWa = pCount ? (waSum / pCount).toFixed(2) : '0';
+            const avgScore = qCount ? (scoreSum / qCount).toFixed(1) : '0';
+            const progress = targetVolumeKg > 0 ? Math.round((totalVolumeKg / targetVolumeKg) * 100) : 0;
+            
+            // Construir el nombre del lote basado en la variedad
+            let lotTitle = variety;
+            if (!lotTitle.toLowerCase().includes('lot') && !lotTitle.toLowerCase().includes('blend')) {
+              lotTitle = `${lotTitle} Lot`;
+            } else if (lotTitle.toLowerCase().includes('blend') && !lotTitle.toLowerCase().includes('lot')) {
+              // Si es un blend (ej. Commercial Blend), puedes dejarlo como está o agregar Lot, como el usuario sugirió "Commercial Lot"
+              // Usaré la convención solicitada:
+              if (lotTitle.toLowerCase() === 'commercial blend') {
+                lotTitle = 'Commercial Blend'; // Como en la imagen verde
+              } else {
+                lotTitle = `${lotTitle} Lot`;
+              }
+            }
+
+            return {
+              id: `part-${normVariety}`,
+              title: lotTitle,
+              coffeeType: variety,
+              process: varietalLots.process || 'Washed',
+              progress,
+              batchCurrent: totalVolumeKg.toLocaleString(),
+              batchTarget: targetVolumeKg.toLocaleString(),
+              managementPct: progress,
+              missingLots: 0, statusText: 'Traceability Complete', nextAction: 'Generate Contract', eta: '2 Days',
+              farmers: allFarmers, missingFarmersList: [],
+              evidenceLayers: [
+                { id: 'origin', name: 'Origin', icon: Map, status: 'complete',
+                  summary: [{ label: 'Producers', value: `${allFarmers.length}` }, { label: 'Avg Altitude', value: '1850 m' }],
+                  explorerContent: { type: 'origin_layer', title: 'Origin Evidence', description: 'Who produced this coffee?', farmsValidated: allFarmers.length } },
+                { id: 'processing', name: 'Processing', icon: Truck, status: 'complete',
+                  summary: [{ label: 'Yield', value: `${avgYield}%` }, { label: 'Moisture', value: `${avgMoisture}%` }, { label: 'Water Activity', value: `${avgWa} aw` }],
+                  explorerContent: { type: 'processing_layer', title: 'Processing & Milling', description: 'Dry mill and laboratory analysis.' } },
+                { id: 'quality', name: 'Quality', icon: Coffee, status: 'complete',
+                  summary: [{ label: 'Roast Profile', value: 'Omni' }, { label: 'CVA Score', value: avgScore }],
+                  explorerContent: { type: 'quality_layer', title: 'Quality Evaluation', description: 'Sensory analysis and roasting curve.' } },
+                { id: 'compliance', name: 'Compliance', icon: Globe2, status: compliance?.eudr_cleared ? 'complete' : 'pending',
+                  summary: [{ label: 'EUDR', value: compliance?.eudr_cleared ? 'Cleared' : 'Pending' }, { label: 'Deforestation', value: `${compliance?.deforestation_ha || 0} ha` }],
+                  explorerContent: { type: 'compliance_layer', title: 'Compliance Verification', description: 'EUDR satellite intersection.' } },
+                { id: 'shipment', name: 'Shipment', icon: Ship, status: shipment?.docs_ready ? 'complete' : 'pending',
+                  summary: [{ label: 'Docs Ready', value: shipment?.docs_ready ? 'Yes' : 'No' }, { label: 'Container', value: shipment?.container_status || 'Pending' }],
+                  explorerContent: { type: 'shipment_layer', title: 'Shipment Logistics', description: 'Export documentation and container stuffing.' } }
+              ]
+            };
           });
+
+          setLiveLots(formattedLots);
+          setLiveVolume(lots.reduce((acc: any, lot: any) => acc + (lot.volume_kg||0), 0));
+          setLiveAverages({ yield: countP?(sumYield/countP).toFixed(1):'0', moisture: countP?(sumMoisture/countP).toFixed(1):'0', waterActivity: countP?(sumWaterActivity/countP).toFixed(2):'0', score: countQ?(sumScore/countQ).toFixed(1):'0', eudrCleared: compliance?.eudr_cleared?'100%':'0%', deforestation: compliance?`${compliance.deforestation_ha} ha`:'0.0 ha', docsReady: shipment?.docs_ready?'Yes':'No', containerStatus: shipment?.container_status==='PENDING'?'Pending':'Sealed' });
+          if (formattedLots.length > 0 && !formattedLots.find(l => l.id === selectedId)) {
+            setSelectedId(formattedLots[0].id);
+          }
+        } else if (po.expected_lots && Array.isArray(po.expected_lots) && po.expected_lots.length > 0) {
+          // If no lots synced yet, but we have expected lots, show them empty
+          const emptyLots = po.expected_lots.map((el: any) => {
+            const variety = el.variety || 'Unknown';
+            let lotTitle = variety;
+            if (!lotTitle.toLowerCase().includes('lot') && !lotTitle.toLowerCase().includes('blend')) lotTitle = `${lotTitle} Lot`;
+            else if (lotTitle.toLowerCase() === 'commercial blend') lotTitle = 'Commercial Blend';
+            else if (lotTitle.toLowerCase().includes('blend')) lotTitle = `${lotTitle} Lot`;
+
+            return {
+              id: `part-${variety.toLowerCase().replace(/\s+/g, '_')}`,
+              title: lotTitle,
+              coffeeType: variety,
+              process: el.process || 'Washed',
+              progress: 0,
+              batchCurrent: '0',
+              batchTarget: (Number(el.volume_kg) || 0).toLocaleString(),
+              managementPct: 0,
+              missingLots: 0, statusText: 'Pending Sync', nextAction: 'Sync Sheets', eta: '-',
+              farmers: [], missingFarmersList: [],
+              evidenceLayers: [
+                { id: 'origin', name: 'Origin', icon: Map, status: 'pending', summary: [{ label: 'Producers', value: '0' }], explorerContent: { type: 'origin_layer', title: 'Origin', description: 'No data.', farmsValidated: 0 } },
+                { id: 'processing', name: 'Processing', icon: Truck, status: 'pending', summary: [{ label: 'Yield', value: '-' }], explorerContent: { type: 'processing_layer', title: 'Processing', description: 'No data.' } },
+                { id: 'quality', name: 'Quality', icon: Coffee, status: 'pending', summary: [{ label: 'CVA Score', value: '-' }], explorerContent: { type: 'quality_layer', title: 'Quality', description: 'No data.' } },
+                { id: 'compliance', name: 'Compliance', icon: Globe2, status: 'pending', summary: [{ label: 'EUDR', value: 'Pending' }], explorerContent: { type: 'compliance_layer', title: 'Compliance', description: 'No data.' } },
+                { id: 'shipment', name: 'Shipment', icon: Ship, status: 'pending', summary: [{ label: 'Docs', value: 'Pending' }], explorerContent: { type: 'shipment_layer', title: 'Shipment', description: 'No data.' } }
+              ]
+            };
+          });
+          setLiveLots(emptyLots);
+          setLiveVolume(0);
+          if (emptyLots.length > 0 && !emptyLots.find((l: any) => l.id === selectedId)) {
+            setSelectedId(emptyLots[0].id);
+          }
+        } else {
+          setLiveLots([]); setLiveVolume(0);
         }
+
       } catch (err) {
-        console.error("Supabase error", err);
+        console.error('Supabase error', err);
       } finally {
         setIsLoading(false);
       }
@@ -277,11 +403,18 @@ export default function EvidenceDashboard() {
     fetchLiveData();
   }, [targetPo]);
 
-  const active = DASHBOARD_DATA.find(d => d.id === selectedId) || DASHBOARD_DATA[0];
+  const defaultLayers = [
+    { id: 'origin', name: 'Origin', icon: Map, status: 'pending', summary: [{ label: 'Producers', value: '0' }], explorerContent: { type: 'origin_layer', title: 'Origin', description: 'No data.', farmsValidated: 0 } },
+    { id: 'processing', name: 'Processing', icon: Truck, status: 'pending', summary: [{ label: 'Yield', value: '-' }], explorerContent: { type: 'processing_layer', title: 'Processing', description: 'No data.' } },
+    { id: 'quality', name: 'Quality', icon: Coffee, status: 'pending', summary: [{ label: 'CVA Score', value: '-' }], explorerContent: { type: 'quality_layer', title: 'Quality', description: 'No data.' } },
+    { id: 'compliance', name: 'Compliance', icon: Globe2, status: 'pending', summary: [{ label: 'EUDR', value: 'Pending' }], explorerContent: { type: 'compliance_layer', title: 'Compliance', description: 'No data.' } },
+    { id: 'shipment', name: 'Shipment', icon: Ship, status: 'pending', summary: [{ label: 'Docs', value: 'Pending' }], explorerContent: { type: 'shipment_layer', title: 'Shipment', description: 'No data.' } },
+  ];
+  const active: any = liveLots.find((d: any) => d.id === selectedId) || liveLots[0] || { id: 'empty', title: 'Awaiting Sync', progress: 0, batchCurrent: '0', batchTarget: livePoData?.target_volume_kg || 0, managementPct: 0, missingLots: 0, statusText: 'Pending', nextAction: 'Sync Sheets', eta: '-', farmers: [], missingFarmersList: [], evidenceLayers: defaultLayers };
 
-  const globalTarget = 20000;
-  const globalCollected = DASHBOARD_DATA.reduce((sum, item) => sum + parseInt(item.batchCurrent.replace(/,/g, '')), 0);
-  const globalProgress = Math.round((globalCollected / globalTarget) * 100);
+  const globalTarget = livePoData?.target_volume_kg || 20000;
+  const globalCollected = liveVolume;
+  const globalProgress = globalTarget > 0 ? Math.round((globalCollected / globalTarget) * 100) : 0;
 
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden" style={{ fontFamily: "var(--font-montserrat, 'Montserrat', sans-serif)" }}>
@@ -289,17 +422,11 @@ export default function EvidenceDashboard() {
       {/* ── SIDEBAR ── */}
       <aside className={`w-full lg:w-[260px] flex-shrink-0 flex flex-col lg:flex-col bg-[#00C87A] border-b lg:border-b-0 border-black/10 transition-all duration-500 ease-in-out z-50 ${isSidebarOpen ? 'lg:ml-0' : 'lg:-ml-[260px]'}`}>
         {/* Logo */}
-                <div className="p-4 lg:p-8 lg:pb-4 flex flex-col justify-center lg:block hidden">
-          <button 
-              onClick={() => router.push('/hub')}
-              className="flex items-center gap-2 text-[9px] font-bold tracking-widest text-[#0f1e38]/70 hover:text-[#0f1e38] transition-colors mb-6 uppercase"
-            >
-              <ArrowLeft className="w-3 h-3" /> Back to Hub
-            </button>
+        <div className="p-4 lg:p-8 lg:pb-4 hidden lg:flex flex-col items-center justify-center">
           <img 
             src="/logo-axisone.png" 
             alt="AxisONE Logo" 
-            className="h-28 object-contain"
+            className="h-32 object-contain"
             style={{ filter: 'brightness(0) saturate(100%) invert(10%) sepia(21%) saturate(6305%) hue-rotate(204deg) brightness(91%) contrast(97%)' }} 
           />
         </div>
@@ -309,7 +436,7 @@ export default function EvidenceDashboard() {
         </div>
 
         <nav className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto flex-nowrap custom-scrollbar">
-          {DASHBOARD_DATA.map(v => {
+          {liveLots.map(v => {
             const isActive = v.id === selectedId;
             return (
               <button
@@ -319,36 +446,30 @@ export default function EvidenceDashboard() {
                 style={{ background: isActive ? 'rgba(0,0,0,0.1)' : undefined }}
               >
                 <div>
-                  <p className={`text-sm font-bold leading-tight text-[#0f1e38] ${isActive ? '' : 'group-hover:text-[#0f1e38]/60 transition-colors'}`}>{v.title}</p>
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    {v.progress === 100 ? (
-                      <CheckCircle2 className={`w-3.5 h-3.5 text-[#0f1e38] ${isActive ? '' : 'group-hover:text-[#0f1e38]/60 transition-colors'}`} />
+                  <h3 className={`text-[17px] font-black leading-tight tracking-tight text-[#0f1e38] ${isActive ? '' : 'group-hover:text-[#0f1e38]/60 transition-colors'}`}>{v.title}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[10px] text-[#0f1e38]/50 uppercase tracking-widest font-bold">{v.process}</p>
+                  </div>
+                  <p className="text-[10px] font-bold text-[#0f1e38] mt-1.5">{v.batchCurrent} / {v.batchTarget} kg</p>
+                  <div className={`flex items-center gap-1.5 mt-1 text-[9px] font-black uppercase tracking-wider text-[#0f1e38] ${isActive ? '' : 'group-hover:text-[#0f1e38]/60 transition-colors'}`}>
+                    {v.managementPct >= 100 ? (
+                      <>
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>MANAGEMENT COMPLETED</span>
+                      </>
                     ) : (
-                      <div className={`w-1.5 h-1.5 rounded-full bg-[#0f1e38] ${isActive ? '' : 'group-hover:bg-[#0f1e38]/60 transition-colors'}`} />
+                      <span>{v.managementPct}% MANAGEMENT</span>
                     )}
-                    <span className={`text-[9px] font-black uppercase tracking-wider text-[#0f1e38] ${isActive ? '' : 'group-hover:text-[#0f1e38]/60 transition-colors'}`}>
-                      {v.progress === 100 ? 'Complete' : 'In Progress'}
-                    </span>
                   </div>
                 </div>
               </button>
             );
           })}
         </nav>
-        <div className="px-4 py-2 lg:py-4 mt-12 border-t border-black/10 hidden lg:block">
-          <button 
-            onClick={() => setIsMapOpen(true)}
-            className="w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-white bg-[#0f1e38] py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
-          >
-            <Globe2 className="w-4 h-4" /> Evidence Journey
-          </button>
-        </div>
-
-
       </aside>
 
       {/* ── MAIN ── */}
-      <main className="flex-1 flex flex-col overflow-y-auto lg:overflow-hidden bg-white relative">
+      <main className="flex-1 flex flex-col overflow-y-auto lg:overflow-hidden bg-white relative custom-scrollbar">
         {/* Toggle Button */}
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -367,8 +488,24 @@ export default function EvidenceDashboard() {
         {/* Top nav */}
         <header className="h-12 flex items-center justify-between px-8 border-b border-slate-800 bg-slate-900 flex-shrink-0">
           <div className="flex items-center gap-4 text-sm text-slate-400">
-            <span className="font-bold text-white uppercase text-[11px] tracking-widest border border-slate-700 bg-slate-800/50 rounded-full px-3 py-0.5">Axis One Evidence</span>
-            <span>European Coffee Roasters Ltd.</span>
+            <button 
+              onClick={() => router.push('/hub')}
+              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white border border-[#0f1e38] bg-[#0f1e38] hover:bg-[#152745] py-1.5 px-4 rounded-full transition-all duration-300 shadow-sm"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Hub
+            </button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsMapOpen(true)}
+                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#00C87A] border border-[#00C87A]/30 bg-[#00C87A]/10 hover:bg-[#00C87A]/20 py-1.5 px-4 rounded-full transition-all duration-300"
+              >
+                <Globe2 className="w-3.5 h-3.5" /> Evidence Journey
+              </button>
+              <div className="hidden xl:flex items-center gap-1.5 text-slate-400 animate-bounce-x-subtle">
+                <ArrowLeft className="w-4 h-4 text-[#00C87A]" />
+                <span className="text-xs font-medium italic">Click to visualize your coffee's journey</span>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-5 text-slate-400">
             <Search className="w-4 h-4 cursor-pointer hover:text-white transition-colors" />
@@ -376,17 +513,17 @@ export default function EvidenceDashboard() {
             <Settings className="w-4 h-4 cursor-pointer hover:text-white transition-colors" />
             <div className="w-px h-4 bg-slate-700 mx-2 hidden sm:block"></div>
             <div className="flex items-center gap-2.5 cursor-pointer group">
-              <div className="w-7 h-7 rounded-full bg-slate-700 group-hover:bg-[#00C87A] transition-colors flex items-center justify-center font-bold text-[11px] text-white">G</div>
+              <div className="w-7 h-7 rounded-full bg-slate-700 group-hover:bg-[#00C87A] transition-colors flex items-center justify-center font-bold text-[11px] text-white">J</div>
               <div className="hidden lg:block text-left">
-                <p className="text-white text-[11px] leading-tight font-bold group-hover:text-[#00C87A] transition-colors">Gurcam</p>
-                <p className="text-[9px] uppercase tracking-widest font-bold text-slate-400 leading-tight">Coffee Buyer</p>
+                <p className="text-white text-[11px] leading-tight font-bold group-hover:text-[#00C87A] transition-colors">Julio</p>
+                <p className="text-[9px] uppercase tracking-widest font-bold text-slate-400 leading-tight">Admin</p>
               </div>
             </div>
           </div>
         </header>
 
         {/* Dashboard scroll area */}
-        <div className="flex-1 overflow-y-auto px-20 py-6 bg-slate-200">
+        <div className="flex-1 overflow-y-auto px-20 py-6 bg-slate-200 custom-scrollbar">
 
           {/* Editorial Layout for Evidence Layers */}
           <div className="flex flex-col gap-6 mb-12">
@@ -542,15 +679,15 @@ export default function EvidenceDashboard() {
               })}
 
               {/* CURRENT LOT OVERVIEW */}
-              <div className="col-span-1 md:col-span-2 relative bg-transparent rounded-2xl shadow-sm border border-slate-200/50 p-5 flex flex-col justify-between w-full min-h-[140px] h-full">
+              <div className="col-span-1 md:col-span-2 relative bg-transparent rounded-2xl shadow-sm border border-slate-400 p-5 flex flex-col justify-between w-full min-h-[140px] h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <p className="text-[9px] uppercase tracking-widest font-bold text-slate-400 mb-0.5">Lot Status</p>
                     <h3 className="text-lg font-light text-[#0f1e38] tracking-tight">{active.title}</h3>
                   </div>
                   <div className="text-left md:text-right mt-6 md:mt-0">
-                    <p className="text-xl font-light tracking-tight text-[#00C87A] leading-none mb-0.5">{active.progress}%</p>
-                    <p className="text-[8px] uppercase tracking-widest font-bold text-slate-400">Consolidated</p>
+                    <p className="text-2xl font-black tracking-tight text-[#0f1e38] leading-none mb-0.5">{active.progress}%</p>
+                    <p className="text-[9px] uppercase tracking-widest font-bold text-[#0f1e38]/70">Consolidated</p>
                   </div>
                 </div>
 
@@ -576,24 +713,24 @@ export default function EvidenceDashboard() {
         </div>
       </main>
       {/* ── EVIDENCE EXPLORER PANEL ── */}
-      {selectedItem && (
-        <aside
-          className="absolute lg:relative inset-y-0 right-0 z-50 w-full md:w-[420px] flex-shrink-0 flex flex-col border-l border-slate-800 overflow-hidden shadow-2xl lg:shadow-none"
-          style={{ background: 'var(--color-panel-bg)' }}
-        >
-          {/* Panel header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#00C87A]" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Evidence Explorer</span>
+      <aside
+        className={`absolute lg:relative inset-y-0 right-0 z-50 w-full md:w-[420px] flex-shrink-0 flex flex-col border-l border-slate-800 overflow-hidden shadow-2xl lg:shadow-none transition-all duration-500 ease-in-out ${selectedItem ? 'translate-x-0 lg:mr-0' : 'translate-x-full lg:-mr-[420px]'}`}
+        style={{ background: 'var(--color-panel-bg)' }}
+      >
+        {selectedItem && (
+          <>
+            {/* Panel header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+              <div className="flex items-center">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Evidence Explorer</span>
+              </div>
+              <button onClick={() => setSelectedItem(null)} className="text-slate-500 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button onClick={() => setSelectedItem(null)} className="text-slate-500 hover:text-white transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
 
-          {/* Panel content */}
-          <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar">
+            {/* Panel content */}
+            <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar">
             <h2 className="text-2xl font-bold text-white mb-2">{selectedItem.explorerContent?.title || selectedItem.name}</h2>
             <p className="text-sm text-slate-400 leading-relaxed mb-8">{selectedItem.explorerContent?.description}</p>
 
@@ -756,8 +893,10 @@ export default function EvidenceDashboard() {
               </div>
             )}
           </div>
-        </aside>
+        </>
       )}
+        </aside>
     </div>
   );
 }
+
