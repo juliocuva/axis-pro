@@ -226,7 +226,7 @@ export default function EvidenceDashboard() {
           let sumYield = 0, sumMoisture = 0, sumWaterActivity = 0, sumScore = 0, countP = 0, countQ = 0;
 
           // Group lots by coffee_type (varietal)
-          const grouped: Record<string, any[]> = {};
+          const grouped: Record<string, any> = {};
           
           // Pre-populate with expected lots from PO
           if (po.expected_lots && Array.isArray(po.expected_lots)) {
