@@ -584,7 +584,7 @@ export default function EvidenceDashboard() {
             </div>
 {/* MIDDLE ROW: Origin, Processing, Quality */}
             <div className="grid grid-cols-3 gap-6">
-              {active.evidenceLayers.filter(l => ['origin', 'processing', 'quality'].includes(l.id)).map(item => {
+              {active.evidenceLayers.filter((l: any) => ['origin', 'processing', 'quality'].includes(l.id)).map((item: any) => {
                 const isSelected = selectedItem?.id === item.id;
                 
                 let bgClass, textColor, labelColor, hoverLayerColor, isNavy;
