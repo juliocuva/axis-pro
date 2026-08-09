@@ -513,7 +513,7 @@ export default function LotCertificate({ inventoryId, onClose, user, isExportMod
 
     const cvaAffective = scaData?.cva_affective;
     const computedCVAScore = cvaAffective ? 
-        (Object.values(cvaAffective).reduce((acc: number, val: any) => acc + (Number(val) || 8.0), 0) + 25) : 0;
+        ((Object.values(cvaAffective).reduce((acc: number, val: any) => acc + (Number(val) || 8.0), 0) as number) + 25) : 0;
         
     const totalScore = lotData?.lot_number === 'WCE-HUILA-01-EUG' ? 90.5 : 83;
 
