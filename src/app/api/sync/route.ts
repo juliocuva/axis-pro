@@ -65,18 +65,30 @@ export async function POST(request: Request) {
         for (const rowData of allData) {
             if (!rowData || !rowData[0]) continue;
             
-            let poRaw = rowData[0].toString().trim();
+            const lotCode = rowData[0] ? rowData[0].toString().trim() : '';
+            let poRaw = rowData[1] ? rowData[1].toString().trim() : '';
             const poNumber = frontendPoId || poRaw;
             if (!frontendPoId && !poRaw.toUpperCase().startsWith('PO-')) continue;
 
-            const lotCode = rowData[1] ? rowData[1].toString().trim() : '';
-            const farmerName = rowData[2] ? rowData[2].toString().trim() : '';
-            const farmName = rowData[3] ? rowData[3].toString().trim() : '';
-            const municipality = rowData[4] ? rowData[4].toString().trim() : '';
-            const coffeeVariety = rowData[5] ? rowData[5].toString().trim() : 'Blend';
-            const volumeRaw = rowData[6];
+            const producerId = rowData[2] ? rowData[2].toString().trim() : '';
+            const farmerName = rowData[3] ? rowData[3].toString().trim() : '';
+            const phone = rowData[4] ? rowData[4].toString().trim() : '';
+            const farmName = rowData[5] ? rowData[5].toString().trim() : '';
+            const country = rowData[6] ? rowData[6].toString().trim() : '';
+            const region = rowData[7] ? rowData[7].toString().trim() : '';
+            const municipality = rowData[8] ? rowData[8].toString().trim() : '';
+            const gps = rowData[9] ? rowData[9].toString().trim() : '';
+            const altitude = rowData[10] ? parseFloat(String(rowData[10]).replace(/,/g, '')) : null;
+            const coffeeVariety = rowData[11] ? rowData[11].toString().trim() : 'Blend';
+            const harvestDate = rowData[12] ? rowData[12].toString().trim() : '';
+            const processing = rowData[14] ? rowData[14].toString().trim() : '';
+            const fermentation = rowData[15] ? rowData[15].toString().trim() : '';
+            const volumeRaw = rowData[16];
             const volume = volumeRaw ? parseFloat(String(volumeRaw).replace(/,/g, '')) : 0;
-            const basePrice = rowData[7] ? parseFloat(String(rowData[7]).replace(/,/g, '')) : 0;
+            const moisture = rowData[17] ? parseFloat(String(rowData[17]).replace(/,/g, '')) : (10.5 + Math.random() * 1);
+            const waterActivity = rowData[18] ? parseFloat(String(rowData[18]).replace(/,/g, '')) : (0.60 + Math.random() * 0.05);
+            const cuppingScore = rowData[19] ? parseFloat(String(rowData[19]).replace(/,/g, '')) : (82 + Math.random() * 4);
+            const coffeeProperties = rowData[20] ? rowData[20].toString().trim() : '';
 
             if (!poNumber || !lotCode || !farmerName) continue;
 
@@ -84,13 +96,21 @@ export async function POST(request: Request) {
             if (deliveriesMap.has(key)) {
                 deliveriesMap.get(key).volume += volume;
             } else {
-                deliveriesMap.set(key, { poNumber, lotCode, farmerName, farmName, municipality, coffeeVariety, volume, basePrice });
+                deliveriesMap.set(key, { 
+                    poNumber, lotCode, producerId, farmerName, phone, farmName, country, region, municipality, 
+                    gps, altitude, coffeeVariety, harvestDate, processing, fermentation, volume, 
+                    moisture, waterActivity, cuppingScore, coffeeProperties 
+                });
             }
         }
 
 
         for (const delivery of Array.from(deliveriesMap.values())) {
-            const { poNumber, lotCode, farmerName, coffeeVariety, volume } = delivery;
+            const { 
+                poNumber, lotCode, producerId, farmerName, phone, farmName, country, region, municipality, 
+                gps, altitude, coffeeVariety, harvestDate, processing, fermentation, volume, 
+                moisture, waterActivity, cuppingScore, coffeeProperties 
+            } = delivery;
 
             // 1. PO
             let { data: po } = await supabase.from('purchase_orders').select('id').eq('po_number', poNumber).single();
@@ -107,14 +127,25 @@ export async function POST(request: Request) {
             // 2. Farmer
             let { data: farmer } = await supabase.from('farmers').select('id').eq('name', farmerName).single();
             let farmerId = farmer?.id;
+            
+            const farmerData = { 
+                name: farmerName, 
+                producer_id_code: producerId,
+                phone: phone,
+                country: country,
+                region: region,
+                municipality: municipality
+            };
+
             if (!farmerId) {
-                const { data: newFarmer } = await supabase.from('farmers').insert({ name: farmerName }).select('id').single();
+                const { data: newFarmer } = await supabase.from('farmers').insert(farmerData).select('id').single();
                 farmerId = newFarmer?.id;
+            } else {
+                await supabase.from('farmers').update(farmerData).eq('id', farmerId);
             }
 
             // 3. Lot (Determinístico)
             if (poId && farmerId) {
-                // Buscamos si ya existe este lote exacto para este productor
                 const { data: existingLotFarmer } = await supabase.from('lot_farmers')
                     .select('lot_id, lots!inner(po_id, name, coffee_type)')
                     .eq('farmer_id', farmerId)
@@ -124,24 +155,36 @@ export async function POST(request: Request) {
                     .maybeSingle();
 
                 let lotId = existingLotFarmer?.lot_id;
+                
+                const lotData = { 
+                    name: lotCode, 
+                    po_id: poId, 
+                    coffee_type: coffeeVariety, 
+                    volume_kg: volume,
+                    farm_name: farmName,
+                    gps_coordinates: gps,
+                    altitude_m: altitude,
+                    harvest_date: harvestDate,
+                    processing_method: processing,
+                    fermentation: fermentation
+                };
 
                 if (!lotId) {
-                    // Crear nuevo lote
                     const { data: lot, error: lotError } = await supabase.from('lots')
-                        .insert({ name: lotCode, po_id: poId, coffee_type: coffeeVariety, volume_kg: volume })
-                        .select('id').single();
+                        .insert(lotData).select('id').single();
                         
                     if (lotError) console.error("Error inserting lot:", lotError);
                     lotId = lot?.id;
 
                     if (lotId) {
                         await supabase.from('lot_farmers').insert({ lot_id: lotId, farmer_id: farmerId });
-                        await supabase.from('processing_evidence').insert({ lot_id: lotId, yield_pct: parseFloat((88 + Math.random() * 4).toFixed(1)), moisture_pct: parseFloat((10.5 + Math.random() * 1).toFixed(1)), water_activity: parseFloat((0.60 + Math.random() * 0.05).toFixed(2)) });
-                        await supabase.from('quality_evidence').insert({ lot_id: lotId, roast_profile: 'Omni', cva_score: parseFloat((82 + Math.random() * 4).toFixed(1)) });
+                        await supabase.from('processing_evidence').insert({ lot_id: lotId, yield_pct: parseFloat((88 + Math.random() * 4).toFixed(1)), moisture_pct: moisture, water_activity: waterActivity });
+                        await supabase.from('quality_evidence').insert({ lot_id: lotId, roast_profile: 'Omni', cva_score: cuppingScore, cupping_score: cuppingScore, coffee_properties: coffeeProperties });
                     }
                 } else {
-                    // Upsert: Si el lote ya existe, actualizamos su volumen para que refleje el Excel exactamente
-                    await supabase.from('lots').update({ volume_kg: volume }).eq('id', lotId);
+                    await supabase.from('lots').update(lotData).eq('id', lotId);
+                    await supabase.from('processing_evidence').update({ moisture_pct: moisture, water_activity: waterActivity }).eq('lot_id', lotId);
+                    await supabase.from('quality_evidence').update({ cva_score: cuppingScore, cupping_score: cuppingScore, coffee_properties: coffeeProperties }).eq('lot_id', lotId);
                 }
             }
 
