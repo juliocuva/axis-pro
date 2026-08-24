@@ -82,32 +82,35 @@ export async function POST(request: Request) {
             if (!rowData || !rowData[0]) continue;
             
             const lotCode = rowData[0] ? rowData[0].toString().trim() : '';
-            let poRaw = rowData[1] ? rowData[1].toString().trim() : '';
-            const poNumber = frontendPoId || poRaw;
+            const poNumber = frontendPoId || 'PO-DEFAULT'; // Fallback to avoid error if missing
             
-            if (!frontendPoId && !poRaw.toUpperCase().startsWith('PO-')) continue;
+            if (!poNumber) continue;
 
-            const producerId = rowData[2] ? rowData[2].toString().trim() : '';
-            const farmerName = rowData[3] ? rowData[3].toString().trim() : '';
-            const phone = rowData[4] ? rowData[4].toString().trim() : '';
-            const farmName = rowData[5] ? rowData[5].toString().trim() : '';
-            const country = rowData[6] ? rowData[6].toString().trim() : '';
-            const region = rowData[7] ? rowData[7].toString().trim() : '';
-            const municipality = rowData[8] ? rowData[8].toString().trim() : '';
-            const altitude = rowData[9] ? parseFloat(String(rowData[9]).replace(/,/g, '')) : null;
-            const gps = rowData[10] ? rowData[10].toString().trim() : '';
-            const harvestDate = rowData[11] ? rowData[11].toString().trim() : '';
-            const coffeeVariety = rowData[12] ? rowData[12].toString().trim() : 'Blend';
-            const processing = rowData[13] ? rowData[13].toString().trim() : '';
-            const yieldPct = rowData[14] ? parseFloat(String(rowData[14]).replace(/,/g, '')) : null;
-            const density = rowData[15] ? parseFloat(String(rowData[15]).replace(/,/g, '')) : null;
-            const moisture = rowData[16] ? parseFloat(String(rowData[16]).replace(/,/g, '')) : null;
-            const waterActivity = rowData[17] ? parseFloat(String(rowData[17]).replace(/,/g, '')) : null;
+            const producerId = rowData[1] ? rowData[1].toString().trim() : '';
+            const farmerName = rowData[2] ? rowData[2].toString().trim() : '';
+            const phone = rowData[3] ? rowData[3].toString().trim() : '';
+            const farmName = rowData[4] ? rowData[4].toString().trim() : '';
             
-            const cuppingScore = rowData[19] ? parseFloat(String(rowData[19]).replace(/,/g, '')) : null;
-            const coffeeProperties = rowData[20] ? rowData[20].toString().trim() : '';
+            // COUNTRY comes from Hoja 1, no longer from Hoja 2
+            const country = poData['COUNTRY'] || 'Colombia';
             
-            const volumeRaw = rowData[21];
+            const region = rowData[5] ? rowData[5].toString().trim() : '';
+            const municipality = rowData[6] ? rowData[6].toString().trim() : '';
+            const altitude = rowData[7] ? parseFloat(String(rowData[7]).replace(/,/g, '')) : null;
+            const gps = rowData[8] ? rowData[8].toString().trim() : '';
+            const harvestDate = rowData[9] ? rowData[9].toString().trim() : '';
+            const coffeeVariety = rowData[10] ? rowData[10].toString().trim() : 'Blend';
+            const processing = rowData[11] ? rowData[11].toString().trim() : '';
+            const yieldPct = rowData[12] ? parseFloat(String(rowData[12]).replace(/,/g, '')) : null;
+            const density = rowData[13] ? parseFloat(String(rowData[13]).replace(/,/g, '')) : null;
+            const moisture = rowData[14] ? parseFloat(String(rowData[14]).replace(/,/g, '')) : null;
+            const waterActivity = rowData[15] ? parseFloat(String(rowData[15]).replace(/,/g, '')) : null;
+            
+            // 16 is Roast Date
+            const cuppingScore = rowData[17] ? parseFloat(String(rowData[17]).replace(/,/g, '')) : null;
+            const coffeeProperties = rowData[18] ? rowData[18].toString().trim() : '';
+            
+            const volumeRaw = rowData[19];
             const volume = volumeRaw ? parseFloat(String(volumeRaw).replace(/,/g, '')) : 0;
 
             if (!poNumber || !lotCode || !farmerName) continue;
@@ -139,6 +142,7 @@ export async function POST(request: Request) {
                 po_number: poNumber,
                 buyer_name: poData['CUSTOMER_NAME'] || poData['BUYER_NAME'] || 'AxisONE Customer',
                 exporter_name: poData['EXPORTER_NAME'] || poData['EXPORTER_ID'] || '',
+                origin: country,
                 destination: poData['DESTINATION_PORT'] || poData['PORT_OF_LOADING'] || 'Destination',
                 target_volume_kg: poData['TARGET_VOLUME_KG'] ? parseFloat(poData['TARGET_VOLUME_KG'].replace(/,/g, '')) : 20000,
                 status: 'IN_PROGRESS'
