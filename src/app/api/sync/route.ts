@@ -206,7 +206,7 @@ export async function POST(request: Request) {
                     yield_pct: yieldPct || parseFloat((88 + Math.random() * 4).toFixed(1)),
                     moisture_pct: moisture || parseFloat((10.5 + Math.random() * 1).toFixed(1)),
                     water_activity: waterActivity || parseFloat((0.60 + Math.random() * 0.05).toFixed(2)),
-                    density_gl: density || null
+                    
                 };
 
                 const qualityData = {
