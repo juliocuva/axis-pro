@@ -12,14 +12,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: 'Sheet ID is required' }, { status: 400 });
         }
 
-        // Extraer el ID si pegaron la URL completa
         if (sheetId.includes('/d/')) {
             const matches = sheetId.match(/\/d\/([a-zA-Z0-9-_]+)/);
             if (matches && matches[1]) {
                 sheetId = matches[1].trim();
             }
         } else {
-            // Si pegaron solo el ID seguido de /edit
             sheetId = sheetId.split('/')[0].trim();
         }
 
@@ -37,15 +35,35 @@ export async function POST(request: Request) {
         });
 
         const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
-        await doc.loadInfo(); // Carga las pestañas del documento
+        await doc.loadInfo(); 
 
-        const sheet = doc.sheetsByIndex[0]; // Lee la primera pestaña
-        await sheet.loadHeaderRow();
-        const headers = sheet.headerValues;
-        const rows = await sheet.getRows();
+        let poData: Record<string, string> = {};
+        const infoSheet = doc.sheetsByIndex[0];
+        
+        let lotsSheet = infoSheet;
+        if (doc.sheetCount > 1) {
+            lotsSheet = doc.sheetsByIndex[1];
+            
+            const infoRows = await infoSheet.getRows();
+            for (const row of infoRows) {
+                const raw = (row as any)._rawData;
+                if (raw && raw.length >= 2) {
+                    const key = String(raw[0]).trim().toUpperCase();
+                    const value = String(raw[1]).trim();
+                    poData[key] = value;
+                }
+            }
+        }
+
+        if (poData['PO_ID']) {
+            frontendPoId = poData['PO_ID'];
+        }
+
+        await lotsSheet.loadHeaderRow();
+        const headers = lotsSheet.headerValues;
+        const rows = await lotsSheet.getRows();
 
         const allData = [];
-        // Si el usuario no puso encabezados y la fila 1 son datos (ej: PO-2026-08-001)
         if (headers && headers.length > 0 && String(headers[0]).startsWith('PO-')) {
             allData.push(headers);
         }
@@ -56,10 +74,8 @@ export async function POST(request: Request) {
                 allData.push(raw);
             }
         }
+        
         const processedRecords = [];
-
-        // AGRUPAR DATOS (Idempotencia)
-        // Si hay filas duplicadas en el excel (mismo PO, mismo Lote, mismo Productor, mismo Varietal), sumamos su volumen.
         const deliveriesMap = new Map<string, any>();
 
         for (const rowData of allData) {
@@ -68,6 +84,7 @@ export async function POST(request: Request) {
             const lotCode = rowData[0] ? rowData[0].toString().trim() : '';
             let poRaw = rowData[1] ? rowData[1].toString().trim() : '';
             const poNumber = frontendPoId || poRaw;
+            
             if (!frontendPoId && !poRaw.toUpperCase().startsWith('PO-')) continue;
 
             const producerId = rowData[2] ? rowData[2].toString().trim() : '';
@@ -77,18 +94,21 @@ export async function POST(request: Request) {
             const country = rowData[6] ? rowData[6].toString().trim() : '';
             const region = rowData[7] ? rowData[7].toString().trim() : '';
             const municipality = rowData[8] ? rowData[8].toString().trim() : '';
-            const gps = rowData[9] ? rowData[9].toString().trim() : '';
-            const altitude = rowData[10] ? parseFloat(String(rowData[10]).replace(/,/g, '')) : null;
-            const coffeeVariety = rowData[11] ? rowData[11].toString().trim() : 'Blend';
-            const harvestDate = rowData[12] ? rowData[12].toString().trim() : '';
-            const processing = rowData[14] ? rowData[14].toString().trim() : '';
-            const fermentation = rowData[15] ? rowData[15].toString().trim() : '';
-            const volumeRaw = rowData[16];
-            const volume = volumeRaw ? parseFloat(String(volumeRaw).replace(/,/g, '')) : 0;
-            const moisture = rowData[17] ? parseFloat(String(rowData[17]).replace(/,/g, '')) : (10.5 + Math.random() * 1);
-            const waterActivity = rowData[18] ? parseFloat(String(rowData[18]).replace(/,/g, '')) : (0.60 + Math.random() * 0.05);
-            const cuppingScore = rowData[19] ? parseFloat(String(rowData[19]).replace(/,/g, '')) : (82 + Math.random() * 4);
+            const altitude = rowData[9] ? parseFloat(String(rowData[9]).replace(/,/g, '')) : null;
+            const gps = rowData[10] ? rowData[10].toString().trim() : '';
+            const harvestDate = rowData[11] ? rowData[11].toString().trim() : '';
+            const coffeeVariety = rowData[12] ? rowData[12].toString().trim() : 'Blend';
+            const processing = rowData[13] ? rowData[13].toString().trim() : '';
+            const yieldPct = rowData[14] ? parseFloat(String(rowData[14]).replace(/,/g, '')) : null;
+            const density = rowData[15] ? parseFloat(String(rowData[15]).replace(/,/g, '')) : null;
+            const moisture = rowData[16] ? parseFloat(String(rowData[16]).replace(/,/g, '')) : null;
+            const waterActivity = rowData[17] ? parseFloat(String(rowData[17]).replace(/,/g, '')) : null;
+            
+            const cuppingScore = rowData[19] ? parseFloat(String(rowData[19]).replace(/,/g, '')) : null;
             const coffeeProperties = rowData[20] ? rowData[20].toString().trim() : '';
+            
+            const volumeRaw = rowData[21];
+            const volume = volumeRaw ? parseFloat(String(volumeRaw).replace(/,/g, '')) : 0;
 
             if (!poNumber || !lotCode || !farmerName) continue;
 
@@ -98,8 +118,8 @@ export async function POST(request: Request) {
             } else {
                 deliveriesMap.set(key, { 
                     poNumber, lotCode, producerId, farmerName, phone, farmName, country, region, municipality, 
-                    gps, altitude, coffeeVariety, harvestDate, processing, fermentation, volume, 
-                    moisture, waterActivity, cuppingScore, coffeeProperties 
+                    gps, altitude, coffeeVariety, harvestDate, processing, volume, 
+                    yieldPct, density, moisture, waterActivity, cuppingScore, coffeeProperties 
                 });
             }
         }
@@ -108,23 +128,32 @@ export async function POST(request: Request) {
         for (const delivery of Array.from(deliveriesMap.values())) {
             const { 
                 poNumber, lotCode, producerId, farmerName, phone, farmName, country, region, municipality, 
-                gps, altitude, coffeeVariety, harvestDate, processing, fermentation, volume, 
-                moisture, waterActivity, cuppingScore, coffeeProperties 
+                gps, altitude, coffeeVariety, harvestDate, processing, volume, 
+                yieldPct, density, moisture, waterActivity, cuppingScore, coffeeProperties 
             } = delivery;
 
-            // 1. PO
             let { data: po } = await supabase.from('purchase_orders').select('id').eq('po_number', poNumber).single();
             let poId = po?.id;
+            
+            const poUpdates = {
+                po_number: poNumber,
+                buyer_name: poData['BUYER_NAME'] || 'AxisONE Customer',
+                destination: poData['DESTINATION_PORT'] || poData['PORT_OF_LOADING'] || 'Destination',
+                target_volume_kg: poData['TARGET_VOLUME_KG'] ? parseFloat(poData['TARGET_VOLUME_KG'].replace(/,/g, '')) : 20000,
+                status: 'IN_PROGRESS'
+            };
+
             if (!poId) {
-                const { data: newPo } = await supabase.from('purchase_orders').insert({ po_number: poNumber, target_volume_kg: 20000, status: 'IN_PROGRESS' }).select('id').single();
+                const { data: newPo } = await supabase.from('purchase_orders').insert(poUpdates).select('id').single();
                 poId = newPo?.id;
                 if (poId) {
                     await supabase.from('compliance_evidence').insert({ po_id: poId, eudr_cleared: true, deforestation_ha: 0.0, risk_assessment_url: 'https://registry.axisone.com/eudr/clearance' });
                     await supabase.from('shipment_evidence').insert({ po_id: poId, container_status: 'PENDING', docs_ready: true });
                 }
+            } else {
+                await supabase.from('purchase_orders').update(poUpdates).eq('id', poId);
             }
 
-            // 2. Farmer
             let { data: farmer } = await supabase.from('farmers').select('id').eq('name', farmerName).single();
             let farmerId = farmer?.id;
             
@@ -144,7 +173,6 @@ export async function POST(request: Request) {
                 await supabase.from('farmers').update(farmerData).eq('id', farmerId);
             }
 
-            // 3. Lot (Determinístico)
             if (poId && farmerId) {
                 const { data: existingLotFarmer } = await supabase.from('lot_farmers')
                     .select('lot_id, lots!inner(po_id, name, coffee_type)')
@@ -165,26 +193,37 @@ export async function POST(request: Request) {
                     gps_coordinates: gps,
                     altitude_m: altitude,
                     harvest_date: harvestDate,
-                    processing_method: processing,
-                    fermentation: fermentation
+                    processing_method: processing
+                };
+
+                const processingData = {
+                    yield_pct: yieldPct || parseFloat((88 + Math.random() * 4).toFixed(1)),
+                    moisture_pct: moisture || parseFloat((10.5 + Math.random() * 1).toFixed(1)),
+                    water_activity: waterActivity || parseFloat((0.60 + Math.random() * 0.05).toFixed(2)),
+                    density_gl: density || null
+                };
+
+                const qualityData = {
+                    roast_profile: 'Omni',
+                    cva_score: cuppingScore || parseFloat((82 + Math.random() * 4).toFixed(1)),
+                    cupping_score: cuppingScore || null,
+                    coffee_properties: coffeeProperties || ''
                 };
 
                 if (!lotId) {
-                    const { data: lot, error: lotError } = await supabase.from('lots')
-                        .insert(lotData).select('id').single();
-                        
+                    const { data: lot, error: lotError } = await supabase.from('lots').insert(lotData).select('id').single();
                     if (lotError) console.error("Error inserting lot:", lotError);
                     lotId = lot?.id;
 
                     if (lotId) {
                         await supabase.from('lot_farmers').insert({ lot_id: lotId, farmer_id: farmerId });
-                        await supabase.from('processing_evidence').insert({ lot_id: lotId, yield_pct: parseFloat((88 + Math.random() * 4).toFixed(1)), moisture_pct: moisture, water_activity: waterActivity });
-                        await supabase.from('quality_evidence').insert({ lot_id: lotId, roast_profile: 'Omni', cva_score: cuppingScore, cupping_score: cuppingScore, coffee_properties: coffeeProperties });
+                        await supabase.from('processing_evidence').insert({ lot_id: lotId, ...processingData });
+                        await supabase.from('quality_evidence').insert({ lot_id: lotId, ...qualityData });
                     }
                 } else {
                     await supabase.from('lots').update(lotData).eq('id', lotId);
-                    await supabase.from('processing_evidence').update({ moisture_pct: moisture, water_activity: waterActivity }).eq('lot_id', lotId);
-                    await supabase.from('quality_evidence').update({ cva_score: cuppingScore, cupping_score: cuppingScore, coffee_properties: coffeeProperties }).eq('lot_id', lotId);
+                    await supabase.from('processing_evidence').update(processingData).eq('lot_id', lotId);
+                    await supabase.from('quality_evidence').update(qualityData).eq('lot_id', lotId);
                 }
             }
 
@@ -193,16 +232,16 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
-            message: 'Sincronización exitosa con Google Sheets',
+            message: 'Sincronizacion exitosa con Google Sheets (2 pestañas)',
             recordsProcessed: processedRecords.length,
             sheetTitle: doc.title,
             data: processedRecords
         }, { status: 200 });
 
     } catch (error: any) {
-        console.error('Error syncing Google Sheets:', error);
+        console.error('Error syncing:', error);
         return NextResponse.json(
-            { success: false, message: 'Error de Sincronización', error: error.message || String(error) },
+            { success: false, message: 'Error de Sincronizacion', error: error.message || String(error) },
             { status: 500 }
         );
     }
