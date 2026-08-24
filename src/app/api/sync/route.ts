@@ -144,7 +144,6 @@ export async function POST(request: Request) {
             
             const poUpdates = {
                 po_number: poNumber,
-                buyer_name: poData['CUSTOMER'] || poData['CUSTOMER_NAME'] || poData['BUYER_NAME'] || 'AxisONE Customer',
                 exporter_name: poData['EXPORTER'] || poData['EXPORTER_NAME'] || poData['EXPORTER_ID'] || '',
                 origin: country,
                 destination: poData['DESTINATION'] || poData['DESTINATION_PORT'] || poData['PORT_OF_LOADING'] || 'Destination',
