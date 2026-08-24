@@ -266,8 +266,8 @@ export default function EvidenceDashboard() {
             const allFarmers: any[] = [];
 
             varietalLots.forEach((lot: any) => {
-              const proc = lot.processing_evidence?.[0];
-              const qual = lot.quality_evidence?.[0];
+              const proc = Array.isArray(lot.processing_evidence) ? lot.processing_evidence[0] : lot.processing_evidence;
+              const qual = Array.isArray(lot.quality_evidence) ? lot.quality_evidence[0] : lot.quality_evidence;
               if (proc) { yieldSum += Number(proc.yield_pct||0); moistureSum += Number(proc.moisture_pct||0); waSum += Number(proc.water_activity||0); pCount++; sumYield += Number(proc.yield_pct||0); sumMoisture += Number(proc.moisture_pct||0); sumWaterActivity += Number(proc.water_activity||0); countP++; }
               if (qual) { scoreSum += Number(qual.cva_score||0); qCount++; sumScore += Number(qual.cva_score||0); countQ++; }
               (lot.lot_farmers || []).forEach((rel: any) => {
