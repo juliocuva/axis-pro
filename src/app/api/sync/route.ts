@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { supabase } from '@/shared/lib/supabase';
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
 
             if (!poNumber || !lotCode || !farmerName) continue;
 
-            const key = ${poNumber}|||;
+            const key = `${poNumber}|${lotCode}|${farmerName}|${coffeeVariety}`;
             if (deliveriesMap.has(key)) {
                 deliveriesMap.get(key).volume += volume;
             } else {
