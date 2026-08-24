@@ -137,7 +137,8 @@ export async function POST(request: Request) {
             
             const poUpdates = {
                 po_number: poNumber,
-                buyer_name: poData['BUYER_NAME'] || 'AxisONE Customer',
+                buyer_name: poData['CUSTOMER_NAME'] || poData['BUYER_NAME'] || 'AxisONE Customer',
+                exporter_name: poData['EXPORTER_NAME'] || poData['EXPORTER_ID'] || '',
                 destination: poData['DESTINATION_PORT'] || poData['PORT_OF_LOADING'] || 'Destination',
                 target_volume_kg: poData['TARGET_VOLUME_KG'] ? parseFloat(poData['TARGET_VOLUME_KG'].replace(/,/g, '')) : 20000,
                 status: 'IN_PROGRESS'
