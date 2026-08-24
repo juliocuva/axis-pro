@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { supabase } from '@/shared/lib/supabase';
@@ -37,52 +37,57 @@ export async function POST(request: Request) {
         const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
         await doc.loadInfo(); 
 
-        let poData: Record<string, string> = {};
-        const infoSheet = doc.sheetsByIndex[0];
+        const sheet = doc.sheetsByIndex[0]; // Usamos SIEMPRE y ÚNICAMENTE la Hoja 1
         
-        let lotsSheet = infoSheet;
-        if (doc.sheetCount > 1) {
-            lotsSheet = doc.sheetsByIndex[1];
-            
-            const infoRows = await infoSheet.getRows();
-            for (const row of infoRows) {
-                const raw = (row as any)._rawData;
-                if (raw && raw.length >= 2) {
-                    const key = String(raw[0]).trim().toUpperCase();
-                    const value = String(raw[1]).trim();
-                    poData[key] = value;
-                }
-            }
-        }
+        try { await sheet.loadHeaderRow(); } catch(e) {}
+        const rows = await sheet.getRows();
 
-        if (poData['PO_ID']) {
-            frontendPoId = poData['PO_ID'];
+        let allRawRows = [];
+        if (sheet.headerValues && sheet.headerValues.length > 0) {
+            allRawRows.push(sheet.headerValues);
         }
-
-        await lotsSheet.loadHeaderRow();
-        const headers = lotsSheet.headerValues;
-        const rows = await lotsSheet.getRows();
-
-        const allData = [];
-        if (headers && headers.length > 0 && String(headers[0]).startsWith('PO-')) {
-            allData.push(headers);
-        }
-        
         for (const row of rows) {
             const raw = (row as any)._rawData;
             if (raw && raw.length > 0) {
-                allData.push(raw);
+                allRawRows.push(raw);
             }
         }
+        
+        let poData: Record<string, string> = {};
+        const lotsData = [];
+        let isDataSection = false;
+
+        for (const raw of allRawRows) {
+            if (!raw || raw.length === 0) continue;
+            
+            const colA = String(raw[0]).trim().toUpperCase();
+            
+            if (colA === 'LOT_ID' || colA === 'LOT ID') {
+                isDataSection = true;
+                continue; // Skip the header row of the table
+            }
+            
+            if (!isDataSection) {
+                // Header section (PO_ID, CUSTOMER, etc)
+                if (raw.length >= 2 && colA) {
+                    poData[colA] = String(raw[1]).trim();
+                }
+            } else {
+                // Lots data section
+                lotsData.push(raw);
+            }
+        }
+
+        // Si la hoja definió un PO_ID general, lo usamos, si no usamos el del frontend
+        let poNumber = frontendPoId || poData['PO_ID'] || '';
         
         const processedRecords = [];
         const deliveriesMap = new Map<string, any>();
 
-        for (const rowData of allData) {
+        for (const rowData of lotsData) {
             if (!rowData || !rowData[0]) continue;
             
             const lotCode = rowData[0] ? rowData[0].toString().trim() : '';
-            const poNumber = frontendPoId || 'PO-DEFAULT'; // Fallback to avoid error if missing
             
             if (!poNumber) continue;
 
@@ -91,8 +96,7 @@ export async function POST(request: Request) {
             const phone = rowData[3] ? rowData[3].toString().trim() : '';
             const farmName = rowData[4] ? rowData[4].toString().trim() : '';
             
-            // COUNTRY comes from Hoja 1, no longer from Hoja 2
-            const country = poData['COUNTRY'] || 'Colombia';
+            const country = poData['ORIGIN'] || 'Colombia';
             
             const region = rowData[5] ? rowData[5].toString().trim() : '';
             const municipality = rowData[6] ? rowData[6].toString().trim() : '';
@@ -115,7 +119,7 @@ export async function POST(request: Request) {
 
             if (!poNumber || !lotCode || !farmerName) continue;
 
-            const key = `${poNumber}|${lotCode}|${farmerName}|${coffeeVariety}`;
+            const key = ${poNumber}|||;
             if (deliveriesMap.has(key)) {
                 deliveriesMap.get(key).volume += volume;
             } else {
@@ -140,11 +144,10 @@ export async function POST(request: Request) {
             
             const poUpdates = {
                 po_number: poNumber,
-                buyer_name: poData['CUSTOMER_NAME'] || poData['BUYER_NAME'] || 'AxisONE Customer',
-                exporter_name: poData['EXPORTER_NAME'] || poData['EXPORTER_ID'] || '',
+                buyer_name: poData['CUSTOMER'] || poData['CUSTOMER_NAME'] || poData['BUYER_NAME'] || 'AxisONE Customer',
+                exporter_name: poData['EXPORTER'] || poData['EXPORTER_NAME'] || poData['EXPORTER_ID'] || '',
                 origin: country,
-                destination: poData['DESTINATION_PORT'] || poData['PORT_OF_LOADING'] || 'Destination',
-                target_volume_kg: poData['TARGET_VOLUME_KG'] ? parseFloat(poData['TARGET_VOLUME_KG'].replace(/,/g, '')) : 20000,
+                destination: poData['DESTINATION'] || poData['DESTINATION_PORT'] || poData['PORT_OF_LOADING'] || 'Destination',
                 status: 'IN_PROGRESS'
             };
 
@@ -237,7 +240,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
-            message: 'Sincronizacion exitosa con Google Sheets (2 pestañas)',
+            message: 'Sincronizacion exitosa con Google Sheets (Version Simple)',
             recordsProcessed: processedRecords.length,
             sheetTitle: doc.title,
             data: processedRecords
