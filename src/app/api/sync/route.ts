@@ -39,42 +39,41 @@ export async function POST(request: Request) {
 
         const sheet = doc.sheetsByIndex[0]; // Usamos SIEMPRE y ÚNICAMENTE la Hoja 1
         
-        try { await sheet.loadHeaderRow(); } catch(e) {}
-        const rows = await sheet.getRows();
-
-        let allRawRows = [];
-        if (sheet.headerValues && sheet.headerValues.length > 0) {
-            allRawRows.push(sheet.headerValues);
-        }
-        for (const row of rows) {
-            const raw = (row as any)._rawData;
-            if (raw && raw.length > 0) {
-                allRawRows.push(raw);
-            }
-        }
+        await sheet.loadCells('A1:T300'); // Load up to 300 rows and 20 columns
         
         let poData: Record<string, string> = {};
         const lotsData = [];
         let isDataSection = false;
 
-        for (const raw of allRawRows) {
-            if (!raw || raw.length === 0) continue;
+        for (let r = 0; r < 300; r++) {
+            const colA = sheet.getCell(r, 0).value;
+            if (colA === null || colA === undefined || colA === '') {
+                if (isDataSection) {
+                    // Empty row in data section, might be end of data, but we continue just in case
+                }
+                continue;
+            }
             
-            const colA = String(raw[0]).trim().toUpperCase();
+            const colAStr = String(colA).trim().toUpperCase();
             
-            if (colA === 'LOT_ID' || colA === 'LOT ID') {
+            if (colAStr === 'LOT_ID' || colAStr === 'LOT ID') {
                 isDataSection = true;
                 continue; // Skip the header row of the table
             }
             
             if (!isDataSection) {
                 // Header section (PO_ID, CUSTOMER, etc)
-                if (raw.length >= 2 && colA) {
-                    poData[colA] = String(raw[1]).trim();
+                const colB = sheet.getCell(r, 1).value;
+                if (colB !== null && colB !== undefined) {
+                    poData[colAStr] = String(colB).trim();
                 }
             } else {
                 // Lots data section
-                lotsData.push(raw);
+                let rowData = [];
+                for (let c = 0; c < 20; c++) {
+                    rowData.push(sheet.getCell(r, c).value);
+                }
+                lotsData.push(rowData);
             }
         }
 
