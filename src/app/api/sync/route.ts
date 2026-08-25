@@ -160,7 +160,8 @@ export async function POST(request: Request) {
                 exporter_name: poData['EXPORTER'] || poData['EXPORTER_NAME'] || poData['EXPORTER_ID'] || '',
                 origin: country,
                 destination: poData['DESTINATION'] || poData['DESTINATION_PORT'] || poData['PORT_OF_LOADING'] || 'Destination',
-                status: 'IN_PROGRESS'
+                status: 'IN_PROGRESS',
+                last_sync_date: new Date().toISOString()
             };
 
             if (!poId) {

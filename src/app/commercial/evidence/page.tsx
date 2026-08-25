@@ -7,7 +7,7 @@ import {
   CheckCircle2, ChevronRight, FileText, Globe2,
   Leaf, Truck, Map, Activity, Ship, Layers,
   Search, Bell, Settings, Download, X, FlaskConical,
-  Coffee, Award, ArrowLeft
+  Coffee, Award, ArrowLeft, Download
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { createClient } from '@supabase/supabase-js';
@@ -500,6 +500,12 @@ export default function EvidenceDashboard() {
                 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#00C87A] border border-[#00C87A]/30 bg-[#00C87A]/10 hover:bg-[#00C87A]/20 py-1.5 px-4 rounded-full transition-all duration-300"
               >
                 <Globe2 className="w-3.5 h-3.5" /> Evidence Journey
+              </button>
+              <button 
+                onClick={() => window.print()}
+                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white border border-[#00C87A] bg-[#00C87A] hover:bg-[#00a866] py-1.5 px-4 rounded-full transition-all duration-300"
+              >
+                <Download className="w-3.5 h-3.5" /> Reporte PDF
               </button>
               <div className="hidden xl:flex items-center gap-1.5 text-slate-400 animate-bounce-x-subtle">
                 <ArrowLeft className="w-4 h-4 text-[#00C87A]" />

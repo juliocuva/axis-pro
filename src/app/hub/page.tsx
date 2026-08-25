@@ -54,13 +54,14 @@ export default function AdminHubPage() {
           volume: Number(po.target_volume_kg) || 0,
           consolidated: actualVolume,
           status: po.status || 'DRAFT',
-        eudr: 'PENDING',
-        sheetUrl: po.sheet_url || localStorage.getItem(`sheet_url_${po.po_number}`) || '',
-        coffee_type: po.coffee_type || '',
-        variety: po.variety || '',
-        process: po.process || '',
-        executionDate: po.execution_date || localStorage.getItem(`date_${po.po_number}`) || '',
-        lots: po.expected_lots || JSON.parse(localStorage.getItem(`lots_${po.po_number}`) || 'null') || [{ variety: '', process: '', volume_kg: '' }]
+          eudr: 'PENDING',
+          sheetUrl: po.sheet_url || localStorage.getItem(`sheet_url_${po.po_number}`) || '',
+          coffee_type: po.coffee_type || '',
+          variety: po.variety || '',
+          process: po.process || '',
+          executionDate: po.execution_date || localStorage.getItem(`date_${po.po_number}`) || '',
+          lots: po.expected_lots || JSON.parse(localStorage.getItem(`lots_${po.po_number}`) || 'null') || [{ variety: '', process: '', volume_kg: '' }],
+          last_sync_date: po.last_sync_date || null
         };
       });
       setPosData(formatted);
@@ -275,8 +276,15 @@ export default function AdminHubPage() {
                 >
                   {/* Card Header */}
                   <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Purchase Order</p>
+                    <div className="flex-1">
+                      <div className="flex flex-col mb-1">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Purchase Order</p>
+                        {po.last_sync_date && (
+                          <p className="text-[9px] text-[#00C87A] font-medium tracking-wider flex items-center gap-1 mt-0.5">
+                             Updated: {new Date(po.last_sync_date).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
                       <h3 className="text-xl font-bold text-white tracking-tight">{po.id}</h3>
                     </div>
                     <div className="flex items-center gap-2">

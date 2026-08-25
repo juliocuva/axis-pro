@@ -1,9 +1,27 @@
-const url = "https://nhhbncogvnocglrymizj.supabase.co/rest/v1";
-const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oaGJuY29ndm5vY2dscnltaXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NzA2MDMsImV4cCI6MjA4NzA0NjYwM30.Mx8_54xL52FrhQuh5x2FHmybJIjBpIlo5PN4MHZ6TeI";
-
-async function check() {
-  const res = await fetch(url + "/lots?select=name,coffee_type,volume_kg", { headers: { apikey: key, Authorization: "Bearer " + key } });
-  const data = await res.json();
-  console.log(data);
+const { createClient } = require('@supabase/supabase-js');
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(url, key);
+async function checkLots() {
+  // run the logic
+  const { GoogleSpreadsheet } = require('google-spreadsheet');
+  const { JWT } = require('google-auth-library');
+  const serviceAccountAuth = new JWT({
+    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  });
+  const doc = new GoogleSpreadsheet('1BQpgvFwceSVwkANc_UiYjQAfmuADjs0-km4ipvkwi7U', serviceAccountAuth);
+  await doc.loadInfo();
+  const sheet = doc.sheetsByIndex[0];
+  await sheet.loadCells('A1:T50');
+  for(let r=0; r<10; r++) {
+    let rowData = [];
+    for(let c=0; c<20; c++) {
+      const cell = sheet.getCell(r, c);
+      rowData.push(cell.value);
+    }
+    console.log(`Row ${r}:`, rowData);
+  }
 }
-check();
+checkLots();
