@@ -80,6 +80,20 @@ export async function POST(request: Request) {
         // Si la hoja definió un PO_ID general, lo usamos, si no usamos el del frontend
         let poNumber = frontendPoId || poData['PO_ID'] || '';
         
+        if (poNumber) {
+            const { data: existingPo } = await supabase.from('purchase_orders').select('id').eq('po_number', poNumber).single();
+            if (existingPo) {
+                const { data: existingLots } = await supabase.from('lots').select('id').eq('po_id', existingPo.id);
+                if (existingLots && existingLots.length > 0) {
+                    const lotIds = existingLots.map(l => l.id);
+                    await supabase.from('quality_evidence').delete().in('lot_id', lotIds);
+                    await supabase.from('processing_evidence').delete().in('lot_id', lotIds);
+                    await supabase.from('lot_farmers').delete().in('lot_id', lotIds);
+                    await supabase.from('lots').delete().eq('po_id', existingPo.id);
+                }
+            }
+        }
+
         const processedRecords = [];
         const deliveriesMap = new Map<string, any>();
 
