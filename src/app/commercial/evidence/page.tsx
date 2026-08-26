@@ -7,7 +7,7 @@ import {
   CheckCircle2, ChevronRight, FileText, Globe2,
   Leaf, Truck, Map, Activity, Ship, Layers,
   Search, Bell, Settings, Download, X, FlaskConical,
-  Coffee, Award, ArrowLeft, Download
+  Coffee, Award, ArrowLeft
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { createClient } from '@supabase/supabase-js';
