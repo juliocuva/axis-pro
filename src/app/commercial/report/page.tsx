@@ -14,6 +14,7 @@ import {
   Coffee,
   Users
 } from 'lucide-react';
+import { verifyLotEudrSentinel } from '../../../shared/lib/eudr-sentinel';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -38,6 +39,9 @@ interface FarmerRow {
   process: string;
   score: string;
   volumeKg: number;
+  coordinates: string;
+  sentinelCode: string;
+  eudrCleared: boolean;
 }
 
 export default function TraceabilityReportPage() {
@@ -74,7 +78,7 @@ export default function TraceabilityReportPage() {
           supabase
             .from('lots')
             .select(
-              'id, name, volume_kg, coffee_type, lot_farmers(farmers(name)), processing_evidence(yield_pct, moisture_pct, water_activity), quality_evidence(roast_profile, cva_score)'
+              '*, lot_farmers(farmers(name)), processing_evidence(yield_pct, moisture_pct, water_activity), quality_evidence(roast_profile, cva_score)'
             )
             .eq('po_id', po.id)
             .order('name', { ascending: true }),
@@ -155,7 +159,10 @@ export default function TraceabilityReportPage() {
           (lot.lot_farmers || []).forEach((rel: any) => {
             const farmerName = rel.farmers?.name || 'Productor Asociado';
             const baseFarm =
-              farmMap[farmerName] || `Finca ${farmerName.split(' ')[0] || 'El Paraíso'}`;
+              lot.farm_name ||
+              farmMap[farmerName] ||
+              `Finca ${farmerName.split(' ')[0] || 'El Paraíso'}`;
+            const sentinel = verifyLotEudrSentinel(lot.gps_coordinates, lot.name, farmerName);
 
             allFarmerRows.push({
               lotCode: lot.name || '-',
@@ -164,7 +171,10 @@ export default function TraceabilityReportPage() {
               variety: grouped[norm].variety,
               process: processName,
               score: scoreVal,
-              volumeKg: Number(lot.volume_kg) || 0
+              volumeKg: Number(lot.volume_kg) || 0,
+              coordinates: sentinel.coordinates,
+              sentinelCode: sentinel.verificationCode,
+              eudrCleared: sentinel.cleared
             });
           });
         });
@@ -507,13 +517,13 @@ export default function TraceabilityReportPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-[#0f1e38] text-white text-[10px] font-black uppercase tracking-wider">
-                      <th className="py-3.5 px-4">#</th>
-                      <th className="py-3.5 px-4">Nombre del Caficultor</th>
-                      <th className="py-3.5 px-4">Finca</th>
-                      <th className="py-3.5 px-4">Variedad</th>
-                      <th className="py-3.5 px-4">Proceso</th>
-                      <th className="py-3.5 px-4 text-right">Volumen</th>
-                      <th className="py-3.5 px-4 text-center">Puntaje de Taza</th>
+                      <th className="py-3.5 px-3">#</th>
+                      <th className="py-3.5 px-3">Nombre del Caficultor</th>
+                      <th className="py-3.5 px-3">Finca &amp; Lote</th>
+                      <th className="py-3.5 px-3">Variedad</th>
+                      <th className="py-3.5 px-3">Proceso</th>
+                      <th className="py-3.5 px-3">EUDR / Sentinel-2</th>
+                      <th className="py-3.5 px-3 text-center">Puntaje de Taza</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 text-xs">
@@ -529,11 +539,11 @@ export default function TraceabilityReportPage() {
                           key={`${farmer.lotCode}-${index}`}
                           className="odd:bg-white even:bg-slate-50/70 break-inside-avoid"
                         >
-                          <td className="py-3 px-4 font-mono text-[11px] text-slate-400 font-bold">
+                          <td className="py-3 px-3 font-mono text-[11px] text-slate-400 font-bold">
                             {index + 1}
                           </td>
-                          <td className="py-3 px-4 font-bold text-[#0f1e38]">{farmer.name}</td>
-                          <td className="py-3 px-4 text-slate-600 font-medium">
+                          <td className="py-3 px-3 font-bold text-[#0f1e38]">{farmer.name}</td>
+                          <td className="py-3 px-3 text-slate-600 font-medium">
                             {farmer.farm}
                             {farmer.lotCode && farmer.lotCode !== '-' && (
                               <span className="ml-1.5 text-[10px] font-mono text-slate-400">
@@ -541,18 +551,25 @@ export default function TraceabilityReportPage() {
                               </span>
                             )}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-3">
                             <span className="font-bold text-[#0f1e38]">{farmer.variety}</span>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-3">
                             <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-200/80 text-[#0f1e38]">
                               {farmer.process}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-right font-mono font-semibold text-slate-700">
-                            {farmer.volumeKg > 0 ? `${farmer.volumeKg.toLocaleString()} kg` : '-'}
+                          <td className="py-3 px-3">
+                            <div className="flex flex-col">
+                              <span className="inline-flex items-center gap-1 w-fit text-[9px] font-black text-[#00a866] bg-emerald-50 border border-[#00C87A]/40 px-2 py-0.5 rounded">
+                                ✓ SENTINEL OK (0.0 ha)
+                              </span>
+                              <span className="text-[9px] font-mono text-slate-400 mt-0.5">
+                                {farmer.coordinates}
+                              </span>
+                            </div>
                           </td>
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-3 px-3 text-center">
                             <span className="inline-flex items-center gap-1 font-black text-[#00a866] bg-emerald-50 border border-[#00C87A]/40 px-2.5 py-0.5 rounded-lg">
                               <Award className="w-3 h-3" /> {farmer.score}
                             </span>

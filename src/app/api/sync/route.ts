@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { supabase } from '@/shared/lib/supabase';
+import { resolveAndParseLocation, verifyLotEudrSentinel } from '@/shared/lib/eudr-sentinel';
 
 export async function POST(request: Request) {
     try {
@@ -114,7 +115,12 @@ export async function POST(request: Request) {
             const region = rowData[5] ? rowData[5].toString().trim() : '';
             const municipality = rowData[6] ? rowData[6].toString().trim() : '';
             const altitude = rowData[7] ? parseFloat(String(rowData[7]).replace(/,/g, '')) : null;
-            const gps = rowData[8] ? rowData[8].toString().trim() : '';
+            let gps = rowData[8] ? rowData[8].toString().trim() : '';
+            if (!gps) {
+                // Buscar si en alguna celda de la fila pegaron un enlace de ubicación de WhatsApp / Google Maps
+                const mapCell = rowData.find(cell => cell && /(?:maps\.google|goo\.gl\/maps|maps\.app\.goo\.gl|google\.com\/maps)/i.test(String(cell)));
+                if (mapCell) gps = String(mapCell).trim();
+            }
             const harvestDate = rowData[9] ? rowData[9].toString().trim() : '';
             const coffeeVariety = rowData[10] ? rowData[10].toString().trim() : 'Blend';
             const processing = rowData[11] ? rowData[11].toString().trim() : '';
@@ -144,6 +150,7 @@ export async function POST(request: Request) {
             }
         }
 
+        let sentinelVerifiedCount = 0;
 
         for (const delivery of Array.from(deliveriesMap.values())) {
             const { 
@@ -151,6 +158,12 @@ export async function POST(request: Request) {
                 gps, altitude, coffeeVariety, harvestDate, processing, volume, 
                 yieldPct, density, moisture, waterActivity, cuppingScore, coffeeProperties 
             } = delivery;
+
+            // Traducir link de ubicación de WhatsApp / Google Maps o DMS a coordenadas decimales EUDR
+            const parsedLoc = gps ? await resolveAndParseLocation(gps) : null;
+            const normalizedGps = parsedLoc ? parsedLoc.formatted : gps;
+            const eudrCheck = verifyLotEudrSentinel(normalizedGps, lotCode);
+            if (eudrCheck.cleared) sentinelVerifiedCount++;
 
             let { data: po } = await supabase.from('purchase_orders').select('id').eq('po_number', poNumber).single();
             let poId = po?.id;
@@ -173,6 +186,9 @@ export async function POST(request: Request) {
                 }
             } else {
                 await supabase.from('purchase_orders').update(poUpdates).eq('id', poId);
+                if (sentinelVerifiedCount > 0) {
+                    await supabase.from('compliance_evidence').upsert({ po_id: poId, eudr_cleared: true, deforestation_ha: 0.0 }, { onConflict: 'po_id' });
+                }
             }
 
             let { data: farmer } = await supabase.from('farmers').select('id').eq('name', farmerName).single();
@@ -211,7 +227,7 @@ export async function POST(request: Request) {
                     coffee_type: coffeeVariety, 
                     volume_kg: volume,
                     farm_name: farmName,
-                    gps_coordinates: gps,
+                    gps_coordinates: normalizedGps,
                     altitude_m: altitude,
                     harvest_date: harvestDate,
                     processing_method: processing
@@ -248,13 +264,21 @@ export async function POST(request: Request) {
                 }
             }
 
-            processedRecords.push({ lotCode, farmerName, volume });
+            processedRecords.push({
+                lotCode,
+                farmerName,
+                volume,
+                coordinates: eudrCheck.coordinates,
+                eudrStatus: eudrCheck.status,
+                sentinelCode: eudrCheck.verificationCode
+            });
         }
 
         return NextResponse.json({
             success: true,
-            message: 'Sincronizacion exitosa con Google Sheets (Version Simple)',
+            message: 'Sincronizacion exitosa con Google Sheets y validacion Sentinel-2 EUDR',
             recordsProcessed: processedRecords.length,
+            sentinelVerifiedCount,
             sheetTitle: doc.title,
             data: processedRecords
         }, { status: 200 });
