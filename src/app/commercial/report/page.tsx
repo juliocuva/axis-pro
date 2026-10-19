@@ -273,9 +273,10 @@ export default function TraceabilityReportPage() {
                 origin: poData?.origin
               })
             }
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-[#00C87A]/50 text-[#00C87A] font-black text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all"
+            className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-[#00C87A]/50 text-[#00C87A] font-black text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all whitespace-nowrap"
           >
-            <Download className="w-4 h-4" /> Descargar GeoJSON EUDR (.geojson)
+            <Download className="w-4 h-4 flex-shrink-0" />
+            <span>Descargar GeoJSON EUDR</span>
           </button>
           <button
             onClick={() => window.print()}

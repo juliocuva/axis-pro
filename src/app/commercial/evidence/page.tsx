@@ -805,10 +805,11 @@ export default function EvidenceDashboard() {
                       liveLots.flatMap((l: any) => l.farmers || [])
                     )
                   }
-                  className="mt-6 w-full flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest border py-3 rounded-lg hover:bg-[#00C87A]/10 transition-colors cursor-pointer"
+                  className="mt-6 w-full flex items-center justify-center gap-2 px-4 text-[10px] font-bold uppercase tracking-widest border py-3 rounded-lg hover:bg-[#00C87A]/10 transition-colors cursor-pointer whitespace-nowrap"
                   style={{ color: 'var(--color-brand-green-light)', borderColor: 'rgba(0, 255, 178, 0.3)' }}
                 >
-                  <Download className="w-4 h-4" /> Descargar GeoJSON EUDR (TRACES NT)
+                  <Download className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Descargar GeoJSON EUDR</span>
                 </button>
               </div>
             )}
@@ -897,9 +898,10 @@ export default function EvidenceDashboard() {
                         liveLots.flatMap((l: any) => l.farmers || [])
                       )
                     }
-                    className="mt-3 w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-[#00C87A] text-[#0f1e38] hover:bg-[#00df88] py-2.5 rounded-xl transition-all cursor-pointer"
+                    className="mt-3 w-full flex items-center justify-center gap-2 px-4 text-[10px] font-black uppercase tracking-widest bg-[#00C87A] text-[#0f1e38] hover:bg-[#00df88] py-3 rounded-xl transition-all cursor-pointer whitespace-nowrap"
                   >
-                    <Download className="w-4 h-4" /> Descargar GeoJSON Oficial EUDR (.geojson)
+                    <Download className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>Descargar GeoJSON EUDR</span>
                   </button>
                 </div>
                 <div>
