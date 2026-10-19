@@ -214,7 +214,7 @@ export default function EvidenceDashboard() {
 
     const fetchLiveData = async () => {
       try {
-        const { data: po } = await supabase.from('purchase_orders').select('id, target_volume_kg, expected_lots, last_sync_date, customer, exporter, origin, destination').eq('po_number', poQuery).single();
+        const { data: po } = await supabase.from('purchase_orders').select('*').eq('po_number', poQuery).single();
         if (!po) { setIsLoading(false); return; }
         setLivePoData(po);
 
@@ -564,9 +564,9 @@ export default function EvidenceDashboard() {
                       <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
                         <Leaf className="w-3.5 h-3.5 text-[#00C87A]" /> {livePoData?.origin || 'Colombia'} &rarr; {livePoData?.destination || 'Hamburg'}
                       </p>
-                      {livePoData?.last_sync_date && (
+                      {(livePoData?.last_sync_date || livePoData?.created_at) && (
                         <p className="text-[10px] font-bold uppercase tracking-widest text-[#00C87A]/90 bg-[#00C87A]/10 border border-[#00C87A]/30 px-2.5 py-0.5 rounded-full">
-                          Actualizado: {new Date(livePoData.last_sync_date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          Actualizado: {new Date(livePoData.last_sync_date || livePoData.created_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </p>
                       )}
                     </div>
