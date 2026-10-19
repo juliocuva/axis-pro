@@ -16,7 +16,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 import ValueMissionPanel from '../../../components/ValueMissionPanel';
-import { verifyLotEudrSentinel } from '../../../shared/lib/eudr-sentinel';
+import { verifyLotEudrSentinel, downloadEudrGeoJson } from '../../../shared/lib/eudr-sentinel';
 
 const GlobalMap = dynamic(() => import('../../../components/GlobalMap'), { ssr: false });
 
@@ -292,6 +292,8 @@ export default function EvidenceDashboard() {
                     name: farmerName,
                     farm: `${farmName} - Lote: ${lot.name}`,
                     lotCode: lot.name,
+                    variety,
+                    process: varietalLots.process || 'Washed',
                     volume: `${lot.volume_kg || 0} kg`,
                     moisture: proc?.moisture_pct ? `${proc.moisture_pct}%` : '11.2%',
                     yield: proc?.yield_pct ? `${proc.yield_pct}%` : '90.2%',
@@ -302,6 +304,8 @@ export default function EvidenceDashboard() {
                     lng: sentinel.lng,
                     eudrCleared: sentinel.cleared,
                     sentinelCode: sentinel.verificationCode,
+                    satelliteUrl: sentinel.satelliteUrl,
+                    copernicusUrl: sentinel.copernicusUrl,
                     source: 'WhatsApp / Sheets'
                   });
                 }
@@ -760,7 +764,7 @@ export default function EvidenceDashboard() {
             {selectedItem.explorerContent?.type === 'origin_layer' && (
               <div className="rounded-3xl border border-white/10 p-5" style={{ background: 'var(--color-panel-inner)' }}>
                 <div className="grid grid-cols-4 text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/5">
-                  <div className="col-span-3">Farmer, Farm &amp; WhatsApp GPS</div>
+                  <div className="col-span-3">Farmer, Farm &amp; Geolocalización</div>
                   <div className="text-left md:text-right mt-6 md:mt-0">Alt (m)</div>
                 </div>
                 <div className="space-y-4">
@@ -769,12 +773,22 @@ export default function EvidenceDashboard() {
                       <div className="col-span-3">
                         <p className="text-xs font-bold text-white truncate">{f.name}</p>
                         <p className="text-[10px] text-slate-400 truncate">{f.farm}</p>
-                        {f.coordinates && (
-                          <p className="text-[9px] font-mono text-[#00C87A] mt-0.5 flex items-center gap-1.5">
-                            <span>📍 {f.coordinates}</span>
+                        {f.eudrCleared && f.satelliteUrl ? (
+                          <a
+                            href={f.satelliteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[9px] font-mono text-[#00C87A] hover:underline mt-0.5 flex items-center gap-1.5"
+                            title="Ver finca en imagen satelital real"
+                          >
+                            <span>📍 {f.coordinates} ↗</span>
                             <span className="bg-[#00C87A]/15 border border-[#00C87A]/40 px-1.5 py-0.2 rounded text-[8px] font-bold">
                               ✓ SENTINEL OK
                             </span>
+                          </a>
+                        ) : (
+                          <p className="text-[9px] font-mono text-amber-400 mt-0.5">
+                            ⚠ Pendiente Coordenada GPS en Sheet
                           </p>
                         )}
                       </div>
@@ -784,8 +798,17 @@ export default function EvidenceDashboard() {
                     </div>
                   ))}
                 </div>
-                <button className="mt-6 w-full flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest border py-3 rounded-lg transition-colors" style={{ color: 'var(--color-brand-green-light)', borderColor: 'rgba(0, 255, 178, 0.3)' }}>
-                  <Download className="w-4 h-4" /> Download Traceability
+                <button
+                  onClick={() =>
+                    downloadEudrGeoJson(
+                      targetPo,
+                      liveLots.flatMap((l: any) => l.farmers || [])
+                    )
+                  }
+                  className="mt-6 w-full flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest border py-3 rounded-lg hover:bg-[#00C87A]/10 transition-colors cursor-pointer"
+                  style={{ color: 'var(--color-brand-green-light)', borderColor: 'rgba(0, 255, 178, 0.3)' }}
+                >
+                  <Download className="w-4 h-4" /> Descargar GeoJSON EUDR (TRACES NT)
                 </button>
               </div>
             )}
@@ -867,15 +890,29 @@ export default function EvidenceDashboard() {
                     <span className="text-[10px] text-slate-400 uppercase tracking-widest">Deforestation</span>
                     <span className="text-sm font-mono text-[#00C87A]">0.00 ha (CLEARED)</span>
                   </div>
+                  <button
+                    onClick={() =>
+                      downloadEudrGeoJson(
+                        targetPo,
+                        liveLots.flatMap((l: any) => l.farmers || [])
+                      )
+                    }
+                    className="mt-3 w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest bg-[#00C87A] text-[#0f1e38] hover:bg-[#00df88] py-2.5 rounded-xl transition-all cursor-pointer"
+                  >
+                    <Download className="w-4 h-4" /> Descargar GeoJSON Oficial EUDR (.geojson)
+                  </button>
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Farm &amp; Lot Verification (WhatsApp GPS + Sentinel)</h3>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Farm &amp; Lot Verification (GPS + Sentinel)</h3>
                   <div className="flex justify-between items-end pb-2 border-b border-white/10 mb-3">
                     <div>
                       <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Lots Scanned</p>
-                      <p className="text-xl font-bold text-[#00C87A]">{active.farmers.length}<span className="text-sm text-slate-500">/{active.farmers.length + active.missingLots}</span></p>
+                      <p className="text-xl font-bold text-[#00C87A]">
+                        {active.farmers.filter((f: any) => f.eudrCleared).length}
+                        <span className="text-sm text-slate-500">/{active.farmers.length}</span>
+                      </p>
                     </div>
-                    <span className="text-[9px] font-mono text-slate-400">100% EUDR Compliant</span>
+                    <span className="text-[9px] font-mono text-slate-400">Geolocalización Real</span>
                   </div>
                   <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
                     {active.farmers.map((f: any, i: number) => (
@@ -883,20 +920,35 @@ export default function EvidenceDashboard() {
                         <div className="min-w-0 pr-2">
                           <p className="text-xs font-bold text-white truncate">{f.name}</p>
                           <p className="text-[10px] text-slate-400 truncate">{f.farm}</p>
-                          <p className="text-[9px] font-mono text-[#00C87A] mt-0.5">📍 {f.coordinates || '4.8133, -75.6961'}</p>
+                          {f.eudrCleared && f.satelliteUrl ? (
+                            <a
+                              href={f.satelliteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[9px] font-mono text-[#00C87A] hover:underline mt-0.5 block"
+                            >
+                              📍 {f.coordinates} (Ver Satélite ↗)
+                            </a>
+                          ) : (
+                            <p className="text-[9px] font-mono text-amber-400 mt-0.5">
+                              ⚠ Sin coordenada GPS en Sheet
+                            </p>
+                          )}
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded bg-[#00C87A]/20 text-[#00C87A] border border-[#00C87A]/40">
-                            ✓ SENTINEL OK
-                          </span>
-                          <p className="text-[8px] font-mono text-slate-500 mt-1">{f.sentinelCode || '0.0 ha'}</p>
+                          {f.eudrCleared ? (
+                            <>
+                              <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded bg-[#00C87A]/20 text-[#00C87A] border border-[#00C87A]/40">
+                                ✓ SENTINEL OK
+                              </span>
+                              <p className="text-[8px] font-mono text-slate-500 mt-1">{f.sentinelCode}</p>
+                            </>
+                          ) : (
+                            <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                              PENDIENTE GPS
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    ))}
-                    {active.missingFarmersList.map((f: any, i: number) => (
-                      <div key={`missing-${i}`} className="flex justify-between items-center bg-amber-900/10 p-2 rounded-md border border-amber-500/20">
-                        <p className="text-xs font-bold text-white truncate">{f.name}</p>
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">PENDING</span>
                       </div>
                     ))}
                   </div>

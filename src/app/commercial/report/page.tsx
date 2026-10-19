@@ -12,9 +12,10 @@ import {
   Ship,
   Award,
   Coffee,
-  Users
+  Users,
+  Download
 } from 'lucide-react';
-import { verifyLotEudrSentinel } from '../../../shared/lib/eudr-sentinel';
+import { verifyLotEudrSentinel, downloadEudrGeoJson } from '../../../shared/lib/eudr-sentinel';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -40,6 +41,9 @@ interface FarmerRow {
   score: string;
   volumeKg: number;
   coordinates: string;
+  lat: number | null;
+  lng: number | null;
+  satelliteUrl: string | null;
   sentinelCode: string;
   eudrCleared: boolean;
 }
@@ -173,6 +177,9 @@ export default function TraceabilityReportPage() {
               score: scoreVal,
               volumeKg: Number(lot.volume_kg) || 0,
               coordinates: sentinel.coordinates,
+              lat: sentinel.lat,
+              lng: sentinel.lng,
+              satelliteUrl: sentinel.satelliteUrl,
               sentinelCode: sentinel.verificationCode,
               eudrCleared: sentinel.cleared
             });
@@ -249,7 +256,7 @@ export default function TraceabilityReportPage() {
       }}
     >
       {/* Top Action Bar (Hidden when printing) */}
-      <div className="max-w-5xl mx-auto mb-6 flex items-center justify-between bg-[#0f1e38] text-white px-6 py-4 rounded-2xl shadow-lg print:hidden">
+      <div className="max-w-5xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3 bg-[#0f1e38] text-white px-6 py-4 rounded-2xl shadow-lg print:hidden">
         <button
           onClick={() => router.push(`/commercial/evidence?po=${encodeURIComponent(targetPo)}`)}
           className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white transition-colors"
@@ -257,10 +264,19 @@ export default function TraceabilityReportPage() {
           <ArrowLeft className="w-4 h-4 text-[#00C87A]" /> Volver al Dashboard
         </button>
 
-        <div className="flex items-center gap-4">
-          <span className="text-xs text-slate-400 hidden sm:inline">
-            Vista previa oficial lista para exportar en A4 / Carta
-          </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() =>
+              downloadEudrGeoJson(targetPo, farmersList, {
+                exporter: poData?.exporter,
+                customer: poData?.customer,
+                origin: poData?.origin
+              })
+            }
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-[#00C87A]/50 text-[#00C87A] font-black text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all"
+          >
+            <Download className="w-4 h-4" /> Descargar GeoJSON EUDR (.geojson)
+          </button>
           <button
             onClick={() => window.print()}
             className="flex items-center gap-2 bg-[#00C87A] hover:bg-[#00b36d] text-[#0f1e38] font-black text-xs uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all shadow-md"
@@ -560,14 +576,31 @@ export default function TraceabilityReportPage() {
                             </span>
                           </td>
                           <td className="py-3 px-3">
-                            <div className="flex flex-col">
-                              <span className="inline-flex items-center gap-1 w-fit text-[9px] font-black text-[#00a866] bg-emerald-50 border border-[#00C87A]/40 px-2 py-0.5 rounded">
-                                ✓ SENTINEL OK (0.0 ha)
+                            {farmer.eudrCleared ? (
+                              <div className="flex flex-col">
+                                <span className="inline-flex items-center gap-1 w-fit text-[9px] font-black text-[#00a866] bg-emerald-50 border border-[#00C87A]/40 px-2 py-0.5 rounded">
+                                  ✓ SENTINEL OK (0.0 ha)
+                                </span>
+                                {farmer.satelliteUrl ? (
+                                  <a
+                                    href={farmer.satelliteUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[9px] font-mono text-[#0f1e38] hover:text-[#00a866] underline mt-0.5"
+                                  >
+                                    📍 {farmer.coordinates} ↗
+                                  </a>
+                                ) : (
+                                  <span className="text-[9px] font-mono text-slate-400 mt-0.5">
+                                    {farmer.coordinates}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 w-fit text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded">
+                                ⚠ Pendiente GPS
                               </span>
-                              <span className="text-[9px] font-mono text-slate-400 mt-0.5">
-                                {farmer.coordinates}
-                              </span>
-                            </div>
+                            )}
                           </td>
                           <td className="py-3 px-3 text-center">
                             <span className="inline-flex items-center gap-1 font-black text-[#00a866] bg-emerald-50 border border-[#00C87A]/40 px-2.5 py-0.5 rounded-lg">
