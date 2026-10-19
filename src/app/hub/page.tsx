@@ -36,7 +36,7 @@ export default function AdminHubPage() {
 
   const fetchPOs = async () => {
     // Select purchase_orders and their actual lots to calculate dynamic progress
-    const { data, error } = await supabase.from('purchase_orders').select('*, actual_lots:lots(volume_kg)').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('purchase_orders').select('*, actual_lots:lots(volume_kg), compliance_evidence(*), shipment_evidence(*)').order('created_at', { ascending: false });
     if (data) {
       const formatted = data.map(po => {
         // Pass the actual volume to consolidated
@@ -44,6 +44,9 @@ export default function AdminHubPage() {
         if (po.actual_lots && Array.isArray(po.actual_lots)) {
           actualVolume = po.actual_lots.reduce((sum: number, l: any) => sum + (Number(l.volume_kg) || 0), 0);
         }
+
+        const comp = po.compliance_evidence?.[0] || po.compliance_evidence;
+        const ship = po.shipment_evidence?.[0] || po.shipment_evidence;
 
         return {
           id: po.po_number,
@@ -54,7 +57,8 @@ export default function AdminHubPage() {
           volume: Number(po.target_volume_kg) || 0,
           consolidated: actualVolume,
           status: po.status || 'DRAFT',
-          eudr: 'PENDING',
+          eudr: comp?.eudr_cleared ? 'CLEARED' : 'PENDING',
+          shipmentReady: !!ship?.docs_ready,
           sheetUrl: po.sheet_url || localStorage.getItem(`sheet_url_${po.po_number}`) || '',
           coffee_type: po.coffee_type || '',
           variety: po.variety || '',
@@ -85,8 +89,9 @@ export default function AdminHubPage() {
       return;
     }
     let error;
+    let finalPoId = null;
     if (editingPoId) {
-      const { error: err } = await supabase.from('purchase_orders').update({
+      const { error: err, data } = await supabase.from('purchase_orders').update({
         origin: newPoForm.origin,
         destination: newPoForm.destination,
         coffee_type: newPoForm.coffee_type,
@@ -96,10 +101,11 @@ export default function AdminHubPage() {
         sheet_url: newPoForm.sheet_url || null,
         execution_date: newPoForm.execution_date || null,
         expected_lots: newPoForm.lots || []
-      }).eq('po_number', editingPoId);
+      }).eq('po_number', editingPoId).select('id').single();
       error = err;
+      if (data) finalPoId = data.id;
     } else {
-      const { error: err } = await supabase.from('purchase_orders').insert({
+      const { error: err, data } = await supabase.from('purchase_orders').insert({
         po_number: newPoForm.po_number,
         origin: newPoForm.origin,
         destination: newPoForm.destination,
@@ -109,26 +115,24 @@ export default function AdminHubPage() {
         target_volume_kg: finalVolume,
         sheet_url: newPoForm.sheet_url || null,
         execution_date: newPoForm.execution_date || null,
-        expected_lots: newPoForm.lots || [],
-        status: 'IN_PROGRESS'
-      });
+        expected_lots: newPoForm.lots || []
+      }).select('id').single();
       error = err;
+      if (data) finalPoId = data.id;
     }
     
     if (error) {
-      showToast('Error al guardar orden: ' + error.message, 'error');
+      showToast('Error al guardar: ' + error.message, 'error');
     } else {
-      // Guardar sheet_url en localStorage si se proporcionó
-      const poKey = editingPoId || newPoForm.po_number;
-      if (poKey) {
-        if (newPoForm.sheet_url) localStorage.setItem(`sheet_url_${poKey}`, newPoForm.sheet_url);
-        if (newPoForm.lots) localStorage.setItem(`lots_${poKey}`, JSON.stringify(newPoForm.lots));
-        if (newPoForm.execution_date) localStorage.setItem(`date_${poKey}`, newPoForm.execution_date);
+      if (finalPoId) {
+        // Upsert compliance and shipment
+        await supabase.from('compliance_evidence').upsert({ po_id: finalPoId, eudr_cleared: newPoForm.eudr_cleared }, { onConflict: 'po_id' });
+        await supabase.from('shipment_evidence').upsert({ po_id: finalPoId, docs_ready: newPoForm.docs_ready, container_status: newPoForm.docs_ready ? 'SEALED' : 'PENDING' }, { onConflict: 'po_id' });
       }
       showToast('Orden guardada exitosamente', 'success');
       setIsNewPoModalOpen(false);
       setEditingPoId(null);
-      setNewPoForm({ po_number: '', customer: '', exporter: '', execution_date: '', origin: '', destination: '', coffee_type: '', variety: '', process: '', target_volume_kg: '', sheet_url: '', lots: [{ variety: '', process: '', volume_kg: '' }] });
+      setNewPoForm({ po_number: '', customer: '', exporter: '', execution_date: '', origin: '', destination: '', coffee_type: '', variety: '', process: '', target_volume_kg: '', sheet_url: '', lots: [{ variety: '', process: '', volume_kg: '' }], eudr_cleared: false, docs_ready: false });
       fetchPOs();
     }
   };
@@ -304,7 +308,9 @@ export default function AdminHubPage() {
                               target_volume_kg: po.volume ? String(po.volume) : '',
                               sheet_url: po.sheetUrl || '',
                               execution_date: po.executionDate || '',
-                              lots: po.lots && po.lots.length > 0 ? po.lots : [{ variety: '', process: '', volume_kg: '' }]
+                              lots: po.lots && po.lots.length > 0 ? po.lots : [{ variety: '', process: '', volume_kg: '' }],
+                              eudr_cleared: po.eudr === 'CLEARED',
+                              docs_ready: po.shipmentReady
                             });
                             setIsNewPoModalOpen(true);
                           }}
@@ -477,6 +483,27 @@ export default function AdminHubPage() {
                 <label className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1 block">Destination</label>
                 <input type="text" value={newPoForm.destination} onChange={e => setNewPoForm({...newPoForm, destination: e.target.value})} className="w-full bg-[#020814] border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00C87A]" placeholder="Hamburg, Germany" />
               </div>
+            </div>
+
+            {/* Compliance & Shipment (Fase 2) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-white/5 p-4 rounded-xl border border-white/10">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={newPoForm.eudr_cleared || false} onChange={e => setNewPoForm({...newPoForm, eudr_cleared: e.target.checked})} className="w-5 h-5 accent-[#00C87A] bg-[#020814] border-white/20 rounded" />
+                <div>
+                  <p className="text-[11px] font-bold text-white uppercase tracking-wider">EUDR Aprobado</p>
+                  <p className="text-[9px] text-slate-400">Due Diligence completado</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={newPoForm.docs_ready || false} onChange={e => setNewPoForm({...newPoForm, docs_ready: e.target.checked})} className="w-5 h-5 accent-[#00C87A] bg-[#020814] border-white/20 rounded" />
+                <div>
+                  <p className="text-[11px] font-bold text-white uppercase tracking-wider">Docs & Shipment</p>
+                  <p className="text-[9px] text-slate-400">Contenedor sellado y docs listos</p>
+                </div>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="md:col-span-2">
                 <label className="text-[10px] text-[#00C87A] uppercase tracking-widest font-bold mb-1 block flex items-center gap-1"><FileText className="w-3 h-3" /> Google Sheet URL</label>
                 <input type="text" value={newPoForm.sheet_url} onChange={e => setNewPoForm({...newPoForm, sheet_url: e.target.value})} placeholder="https://docs.google.com/spreadsheets/d/..." className="w-full bg-[#020814] border border-[#00C87A]/30 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00C87A]" />

@@ -214,7 +214,7 @@ export default function EvidenceDashboard() {
 
     const fetchLiveData = async () => {
       try {
-        const { data: po } = await supabase.from('purchase_orders').select('id, target_volume_kg, expected_lots').eq('po_number', poQuery).single();
+        const { data: po } = await supabase.from('purchase_orders').select('id, target_volume_kg, expected_lots, last_sync_date, customer, exporter, origin, destination').eq('po_number', poQuery).single();
         if (!po) { setIsLoading(false); return; }
         setLivePoData(po);
 
@@ -502,7 +502,7 @@ export default function EvidenceDashboard() {
                 <Globe2 className="w-3.5 h-3.5" /> Evidence Journey
               </button>
               <button 
-                onClick={() => window.print()}
+                onClick={() => router.push(`/commercial/report?po=${encodeURIComponent(targetPo)}`)}
                 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white border border-[#00C87A] bg-[#00C87A] hover:bg-[#00a866] py-1.5 px-4 rounded-full transition-all duration-300"
               >
                 <Download className="w-3.5 h-3.5" /> Reporte PDF
@@ -560,9 +560,16 @@ export default function EvidenceDashboard() {
                         <p className="text-sm font-bold text-white">Cooperativa de Caficultores de Risaralda</p>
                       </div>
                     </div>
-                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                      <Leaf className="w-3.5 h-3.5 text-[#00C87A]" /> Colombia &rarr; Hamburg
-                    </p>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                        <Leaf className="w-3.5 h-3.5 text-[#00C87A]" /> {livePoData?.origin || 'Colombia'} &rarr; {livePoData?.destination || 'Hamburg'}
+                      </p>
+                      {livePoData?.last_sync_date && (
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#00C87A]/90 bg-[#00C87A]/10 border border-[#00C87A]/30 px-2.5 py-0.5 rounded-full">
+                          Actualizado: {new Date(livePoData.last_sync_date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="text-left md:text-right mt-6 md:mt-0 flex flex-col items-start md:items-end">
                     <p className="text-[64px] leading-none font-light tracking-tight text-[#00C87A] mb-2">
