@@ -194,7 +194,7 @@ const DASHBOARD_DATA = [
 
 export default function EvidenceDashboard() {
   const [selectedId, setSelectedId] = useState("commercial");
-    const router = useRouter();
+  const router = useRouter();
   const [selectedItem, setSelectedItem] = useState<EvidenceLayer | null>(null);
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -206,6 +206,56 @@ export default function EvidenceDashboard() {
   const [liveAverages, setLiveAverages] = useState<any>(null);
   const [targetPo, setTargetPo] = useState("PO-2026-08-001");
   const [isLoading, setIsLoading] = useState(true);
+  const [shipmentDocs, setShipmentDocs] = useState<Record<string, boolean>>({
+    "Commercial Invoice": true,
+    "Packing List": true,
+    "ICO Certificate": true,
+    "Phytosanitary": true,
+    "Bill of Lading": false,
+  });
+  const [containerSealed, setContainerSealed] = useState(false);
+
+  const syncShipmentState = async (nextDocs: Record<string, boolean>, nextSealed: boolean) => {
+    setShipmentDocs(nextDocs);
+    setContainerSealed(nextSealed);
+    const allDocsReady = Object.values(nextDocs).every(Boolean);
+    const isComplete = allDocsReady && nextSealed;
+    const statusVal: EvidenceStatus = isComplete ? 'complete' : 'pending';
+    const nextSummary = [
+      { label: 'Docs Ready', value: allDocsReady ? 'Yes' : 'No' },
+      { label: 'Container', value: nextSealed ? 'Sealed' : 'Pending' }
+    ];
+
+    if (typeof window !== 'undefined' && targetPo) {
+      localStorage.setItem(`shipment_checklist_${targetPo}`, JSON.stringify({ docs: nextDocs, sealed: nextSealed }));
+    }
+
+    setLiveLots(prev => prev.map(lot => ({
+      ...lot,
+      evidenceLayers: (lot.evidenceLayers || []).map((layer: any) =>
+        layer.id === 'shipment'
+          ? { ...layer, status: statusVal, summary: nextSummary }
+          : layer
+      )
+    })));
+
+    setSelectedItem(prev =>
+      prev && prev.id === 'shipment'
+        ? { ...prev, status: statusVal, summary: nextSummary }
+        : prev
+    );
+
+    if (livePoData?.id) {
+      await supabase.from('shipment_evidence').upsert(
+        {
+          po_id: livePoData.id,
+          docs_ready: isComplete,
+          container_status: nextSealed ? 'SEALED' : 'PENDING'
+        },
+        { onConflict: 'po_id' }
+      );
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -223,6 +273,27 @@ export default function EvidenceDashboard() {
         const { data: compliance } = await supabase.from('compliance_evidence').select('*').eq('po_id', po.id).single();
         const { data: shipment } = await supabase.from('shipment_evidence').select('*').eq('po_id', po.id).single();
 
+        let initialDocs: Record<string, boolean> = {
+          "Commercial Invoice": true,
+          "Packing List": true,
+          "ICO Certificate": true,
+          "Phytosanitary": true,
+          "Bill of Lading": !!shipment?.docs_ready,
+        };
+        let initialSealed = !!shipment?.docs_ready || String(shipment?.container_status || '').toUpperCase() === 'SEALED';
+        const savedChecklist = typeof window !== 'undefined' ? localStorage.getItem(`shipment_checklist_${poQuery}`) : null;
+        if (savedChecklist) {
+          try {
+            const parsed = JSON.parse(savedChecklist);
+            if (parsed.docs) initialDocs = parsed.docs;
+            if (typeof parsed.sealed === 'boolean') initialSealed = parsed.sealed;
+          } catch {}
+        }
+        setShipmentDocs(initialDocs);
+        setContainerSealed(initialSealed);
+        const allDocsInit = Object.values(initialDocs).every(Boolean);
+        const isShipmentInitComplete = allDocsInit && initialSealed;
+
         if (lots && lots.length > 0) {
           let sumYield = 0, sumMoisture = 0, sumWaterActivity = 0, sumScore = 0, countP = 0, countQ = 0;
 
@@ -235,7 +306,6 @@ export default function EvidenceDashboard() {
               if (el.variety) {
                 const normVariety = el.variety.trim().toLowerCase();
                 grouped[normVariety] = [];
-                // We store the target volume for this specific varietal so we can display it correctly
                 grouped[normVariety].targetVolume = Number(el.volume_kg) || 0;
                 grouped[normVariety].originalName = el.variety.trim();
                 grouped[normVariety].process = el.process || 'Washed';
@@ -245,7 +315,7 @@ export default function EvidenceDashboard() {
 
           (lots || []).forEach((lot: any) => {
             const key = lot.coffee_type || 'Unknown';
-            if (key === 'Unknown') return; // Ignorar lotes sin varietal definido
+            if (key === 'Unknown') return;
             const normKey = key.trim().toLowerCase();
             if (!grouped[normKey]) {
               grouped[normKey] = [];
@@ -256,13 +326,12 @@ export default function EvidenceDashboard() {
           });
 
           const formattedLots = Object.entries(grouped)
-            .filter(([variety]) => variety !== 'unknown') // Doble seguridad para no mostrar 'Unknown'
+            .filter(([variety]) => variety !== 'unknown')
             .map(([normVariety, varietalLots]: [string, any]) => {
             const variety = varietalLots.originalName || normVariety;
             const totalVolumeKg = varietalLots.reduce((s: number, l: any) => s + (l.volume_kg || 0), 0);
             const targetVolumeKg = varietalLots.targetVolume || po.target_volume_kg || 1;
 
-            // Aggregate processing and quality from all lots in this varietal
             let yieldSum = 0, moistureSum = 0, waSum = 0, scoreSum = 0, pCount = 0, qCount = 0;
             const allFarmers: any[] = [];
 
@@ -286,7 +355,6 @@ export default function EvidenceDashboard() {
                 const farmName = lot.farm_name || farmMap[farmerName] || `Finca ${farmerName.split(' ')[0] || 'El Paraíso'}`;
                 const sentinel = verifyLotEudrSentinel(lot.gps_coordinates, lot.name, farmerName);
                 
-                // Solo agregamos si no existe ya para que no cuente duplicados por historiales de sync
                 if (!allFarmers.find(f => f.name === farmerName)) {
                   allFarmers.push({
                     name: farmerName,
@@ -318,15 +386,12 @@ export default function EvidenceDashboard() {
             const avgScore = qCount ? (scoreSum / qCount).toFixed(1) : '0';
             const progress = targetVolumeKg > 0 ? Math.round((totalVolumeKg / targetVolumeKg) * 100) : 0;
             
-            // Construir el nombre del lote basado en la variedad
             let lotTitle = variety;
             if (!lotTitle.toLowerCase().includes('lot') && !lotTitle.toLowerCase().includes('blend')) {
               lotTitle = `${lotTitle} Lot`;
             } else if (lotTitle.toLowerCase().includes('blend') && !lotTitle.toLowerCase().includes('lot')) {
-              // Si es un blend (ej. Commercial Blend), puedes dejarlo como está o agregar Lot, como el usuario sugirió "Commercial Lot"
-              // Usaré la convención solicitada:
               if (lotTitle.toLowerCase() === 'commercial blend') {
-                lotTitle = 'Commercial Blend'; // Como en la imagen verde
+                lotTitle = 'Commercial Blend';
               } else {
                 lotTitle = `${lotTitle} Lot`;
               }
@@ -353,11 +418,11 @@ export default function EvidenceDashboard() {
                 { id: 'quality', name: 'Quality', icon: Coffee, status: 'complete',
                   summary: [{ label: 'Roast Profile', value: 'Omni' }, { label: 'CVA Score', value: avgScore }],
                   explorerContent: { type: 'quality_layer', title: 'Quality Evaluation', description: 'Sensory analysis and roasting curve.' } },
-                { id: 'compliance', name: 'Compliance', icon: Globe2, status: compliance?.eudr_cleared ? 'complete' : 'pending',
-                  summary: [{ label: 'EUDR', value: compliance?.eudr_cleared ? 'Cleared' : 'Pending' }, { label: 'Deforestation', value: `${compliance?.deforestation_ha || 0} ha` }],
+                { id: 'compliance', name: 'Compliance', icon: Globe2, status: (compliance?.eudr_cleared || (allFarmers.length > 0 && allFarmers.every(f => f.eudrCleared))) ? 'complete' : 'pending',
+                  summary: [{ label: 'EUDR', value: (compliance?.eudr_cleared || (allFarmers.length > 0 && allFarmers.every(f => f.eudrCleared))) ? 'Cleared' : 'Pending' }, { label: 'Deforestation', value: `${compliance?.deforestation_ha || 0} ha` }],
                   explorerContent: { type: 'compliance_layer', title: 'Compliance Verification', description: 'EUDR satellite intersection.' } },
-                { id: 'shipment', name: 'Shipment', icon: Ship, status: shipment?.docs_ready ? 'complete' : 'pending',
-                  summary: [{ label: 'Docs Ready', value: shipment?.docs_ready ? 'Yes' : 'No' }, { label: 'Container', value: shipment?.container_status || 'Pending' }],
+                { id: 'shipment', name: 'Shipment', icon: Ship, status: isShipmentInitComplete ? 'complete' : 'pending',
+                  summary: [{ label: 'Docs Ready', value: allDocsInit ? 'Yes' : 'No' }, { label: 'Container', value: initialSealed ? 'Sealed' : 'Pending' }],
                   explorerContent: { type: 'shipment_layer', title: 'Shipment Logistics', description: 'Export documentation and container stuffing.' } }
               ]
             };
@@ -370,7 +435,6 @@ export default function EvidenceDashboard() {
             setSelectedId(formattedLots[0].id);
           }
         } else if (po.expected_lots && Array.isArray(po.expected_lots) && po.expected_lots.length > 0) {
-          // If no lots synced yet, but we have expected lots, show them empty
           const emptyLots = po.expected_lots.map((el: any) => {
             const variety = el.variety || 'Unknown';
             let lotTitle = variety;
@@ -432,46 +496,48 @@ export default function EvidenceDashboard() {
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden" style={{ fontFamily: "var(--font-montserrat, 'Montserrat', sans-serif)" }}>
 
-      {/* ── SIDEBAR ── */}
-      <aside className={`w-full lg:w-[260px] flex-shrink-0 flex flex-col lg:flex-col bg-[#00C87A] border-b lg:border-b-0 border-black/10 transition-all duration-500 ease-in-out z-50 ${isSidebarOpen ? 'lg:ml-0' : 'lg:-ml-[260px]'}`}>
+      {/* ── SIDEBAR (Warm Parchment #FAF2CA) ── */}
+      <aside className={`w-full lg:w-[260px] flex-shrink-0 flex flex-col lg:flex-col bg-[#FAF2CA] border-b lg:border-b-0 lg:border-r border-[#0C3C60]/15 transition-all duration-500 ease-in-out z-50 ${isSidebarOpen ? 'lg:ml-0' : 'lg:-ml-[260px]'}`}>
         {/* Logo */}
         <div className="p-4 lg:p-8 lg:pb-4 hidden lg:flex flex-col items-center justify-center">
           <img 
             src="/logo-axisone.png" 
             alt="AxisONE Logo" 
             className="h-32 object-contain"
-            style={{ filter: 'brightness(0) saturate(100%) invert(10%) sepia(21%) saturate(6305%) hue-rotate(204deg) brightness(91%) contrast(97%)' }} 
+            style={{ filter: 'brightness(0) saturate(100%) invert(18%) sepia(51%) saturate(1656%) hue-rotate(181deg) brightness(92%) contrast(94%)' }} 
           />
         </div>
 
         <div className="px-4 pb-2 hidden lg:block">
-          <p className="text-[9px] font-bold tracking-widest uppercase text-[#0f1e38]/70">Purchase Order Parts</p>
+          <p className="text-[9px] font-bold tracking-widest uppercase text-[#0C3C60]/60">Purchase Order Parts</p>
         </div>
 
         <nav className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto flex-nowrap custom-scrollbar">
           {liveLots.map(v => {
             const isActive = v.id === selectedId;
+            const isComplete = v.managementPct >= 100;
             return (
               <button
                 key={v.id}
                 onClick={() => { setSelectedId(v.id); setSelectedItem(null); }}
-                className="group w-auto lg:w-full min-w-[140px] lg:min-w-0 text-left px-4 py-3 lg:py-4 border-r lg:border-r-0 lg:border-b border-black/10 transition-all hover:bg-black/5 flex-shrink-0"
-                style={{ background: isActive ? 'rgba(0,0,0,0.1)' : undefined }}
+                className={`group w-auto lg:w-full min-w-[140px] lg:min-w-0 text-left px-4 py-3 lg:py-4 border-r lg:border-r-0 lg:border-b border-[#0C3C60]/10 transition-all hover:bg-[#0C3C60]/5 flex-shrink-0 ${isActive ? 'bg-[#0C3C60]/[0.08] border-l-4 border-l-[#0C3C60]' : ''}`}
               >
                 <div>
-                  <h3 className={`text-[17px] font-black leading-tight tracking-tight text-[#0f1e38] ${isActive ? '' : 'group-hover:text-[#0f1e38]/60 transition-colors'}`}>{v.title}</h3>
+                  <h3 className={`text-[17px] font-black leading-tight tracking-tight text-[#0C3C60] ${isActive ? '' : 'group-hover:text-[#0C3C60]/70 transition-colors'}`}>{v.title}</h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <p className="text-[10px] text-[#0f1e38]/50 uppercase tracking-widest font-bold">{v.process}</p>
+                    <p className="text-[10px] text-[#0C3C60]/60 uppercase tracking-widest font-bold">{v.process}</p>
                   </div>
-                  <p className="text-[10px] font-bold text-[#0f1e38] mt-1.5">{v.batchCurrent} / {v.batchTarget} kg</p>
-                  <div className={`flex items-center gap-1.5 mt-1 text-[9px] font-black uppercase tracking-wider text-[#0f1e38] ${isActive ? '' : 'group-hover:text-[#0f1e38]/60 transition-colors'}`}>
-                    {v.managementPct >= 100 ? (
-                      <>
-                        <CheckCircle2 className="w-3 h-3" />
+                  <p className="text-[10px] font-bold text-[#0C3C60] mt-1.5">{v.batchCurrent} / {v.batchTarget} kg</p>
+                  <div className="mt-2">
+                    {isComplete ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#83DF9C]/35 border border-[#83DF9C] text-[#0C3C60] text-[9px] font-black uppercase tracking-wider">
+                        <CheckCircle2 className="w-3 h-3 text-[#0C3C60]" />
                         <span>MANAGEMENT COMPLETED</span>
-                      </>
+                      </span>
                     ) : (
-                      <span>{v.managementPct}% MANAGEMENT</span>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#FF7E7E]/25 border border-[#FF7E7E]/70 text-[#0C3C60] text-[9px] font-black uppercase tracking-wider">
+                        <span>{v.managementPct}% MANAGEMENT</span>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -482,67 +548,67 @@ export default function EvidenceDashboard() {
       </aside>
 
       {/* ── MAIN ── */}
-      <main className="flex-1 flex flex-col overflow-y-auto lg:overflow-hidden bg-white relative custom-scrollbar">
+      <main className="flex-1 flex flex-col overflow-y-auto lg:overflow-hidden bg-slate-200 relative custom-scrollbar">
         {/* Toggle Button */}
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`hidden lg:flex absolute top-1/2 -translate-y-1/2 z-40 items-center justify-center w-5 h-16 bg-[#00C87A] text-[#0f1e38] rounded-r-lg shadow-lg border border-l-0 border-[#00C87A]/50 hover:w-7 hover:bg-[#00df88] transition-all duration-300 left-0`}
+          className="hidden lg:flex absolute top-1/2 -translate-y-1/2 z-40 items-center justify-center w-5 h-16 bg-[#FAF2CA] text-[#0C3C60] rounded-r-lg shadow-lg border border-l-0 border-[#0C3C60]/20 hover:w-7 hover:bg-[#f2e7b5] transition-all duration-300 left-0"
           style={{ transform: 'translateY(-50%)' }}
         >
           {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </button>
         
         {isMapOpen && (
-          <div className="absolute inset-0 z-50 bg-[#0a0a0a]">
+          <div className="absolute inset-0 z-50 bg-[#0C3C60]">
             <GlobalMap onClose={() => setIsMapOpen(false)} activeLot={active} />
           </div>
         )}
 
         {/* Top nav */}
-        <header className="h-12 flex items-center justify-between px-8 border-b border-slate-800 bg-slate-900 flex-shrink-0">
-          <div className="flex items-center gap-4 text-sm text-slate-400">
+        <header className="h-14 flex items-center justify-between px-6 border-b border-white/10 bg-[#0C3C60] flex-shrink-0">
+          <div className="flex items-center gap-3 text-sm text-slate-300">
             <button 
               onClick={() => router.push('/hub')}
-              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white border border-[#0f1e38] bg-[#0f1e38] hover:bg-[#152745] py-1.5 px-4 rounded-full transition-all duration-300 shadow-sm"
+              className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#FAF2CA] border border-[#FAF2CA]/25 bg-white/5 hover:bg-white/15 py-1.5 px-3.5 rounded-full transition-all duration-300 shadow-sm whitespace-nowrap cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Hub
+              <ArrowLeft className="w-3.5 h-3.5 flex-shrink-0" /> Back to Hub
             </button>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <button 
                 onClick={() => setIsMapOpen(true)}
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#00C87A] border border-[#00C87A]/30 bg-[#00C87A]/10 hover:bg-[#00C87A]/20 py-1.5 px-4 rounded-full transition-all duration-300"
+                className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#69CCC2] border border-[#69CCC2]/40 bg-[#69CCC2]/10 hover:bg-[#69CCC2]/20 py-1.5 px-3.5 rounded-full transition-all duration-300 whitespace-nowrap cursor-pointer"
               >
-                <Globe2 className="w-3.5 h-3.5" /> Evidence Journey
+                <Globe2 className="w-3.5 h-3.5 flex-shrink-0" /> Evidence Journey
               </button>
               <button 
                 onClick={() => router.push(`/commercial/report?po=${encodeURIComponent(targetPo)}`)}
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white border border-[#00C87A] bg-[#00C87A] hover:bg-[#00a866] py-1.5 px-4 rounded-full transition-all duration-300"
+                className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#0C3C60] border border-[#83DF9C] bg-[#83DF9C] hover:bg-[#6fd48b] py-1.5 px-3.5 rounded-full transition-all duration-300 shadow-sm whitespace-nowrap cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" /> Reporte PDF
+                <Download className="w-3.5 h-3.5 flex-shrink-0" /> Reporte PDF
               </button>
-              <div className="hidden xl:flex items-center gap-1.5 text-slate-400 animate-bounce-x-subtle">
-                <ArrowLeft className="w-4 h-4 text-[#00C87A]" />
+              <div className="hidden 2xl:flex items-center gap-1.5 text-[#FAF2CA]/80 animate-bounce-x-subtle whitespace-nowrap">
+                <ArrowLeft className="w-4 h-4 text-[#69CCC2] flex-shrink-0" />
                 <span className="text-xs font-medium italic">Click to visualize your coffee's journey</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-5 text-slate-400">
+          <div className="flex items-center gap-4 text-[#FAF2CA]/70 flex-shrink-0">
             <Search className="w-4 h-4 cursor-pointer hover:text-white transition-colors" />
             <Bell className="w-4 h-4 cursor-pointer hover:text-white transition-colors" />
             <Settings className="w-4 h-4 cursor-pointer hover:text-white transition-colors" />
-            <div className="w-px h-4 bg-slate-700 mx-2 hidden sm:block"></div>
+            <div className="w-px h-4 bg-white/15 mx-1 hidden sm:block"></div>
             <div className="flex items-center gap-2.5 cursor-pointer group">
-              <div className="w-7 h-7 rounded-full bg-slate-700 group-hover:bg-[#00C87A] transition-colors flex items-center justify-center font-bold text-[11px] text-white">J</div>
+              <div className="w-7 h-7 rounded-full bg-[#69CCC2]/20 border border-[#69CCC2]/40 group-hover:bg-[#83DF9C] group-hover:text-[#0C3C60] transition-colors flex items-center justify-center font-bold text-[11px] text-[#FAF2CA]">J</div>
               <div className="hidden lg:block text-left">
-                <p className="text-white text-[11px] leading-tight font-bold group-hover:text-[#00C87A] transition-colors">Julio</p>
-                <p className="text-[9px] uppercase tracking-widest font-bold text-slate-400 leading-tight">Admin</p>
+                <p className="text-[#FAF2CA] text-[11px] leading-tight font-bold group-hover:text-[#83DF9C] transition-colors">Julio</p>
+                <p className="text-[9px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 leading-tight">Admin</p>
               </div>
             </div>
           </div>
         </header>
 
         {/* Dashboard scroll area */}
-        <div className="flex-1 overflow-y-auto px-20 py-6 bg-slate-200 custom-scrollbar">
+        <div className={`flex-1 overflow-y-auto py-6 bg-slate-200 custom-scrollbar transition-all duration-300 ${selectedItem ? 'px-6 xl:px-8' : 'px-8 xl:px-14'}`}>
 
           {/* Editorial Layout for Evidence Layers */}
           <div className="flex flex-col gap-6 mb-12">
@@ -555,76 +621,78 @@ export default function EvidenceDashboard() {
                 <ValueMissionPanel selectedLayerId={selectedItem?.id} />
               </div>
 
-              {/* Right: Purchase Order Card */}
-              <div className="col-span-1 xl:col-span-3 relative bg-[#0f1e38] rounded-3xl overflow-hidden shadow-sm border border-slate-200/50 flex flex-col justify-between p-6 md:p-8 min-h-[160px]">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-                  <div className="flex flex-col gap-6">
-                    <div className="flex flex-wrap items-baseline gap-4">
-                      <h1 className="text-3xl font-light text-white tracking-tight">Purchase Order</h1>
-                      <span className="text-3xl font-bold text-[#00C87A] tracking-tight">{targetPo}</span>
+              {/* Right: Purchase Order Card (#0C3C60) */}
+              <div className="col-span-1 xl:col-span-3 relative bg-[#0C3C60] rounded-3xl overflow-hidden shadow-md border border-[#0C3C60] flex flex-col justify-between p-6 md:p-7 min-h-[160px]">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                  <div className="flex flex-col gap-5 min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <h1 className="text-2xl xl:text-3xl font-light text-[#FAF2CA] tracking-tight whitespace-nowrap">Purchase Order</h1>
+                      <span className="text-2xl xl:text-3xl font-bold text-[#69CCC2] tracking-tight whitespace-nowrap">{targetPo}</span>
                     </div>
-                    <div className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-4">
                       <div>
-                        <p className="text-[9px] uppercase tracking-widest font-bold text-slate-400 mb-1">Customer</p>
+                        <p className="text-[9px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 mb-1">Customer</p>
                         <p className="text-sm font-bold text-white">European Coffee Roasters Ltd.</p>
                       </div>
                       <div>
-                        <p className="text-[9px] uppercase tracking-widest font-bold text-slate-400 mb-1">Exporter</p>
+                        <p className="text-[9px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 mb-1">Exporter</p>
                         <p className="text-sm font-bold text-white">Cooperativa de Caficultores de Risaralda</p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-4">
-                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                        <Leaf className="w-3.5 h-3.5 text-[#00C87A]" /> {livePoData?.origin || 'Colombia'} &rarr; {livePoData?.destination || 'Hamburg'}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <p className="text-[#FAF2CA]/80 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5">
+                        <Leaf className="w-3.5 h-3.5 text-[#83DF9C] flex-shrink-0" /> {livePoData?.origin || 'Colombia'} &rarr; {livePoData?.destination || 'Hamburg'}
                       </p>
                       {(livePoData?.last_sync_date || livePoData?.created_at) && (
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#00C87A]/90 bg-[#00C87A]/10 border border-[#00C87A]/30 px-2.5 py-0.5 rounded-full">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#83DF9C] bg-[#83DF9C]/15 border border-[#83DF9C]/40 px-2.5 py-0.5 rounded-full whitespace-nowrap">
                           Actualizado: {new Date(livePoData.last_sync_date || livePoData.created_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="text-left md:text-right mt-6 md:mt-0 flex flex-col items-start md:items-end">
-                    <p className="text-[64px] leading-none font-light tracking-tight text-[#00C87A] mb-2">
+                  <div className="text-left md:text-right flex flex-col items-start md:items-end flex-shrink-0">
+                    <p className={`text-[54px] xl:text-[64px] leading-none font-light tracking-tight mb-2 ${globalProgress >= 100 ? 'text-[#83DF9C]' : 'text-[#69CCC2]'}`}>
                       {globalProgress}%
                     </p>
-                    <p className="text-slate-400 text-[10px] uppercase tracking-widest font-bold mb-1">Total Consolidated</p>
+                    <p className="text-[#FAF2CA]/60 text-[10px] uppercase tracking-widest font-bold mb-1 whitespace-nowrap">Total Consolidated</p>
                     <div className="text-right">
-                      <p className="text-white text-2xl font-bold">
-                        {globalCollected.toLocaleString()} <span className="text-slate-400 font-light">/ {globalTarget.toLocaleString()}</span>
+                      <p className="text-white text-xl xl:text-2xl font-bold whitespace-nowrap">
+                        {globalCollected.toLocaleString()} <span className="text-[#FAF2CA]/60 font-light">/ {globalTarget.toLocaleString()}</span>
                       </p>
-                      <p className="text-slate-400 text-sm font-medium mt-1">kg</p>
+                      <p className="text-[#FAF2CA]/60 text-sm font-medium mt-1">kg</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-8 flex items-center gap-4">
-                  <div className="h-1.5 flex-1 bg-slate-700 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-[#00C87A] transition-all duration-700" style={{ width: `${globalProgress}%` }} />
+                <div className="mt-7 flex items-center gap-4">
+                  <div className="h-1.5 flex-1 bg-white/15 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full transition-all duration-700 ${globalProgress >= 100 ? 'bg-[#83DF9C]' : 'bg-[#69CCC2]'}`} style={{ width: `${globalProgress}%` }} />
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                  <span className={`text-[9px] font-black uppercase tracking-widest whitespace-nowrap ${globalProgress >= 100 ? 'text-[#83DF9C]' : 'text-[#FAF2CA]/70'}`}>
                     {globalProgress === 100 ? 'Consolidation Complete' : 'Consolidation In Progress'}
                   </span>
                 </div>
               </div>
             </div>
-{/* MIDDLE ROW: Origin, Processing, Quality */}
+
+            {/* MIDDLE ROW: Origin, Processing, Quality */}
             <div className="grid grid-cols-3 gap-6">
               {active.evidenceLayers.filter((l: any) => ['origin', 'processing', 'quality'].includes(l.id)).map((item: any) => {
                 const isSelected = selectedItem?.id === item.id;
+                const isVerified = item.status === 'complete';
                 
                 let bgClass, textColor, labelColor, hoverLayerColor, isNavy;
                 if (item.id === 'origin' || item.id === 'quality') {
-                  bgClass = 'bg-[#00C87A]';
-                  textColor = 'text-[#0f1e38]';
-                  labelColor = 'text-emerald-900/70';
-                  hoverLayerColor = 'bg-black/20';
+                  bgClass = 'bg-[#FAF2CA] border-[#0C3C60]/15';
+                  textColor = 'text-[#0C3C60]';
+                  labelColor = 'text-[#0C3C60]/60';
+                  hoverLayerColor = 'bg-[#0C3C60]/10';
                   isNavy = false;
                 } else {
-                  bgClass = 'bg-[#0f1e38]';
-                  textColor = 'text-white';
-                  labelColor = 'text-slate-400';
-                  hoverLayerColor = 'bg-white/10';
+                  bgClass = 'bg-[#0C3C60] border-[#0C3C60]';
+                  textColor = 'text-[#FAF2CA]';
+                  labelColor = 'text-[#FAF2CA]/60';
+                  hoverLayerColor = 'bg-black/25';
                   isNavy = true;
                 }
                 
@@ -632,60 +700,84 @@ export default function EvidenceDashboard() {
                   <div
                     key={item.id}
                     onClick={() => setSelectedItem(item)}
-                    className={`relative group ${bgClass} rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 shadow-sm border border-slate-200/50 p-6 pb-12 min-h-[160px] flex flex-col justify-start
-                      ${isSelected ? (item.id === 'origin' ? 'ring-4 ring-white' : 'ring-2 ring-[#00C87A]') + ' shadow-xl -translate-y-1' : 'hover:shadow-lg hover:-translate-y-1'}`}
+                    className={`relative group ${bgClass} rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 shadow-sm border p-5 xl:p-6 pb-12 min-h-[160px] flex flex-col justify-start
+                      ${isSelected ? 'ring-2 ring-[#69CCC2] shadow-xl -translate-y-1' : 'hover:shadow-lg hover:-translate-y-1'}`}
                   >
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-                      <h2 className={`text-xl font-light ${textColor} uppercase tracking-tight`}>{item.name}</h2>
+                    <div className="flex flex-row justify-between items-center gap-2">
+                      <h2 className={`text-base xl:text-lg font-light ${textColor} uppercase tracking-tight truncate`}>{item.name}</h2>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider whitespace-nowrap flex-shrink-0 ${
+                        isVerified
+                          ? isNavy
+                            ? 'bg-[#83DF9C]/20 text-[#83DF9C] border border-[#83DF9C]/40'
+                            : 'bg-[#83DF9C]/40 text-[#0C3C60] border border-[#83DF9C]'
+                          : isNavy
+                            ? 'bg-[#FF7E7E]/20 text-[#FF7E7E] border border-[#FF7E7E]/40'
+                            : 'bg-[#FF7E7E]/30 text-[#0C3C60] border border-[#FF7E7E]'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isVerified ? (isNavy ? 'bg-[#83DF9C]' : 'bg-[#0C3C60]') : (isNavy ? 'bg-[#FF7E7E]' : 'bg-[#0C3C60]')}`} />
+                        {isVerified ? 'Verified' : 'Pending'}
+                      </span>
                     </div>
 
-                    <div className="flex flex-wrap gap-x-6 gap-y-3 mt-6">
-                      {item.summary.map(s => (
+                    <div className="flex flex-wrap gap-x-5 gap-y-3 mt-6">
+                      {item.summary.map((s: any) => (
                         <div key={s.label}>
                           <p className={`text-[9px] ${labelColor} uppercase tracking-widest font-bold mb-1`}>{s.label}</p>
-                          <p className={`text-base font-bold ${textColor}`}>{s.value}</p>
+                          <p className={`text-base font-bold ${isNavy ? 'text-white' : 'text-[#0C3C60]'}`}>{s.value}</p>
                         </div>
                       ))}
                     </div>
 
                     {/* Hover Status Layer */}
                     <div className={`absolute inset-x-0 bottom-0 ${hoverLayerColor} h-0 group-hover:h-10 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center px-6 justify-between`}>
-                       <span className={`${textColor} text-[10px] font-bold uppercase tracking-widest`}>Evidence Status</span>
-                       <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${isNavy ? 'bg-[#00C87A]' : 'bg-[#0f1e38]'}`}></span>
-                          <span className={`text-[9px] font-bold uppercase tracking-wider ${isNavy ? 'text-[#00C87A]' : 'text-[#0f1e38]'}`}>Verified</span>
-                       </div>
+                       <span className={`${textColor} text-[10px] font-bold uppercase tracking-widest`}>Explore Layer</span>
+                       <span className={`text-[9px] font-bold uppercase tracking-wider ${isNavy ? 'text-[#69CCC2]' : 'text-[#0C3C60]'}`}>Open Details &rarr;</span>
                     </div>
                   </div>
                 );
               })}
             </div>
-{/* BOTTOM ROW: Compliance (Small) & Shipment (Small) */}
+
+            {/* BOTTOM ROW: Compliance (Small) & Shipment (Small) */}
             <div className="grid grid-cols-4 gap-6">
-              {active.evidenceLayers.filter(l => l.id === 'compliance' || l.id === 'shipment').map(item => {
+              {active.evidenceLayers.filter((l: any) => l.id === 'compliance' || l.id === 'shipment').map((item: any) => {
                 const isSelected = selectedItem?.id === item.id;
                 const isVerified = item.status === 'complete';
                 
                 const isNavy = item.id === 'compliance';
-                const bgClass = isNavy ? 'bg-[#0f1e38]' : 'bg-[#00C87A]';
-                const textColor = isNavy ? 'text-white' : 'text-[#0f1e38]';
-                const labelColor = isNavy ? 'text-slate-400' : 'text-emerald-900/70';
-                const hoverLayerColor = isNavy ? 'bg-white/10' : 'bg-black/20';
+                const bgClass = isNavy ? 'bg-[#0C3C60] border-[#0C3C60]' : 'bg-[#FAF2CA] border-[#0C3C60]/15';
+                const textColor = isNavy ? 'text-[#FAF2CA]' : 'text-[#0C3C60]';
+                const labelColor = isNavy ? 'text-[#FAF2CA]/60' : 'text-[#0C3C60]/60';
+                const hoverLayerColor = isNavy ? 'bg-black/25' : 'bg-[#0C3C60]/10';
                 
                 return (
                   <div
                     key={item.id}
                     onClick={() => setSelectedItem(item)}
-                    className={`relative group ${bgClass} rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 shadow-sm border border-slate-200/50 p-5 pb-10 min-h-[140px] h-full w-full flex flex-col justify-between
-                      ${isSelected ? 'ring-2 ring-white shadow-xl -translate-y-1' : 'hover:shadow-md hover:-translate-y-1'}`}
+                    className={`relative group ${bgClass} rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 shadow-sm border p-5 pb-10 min-h-[140px] h-full w-full flex flex-col justify-between
+                      ${isSelected ? 'ring-2 ring-[#69CCC2] shadow-xl -translate-y-1' : 'hover:shadow-md hover:-translate-y-1'}`}
                   >
                     <div>
-                      <h2 className={`text-base font-light ${textColor} uppercase tracking-tight mb-3`}>{item.name}</h2>
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className={`text-base font-light ${textColor} uppercase tracking-tight`}>{item.name}</h2>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${
+                          isVerified
+                            ? isNavy
+                              ? 'bg-[#83DF9C]/20 text-[#83DF9C] border border-[#83DF9C]/40'
+                              : 'bg-[#83DF9C]/40 text-[#0C3C60] border border-[#83DF9C]'
+                            : isNavy
+                              ? 'bg-[#FF7E7E]/20 text-[#FF7E7E] border border-[#FF7E7E]/40'
+                              : 'bg-[#FF7E7E]/30 text-[#0C3C60] border border-[#FF7E7E]'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isVerified ? (isNavy ? 'bg-[#83DF9C]' : 'bg-[#0C3C60]') : (isNavy ? 'bg-[#FF7E7E]' : 'bg-[#0C3C60]')}`} />
+                          {isVerified ? 'OK' : 'Alert'}
+                        </span>
+                      </div>
                       <div className={`flex flex-col ${selectedItem ? '' : 'xl:flex-row'} gap-4`}>
-                        {item.summary.map(s => (
+                        {item.summary.map((s: any) => (
                           <div key={s.label}>
                             <p className={`text-[8px] ${labelColor} uppercase tracking-widest font-bold mb-0.5`}>{s.label}</p>
-                            <p className={`text-sm font-bold ${textColor}`}>{s.value}</p>
+                            <p className={`text-sm font-bold ${isNavy ? 'text-white' : 'text-[#0C3C60]'}`}>{s.value}</p>
                           </div>
                         ))}
                       </div>
@@ -693,203 +785,111 @@ export default function EvidenceDashboard() {
                     {/* Hover Status Layer */}
                     <div className={`absolute inset-x-0 bottom-0 ${hoverLayerColor} h-0 group-hover:h-8 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center px-5 justify-between`}>
                        <span className={`${textColor} text-[9px] font-bold uppercase tracking-widest`}>Evidence</span>
-                       <div className="flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full ${isVerified ? (isNavy?'bg-[#00C87A]':'bg-[#0f1e38]') : 'bg-amber-400'}`}></span>
-                          <span className={`text-[8px] font-bold uppercase tracking-wider ${isVerified ? (isNavy?'text-[#00C87A]':'text-[#0f1e38]') : 'text-amber-400'}`}>
-                            {isVerified ? 'Verified' : 'Pending'}
-                          </span>
-                       </div>
+                       <span className={`text-[8px] font-bold uppercase tracking-wider ${isNavy ? 'text-[#69CCC2]' : 'text-[#0C3C60]'}`}>
+                         View &rarr;
+                       </span>
                     </div>
                   </div>
                 );
               })}
 
-              {/* CURRENT LOT OVERVIEW */}
-              <div className="col-span-1 md:col-span-2 relative bg-transparent rounded-2xl shadow-sm border border-slate-400 p-5 flex flex-col justify-between w-full min-h-[140px] h-full">
+              {/* CURRENT LOT OVERVIEW (#0C3C60) */}
+              <div className="col-span-1 md:col-span-2 relative bg-[#0C3C60] rounded-2xl shadow-sm border border-[#0C3C60] p-5 flex flex-col justify-between w-full min-h-[140px] h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <p className="text-[9px] uppercase tracking-widest font-bold text-slate-400 mb-0.5">Lot Status</p>
-                    <h3 className="text-lg font-light text-[#0f1e38] tracking-tight">{active.title}</h3>
+                    <p className="text-[9px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 mb-0.5">Lot Status</p>
+                    <h3 className="text-lg font-light text-[#FAF2CA] tracking-tight">{active.title}</h3>
                   </div>
                   <div className="text-left md:text-right mt-6 md:mt-0">
-                    <p className="text-2xl font-black tracking-tight text-[#0f1e38] leading-none mb-0.5">{active.progress}%</p>
-                    <p className="text-[9px] uppercase tracking-widest font-bold text-[#0f1e38]/70">Consolidated</p>
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-lg font-black tracking-tight leading-none mb-0.5 ${
+                      active.progress >= 100
+                        ? 'bg-[#83DF9C]/20 text-[#83DF9C] border border-[#83DF9C]/50'
+                        : 'bg-[#FF7E7E]/20 text-[#FF7E7E] border border-[#FF7E7E]/50'
+                    }`}>
+                      {active.progress}%
+                    </span>
+                    <p className="text-[9px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 mt-1">Consolidated</p>
                   </div>
                 </div>
 
-                <div className={`flex flex-col ${selectedItem ? '' : 'xl:flex-row'} gap-6 xl:gap-8 mb-4 mt-1 flex-1`}>
+                <div className={`flex flex-col ${selectedItem ? '' : 'xl:flex-row'} gap-4 xl:gap-8 mb-2 mt-2 flex-1`}>
                   <div className="min-w-0">
-                    <p className="text-[8px] uppercase tracking-widest font-bold text-slate-400 mb-0.5">Volume</p>
-                    <p className="text-xs font-bold text-[#0f1e38] font-mono whitespace-nowrap">{active.batchCurrent} <span className="text-slate-400 font-medium">/ {active.batchTarget} kg</span></p>
+                    <p className="text-[8px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 mb-0.5">Volume</p>
+                    <p className="text-xs font-bold text-white font-mono whitespace-nowrap">{active.batchCurrent} <span className="text-[#FAF2CA]/60 font-medium">/ {active.batchTarget} kg</span></p>
                   </div>
-                  <div className={`min-w-0 border-t pt-3 border-slate-200/50 ${selectedItem ? '' : 'xl:border-l xl:border-t-0 xl:pt-0 xl:border-slate-300 xl:pl-8'}`}>
-                    <p className="text-[8px] uppercase tracking-widest font-bold text-slate-400 mb-0.5">Status</p>
-                    <p className="text-xs font-bold text-[#0f1e38] leading-tight truncate">{active.statusText}</p>
+                  <div className={`min-w-0 border-t pt-2.5 border-white/10 ${selectedItem ? '' : 'xl:border-l xl:border-t-0 xl:pt-0 xl:border-white/15 xl:pl-8'}`}>
+                    <p className="text-[8px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 mb-0.5">Status</p>
+                    <p className="text-xs font-bold text-white leading-tight truncate">{active.statusText}</p>
                   </div>
-                  <div className={`min-w-0 border-t pt-3 border-slate-200/50 ${selectedItem ? '' : 'xl:border-l xl:border-t-0 xl:pt-0 xl:border-slate-300 xl:pl-8'}`}>
-                    <p className="text-[8px] uppercase tracking-widest font-bold text-slate-400 mb-0.5">Next Action</p>
-                    <p className="text-xs font-bold text-[#0f1e38] truncate">{active.nextAction}</p>
+                  <div className={`min-w-0 border-t pt-2.5 border-white/10 ${selectedItem ? '' : 'xl:border-l xl:border-t-0 xl:pt-0 xl:border-white/15 xl:pl-8'}`}>
+                    <p className="text-[8px] uppercase tracking-widest font-bold text-[#FAF2CA]/60 mb-0.5">Next Action</p>
+                    <p className="text-xs font-bold text-[#69CCC2] truncate">{active.nextAction}</p>
                   </div>
                 </div>
-
-
               </div>
             </div>
           </div>
         </div>
       </main>
-      {/* ── EVIDENCE EXPLORER PANEL ── */}
+
+      {/* ── EVIDENCE EXPLORER PANEL (#082840 / #0C3C60) ── */}
       <aside
-        className={`absolute lg:relative inset-y-0 right-0 z-50 w-full md:w-[420px] flex-shrink-0 flex flex-col border-l border-slate-800 overflow-hidden shadow-2xl lg:shadow-none transition-all duration-500 ease-in-out ${selectedItem ? 'translate-x-0 lg:mr-0' : 'translate-x-full lg:-mr-[420px]'}`}
-        style={{ background: 'var(--color-panel-bg)' }}
+        className={`absolute lg:relative inset-y-0 right-0 z-50 w-full md:w-[420px] flex-shrink-0 flex flex-col bg-[#082840] border-l border-white/10 overflow-hidden shadow-2xl lg:shadow-none transition-all duration-500 ease-in-out ${selectedItem ? 'translate-x-0 lg:mr-0' : 'translate-x-full lg:-mr-[420px]'}`}
       >
         {selectedItem && (
           <>
             {/* Panel header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-[#0C3C60]">
               <div className="flex items-center">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Evidence Explorer</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#FAF2CA]/80">Evidence Explorer</span>
               </div>
-              <button onClick={() => setSelectedItem(null)} className="text-slate-500 hover:text-white transition-colors">
+              <button onClick={() => setSelectedItem(null)} className="text-[#FAF2CA]/60 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Panel content */}
             <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar">
-            <h2 className="text-2xl font-bold text-white mb-2">{selectedItem.explorerContent?.title || selectedItem.name}</h2>
-            <p className="text-sm text-slate-400 leading-relaxed mb-8">{selectedItem.explorerContent?.description}</p>
+              <h2 className="text-2xl font-bold text-[#FAF2CA] mb-2">{selectedItem.explorerContent?.title || selectedItem.name}</h2>
+              <p className="text-sm text-[#FAF2CA]/70 leading-relaxed mb-8">{selectedItem.explorerContent?.description}</p>
 
-                        {/* ORIGIN LAYER */}
-            {selectedItem.explorerContent?.type === 'origin_layer' && (
-              <div className="rounded-3xl border border-white/10 p-5" style={{ background: 'var(--color-panel-inner)' }}>
-                <div className="grid grid-cols-4 text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/5">
-                  <div className="col-span-3">Farmer, Farm &amp; Geolocalización</div>
-                  <div className="text-left md:text-right mt-6 md:mt-0">Alt (m)</div>
-                </div>
-                <div className="space-y-4">
-                  {active.farmers.map((f: any, i: number) => (
-                    <div key={i} className="grid grid-cols-4 items-center gap-1 pb-2 border-b border-white/5 last:border-none">
-                      <div className="col-span-3">
-                        <p className="text-xs font-bold text-white truncate">{f.name}</p>
-                        <p className="text-[10px] text-slate-400 truncate">{f.farm}</p>
-                        {f.eudrCleared && f.satelliteUrl ? (
-                          <a
-                            href={f.satelliteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[9px] font-mono text-[#00C87A] hover:underline mt-0.5 flex items-center gap-1.5"
-                            title="Ver finca en imagen satelital real"
-                          >
-                            <span>📍 {f.coordinates} ↗</span>
-                            <span className="bg-[#00C87A]/15 border border-[#00C87A]/40 px-1.5 py-0.2 rounded text-[8px] font-bold">
-                              ✓ SENTINEL OK
-                            </span>
-                          </a>
-                        ) : (
-                          <p className="text-[9px] font-mono text-amber-400 mt-0.5">
-                            ⚠ Pendiente Coordenada GPS en Sheet
-                          </p>
-                        )}
-                      </div>
-                      <p className="text-xs font-mono text-right text-emerald-400">
-                        {f.altitude} m
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() =>
-                    downloadEudrGeoJson(
-                      targetPo,
-                      liveLots.flatMap((l: any) => l.farmers || [])
-                    )
-                  }
-                  className="mt-6 w-full flex items-center justify-center gap-2 px-4 text-[10px] font-bold uppercase tracking-widest border py-3 rounded-lg hover:bg-[#00C87A]/10 transition-colors cursor-pointer whitespace-nowrap"
-                  style={{ color: 'var(--color-brand-green-light)', borderColor: 'rgba(0, 255, 178, 0.3)' }}
-                >
-                  <Download className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span>Descargar GeoJSON EUDR</span>
-                </button>
-              </div>
-            )}
-
-            {/* PROCESSING LAYER */}
-            {selectedItem.explorerContent?.type === 'processing_layer' && (
-              <div className="rounded-3xl border border-white/10 p-5 space-y-6" style={{ background: 'var(--color-panel-inner)' }}>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Milling</h3>
-                  <div className="grid grid-cols-4 text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/5">
-                    <div className="col-span-3">Farmer & Farm</div>
-                    <div className="text-left md:text-right mt-6 md:mt-0">Yield</div>
+              {/* ORIGIN LAYER */}
+              {selectedItem.explorerContent?.type === 'origin_layer' && (
+                <div className="rounded-3xl border border-white/10 p-5 bg-[#0C3C60]">
+                  <div className="grid grid-cols-4 text-[9px] text-[#FAF2CA]/60 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/10">
+                    <div className="col-span-3">Farmer, Farm &amp; Geolocalización</div>
+                    <div className="text-left md:text-right mt-6 md:mt-0">Alt (m)</div>
                   </div>
-                  <div className="space-y-2">
-                    {active.farmers.slice(0, 3).map((f, i) => (
-                      <div key={i} className="grid grid-cols-4 items-center gap-1">
-                        <div className="col-span-3"><p className="text-xs font-bold text-white truncate">{f.name}</p></div>
-                        <p className="text-xs font-mono text-right text-[#00C87A]">{f.yield}</p>
+                  <div className="space-y-4">
+                    {active.farmers.map((f: any, i: number) => (
+                      <div key={i} className="grid grid-cols-4 items-center gap-1 pb-2 border-b border-white/5 last:border-none">
+                        <div className="col-span-3">
+                          <p className="text-xs font-bold text-white truncate">{f.name}</p>
+                          <p className="text-[10px] text-[#FAF2CA]/70 truncate">{f.farm}</p>
+                          {f.eudrCleared && f.satelliteUrl ? (
+                            <a
+                              href={f.satelliteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[9px] font-mono text-[#83DF9C] hover:underline mt-0.5 flex items-center gap-1.5"
+                              title="Ver finca en imagen satelital real"
+                            >
+                              <span>📍 {f.coordinates} ↗</span>
+                              <span className="bg-[#83DF9C]/20 border border-[#83DF9C]/50 text-[#83DF9C] px-1.5 py-0.2 rounded text-[8px] font-bold">
+                                ✓ SENTINEL OK
+                              </span>
+                            </a>
+                          ) : (
+                            <p className="text-[9px] font-mono text-[#FF7E7E] mt-0.5">
+                              ⚠ Pendiente Coordenada GPS en Sheet
+                            </p>
+                          )}
+                        </div>
+                        <p className="text-xs font-mono text-right text-[#69CCC2]">
+                          {f.altitude} m
+                        </p>
                       </div>
                     ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Laboratory</h3>
-                  <div className="grid grid-cols-4 text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/5">
-                    <div className="col-span-3">Farmer & Farm</div>
-                    <div className="text-left md:text-right mt-6 md:mt-0">Moisture</div>
-                  </div>
-                  <div className="space-y-2">
-                    {active.farmers.slice(0, 3).map((f, i) => (
-                      <div key={i} className="grid grid-cols-4 items-center gap-1">
-                        <div className="col-span-3"><p className="text-xs font-bold text-white truncate">{f.name}</p></div>
-                        <p className="text-xs font-mono text-right text-[#00C87A]">{f.moisture}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* QUALITY LAYER */}
-            {selectedItem.explorerContent?.type === 'quality_layer' && (
-              <div className="rounded-3xl border border-white/10 p-5 space-y-6" style={{ background: 'var(--color-panel-inner)' }}>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Roasting</h3>
-                  <p className="text-xs text-slate-400">Winning Profile: <span className="text-white font-mono">Omni Medium</span></p>
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">CVA Sensory</h3>
-                  <div className="grid grid-cols-4 text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/5">
-                    <div className="col-span-3">Farmer & Farm</div>
-                    <div className="text-left md:text-right mt-6 md:mt-0">Score</div>
-                  </div>
-                  <div className="space-y-2">
-                    {active.farmers.slice(0, 3).map((f, i) => (
-                      <div key={i} className="grid grid-cols-4 items-center gap-1">
-                        <div className="col-span-3"><p className="text-xs font-bold text-white truncate">{f.name}</p></div>
-                        <p className="text-xs font-mono text-right text-[#00C87A]">{f.score}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* COMPLIANCE LAYER */}
-            {selectedItem.explorerContent?.type === 'compliance_layer' && (
-              <div className="rounded-3xl border border-white/10 p-5 space-y-6" style={{ background: 'var(--color-panel-inner)' }}>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">EUDR Status</h3>
-                  <div className="flex items-center gap-3 mb-4">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-[#00C87A]" />
-                    <div>
-                      <p className="text-sm font-medium text-white">Satellite Intersection (Sentinel-2)</p>
-                      <p className="text-[10px] text-slate-400">Copernicus L2A + JRC 2020 Baseline (Cutoff 31-Dec-2020)</p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between p-4 bg-green-900/20 border border-green-800/30 rounded-lg">
-                    <span className="text-[10px] text-slate-400 uppercase tracking-widest">Deforestation</span>
-                    <span className="text-sm font-mono text-[#00C87A]">0.00 ha (CLEARED)</span>
                   </div>
                   <button
                     onClick={() =>
@@ -898,108 +898,221 @@ export default function EvidenceDashboard() {
                         liveLots.flatMap((l: any) => l.farmers || [])
                       )
                     }
-                    className="mt-3 w-full flex items-center justify-center gap-2 px-4 text-[10px] font-black uppercase tracking-widest bg-[#00C87A] text-[#0f1e38] hover:bg-[#00df88] py-3 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                    className="mt-6 w-full flex items-center justify-center gap-2 px-4 text-[10px] font-bold uppercase tracking-widest border border-[#83DF9C]/50 text-[#83DF9C] py-3 rounded-lg hover:bg-[#83DF9C]/15 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <Download className="w-3.5 h-3.5 flex-shrink-0" />
                     <span>Descargar GeoJSON EUDR</span>
                   </button>
                 </div>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Farm &amp; Lot Verification (GPS + Sentinel)</h3>
-                  <div className="flex justify-between items-end pb-2 border-b border-white/10 mb-3">
-                    <div>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Lots Scanned</p>
-                      <p className="text-xl font-bold text-[#00C87A]">
-                        {active.farmers.filter((f: any) => f.eudrCleared).length}
-                        <span className="text-sm text-slate-500">/{active.farmers.length}</span>
-                      </p>
-                    </div>
-                    <span className="text-[9px] font-mono text-slate-400">Geolocalización Real</span>
-                  </div>
-                  <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
-                    {active.farmers.map((f: any, i: number) => (
-                      <div key={`verified-${i}`} className="flex justify-between items-center bg-emerald-950/30 p-2.5 rounded-xl border border-[#00C87A]/25">
-                        <div className="min-w-0 pr-2">
-                          <p className="text-xs font-bold text-white truncate">{f.name}</p>
-                          <p className="text-[10px] text-slate-400 truncate">{f.farm}</p>
-                          {f.eudrCleared && f.satelliteUrl ? (
-                            <a
-                              href={f.satelliteUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[9px] font-mono text-[#00C87A] hover:underline mt-0.5 block"
-                            >
-                              📍 {f.coordinates} (Ver Satélite ↗)
-                            </a>
-                          ) : (
-                            <p className="text-[9px] font-mono text-amber-400 mt-0.5">
-                              ⚠ Sin coordenada GPS en Sheet
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          {f.eudrCleared ? (
-                            <>
-                              <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded bg-[#00C87A]/20 text-[#00C87A] border border-[#00C87A]/40">
-                                ✓ SENTINEL OK
-                              </span>
-                              <p className="text-[8px] font-mono text-slate-500 mt-1">{f.sentinelCode}</p>
-                            </>
-                          ) : (
-                            <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                              PENDIENTE GPS
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+              )}
 
-            {/* SHIPMENT LAYER */}
-            {selectedItem.explorerContent?.type === 'shipment_layer' && (
-              <div className="rounded-3xl border border-white/10 p-5 space-y-6" style={{ background: 'var(--color-panel-inner)' }}>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Documentation</h3>
-                  <div className="space-y-2">
-                    {[
-                      { name: "Commercial Invoice", pending: false },
-                      { name: "Packing List", pending: false },
-                      { name: "ICO Certificate", pending: false },
-                      { name: "Phytosanitary", pending: false },
-                      { name: "Bill of Lading", pending: true },
-                    ].map((d, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-white/10">
-                        <p className="text-xs font-bold text-white">{d.name}</p>
-                        <span className={`text-[8px] font-bold px-2 py-1 rounded uppercase tracking-wider ${d.pending ? 'bg-amber-500/10 text-amber-400' : 'bg-green-500/10 text-[#00C87A]'}`}>
-                          {d.pending ? 'Awaiting' : 'Ready'}
-                        </span>
+              {/* PROCESSING LAYER */}
+              {selectedItem.explorerContent?.type === 'processing_layer' && (
+                <div className="rounded-3xl border border-white/10 p-5 space-y-6 bg-[#0C3C60]">
+                  <div>
+                    <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">Milling</h3>
+                    <div className="grid grid-cols-4 text-[9px] text-[#FAF2CA]/60 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/10">
+                      <div className="col-span-3">Farmer &amp; Farm</div>
+                      <div className="text-left md:text-right mt-6 md:mt-0">Yield</div>
+                    </div>
+                    <div className="space-y-2">
+                      {active.farmers.slice(0, 3).map((f: any, i: number) => (
+                        <div key={i} className="grid grid-cols-4 items-center gap-1">
+                          <div className="col-span-3"><p className="text-xs font-bold text-white truncate">{f.name}</p></div>
+                          <p className="text-xs font-mono text-right text-[#83DF9C]">{f.yield}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">Laboratory</h3>
+                    <div className="grid grid-cols-4 text-[9px] text-[#FAF2CA]/60 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/10">
+                      <div className="col-span-3">Farmer &amp; Farm</div>
+                      <div className="text-left md:text-right mt-6 md:mt-0">Moisture</div>
+                    </div>
+                    <div className="space-y-2">
+                      {active.farmers.slice(0, 3).map((f: any, i: number) => (
+                        <div key={i} className="grid grid-cols-4 items-center gap-1">
+                          <div className="col-span-3"><p className="text-xs font-bold text-white truncate">{f.name}</p></div>
+                          <p className="text-xs font-mono text-right text-[#69CCC2]">{f.moisture}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* QUALITY LAYER */}
+              {selectedItem.explorerContent?.type === 'quality_layer' && (
+                <div className="rounded-3xl border border-white/10 p-5 space-y-6 bg-[#0C3C60]">
+                  <div>
+                    <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">Roasting</h3>
+                    <p className="text-xs text-[#FAF2CA]/70">Winning Profile: <span className="text-[#69CCC2] font-mono font-bold">Omni Medium</span></p>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">CVA Sensory</h3>
+                    <div className="grid grid-cols-4 text-[9px] text-[#FAF2CA]/60 uppercase tracking-widest font-bold mb-3 pb-2 border-b border-white/10">
+                      <div className="col-span-3">Farmer &amp; Farm</div>
+                      <div className="text-left md:text-right mt-6 md:mt-0">Score</div>
+                    </div>
+                    <div className="space-y-2">
+                      {active.farmers.slice(0, 3).map((f: any, i: number) => (
+                        <div key={i} className="grid grid-cols-4 items-center gap-1">
+                          <div className="col-span-3"><p className="text-xs font-bold text-white truncate">{f.name}</p></div>
+                          <p className="text-xs font-mono text-right text-[#83DF9C]">{f.score}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* COMPLIANCE LAYER */}
+              {selectedItem.explorerContent?.type === 'compliance_layer' && (
+                <div className="rounded-3xl border border-white/10 p-5 space-y-6 bg-[#0C3C60]">
+                  <div>
+                    <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">EUDR Status</h3>
+                    <div className="flex items-center gap-3 mb-4">
+                      <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-[#83DF9C]" />
+                      <div>
+                        <p className="text-sm font-medium text-white">Satellite Intersection (Sentinel-2)</p>
+                        <p className="text-[10px] text-[#FAF2CA]/70">Copernicus L2A + JRC 2020 Baseline (Cutoff 31-Dec-2020)</p>
                       </div>
-                    ))}
+                    </div>
+                    <div className="flex justify-between p-4 bg-[#83DF9C]/10 border border-[#83DF9C]/30 rounded-lg">
+                      <span className="text-[10px] text-[#FAF2CA]/80 uppercase tracking-widest">Deforestation</span>
+                      <span className="text-sm font-mono font-bold text-[#83DF9C]">0.00 ha (CLEARED)</span>
+                    </div>
+                    <button
+                      onClick={() =>
+                        downloadEudrGeoJson(
+                          targetPo,
+                          liveLots.flatMap((l: any) => l.farmers || [])
+                        )
+                      }
+                      className="mt-3 w-full flex items-center justify-center gap-2 px-4 text-[10px] font-black uppercase tracking-widest bg-[#83DF9C] text-[#0C3C60] hover:bg-[#6fd48b] py-3 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      <Download className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>Descargar GeoJSON EUDR</span>
+                    </button>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">Farm &amp; Lot Verification (GPS + Sentinel)</h3>
+                    <div className="flex justify-between items-end pb-2 border-b border-white/10 mb-3">
+                      <div>
+                        <p className="text-[10px] text-[#FAF2CA]/70 uppercase tracking-widest mb-1">Lots Scanned</p>
+                        <p className="text-xl font-bold text-[#83DF9C]">
+                          {active.farmers.filter((f: any) => f.eudrCleared).length}
+                          <span className="text-sm text-[#FAF2CA]/50">/{active.farmers.length}</span>
+                        </p>
+                      </div>
+                      <span className="text-[9px] font-mono text-[#69CCC2]">Geolocalización Real</span>
+                    </div>
+                    <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
+                      {active.farmers.map((f: any, i: number) => (
+                        <div key={`verified-${i}`} className={`flex justify-between items-center p-2.5 rounded-xl border ${f.eudrCleared ? 'bg-[#83DF9C]/10 border-[#83DF9C]/30' : 'bg-[#FF7E7E]/10 border-[#FF7E7E]/30'}`}>
+                          <div className="min-w-0 pr-2">
+                            <p className="text-xs font-bold text-white truncate">{f.name}</p>
+                            <p className="text-[10px] text-[#FAF2CA]/70 truncate">{f.farm}</p>
+                            {f.eudrCleared && f.satelliteUrl ? (
+                              <a
+                                href={f.satelliteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[9px] font-mono text-[#83DF9C] hover:underline mt-0.5 block"
+                              >
+                                📍 {f.coordinates} (Ver Satélite ↗)
+                              </a>
+                            ) : (
+                              <p className="text-[9px] font-mono text-[#FF7E7E] mt-0.5">
+                                ⚠ Sin coordenada GPS en Sheet
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            {f.eudrCleared ? (
+                              <>
+                                <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded bg-[#83DF9C]/20 text-[#83DF9C] border border-[#83DF9C]/40">
+                                  ✓ SENTINEL OK
+                                </span>
+                                <p className="text-[8px] font-mono text-[#FAF2CA]/50 mt-1">{f.sentinelCode}</p>
+                              </>
+                            ) : (
+                              <span className="inline-block text-[8px] font-black px-2 py-0.5 rounded bg-[#FF7E7E]/20 text-[#FF7E7E] border border-[#FF7E7E]/40">
+                                PENDIENTE GPS
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-3">Container</h3>
-                  <div className="flex justify-between text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-2">
-                    <span>Stuffed Volume</span><span>{active.progress}%</span>
+              )}
+
+              {/* SHIPMENT LAYER (INTERACTIVE BUTTON CHECKLIST) */}
+              {selectedItem.explorerContent?.type === 'shipment_layer' && (
+                <div className="rounded-3xl border border-white/10 p-5 space-y-6 bg-[#0C3C60]">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest">Documentation</h3>
+                      <span className="text-[9px] text-[#FAF2CA]/60 font-medium">Clic para cambiar estado</span>
+                    </div>
+                    <div className="space-y-2">
+                      {Object.entries(shipmentDocs).map(([docName, isReady]) => (
+                        <div key={docName} className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-[#082840]/60">
+                          <p className="text-xs font-bold text-white">{docName}</p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nextDocs = { ...shipmentDocs, [docName]: !isReady };
+                              syncShipmentState(nextDocs, containerSealed);
+                            }}
+                            className={`text-[9px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer active:scale-95 ${
+                              isReady
+                                ? 'bg-[#83DF9C] text-[#0C3C60] border border-[#83DF9C] shadow-sm hover:bg-[#6fd48b]'
+                                : 'bg-[#FF7E7E]/20 text-[#FF7E7E] border border-[#FF7E7E]/50 hover:bg-[#FF7E7E] hover:text-[#0C3C60]'
+                            }`}
+                          >
+                            {isReady ? '✓ Ready' : 'Awaiting'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden mb-2">
-                    <div className="h-full rounded-full bg-[#00C87A]" style={{ width: `${active.progress}%` }} />
-                  </div>
-                  <div className="flex justify-between items-center p-3 mt-4 bg-slate-800 rounded border border-slate-700">
-                    <span className="text-[10px] text-slate-400 uppercase tracking-widest">Seal Number</span>
-                    <span className="text-sm font-mono text-white">AXIS-U-89210</span>
+                  <div>
+                    <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">Container</h3>
+                    <div className="flex justify-between text-[10px] text-[#FAF2CA]/70 uppercase tracking-widest font-bold mb-2">
+                      <span>Stuffed Volume</span><span>{active.progress}%</span>
+                    </div>
+                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden mb-3">
+                      <div className={`h-full rounded-full ${active.progress >= 100 ? 'bg-[#83DF9C]' : 'bg-[#69CCC2]'}`} style={{ width: `${active.progress}%` }} />
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-[#082840] rounded-xl border border-white/10 mb-2.5">
+                      <span className="text-[10px] text-[#FAF2CA]/70 uppercase tracking-widest">Seal Number</span>
+                      <span className="text-sm font-mono text-[#69CCC2]">AXIS-U-89210</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-[#082840] rounded-xl border border-white/10">
+                      <span className="text-[10px] text-[#FAF2CA]/70 uppercase tracking-widest font-bold">Container Status</span>
+                      <button
+                        type="button"
+                        onClick={() => syncShipmentState(shipmentDocs, !containerSealed)}
+                        className={`text-[9px] font-black px-3 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer active:scale-95 ${
+                          containerSealed
+                            ? 'bg-[#83DF9C] text-[#0C3C60] border border-[#83DF9C] shadow-sm hover:bg-[#6fd48b]'
+                            : 'bg-[#FF7E7E]/20 text-[#FF7E7E] border border-[#FF7E7E]/50 hover:bg-[#FF7E7E] hover:text-[#0C3C60]'
+                        }`}
+                      >
+                        {containerSealed ? '✓ Sealed' : 'Pending'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-        </aside>
+              )}
+            </div>
+          </>
+        )}
+      </aside>
     </div>
   );
 }
-

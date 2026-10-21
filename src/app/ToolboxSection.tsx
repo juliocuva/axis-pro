@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/shared/lib/supabase';
 
@@ -122,27 +122,27 @@ export default function ToolboxSection() {
     };
 
     return (
-        <section id="toolbox" className="bg-brand-industrial-gray relative z-20 pt-16 pb-20 overflow-hidden border-t border-gray-400/60">
+        <section id="toolbox" className="bg-slate-200 relative z-20 pt-16 pb-20 overflow-hidden border-t border-[#0C3C60]/10">
             {/* Header Area */}
             <div className="relative mb-12">
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
-                    <div className="inline-flex items-center gap-2 bg-brand-green/10 border border-brand-green/30 px-3.5 py-1.5 rounded-full mb-4">
-                        <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
-                        <span className="text-[10px] font-black tracking-widest text-brand-green uppercase">
+                    <div className="inline-flex items-center gap-2 bg-[#0C3C60] px-3.5 py-1.5 rounded-full mb-4">
+                        <span className="w-2 h-2 rounded-full bg-[#83DF9C] animate-pulse"></span>
+                        <span className="text-[10px] font-black tracking-widest text-[#FAF2CA] uppercase">
                             Modular Coffee Tools
                         </span>
                     </div>
 
-                    <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight text-brand-navy mb-4">
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight text-[#0C3C60] mb-4">
                         Explore the <br className="hidden sm:inline" />
                         <span>
-                            <span className="font-azonix azonix-thin-gray text-brand-green">AXIS</span>
-                            <span className="font-montserrat-black text-brand-navy">one</span>
-                            <span className="text-brand-green"> Toolbox</span>
+                            <span className="font-azonix text-[#0C3C60]">AXIS</span>
+                            <span className="font-montserrat-black text-[#0C3C60]">one</span>
+                            <span className="text-[#0C3C60]"> Toolbox</span>
                         </span>
                     </h2>
 
-                    <p className="text-gray-700 text-sm md:text-base leading-relaxed font-medium max-w-xl">
+                    <p className="text-[#0C3C60]/75 text-sm md:text-base leading-relaxed font-medium max-w-xl">
                         Select the independent digital tool you need for your coffee process today.
                     </p>
                 </div>
@@ -152,55 +152,48 @@ export default function ToolboxSection() {
             <div className="relative max-w-7xl mx-auto mb-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-6">
                     {activeTools.map((tool, idx) => {
-                        const cardClasses = "bg-white rounded-3xl border border-gray-100 shadow-[0_4px_30px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col group hover:border-brand-green/40 transition-colors cursor-pointer hover:-translate-y-2 duration-300 relative";
+                        const isOnline = tool.status === 'Online';
+                        const cardClasses = "bg-[#FAF2CA] rounded-3xl border border-[#0C3C60]/15 shadow-lg overflow-hidden flex flex-col group hover:border-[#0C3C60]/40 hover:ring-2 hover:ring-[#69CCC2]/40 transition-all cursor-pointer hover:-translate-y-2 duration-300 relative";
                         const CardContent = (
                             <>
                                 {/* Image Area */}
                                 <div className="w-full h-48 overflow-hidden relative">
-                                    <div className="absolute inset-0 bg-brand-navy/10 group-hover:bg-transparent transition-colors z-10"></div>
+                                    <div className="absolute inset-0 bg-[#0C3C60]/15 group-hover:bg-transparent transition-colors z-10"></div>
                                     <img 
                                         src={tool.image} 
                                         alt={tool.title} 
-                                        className={`w-full h-full object-cover transition-transform duration-700 ${tool.status === 'Online' ? 'group-hover:scale-105' : 'grayscale opacity-80 group-hover:scale-100'}`}
+                                        className={`w-full h-full object-cover transition-transform duration-700 ${isOnline ? 'group-hover:scale-105' : 'grayscale opacity-80 group-hover:scale-100'}`}
                                     />
                                 </div>
                                 {/* Icon Overlapping */}
-                                <div className="absolute top-[170px] left-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center text-brand-green border border-gray-100 z-20 group-hover:scale-110 group-hover:bg-brand-green group-hover:text-white transition-all duration-300">
+                                <div className="absolute top-[170px] left-6 w-14 h-14 bg-[#0C3C60] rounded-2xl shadow-lg flex items-center justify-center text-[#FAF2CA] border border-white/10 z-20 group-hover:scale-110 group-hover:bg-[#83DF9C] group-hover:text-[#0C3C60] transition-all duration-300">
                                     {tool.icon}
                                 </div>
                                 {/* Text Content */}
                                 <div className="pt-10 pb-8 px-6 flex-1 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-xl font-bold text-brand-navy mb-2">{tool.title}</h3>
-                                        <p className="text-sm text-gray-500 leading-relaxed font-medium">
+                                        <h3 className="text-xl font-bold text-[#0C3C60] mb-2">{tool.title}</h3>
+                                        <p className="text-sm text-[#0C3C60]/75 leading-relaxed font-medium">
                                             {tool.description}
                                         </p>
                                     </div>
-                                    <div className="mt-8 flex items-center justify-between pt-4 border-t border-gray-200/60">
+                                    <div className="mt-8 flex items-center justify-between pt-4 border-t border-[#0C3C60]/15">
                                         <div className="flex items-center gap-2">
-                                            {tool.status === 'Online' ? (
-                                                <>
-                                                    <span className="relative flex h-2.5 w-2.5">
-                                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
-                                                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green"></span>
-                                                    </span>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 group-hover:text-brand-navy transition-colors">
-                                                        {tool.status}
-                                                    </span>
-                                                </>
+                                            {isOnline ? (
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#83DF9C]/45 border border-[#83DF9C] text-[#0C3C60] text-[10px] font-black uppercase tracking-widest">
+                                                    <span className="w-2 h-2 rounded-full bg-[#0C3C60]"></span>
+                                                    {tool.status}
+                                                </span>
                                             ) : (
-                                                <span className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200 shadow-sm">
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-navy">
-                                                        {tool.status}
-                                                    </span>
+                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF7E7E]/30 border border-[#FF7E7E] text-[#0C3C60] text-[10px] font-black uppercase tracking-widest">
+                                                    {tool.status}
                                                 </span>
                                             )}
                                         </div>
 
-                                        <span className={`inline-flex items-center gap-1.5 ${tool.status === 'Online' ? 'bg-brand-navy/10 group-hover:bg-brand-green group-hover:text-white text-brand-navy' : 'bg-gray-200 text-gray-600 border border-gray-300'} text-xs font-black py-2 px-4 rounded-xl transition-all duration-300 shadow-sm ${tool.status === 'Online' ? 'group-hover:shadow-md' : ''}`}>
-                                            <span>{tool.status === 'Online' ? 'LAUNCH' : 'COMING SOON'}</span>
-                                            {tool.status === 'Online' && (
+                                        <span className={`inline-flex items-center gap-1.5 ${isOnline ? 'bg-[#0C3C60] group-hover:bg-[#83DF9C] group-hover:text-[#0C3C60] text-[#FAF2CA]' : 'bg-[#0C3C60]/10 text-[#0C3C60]/60 border border-[#0C3C60]/20'} text-xs font-black py-2 px-4 rounded-xl transition-all duration-300 shadow-sm`}>
+                                            <span>{isOnline ? 'LAUNCH' : 'COMING SOON'}</span>
+                                            {isOnline && (
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
                                                     <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
                                                 </svg>
@@ -211,7 +204,7 @@ export default function ToolboxSection() {
                             </>
                         );
 
-                        return tool.status === 'Online' ? (
+                        return isOnline ? (
                             <Link key={idx} href={tool.href} className={cardClasses} {...(tool.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
                                 {CardContent}
                             </Link>
@@ -224,57 +217,51 @@ export default function ToolboxSection() {
                 </div>
             </div>
 
-            {/* Upcoming Tools Section - Green Background with Navy Blue Cards */}
-            <div id="roadmap" className="bg-brand-green w-full py-20 mt-16 relative overflow-hidden shadow-2xl">
-                {/* Decorative subtle background overlay */}
-                <div className="absolute -right-16 -top-16 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="absolute -left-16 -bottom-16 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-                
+            {/* Upcoming Tools Section (#FAF2CA Beige Background with #0C3C60 Navy Blue Cards) */}
+            <div id="roadmap" className="bg-[#FAF2CA] w-full py-20 mt-16 relative overflow-hidden border-y border-[#0C3C60]/15">
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
                         <div>
-                            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/30 mb-3 shadow-sm">
-                                <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                                <span className="text-[10px] font-black tracking-widest text-white uppercase">ECOSYSTEM ROADMAP</span>
+                            <div className="inline-flex items-center gap-2 bg-[#0C3C60] px-3.5 py-1.5 rounded-full mb-3 shadow-sm">
+                                <span className="w-2 h-2 rounded-full bg-[#69CCC2] animate-ping"></span>
+                                <span className="text-[10px] font-black tracking-widest text-[#FAF2CA] uppercase">ECOSYSTEM ROADMAP</span>
                             </div>
-                            <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                            <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#0C3C60] tracking-tight leading-tight flex flex-wrap items-baseline gap-x-2 gap-y-1">
                                 <span>Coming Soon to </span>
                                 <span className="inline-block">
-                                    <span className="font-azonix azonix-thin-green text-white">AXIS</span>
-                                    <span className="font-montserrat-black text-brand-navy">one</span>
+                                    <span className="font-azonix text-[#0C3C60]">AXIS</span>
+                                    <span className="font-montserrat-black text-[#0C3C60]">one</span>
                                 </span>
                             </h3>
                         </div>
-                        <p className="text-white/80 text-xs sm:text-sm font-medium max-w-md">
+                        <p className="text-[#0C3C60]/75 text-xs sm:text-sm font-medium max-w-md">
                             We are expanding our modular suite. Upcoming tools seamlessly integrate with your existing lots.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                         {upcomingTools.map((tool, idx) => (
-                            <div key={idx} className="bg-brand-navy border border-white/10 hover:border-brand-green rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 group shadow-xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-brand-green/10 rounded-full blur-xl pointer-events-none group-hover:bg-brand-green/20 transition-all"></div>
-                                
+                            <div key={idx} className="bg-[#0C3C60] border border-[#0C3C60] hover:border-[#69CCC2] rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 group shadow-xl relative overflow-hidden">
                                 <div>
                                     <div className="flex items-center justify-between mb-5">
-                                        <div className="w-12 h-12 rounded-2xl bg-brand-green/15 border border-brand-green/30 flex items-center justify-center text-brand-green group-hover:scale-110 group-hover:bg-brand-green group-hover:text-white transition-all duration-300 shadow-sm">
+                                        <div className="w-12 h-12 rounded-2xl bg-[#69CCC2]/15 border border-[#69CCC2]/30 flex items-center justify-center text-[#69CCC2] group-hover:scale-110 group-hover:bg-[#83DF9C] group-hover:text-[#0C3C60] transition-all duration-300 shadow-sm">
                                             {tool.icon}
                                         </div>
-                                        <span className="text-[9px] font-black text-brand-green bg-brand-green/15 border border-brand-green/30 py-1 px-2.5 rounded-full uppercase tracking-wider group-hover:bg-brand-green group-hover:text-white group-hover:border-brand-green transition-all duration-300">
+                                        <span className="text-[9px] font-black text-[#69CCC2] bg-[#69CCC2]/15 border border-[#69CCC2]/30 py-1 px-2.5 rounded-full uppercase tracking-wider">
                                             {tool.tag}
                                         </span>
                                     </div>
-                                    <h4 className="font-bold text-white text-lg mb-2">{tool.title}</h4>
-                                    <p className="text-xs text-white/70 leading-relaxed mb-6 font-medium">
+                                    <h4 className="font-bold text-[#FAF2CA] text-lg mb-2">{tool.title}</h4>
+                                    <p className="text-xs text-[#FAF2CA]/75 leading-relaxed mb-6 font-medium">
                                         {tool.description}
                                     </p>
                                 </div>
                                 <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                                    <span className="text-[10px] font-black text-white/90 uppercase tracking-widest flex items-center gap-1.5">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
+                                    <span className="text-[10px] font-black text-[#FAF2CA] uppercase tracking-widest flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#69CCC2] animate-pulse"></span>
                                         {tool.status}
                                     </span>
-                                    <span className="text-brand-green opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-xs">→</span>
+                                    <span className="text-[#69CCC2] group-hover:translate-x-1 transition-all text-xs">→</span>
                                 </div>
                             </div>
                         ))}
@@ -282,35 +269,34 @@ export default function ToolboxSection() {
                 </div>
             </div>
 
-            {/* Subscribe Banner - Full Width Gray Theme */}
-            <div className="bg-brand-industrial-gray w-full py-20 relative overflow-hidden border-t border-gray-400/60 z-10">
+            {/* Subscribe Banner */}
+            <div className="bg-slate-200 w-full py-20 relative overflow-hidden z-10">
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 items-center gap-12 relative">
-                    {/* Left/Top Content Column */}
-                    <div className="lg:col-span-7 flex flex-col justify-between text-brand-navy">
+                    <div className="lg:col-span-7 flex flex-col justify-between text-[#0C3C60]">
                         <div>
-                            <div className="inline-flex items-center gap-2 bg-brand-green/10 border border-brand-green/30 px-3.5 py-1.5 rounded-full mb-6">
-                                <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
-                                <span className="text-[10px] font-black tracking-widest text-brand-green uppercase">
-                                    Global Logistics & Traceability
+                            <div className="inline-flex items-center gap-2 bg-[#0C3C60] px-3.5 py-1.5 rounded-full mb-6">
+                                <span className="w-2 h-2 rounded-full bg-[#83DF9C] animate-pulse"></span>
+                                <span className="text-[10px] font-black tracking-widest text-[#FAF2CA] uppercase">
+                                    Global Logistics &amp; Traceability
                                 </span>
                             </div>
 
-                            <h3 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-4 text-brand-navy">
+                            <h3 className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight mb-4 text-[#0C3C60]">
                                 Discover the Complete <br />
                                 <span>
-                                    <span className="font-azonix azonix-thin-gray text-brand-green">AXIS</span>
-                                    <span className="font-montserrat-black text-brand-navy">one</span>
-                                    <span className="text-brand-green"> Ecosystem</span>
+                                    <span className="font-azonix text-[#0C3C60]">AXIS</span>
+                                    <span className="font-montserrat-black text-[#0C3C60]">one</span>
+                                    <span className="text-[#0C3C60]"> Ecosystem</span>
                                 </span>
                             </h3>
 
-                            <p className="text-gray-700 text-sm md:text-base leading-relaxed font-medium mb-8 max-w-xl">
+                            <p className="text-[#0C3C60]/75 text-sm md:text-base leading-relaxed font-medium mb-8 max-w-xl">
                                 Every container carries a digital history validated in real time — eliminating uncertainty and protecting batch value from farm to destination port.
                             </p>
                         </div>
 
                         {subscribed ? (
-                            <div className="bg-brand-green/10 border border-brand-green/40 text-brand-green p-4 rounded-2xl font-bold text-sm text-center max-w-md shadow-sm">
+                            <div className="bg-[#83DF9C]/40 border border-[#83DF9C] text-[#0C3C60] p-4 rounded-2xl font-bold text-sm text-center max-w-md shadow-sm">
                                 ✓ Thank you for subscribing! We&apos;ll keep you posted with exclusive updates.
                             </div>
                         ) : (
@@ -321,12 +307,12 @@ export default function ToolboxSection() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter your email for early access..."
-                                    className="w-full sm:flex-1 bg-white border border-gray-300 rounded-2xl px-5 py-4 text-sm font-semibold text-brand-navy placeholder:text-gray-400 outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/20 transition-all shadow-sm"
+                                    className="w-full sm:flex-1 bg-[#FAF2CA] border border-[#0C3C60]/20 rounded-2xl px-5 py-4 text-sm font-semibold text-[#0C3C60] placeholder:text-[#0C3C60]/50 outline-none focus:border-[#0C3C60] focus:ring-2 focus:ring-[#69CCC2]/40 transition-all shadow-sm"
                                 />
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="w-full sm:w-auto bg-brand-navy hover:bg-brand-green text-white font-black text-xs uppercase tracking-widest px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg disabled:opacity-50 flex-shrink-0"
+                                    className="w-full sm:w-auto bg-[#0C3C60] hover:bg-[#83DF9C] text-[#FAF2CA] hover:text-[#0C3C60] font-black text-xs uppercase tracking-widest px-8 py-4 rounded-2xl transition-all duration-300 shadow-lg disabled:opacity-50 flex-shrink-0 cursor-pointer"
                                 >
                                     {submitting ? 'Subscribing...' : 'Subscribe'}
                                 </button>
@@ -335,13 +321,13 @@ export default function ToolboxSection() {
                     </div>
 
                     {/* Right Image Column */}
-                    <div className="lg:col-span-5 relative min-h-[350px] rounded-3xl overflow-hidden shadow-2xl border border-gray-300">
+                    <div className="lg:col-span-5 relative min-h-[350px] rounded-3xl overflow-hidden shadow-2xl border border-[#0C3C60]/20">
                         <img 
                             src="/subscribe_coffee_bg.png" 
                             alt="Axis Coffee Logistics" 
                             className="w-full h-full object-cover object-center scale-105 hover:scale-100 transition-transform duration-700"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/60 via-transparent to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0C3C60]/70 via-transparent to-transparent"></div>
                     </div>
                 </div>
             </div>

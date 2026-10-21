@@ -24,7 +24,7 @@ const createNeonIcon = (color: string) => {
         background-color: ${color}; 
         border-radius: 50%; 
         box-shadow: 0 0 10px ${color}, 0 0 20px ${color};
-        border: 2px solid #fff;
+        border: 2px solid #FAF2CA;
       "></div>
     `,
     iconSize: [12, 12],
@@ -60,29 +60,38 @@ export default function GlobalMap({ onClose, activeLot }: GlobalMapProps) {
   }));
 
   return (
-    <div className="relative w-full h-full bg-[#0a0a0a]">
-      {/* Map Button requested by user */}
+    <div className="relative w-full h-full bg-[#0C3C60]">
+      <style>{`
+        .axis-navy-map .leaflet-tile-pane {
+          filter: sepia(100%) hue-rotate(168deg) saturate(310%) brightness(88%) contrast(108%);
+        }
+        .axis-navy-map.leaflet-container {
+          background-color: #082840 !important;
+        }
+      `}</style>
+
+      {/* Map Button & Active Lot Card in #0C3C60 Navy */}
       <div className="absolute top-6 right-6 z-[1000] flex flex-col items-end gap-2">
         <button 
           onClick={onClose}
-          className="bg-black/80 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-colors shadow-[0_0_15px_rgba(0,0,0,0.5)]"
+          className="bg-[#0C3C60]/95 backdrop-blur-md border border-[#FAF2CA]/30 text-[#FAF2CA] px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#124d7a] transition-colors shadow-xl cursor-pointer"
         >
           Cerrar Mapa / Volver al Lote
         </button>
-        <div className="bg-black/80 backdrop-blur-md border border-[#00FFB2]/30 p-4 rounded-lg shadow-[0_0_20px_rgba(0,255,178,0.15)] mt-2 w-64 text-left pointer-events-none">
-          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1">Lote Activo</p>
-          <p className="text-white font-bold mb-2">{activeLot?.title || 'Lote'}</p>
+        <div className="bg-[#0C3C60]/95 backdrop-blur-md border border-[#69CCC2]/40 p-4 rounded-xl shadow-2xl mt-2 w-64 text-left pointer-events-none">
+          <p className="text-[10px] text-[#FAF2CA]/70 uppercase tracking-widest font-bold mb-1">Lote Activo</p>
+          <p className="text-[#FAF2CA] font-bold mb-2">{activeLot?.title || 'Lote'}</p>
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-400">Volumen:</span>
-            <span className="text-[#00FFB2] font-mono">{activeLot?.batchCurrent} kg</span>
+            <span className="text-[#FAF2CA]/70">Volumen:</span>
+            <span className="text-[#69CCC2] font-mono font-bold">{activeLot?.batchCurrent} kg</span>
           </div>
           <div className="flex justify-between items-center text-xs mt-1">
-            <span className="text-slate-400">Fincas (WhatsApp GPS):</span>
+            <span className="text-[#FAF2CA]/70">Fincas (WhatsApp GPS):</span>
             <span className="text-white font-mono">{activeLot?.farmers?.length} validadas</span>
           </div>
-          <div className="flex justify-between items-center text-xs mt-1 pt-1 border-t border-white/10">
-            <span className="text-slate-400">Cruce Sentinel-2:</span>
-            <span className="text-[#00FFB2] font-mono font-bold">✓ EUDR 0.0 ha</span>
+          <div className="flex justify-between items-center text-xs mt-1.5 pt-1.5 border-t border-white/15">
+            <span className="text-[#FAF2CA]/70">Cruce Sentinel-2:</span>
+            <span className="text-[#83DF9C] font-mono font-bold">✓ EUDR 0.0 ha</span>
           </div>
         </div>
       </div>
@@ -90,7 +99,7 @@ export default function GlobalMap({ onClose, activeLot }: GlobalMapProps) {
       <MapContainer 
         center={[20.0, -30.0]} 
         zoom={3} 
-        className="w-full h-full z-0"
+        className="w-full h-full z-0 axis-navy-map"
         zoomControl={false}
       >
         <TileLayer
@@ -102,15 +111,15 @@ export default function GlobalMap({ onClose, activeLot }: GlobalMapProps) {
         />
 
         {/* Origin Marker */}
-        <Marker position={colombiaCenter} icon={createNeonIcon('#00FFB2')}>
-          <Tooltip direction="top" className="bg-black/90 text-[#00FFB2] border border-[#00FFB2]/50 font-mono text-xs p-2">
+        <Marker position={colombiaCenter} icon={createNeonIcon('#83DF9C')}>
+          <Tooltip direction="top" className="bg-[#0C3C60] text-[#83DF9C] border border-[#83DF9C]/50 font-mono text-xs p-2">
             ORIGEN: COLOMBIA (EJE CAFETERO)
           </Tooltip>
         </Marker>
 
         {/* Destination Marker */}
-        <Marker position={hamburg} icon={createNeonIcon('#0C6056')}>
-          <Tooltip direction="top" className="bg-black/90 text-white border border-white/20 font-mono text-xs p-2">
+        <Marker position={hamburg} icon={createNeonIcon('#69CCC2')}>
+          <Tooltip direction="top" className="bg-[#0C3C60] text-[#FAF2CA] border border-[#69CCC2]/50 font-mono text-xs p-2">
             DESTINO: HAMBURGO
           </Tooltip>
         </Marker>
@@ -118,20 +127,20 @@ export default function GlobalMap({ onClose, activeLot }: GlobalMapProps) {
         {/* Route Line */}
         <Polyline 
           positions={[colombiaCenter, [30.0, -40.0], hamburg]} 
-          color="#00FFB2" 
-          weight={2} 
-          dashArray="5, 10" 
-          opacity={0.5} 
+          color="#69CCC2" 
+          weight={2.5} 
+          dashArray="6, 10" 
+          opacity={0.85} 
         />
 
         {/* Farm Markers */}
         {farms.map((f: any, i: number) => (
-          <Marker key={i} position={[f.lat, f.lng]} icon={createNeonIcon('#00C87A')}>
-            <Tooltip direction="top" className="bg-black/90 text-white border border-[#00C87A]/50 text-xs p-2">
-              <p className="font-bold">{f.farm}</p>
-              <p className="text-[10px] text-slate-400">{f.name}</p>
-              <p className="text-[10px] text-[#00FFB2] font-mono mt-0.5">📍 {f.coordinates || `${f.lat.toFixed(4)}, ${f.lng.toFixed(4)}`}</p>
-              <p className="text-[#00C87A] font-mono font-bold mt-1">{f.volume} • ✓ SENTINEL-2 EUDR OK</p>
+          <Marker key={i} position={[f.lat, f.lng]} icon={createNeonIcon(f.eudrCleared === false ? '#FF7E7E' : '#83DF9C')}>
+            <Tooltip direction="top" className="bg-[#0C3C60] text-white border border-[#83DF9C]/50 text-xs p-2">
+              <p className="font-bold text-[#FAF2CA]">{f.farm}</p>
+              <p className="text-[10px] text-[#FAF2CA]/70">{f.name}</p>
+              <p className="text-[10px] text-[#69CCC2] font-mono mt-0.5">📍 {f.coordinates || `${f.lat.toFixed(4)}, ${f.lng.toFixed(4)}`}</p>
+              <p className="text-[#83DF9C] font-mono font-bold mt-1">{f.volume} • ✓ SENTINEL-2 EUDR OK</p>
             </Tooltip>
           </Marker>
         ))}

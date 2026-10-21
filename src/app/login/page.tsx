@@ -64,8 +64,6 @@ export default function LoginPage() {
         };
 
         const finalIdentity = await loadAndPersistProfile();
-        
-        // Guardar la sesión global para que otras partes del sistema lo lean si es necesario
         localStorage.setItem('axis-user', JSON.stringify({ email, name: finalIdentity.name, companyId: finalIdentity.companyId, role: finalIdentity.role }));
         
         setIsLoading(false);
@@ -73,50 +71,81 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-soft-white flex items-center justify-center p-6 relative overflow-hidden text-brand-navy" style={{ fontFamily: "var(--font-montserrat, 'Montserrat', sans-serif)" }}>
-            {/* Background elements to match the soft-white theme of AuthScreen */}
-            <div className="absolute inset-0 bg-gradient-to-b from-soft-white via-transparent to-soft-white z-0"></div>
-            <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+        <div className="min-h-screen bg-[#0C3C60] flex items-center justify-center p-6 relative overflow-hidden text-[#0C3C60]" style={{ fontFamily: "var(--font-montserrat, 'Montserrat', sans-serif)" }}>
+            {/* Subtle background coffee image + Navy mask */}
+            <div 
+                className="absolute inset-0 opacity-20 bg-cover bg-center pointer-events-none"
+                style={{ backgroundImage: 'url("/coffee_farm_hero_v2.png")' }}
+            />
+            <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: 'radial-gradient(circle at 50% 45%, rgba(12, 60, 96, 0.75) 0%, rgba(8, 40, 64, 0.96) 85%)' }}
+            />
+            {/* Technical grid & ambient glow */}
+            <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'linear-gradient(#FAF2CA 1px, transparent 1px), linear-gradient(90deg, #FAF2CA 1px, transparent 1px)', backgroundSize: '44px 44px' }}></div>
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#69CCC2]/15 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#83DF9C]/10 rounded-full blur-[120px] pointer-events-none"></div>
             
-            <div className="w-full max-w-md bg-white rounded-[2rem] p-10 sm:p-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative z-10 border border-brand-gray/50 animate-in fade-in duration-300">
-                <button onClick={() => router.push('/')} className="absolute top-8 right-8 text-brand-navy hover:text-brand-green transition-colors">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            {/* Login Card (#FAF2CA Beige on #0C3C60 Navy) */}
+            <div className="w-full max-w-md bg-[#FAF2CA] rounded-[2rem] p-10 sm:p-12 shadow-[0_25px_70px_-15px_rgba(0,0,0,0.5)] relative z-10 border border-white/20 animate-in fade-in duration-300">
+                <button
+                    onClick={() => router.push('/')}
+                    className="absolute top-7 right-7 w-9 h-9 rounded-full bg-[#0C3C60]/10 hover:bg-[#0C3C60] text-[#0C3C60] hover:text-[#FAF2CA] flex items-center justify-center transition-all cursor-pointer"
+                    title="Volver al inicio"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
-                <div className="mb-10 text-center">
-                    <img src="/logo.png" alt="AXISONE" className="h-28 mx-auto mb-6" />
-                    <p className="text-[10px] text-brand-green font-bold uppercase tracking-[0.2em]">Terminal de Control Maestro</p>
+
+                <div className="mb-9 text-center flex flex-col items-center">
+                    <img
+                        src="/logo-axisone.png"
+                        alt="AXISONE"
+                        className="h-24 mx-auto mb-5 object-contain"
+                        style={{ filter: 'brightness(0) saturate(100%) invert(18%) sepia(51%) saturate(1656%) hue-rotate(181deg) brightness(92%) contrast(94%)' }}
+                    />
+                    <div className="inline-flex items-center gap-2 bg-[#0C3C60] px-3.5 py-1 rounded-full shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-[#83DF9C] animate-pulse"></span>
+                        <p className="text-[9px] text-[#FAF2CA] font-black uppercase tracking-[0.18em]">Terminal de Control Maestro</p>
+                    </div>
                 </div>
-                <form onSubmit={handleSubmit} className="space-y-8">
+
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-brand-navy/40 uppercase tracking-widest">Usuario</label>
+                        <label className="text-[10px] font-black text-[#0C3C60]/70 uppercase tracking-widest block">Usuario / Cédula</label>
                         <input 
                             type="text" 
                             required 
-                            placeholder="user@email.com" 
+                            placeholder="demo@axisone.coffee" 
                             value={identifier} 
                             onChange={(e) => setIdentifier(e.target.value)} 
-                            className="w-full border-b border-black/10 px-0 py-3 text-sm focus:border-brand-green outline-none transition-all font-semibold text-brand-navy bg-transparent" 
+                            className="w-full bg-white/70 border border-[#0C3C60]/20 rounded-xl px-4 py-3.5 text-sm focus:border-[#0C3C60] focus:bg-white focus:ring-2 focus:ring-[#69CCC2]/40 outline-none transition-all font-bold text-[#0C3C60]" 
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-brand-navy/40 uppercase tracking-widest">Contraseña</label>
+                        <label className="text-[10px] font-black text-[#0C3C60]/70 uppercase tracking-widest block">Contraseña</label>
                         <input 
                             type="password" 
                             required 
                             placeholder="••••••••" 
                             value={password} 
                             onChange={(e) => setPassword(e.target.value)} 
-                            className="w-full border-b border-black/10 px-0 py-3 text-sm focus:border-brand-green outline-none transition-all font-semibold text-brand-navy bg-transparent" 
+                            className="w-full bg-white/70 border border-[#0C3C60]/20 rounded-xl px-4 py-3.5 text-sm focus:border-[#0C3C60] focus:bg-white focus:ring-2 focus:ring-[#69CCC2]/40 outline-none transition-all font-bold text-[#0C3C60]" 
                         />
                     </div>
                     <button 
                         type="submit" 
                         disabled={isLoading} 
-                        className="w-full bg-brand-green text-white font-bold py-4 rounded-xl transition-all shadow-xl shadow-brand-green/20 hover:shadow-brand-green/30 uppercase text-xs tracking-widest mt-10 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                        className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] text-[#FAF2CA] hover:text-[#0C3C60] font-black py-4 rounded-xl transition-all shadow-lg uppercase text-xs tracking-widest mt-6 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                     >
-                        {isLoading ? "Verificando..." : "Entrar al Sistema"}
+                        <span>{isLoading ? "Verificando..." : "Entrar al Sistema"}</span>
+                        <span>→</span>
                     </button>
                 </form>
+
+                <div className="mt-6 pt-5 border-t border-[#0C3C60]/10 flex items-center justify-between text-[10px] font-bold text-[#0C3C60]/60">
+                    <span>EUDR &amp; Traceability Hub</span>
+                    <span className="text-[#0C3C60] font-mono">v2.4 Verified</span>
+                </div>
             </div>
         </div>
     );

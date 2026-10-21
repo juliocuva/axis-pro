@@ -81,10 +81,10 @@ export default function ValueMissionPanel({ selectedLayerId }: ValueMissionPanel
       style={{ minHeight: '160px' }}
     >
       <div className={`flex-1 flex flex-col justify-center transition-opacity duration-300 ease-in-out ${fade ? 'opacity-0' : 'opacity-100'}`}>
-        <h2 className="text-4xl font-light text-slate-900 mb-3 tracking-tight">
+        <h2 className="text-4xl font-light text-[#0C3C60] mb-3 tracking-tight">
           {currentMessage.title}
         </h2>
-        <p className="text-[15px] leading-relaxed text-slate-500 font-medium max-w-lg">
+        <p className="text-[15px] leading-relaxed text-[#0C3C60]/70 font-medium max-w-lg">
           {currentMessage.description}
         </p>
       </div>
@@ -96,7 +96,7 @@ export default function ValueMissionPanel({ selectedLayerId }: ValueMissionPanel
               key={idx}
               onClick={() => handleNav(idx)}
               className={`rounded-full transition-all duration-300 ${
-                idx === currentIndex ? 'w-4 h-1.5 bg-slate-800' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400'
+                idx === currentIndex ? 'w-4 h-1.5 bg-[#0C3C60]' : 'w-1.5 h-1.5 bg-[#0C3C60]/25 hover:bg-[#0C3C60]/50'
               }`}
               aria-label={`Go to slide ${idx + 1}`}
             />

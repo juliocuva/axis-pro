@@ -60,7 +60,7 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
         };
 
         fetchRealPrices();
-        const priceInterval = setInterval(fetchRealPrices, 300000); // refresh every 5 min
+        const priceInterval = setInterval(fetchRealPrices, 300000);
 
         return () => {
             clearInterval(timer);
@@ -76,50 +76,50 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
     };
 
     return (
-        <div className="relative min-h-screen bg-white flex flex-col justify-between items-center text-center p-8 md:p-16 lg:p-24 overflow-hidden font-sans pt-32 pb-12">
+        <div className="relative min-h-screen bg-[#0C3C60] flex flex-col justify-between items-center text-center p-8 md:p-16 lg:p-24 overflow-hidden font-sans pt-32 pb-12">
             {/* Header Structure: Top Utility Bar + Main Navigation Bar */}
             <header className="fixed top-0 left-0 right-0 z-50 flex flex-col transition-all duration-300">
-                {/* 1. Top Utility Bar (Dark Navy #020814) */}
-                <div className="w-full bg-brand-dark-navy border-b border-white/10 text-white text-[11px] py-3 px-6 md:px-12 flex items-center justify-between font-sans shadow-sm">
+                {/* 1. Top Utility Bar (#082840) */}
+                <div className="w-full bg-[#082840] border-b border-white/10 text-white text-[11px] py-3 px-6 md:px-12 flex items-center justify-between font-sans shadow-sm">
                     <div className="flex items-center gap-6">
-                        <span className="inline-flex items-center gap-1.5 bg-brand-green/20 border border-brand-green/40 text-brand-green font-black px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-wider">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
+                        <span className="inline-flex items-center gap-1.5 bg-[#83DF9C]/20 border border-[#83DF9C]/40 text-[#83DF9C] font-black px-2.5 py-0.5 rounded-full text-[9px] uppercase tracking-wider">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#83DF9C] animate-pulse"></span>
                             {marketData.isReal ? 'LIVE MARKET DATA' : 'ECOSYSTEM v2.4 LIVE'}
                         </span>
                         
                         {/* 3 Separate Real Coffee Market Price Badges */}
-                        <div className="hidden xl:flex items-center gap-8 select-none">
+                        <div className="hidden xl:flex items-center gap-6 select-none">
                             {/* 1. ICE COFFEE C */}
-                            <div className="flex items-center gap-2.5 bg-white/5 px-4 py-1 rounded-full border border-white/10 text-[10px]">
-                                <span className="text-white/60 font-bold uppercase tracking-wider text-[9px]">ICE C:</span>
+                            <div className="flex items-center gap-2 bg-white/5 px-3.5 py-0.5 rounded-full border border-white/10 text-[10px]">
+                                <span className="text-[#FAF2CA]/70 font-bold uppercase tracking-wider text-[9px]">ICE C:</span>
                                 <span className="font-mono font-bold text-white">{marketData.iceCoffee.formatted} <span className="text-[8px] text-white/50">USD/lb</span></span>
-                                <span className={`font-mono font-bold text-[9px] ${marketData.iceCoffee.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                <span className={`font-mono font-bold text-[9px] ${marketData.iceCoffee.isUp ? 'text-[#83DF9C]' : 'text-[#FF7E7E]'}`}>
                                     {marketData.iceCoffee.isUp ? '▲' : '▼'} {marketData.iceCoffee.change}
                                 </span>
                             </div>
 
                             {/* 2. CARGA FNC */}
-                            <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10 text-[10px]">
-                                <span className="text-white/60 font-bold uppercase tracking-wider text-[9px]">CARGA FNC:</span>
+                            <div className="flex items-center gap-2 bg-white/5 px-3.5 py-0.5 rounded-full border border-white/10 text-[10px]">
+                                <span className="text-[#FAF2CA]/70 font-bold uppercase tracking-wider text-[9px]">CARGA FNC:</span>
                                 <span className="font-mono font-bold text-white">{marketData.cargaFnc.value} <span className="text-[8px] text-white/50">COP</span></span>
-                                <span className={`font-mono font-bold text-[9px] ${marketData.cargaFnc.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                <span className={`font-mono font-bold text-[9px] ${marketData.cargaFnc.isUp ? 'text-[#83DF9C]' : 'text-[#FF7E7E]'}`}>
                                     {marketData.cargaFnc.isUp ? '▲' : '▼'} {marketData.cargaFnc.change}
                                 </span>
                             </div>
 
                             {/* 3. TRM */}
-                            <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10 text-[10px]">
-                                <span className="text-white/60 font-bold uppercase tracking-wider text-[9px]">TRM:</span>
+                            <div className="flex items-center gap-2 bg-white/5 px-3.5 py-0.5 rounded-full border border-white/10 text-[10px]">
+                                <span className="text-[#FAF2CA]/70 font-bold uppercase tracking-wider text-[9px]">TRM:</span>
                                 <span className="font-mono font-bold text-white">{marketData.trm.value} <span className="text-[8px] text-white/50">COP</span></span>
-                                <span className={`font-mono font-bold text-[9px] ${marketData.trm.isUp ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                <span className={`font-mono font-bold text-[9px] ${marketData.trm.isUp ? 'text-[#83DF9C]' : 'text-[#FF7E7E]'}`}>
                                     {marketData.trm.isUp ? '▲' : '▼'} {marketData.trm.change}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-5 text-white/80 font-medium">
-                        <a href="https://www.becoffee.pro" target="_blank" rel="noopener noreferrer" className="hover:text-brand-green transition-colors hidden sm:inline-block text-[10px] uppercase tracking-wider">
+                    <div className="flex items-center gap-5 text-[#FAF2CA]/80 font-medium">
+                        <a href="https://www.becoffee.pro" target="_blank" rel="noopener noreferrer" className="hover:text-[#83DF9C] transition-colors hidden sm:inline-block text-[10px] uppercase tracking-wider">
                             BeCoffee.pro ↗
                         </a>
                         <span className="hidden sm:inline text-white/20">|</span>
@@ -128,14 +128,14 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                         <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 px-2.5 py-0.5 rounded-full text-[10px] font-black text-white select-none">
                             <span 
                                 onClick={() => setLang('EN')} 
-                                className={`cursor-pointer transition-all duration-200 hover:scale-110 ${lang === 'EN' ? 'text-brand-green font-black scale-105' : 'text-white/60 opacity-80 hover:opacity-100'}`}
+                                className={`cursor-pointer transition-all duration-200 hover:scale-110 ${lang === 'EN' ? 'text-[#83DF9C] font-black scale-105' : 'text-white/60 opacity-80 hover:opacity-100'}`}
                             >
                                 EN
                             </span>
                             <span className="text-white/30">|</span>
                             <span 
                                 onClick={() => setLang('ES')} 
-                                className={`cursor-pointer transition-all duration-200 hover:scale-110 ${lang === 'ES' ? 'text-brand-green font-black scale-105' : 'text-white/60 opacity-80 hover:opacity-100'}`}
+                                className={`cursor-pointer transition-all duration-200 hover:scale-110 ${lang === 'ES' ? 'text-[#83DF9C] font-black scale-105' : 'text-white/60 opacity-80 hover:opacity-100'}`}
                             >
                                 ES
                             </span>
@@ -143,8 +143,8 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                     </div>
                 </div>
 
-                {/* 2. Main Navigation Header (Glassmorphism) */}
-                <div className="flex items-center justify-between px-6 md:px-12 py-3 bg-white/50 backdrop-blur-md border-b border-gray-100/60 shadow-sm">
+                {/* 2. Main Navigation Header (Warm Parchment #FAF2CA Glassmorphism) */}
+                <div className="flex items-center justify-between px-6 md:px-12 py-3 bg-[#FAF2CA]/90 backdrop-blur-md border-b border-[#0C3C60]/15 shadow-sm">
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                         <img 
                             src="/logo.png" 
@@ -156,26 +156,26 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                     <nav className="flex items-center gap-4 md:gap-8">
                         <button 
                             onClick={() => scrollToSection('toolbox')}
-                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand-navy hover:text-brand-green transition-colors"
+                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#0C3C60] hover:text-[#0C3C60]/60 transition-colors cursor-pointer"
                         >
                             Toolbox
                         </button>
                         <button 
                             onClick={() => scrollToSection('roadmap')}
-                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand-navy hover:text-brand-green transition-colors"
+                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#0C3C60] hover:text-[#0C3C60]/60 transition-colors cursor-pointer"
                         >
                             Roadmap
                         </button>
                         <button 
                             onClick={() => scrollToSection('contact')}
-                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand-navy hover:text-brand-green transition-colors"
+                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#0C3C60] hover:text-[#0C3C60]/60 transition-colors cursor-pointer"
                         >
                             Contact
                         </button>
                         
                         <a 
                             href="/commercial/evidence"
-                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-brand-green hover:text-brand-navy transition-colors bg-brand-green/10 px-4 py-1.5 rounded-full"
+                            className="text-xs md:text-sm font-bold uppercase tracking-wider text-[#0C3C60] hover:bg-[#0C3C60] hover:text-[#FAF2CA] transition-colors bg-[#0C3C60]/10 border border-[#0C3C60]/20 px-4 py-1.5 rounded-full"
                         >
                             Commercial Evidence
                         </a>
@@ -183,7 +183,7 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                         {/* Primary CTA Button */}
                         <button 
                             onClick={onLoginClick} 
-                            className="bg-brand-green hover:bg-brand-navy text-white px-5 md:px-7 py-2.5 md:py-3 rounded-full font-black uppercase tracking-widest text-[11px] md:text-xs transition-all shadow-md hover:scale-105 active:scale-95 flex items-center gap-2"
+                            className="bg-[#0C3C60] hover:bg-[#83DF9C] text-[#FAF2CA] hover:text-[#0C3C60] px-5 md:px-7 py-2.5 md:py-3 rounded-full font-black uppercase tracking-widest text-[11px] md:text-xs transition-all shadow-md hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer"
                         >
                             <span>Access axisONE</span>
                             <span className="text-xs">→</span>
@@ -192,7 +192,7 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                 </div>
             </header>
 
-            {/* Background Image Slider - Sharp & Defined */}
+            {/* Background Image Slider */}
             <div className="absolute inset-0 z-0 overflow-hidden">
                 {heroSlides.map((slide, idx) => (
                     <div
@@ -210,43 +210,37 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                 ))}
             </div>
             
-            {/* Brand Navy Blue Overlay Mask with 100% Side Opacity */}
+            {/* Brand Navy Blue (#0C3C60) Overlay Mask */}
             <div 
                 className="absolute inset-0 z-0 pointer-events-none"
                 style={{
-                    background: 'radial-gradient(circle at 50% 45%, rgba(0, 20, 48, 0.15) 0%, rgba(0, 20, 48, 0.50) 50%, rgba(0, 20, 48, 1.0) 90%)'
+                    background: 'radial-gradient(circle at 50% 45%, rgba(12, 60, 96, 0.25) 0%, rgba(12, 60, 96, 0.65) 55%, rgba(12, 60, 96, 0.98) 92%)'
                 }}
             ></div>
 
             {/* Hero Main Content */}
             <div className="relative z-10 max-w-4xl flex flex-col items-center mt-32 my-auto">
-
-
-
-                {/* Main Heading - All White */}
-                <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-[1.1] tracking-tight mb-6 w-full px-4 drop-shadow-sm">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-[#FAF2CA] leading-[1.1] tracking-tight mb-6 w-full px-4 drop-shadow-sm">
                     Commercial Coffee<br />
-                    Traceability & EUDR.
+                    Traceability &amp; EUDR.
                 </h1>
 
-                {/* Subheading - All White */}
                 <p className="text-lg md:text-xl text-white font-medium max-w-5xl mb-6 leading-relaxed">
                     Turn volume coffee into verified, transparent, and EUDR-compliant<br />
                     digital packages for international buyers.
                 </p>
 
-                {/* Bullet Point - All White */}
                 <div className="flex items-center gap-3 text-white mb-4">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-white/60 flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-white">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-[#83DF9C] flex items-center justify-center bg-[#83DF9C]/20 backdrop-blur-sm">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#83DF9C]">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                     </div>
-                    <p className="font-bold text-sm md:text-base text-white">
+                    <p className="font-bold text-sm md:text-base text-[#FAF2CA]">
                         Stop reacting to compliance requests. Be proactive with{' '}
                         <span className="inline-block">
                             <span className="font-azonix text-white text-[0.92em]">AXIS</span>
-                            <span className="font-montserrat-black text-white">one</span>
+                            <span className="font-montserrat-black text-[#69CCC2]">one</span>
                         </span>.
                     </p>
                 </div>
@@ -255,12 +249,12 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
             {/* Bottom Slider Controls & Current Process Badge */}
             <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between w-full max-w-5xl px-6 pt-6 border-t border-white/15 gap-4">
                 <div className="flex items-center gap-3 text-left">
-                    <span className="w-2.5 h-2.5 rounded-full bg-brand-green animate-ping"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#83DF9C] animate-ping"></span>
                     <div>
-                        <span className="text-[10px] font-black tracking-widest text-white/80 uppercase block mb-0.5">
+                        <span className="text-[10px] font-black tracking-widest text-[#69CCC2] uppercase block mb-0.5">
                             {heroSlides[currentSlide].tag}
                         </span>
-                        <span className="text-sm font-bold text-white tracking-wide">
+                        <span className="text-sm font-bold text-[#FAF2CA] tracking-wide">
                             {heroSlides[currentSlide].title}
                         </span>
                     </div>
@@ -272,9 +266,9 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                         <button
                             key={idx}
                             onClick={() => setCurrentSlide(idx)}
-                            className={`h-2.5 rounded-full transition-all duration-300 ${
+                            className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
                                 idx === currentSlide 
-                                    ? 'w-8 bg-brand-green' 
+                                    ? 'w-8 bg-[#83DF9C]' 
                                     : 'w-2.5 bg-white/40 hover:bg-white/80'
                             }`}
                             aria-label={`Go to slide ${idx + 1}`}
@@ -283,8 +277,8 @@ export default function HeroSection({ onLoginClick }: { onLoginClick: () => void
                 </div>
             </div>
 
-            {/* Bottom gradient transition into Target Audience (navy) */}
-            <div className="absolute bottom-0 left-0 right-0 h-48 z-[5] pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(0, 20, 48, 0.6) 40%, rgba(0, 20, 48, 1) 100%)' }}></div>
+            {/* Bottom gradient transition into Target Audience (#0C3C60) */}
+            <div className="absolute bottom-0 left-0 right-0 h-48 z-[5] pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(12, 60, 96, 0.7) 40%, rgba(12, 60, 96, 1) 100%)' }}></div>
         </div>
     );
 }

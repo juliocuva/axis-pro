@@ -77,55 +77,52 @@ const audiences = [
 
 export default function TargetAudienceSection() {
     return (
-        <section className="py-24 bg-brand-navy relative z-20 overflow-hidden">
+        <section className="py-24 bg-[#0C3C60] relative z-20 overflow-hidden">
             {/* Decorative Background Elements */}
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-green/5 rounded-full blur-[120px] pointer-events-none"></div>
-            <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-brand-green/3 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#69CCC2]/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#83DF9C]/10 rounded-full blur-[100px] pointer-events-none"></div>
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* Header */}
                 <div className="text-center mb-16 max-w-3xl mx-auto">
-                    <div className="inline-flex items-center gap-2 bg-brand-green/10 border border-brand-green/25 px-3.5 py-1.5 rounded-full mb-6">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                        <span className="text-[10px] font-black tracking-widest text-brand-green uppercase">Who Is It For</span>
+                    <div className="inline-flex items-center gap-2 bg-[#FAF2CA]/10 border border-[#FAF2CA]/25 px-3.5 py-1.5 rounded-full mb-6">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#83DF9C] animate-pulse"></span>
+                        <span className="text-[10px] font-black tracking-widest text-[#FAF2CA] uppercase">Who Is It For</span>
                     </div>
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight mb-4">
                         Designed for those who make<br />
-                        <span className="text-brand-green">great coffee possible.</span>
+                        <span className="text-[#FAF2CA]">great coffee possible.</span>
                     </h2>
-                    <p className="text-white/50 text-sm md:text-base font-medium max-w-xl mx-auto">
+                    <p className="text-[#FAF2CA]/70 text-sm md:text-base font-medium max-w-xl mx-auto">
                         From farm to cup, every role in the supply chain has a tool built for their workflow.
                     </p>
                 </div>
 
-                {/* Cards Grid: 3 top + 2 bottom centered */}
+                {/* Cards Grid in #FAF2CA Beige on #0C3C60 Navy */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
                     {audiences.map((item, idx) => (
                         <div 
                             key={idx} 
-                            className="group relative bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-brand-green/40 rounded-2xl p-8 transition-all duration-500 cursor-default hover:-translate-y-1.5"
+                            className="group relative bg-[#FAF2CA] border border-[#0C3C60]/15 hover:border-[#69CCC2] hover:ring-2 hover:ring-[#69CCC2]/40 rounded-3xl p-8 transition-all duration-500 cursor-default hover:-translate-y-1.5 shadow-xl"
                         >
-                            {/* Glow effect on hover */}
-                            <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-brand-green/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
                             <div className="relative z-10">
                                 {/* Icon */}
-                                <div className="w-14 h-14 rounded-xl bg-brand-green/10 border border-brand-green/20 flex items-center justify-center text-brand-green mb-6 group-hover:bg-brand-green group-hover:text-white group-hover:border-brand-green group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(0,96,86,0.4)] transition-all duration-500">
+                                <div className="w-14 h-14 rounded-2xl bg-[#0C3C60] flex items-center justify-center text-[#FAF2CA] mb-6 group-hover:bg-[#83DF9C] group-hover:text-[#0C3C60] group-hover:scale-110 transition-all duration-500 shadow-md">
                                     {item.icon}
                                 </div>
 
                                 {/* Tag */}
-                                <span className="text-[9px] font-black text-brand-green/70 uppercase tracking-[0.15em] mb-3 block group-hover:text-brand-green transition-colors">
+                                <span className="text-[9px] font-black text-[#0C3C60]/60 uppercase tracking-[0.15em] mb-2 block">
                                     {item.stat}
                                 </span>
 
                                 {/* Title */}
-                                <h3 className="text-xl font-black text-white mb-3 tracking-tight group-hover:text-brand-green transition-colors duration-300">
+                                <h3 className="text-xl font-black text-[#0C3C60] mb-3 tracking-tight">
                                     {item.title}
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-white/50 text-sm leading-relaxed font-medium group-hover:text-white/70 transition-colors duration-300">
+                                <p className="text-[#0C3C60]/75 text-sm leading-relaxed font-medium">
                                     {item.description}
                                 </p>
                             </div>

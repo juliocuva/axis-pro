@@ -24,9 +24,12 @@ module.exports = {
             },
             colors: {
                 brand: {
-                    green: "#006056",
-                    navy: "#001430",
-                    "dark-navy": "#020814",
+                    green: "#83DF9C",
+                    navy: "#0C3C60",
+                    "dark-navy": "#082840",
+                    beige: "#FAF2CA",
+                    teal: "#69CCC2",
+                    coral: "#FF7E7E",
                     gray: "#d1d3d4",
                     "industrial-gray": "#d4d8e0",
                 },
