@@ -140,7 +140,7 @@ export default function PublicCaminataDigitalPage() {
                         </div>
                         <div>
                             <p className="text-[11px] sm:text-xs font-black uppercase text-[#0C3C60]">Recorrido en Campo</p>
-                            <p className="text-[10px] text-[#0C3C60]/70 mt-0.5 leading-tight">Captura vértices GPS caminando o ingresa datos SICA.</p>
+                            <p className="text-[10px] text-[#0C3C60]/70 mt-0.5 leading-tight">Captura vértices GPS caminando alrededor del perímetro.</p>
                         </div>
                     </div>
 

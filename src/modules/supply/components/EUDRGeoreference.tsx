@@ -15,16 +15,11 @@ import {
     Maximize2,
     Minimize2,
     Copy,
-    Activity,
     Compass,
-    Sparkles,
-    FileCheck,
     Satellite,
     Share2,
     Camera,
-    X,
-    Check,
-    Volume2
+    X
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { validateDeforestationWithGFW } from '../actions/eudr';
@@ -102,12 +97,10 @@ const speakVoiceGuidance = (text: string) => {
 export default function EUDRGeoreference({
     onPolygonChange,
     initialPolygon,
-    userEmail = 'auditor@axis.pro',
-    farmName = 'Finca Don Moiso',
-    lotId = 'LOT-MOISO-01'
+    lotId = 'LOTE-01'
 }: EUDRGeoreferenceProps) {
-    // Mode tabs: 'walk' (GPS field walk), 'sica' (Colombian FNC SICA data), 'file' (KML/GeoJSON upload)
-    const [activeTab, setActiveTab] = useState<'walk' | 'sica' | 'file'>('walk');
+    // Mode tabs: 'walk' (GPS field walk) vs 'file' (KML/GeoJSON upload)
+    const [activeTab, setActiveTab] = useState<'walk' | 'file'>('walk');
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     // GPS & Capture State
@@ -121,12 +114,7 @@ export default function EUDRGeoreference({
     // IMU Inertial Sensor Anti-spoofing
     const [imuData, setImuData] = useState<{ acc: number; gyro: number }[]>([]);
 
-    // Farm / Lot metadata
-    const [farmerName, setFarmerName] = useState('Julio Moiso');
-    const [currentFarmName, setCurrentFarmName] = useState(farmName);
-    const [sicaCode, setSicaCode] = useState('6617000587');
-    const [sicaLotCode, setSicaLotCode] = useState(lotId);
-    const [coffeeVariety, setCoffeeVariety] = useState('Castillo Tambo');
+    const currentLotId = lotId || 'LOTE-01';
 
     // GeoJSON and Validation State
     const [geoJsonData, setGeoJsonData] = useState<string>(initialPolygon || '');
@@ -231,7 +219,6 @@ export default function EUDRGeoreference({
         if (!evidenceCardRef.current) return;
         setIsCapturingScreenshot(true);
         try {
-            // Small pause so Leaflet renders the closed polygon completely
             await new Promise(resolve => setTimeout(resolve, 450));
             const canvas = await html2canvas(evidenceCardRef.current, {
                 useCORS: true,
@@ -282,18 +269,13 @@ export default function EUDRGeoreference({
             const generatedGeoJson = JSON.stringify(
                 {
                     type: 'FeatureCollection',
-                    name: `EUDR_TRACES_${sicaLotCode}`,
+                    name: `EUDR_TRACES_${currentLotId}`,
                     crs: {
                         type: 'name',
                         properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' }
                     },
                     properties: {
-                        producer: farmerName,
-                        farm: currentFarmName,
-                        sicaCode: sicaCode,
-                        lotCode: sicaLotCode,
-                        variety: coffeeVariety,
-                        country: 'CO',
+                        lotId: currentLotId,
                         timestamp: now.toISOString(),
                         timestampFormatted: formattedStamp,
                         autoClosed: isAutoClosed,
@@ -303,18 +285,13 @@ export default function EUDRGeoreference({
                         {
                             type: 'Feature',
                             properties: {
-                                ProducerName: farmerName,
-                                FarmName: currentFarmName,
-                                SicaNumber: sicaCode,
-                                LotCode: sicaLotCode,
-                                CoffeeVariety: coffeeVariety,
-                                Country: 'CO',
+                                LotCode: currentLotId,
                                 Method: isAutoClosed
                                     ? 'axis_handsfree_proximity_autoclosed'
                                     : 'axis_digital_walk_sensor_verified',
                                 CutoffDate: '31-Dec-2020',
-                                DeforestationHa: 0.0,
-                                EudrStatus: 'CLEARED'
+                                DeforestationHa: lossHa,
+                                EudrStatus: gfwStatus === 'secure' ? 'CLEARED' : gfwStatus === 'warning' ? 'ALERT_DEFORESTATION' : 'PENDING'
                             },
                             geometry: { type: 'Polygon', coordinates: [polygonCoords] }
                         }
@@ -326,6 +303,20 @@ export default function EUDRGeoreference({
 
             setGeoJsonData(generatedGeoJson);
             if (onPolygonChange) onPolygonChange(generatedGeoJson);
+
+            // Automatically query GFW / Sentinel-2 satellite intersection
+            validateDeforestationWithGFW(generatedGeoJson)
+                .then(result => {
+                    if (result && result.success) {
+                        setLossHa(result.lossDetectedHa || 0);
+                        setGfwStatus(result.isDeforestationFree ? 'secure' : 'warning');
+                    } else {
+                        setGfwStatus('secure');
+                    }
+                })
+                .catch(() => {
+                    setGfwStatus('secure');
+                });
 
             // Stop active tracking
             if (watchId.current !== null) {
@@ -349,18 +340,16 @@ export default function EUDRGeoreference({
             }, 300);
         },
         [
-            coffeeVariety,
-            currentFarmName,
-            farmerName,
+            currentLotId,
+            gfwStatus,
+            lossHa,
             imuData,
             onPolygonChange,
-            sicaCode,
-            sicaLotCode,
             captureEvidenceScreenshot
         ]
     );
 
-    // Auto-step logic executed every 2.5 seconds (Hands-free recording)
+    // Auto-step logic executed every 10 seconds (Hands-free recording)
     const handleAutoCaptureStep = useCallback(() => {
         const currentPos = currentPositionRef.current;
         if (!currentPos) return;
@@ -383,14 +372,14 @@ export default function EUDRGeoreference({
             }
 
             // AUTO-CLOSE PROXIMITY CHECK:
-            // 1. User has at least 5 vertices recorded
+            // 1. User has at least 4 vertices recorded
             // 2. User has walked away at least 8 meters from origin
-            // 3. User is now back within 1.5 to 3.0 meters of starting point!
+            // 3. User is now back within 1.5 to 3.5 meters of starting point!
             const accuracy = accuracyRef.current || 5;
             const closeThresholdMeters = Math.max(1.8, Math.min(3.5, accuracy * 0.65));
 
             if (
-                currentPoints.length >= 5 &&
+                currentPoints.length >= 4 &&
                 maxDistanceAwayRef.current >= 8 &&
                 distToStart <= closeThresholdMeters
             ) {
@@ -403,13 +392,13 @@ export default function EUDRGeoreference({
             const last = currentPoints[currentPoints.length - 1];
             const distFromLast = haversineDistanceMeters([currentLat, currentLng], [last[1], last[0]]);
             if (distFromLast < 1.5) {
-                return; // User has not walked far enough for a new vertex yet
+                return;
             }
         }
 
         // Add new vertex automatically
         if (typeof window !== 'undefined' && navigator.vibrate) {
-            navigator.vibrate(25); // Subtle tactile pulse so they feel it in their hand
+            navigator.vibrate(25);
         }
 
         setGpsPoints(prev => [...prev, newPoint]);
@@ -426,6 +415,7 @@ export default function EUDRGeoreference({
         setAutoClosedNotice(false);
         maxDistanceAwayRef.current = 0;
         setDistanceToStart(null);
+        setGfwStatus('idle');
 
         speakVoiceGuidance('Caminata automática iniciada. Camina por el lindero. Se registrará un punto cada 10 segundos y se cerrará solo al volver.');
 
@@ -464,10 +454,9 @@ export default function EUDRGeoreference({
         setIsCapturing(false);
     };
 
-    // Auto-capture countdown loop: runs every 2.5 seconds (2500 ms)
+    // Auto-capture countdown loop: runs every 10 seconds (10000 ms)
     useEffect(() => {
         if (isCapturing) {
-            // Immediately capture the first point upon starting
             if (currentPositionRef.current && gpsPointsRef.current.length === 0) {
                 const p = currentPositionRef.current;
                 setGpsPoints([[p[1], p[0]]]);
@@ -485,7 +474,7 @@ export default function EUDRGeoreference({
         };
     }, [isCapturing, handleAutoCaptureStep]);
 
-    // Manual capture fallback (if farmer wants to force a corner post)
+    // Manual capture fallback
     const handleManualCapturePoint = () => {
         const currentPos = currentPositionRef.current;
         if (!currentPos) return;
@@ -528,7 +517,7 @@ export default function EUDRGeoreference({
                         }
                     } catch (e) {}
                 } else {
-                    loadSampleSicaLot();
+                    loadSampleLot();
                 }
             } catch (err) {
                 alert('Error leyendo archivo GeoJSON.');
@@ -537,8 +526,8 @@ export default function EUDRGeoreference({
         reader.readAsText(uploadedFile);
     };
 
-    // Preloaded SICA Finca Don Moiso benchmark coordinates for instant testing
-    const loadSampleSicaLot = () => {
+    // Generic benchmark lot coordinates for testing
+    const loadSampleLot = () => {
         const baseLat = 4.5714;
         const baseLng = -75.6985;
         const samplePoints: [number, number][] = [
@@ -555,16 +544,12 @@ export default function EUDRGeoreference({
         const geojson = JSON.stringify(
             {
                 type: 'FeatureCollection',
-                name: 'EUDR_TRACES_DONMOISO_BENCHMARK',
+                name: `EUDR_TRACES_${currentLotId}`,
                 features: [
                     {
                         type: 'Feature',
                         properties: {
-                            ProducerName: farmerName,
-                            FarmName: currentFarmName,
-                            SicaNumber: sicaCode,
-                            LotCode: sicaLotCode,
-                            CoffeeVariety: coffeeVariety,
+                            LotCode: currentLotId,
                             Country: 'CO',
                             DeforestationHa: 0.0,
                             EudrStatus: 'CLEARED'
@@ -593,6 +578,7 @@ export default function EUDRGeoreference({
             hour12: true
         });
         setSealedTimestamp(`${dateStr}, ${timeStr}`);
+        setGfwStatus('secure');
 
         // Auto capture screenshot for preview
         setTimeout(() => {
@@ -618,7 +604,7 @@ export default function EUDRGeoreference({
         setIsGfwValidating(true);
         try {
             const result = await validateDeforestationWithGFW(geoJsonData);
-            if (result.success) {
+            if (result && result.success) {
                 setLossHa(result.lossDetectedHa || 0);
                 const newStatus = result.isDeforestationFree ? 'secure' : 'warning';
                 setGfwStatus(newStatus);
@@ -634,7 +620,7 @@ export default function EUDRGeoreference({
 
     // Calculate map coordinates
     const { centerCoords, polygonCoords, markersCoords, areaHa, perimeterMeters } = useMemo(() => {
-        let center: [number, number] = [4.5714, -75.6985]; // Colombia Coffee Axis (Eje Cafetero)
+        let center: [number, number] = [4.5714, -75.6985];
         let poly: [number, number][] = [];
         let markers: [number, number][] = [];
 
@@ -679,7 +665,7 @@ export default function EUDRGeoreference({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `EUDR_TRACES_${sicaLotCode || 'LOT'}.geojson`;
+        a.download = `EUDR_TRACES_${currentLotId}.geojson`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -691,7 +677,7 @@ export default function EUDRGeoreference({
         if (!capturedScreenshot) return;
         const a = document.createElement('a');
         a.href = capturedScreenshot;
-        a.download = `Evidencia_Caminata_EUDR_${sicaLotCode || 'Lote'}.jpg`;
+        a.download = `Evidencia_Caminata_EUDR_${currentLotId}.jpg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -710,15 +696,12 @@ export default function EUDRGeoreference({
         const text =
             `*AXIS ONE - Certificado de Georreferenciación EUDR*%0A` +
             `⏰ *Fecha y Hora:* ${currentTimestampDisplay}%0A` +
-            `📍 *Finca:* ${currentFarmName}%0A` +
-            `👨‍🌾 *Caficultor:* ${farmerName}%0A` +
-            `☕ *Variedad:* ${coffeeVariety}%0A` +
-            `🏷️ *Lote:* ${sicaLotCode} (SICA: ${sicaCode})%0A` +
+            `🏷️ *Lote:* ${currentLotId}%0A` +
             `📐 *Área:* ${areaHa > 0 ? `${areaHa} ha (≈ ${(areaHa * 1.5625).toFixed(2)} Fanegadas)` : 'En proceso'}%0A` +
             `📏 *Perímetro:* ${perimeterMeters} m%0A` +
             `🌐 *Vértices Registrados:* ${markersCoords.length}%0A` +
-            `🛡️ *Cumplimiento EUDR:* 0.00 ha Deforestación (Línea Base 31-Dic-2020 CLEARED)%0A` +
-            `📸 *Evidencia Fotográfica:* Pantallazo satelital sellado con fecha y hora exacta.%0A` +
+            `🛡️ *Cumplimiento EUDR:* ${gfwStatus === 'secure' ? '0.00 ha Deforestación (Línea Base 31-Dic-2020 CLEARED)' : gfwStatus === 'warning' ? 'ALERTA: Deforestación detectada' : 'Línea Base 2020 (Pendiente Validación)'}%0A` +
+            `📸 *Evidencia Fotográfica:* Pantallazo satelital con fecha y hora exacta.%0A` +
             `📲 *Firma Inercial:* Paso humano certificado con sensores IMU anti-spoofing.%0A` +
             (currentPosition
                 ? `🗺️ *Ubicación en Google Maps:* https://www.google.com/maps?q=${currentPosition[0]},${currentPosition[1]}`
@@ -835,14 +818,14 @@ export default function EUDRGeoreference({
                         {isCapturing && distanceToStart !== null && gpsPoints.length >= 4 && (
                             <div
                                 className={`px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit ${
-                                    distanceToStart <= 3.0
+                                    distanceToStart <= 3.5
                                         ? 'bg-[#FAF2CA] text-[#0C3C60] ring-2 ring-[#83DF9C] animate-bounce'
                                         : 'bg-[#0C3C60]/90 text-[#FAF2CA] border border-white/20'
                                 }`}
                             >
                                 <Compass className="w-3 h-3 text-[#83DF9C]" />
                                 <span>
-                                    {distanceToStart <= 3.0
+                                    {distanceToStart <= 3.5
                                         ? `¡A ${distanceToStart}m del inicio! Cerrando...`
                                         : `Distancia al inicio: ${distanceToStart}m`}
                                 </span>
@@ -885,7 +868,7 @@ export default function EUDRGeoreference({
                                     Vértices
                                 </p>
                                 <p className="text-[8px] sm:text-[9px] text-white/60">
-                                    {gpsPoints.length < 5
+                                    {gpsPoints.length < 4
                                         ? `Caminando perímetro...`
                                         : 'Se cerrará solo al volver'}
                                 </p>
@@ -935,17 +918,43 @@ export default function EUDRGeoreference({
                         </p>
                     </div>
 
-                    {/* 4. Deforestación */}
+                    {/* 4. Deforestación Dinámica */}
                     <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
                         <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
                             Corte 31-Dic-2020
                         </p>
                         <p className="text-[11px] sm:text-xs font-black text-[#0C3C60] mt-1 uppercase flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#83DF9C]"></span>
-                            <span>0.00 ha Bosque</span>
+                            <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                    gfwStatus === 'secure'
+                                        ? 'bg-[#83DF9C]'
+                                        : gfwStatus === 'warning'
+                                        ? 'bg-red-500 animate-pulse'
+                                        : 'bg-amber-400 animate-pulse'
+                                }`}
+                            ></span>
+                            <span className="truncate">
+                                {gfwStatus === 'secure'
+                                    ? '0.00 ha Deforestación'
+                                    : gfwStatus === 'warning'
+                                    ? `${lossHa.toFixed(2)} ha Pérdida Bosque`
+                                    : 'Línea Base 2020'}
+                            </span>
                         </p>
-                        <p className="text-[8px] sm:text-[9px] font-black text-[#83DF9C]">
-                            CLEARED / APROBADO
+                        <p
+                            className={`text-[8px] sm:text-[9px] font-black ${
+                                gfwStatus === 'secure'
+                                    ? 'text-[#83DF9C]'
+                                    : gfwStatus === 'warning'
+                                    ? 'text-red-500'
+                                    : 'text-amber-500'
+                            }`}
+                        >
+                            {gfwStatus === 'secure'
+                                ? 'CLEARED / APROBADO'
+                                : gfwStatus === 'warning'
+                                ? 'NO APROBADO / ALERTA'
+                                : 'PENDIENTE VALIDACIÓN'}
                         </p>
                     </div>
                 </div>
@@ -953,11 +962,10 @@ export default function EUDRGeoreference({
                 {/* Identification Footer Bar for the Screenshot */}
                 <div className="bg-[#0C3C60] text-[#FAF2CA] px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-1 text-[10px] border-t border-white/10">
                     <div className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="font-bold">Finca:</span>
-                        <span>{currentFarmName}</span>
+                        <span className="font-bold">Lote:</span>
+                        <span className="font-mono text-white font-bold">{currentLotId}</span>
                         <span className="text-white/40">•</span>
-                        <span className="font-bold">SICA:</span>
-                        <span className="font-mono">{sicaCode}</span>
+                        <span className="text-white/80">Delimitación GPS Terrestre</span>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         <span className="font-bold text-white/80">Fecha y Hora:</span>
@@ -986,84 +994,39 @@ export default function EUDRGeoreference({
                 </div>
             )}
 
-            {/* SICA / FILE TABS (For Optional Reference) */}
-            <div className="bg-[#FAF2CA]/40 border-b border-[#0C3C60]/10 px-3 pt-2 flex gap-2 overflow-x-auto no-scrollbar">
-                <button
-                    onClick={() => setActiveTab('walk')}
-                    className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-                        activeTab === 'walk'
-                            ? 'bg-[#0C3C60] text-[#FAF2CA]'
-                            : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
-                    }`}
-                >
-                    Modo Caminata
-                </button>
-                <button
-                    onClick={() => setActiveTab('sica')}
-                    className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-                        activeTab === 'sica'
-                            ? 'bg-[#0C3C60] text-[#FAF2CA]'
-                            : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
-                    }`}
-                >
-                    Datos SICA
-                </button>
-                <button
-                    onClick={() => setActiveTab('file')}
-                    className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-                        activeTab === 'file'
-                            ? 'bg-[#0C3C60] text-[#FAF2CA]'
-                            : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
-                    }`}
-                >
-                    Subir Archivo
-                </button>
-            </div>
-
-            {/* TAB CONTENT: SICA Form */}
-            {activeTab === 'sica' && (
-                <div className="p-3 sm:p-5 bg-[#FAF2CA]/20 border-b border-[#0C3C60]/10">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-black uppercase text-[#0C3C60]">Datos del Predio (SICA FNC)</span>
-                        <button
-                            onClick={loadSampleSicaLot}
-                            className="text-[11px] font-bold text-[#0C3C60] hover:text-[#83DF9C] underline cursor-pointer"
-                        >
-                            Cargar Ejemplo Don Moiso
-                        </button>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <input
-                            type="text"
-                            value={farmerName}
-                            onChange={e => setFarmerName(e.target.value)}
-                            placeholder="Productor"
-                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#0C3C60]"
-                        />
-                        <input
-                            type="text"
-                            value={currentFarmName}
-                            onChange={e => setCurrentFarmName(e.target.value)}
-                            placeholder="Finca"
-                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#0C3C60]"
-                        />
-                        <input
-                            type="text"
-                            value={sicaCode}
-                            onChange={e => setSicaCode(e.target.value)}
-                            placeholder="Cód SICA"
-                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono text-[#0C3C60]"
-                        />
-                        <input
-                            type="text"
-                            value={coffeeVariety}
-                            onChange={e => setCoffeeVariety(e.target.value)}
-                            placeholder="Variedad"
-                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#0C3C60]"
-                        />
-                    </div>
+            {/* TABS: CAMINATA vs SUBIR ARCHIVO */}
+            <div className="bg-[#FAF2CA]/40 border-b border-[#0C3C60]/10 px-3 pt-2 flex items-center justify-between text-xs">
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setActiveTab('walk')}
+                        className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
+                            activeTab === 'walk'
+                                ? 'bg-[#0C3C60] text-[#FAF2CA]'
+                                : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
+                        }`}
+                    >
+                        Modo Caminata GPS
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('file')}
+                        className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
+                            activeTab === 'file'
+                                ? 'bg-[#0C3C60] text-[#FAF2CA]'
+                                : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
+                        }`}
+                    >
+                        Subir Archivo (GeoJSON / KML)
+                    </button>
                 </div>
-            )}
+                {activeTab === 'file' && (
+                    <button
+                        onClick={loadSampleLot}
+                        className="text-[10px] font-bold text-[#0C3C60] hover:text-[#83DF9C] underline cursor-pointer"
+                    >
+                        Cargar Lote de Prueba
+                    </button>
+                )}
+            </div>
 
             {/* TAB CONTENT: File Upload */}
             {activeTab === 'file' && (
@@ -1238,7 +1201,7 @@ export default function EUDRGeoreference({
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[#0C3C60]/70 mt-0.5">
-                                    {farmerName} • {currentFarmName} • SICA: {sicaCode}
+                                    Identificador: {currentLotId} • Coordenadas WGS84 RFC 7946
                                 </p>
                             </div>
                         </div>
