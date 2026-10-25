@@ -995,6 +995,15 @@ export default function EvidenceDashboard() {
                       <Download className="w-3.5 h-3.5 flex-shrink-0" />
                       <span>Descargar GeoJSON EUDR</span>
                     </button>
+                    <a
+                      href="/caminata-digital"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 w-full flex items-center justify-center gap-2 px-4 text-[10px] font-black uppercase tracking-widest bg-white/10 text-[#FAF2CA] hover:bg-white/20 border border-white/20 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      <Map className="w-3.5 h-3.5 flex-shrink-0 text-[#83DF9C]" />
+                      <span>Abrir Digital Walk (Mapeo GPS)</span>
+                    </a>
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-[#FAF2CA] uppercase tracking-widest mb-3">Farm &amp; Lot Verification (GPS + Sentinel)</h3>

@@ -14,12 +14,29 @@ if (typeof window !== 'undefined') {
     });
 }
 
-const vertexIcon = typeof window !== 'undefined' ? L.divIcon({
-    className: 'custom-div-icon',
-    html: "<div style='background-color:#00DF9A; width:10px; height:10px; border-radius:50%; border:2px solid white; box-shadow: 0 0 10px rgba(0,255,154,0.8);'></div>",
-    iconSize: [10, 10],
-    iconAnchor: [5, 5]
-}) : null;
+const getVertexIcon = (num: number, isLast: boolean) => {
+    if (typeof window === 'undefined') return undefined;
+    return L.divIcon({
+        className: 'custom-vertex-marker',
+        html: `<div style="
+            background: ${isLast ? '#FAF2CA' : '#83DF9C'};
+            color: #0C3C60;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            font-family: system-ui, -apple-system, sans-serif;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+        ">${num}</div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+    });
+};
 
 interface LeafletMapProps {
     center: [number, number];
@@ -46,19 +63,24 @@ function MapUpdater({ center, polygonCoords, markers }: LeafletMapProps) {
 }
 
 export default function LeafletMap({ center, polygonCoords, markers, currentLocation }: LeafletMapProps) {
-    // Memoize markers to prevent unnecessary re-renders
+    // Memoize markers with custom numbered vertex pills
     const markerElements = useMemo(() => {
-        if (!markers || !vertexIcon) return null;
-        return markers.map((m, i) => (
-            <Marker key={`${i}-${m[0]}`} position={m} icon={vertexIcon} />
-        ));
+        if (!markers || markers.length === 0) return null;
+        return markers.map((m, i) => {
+            const isLast = i === markers.length - 1;
+            const icon = getVertexIcon(i + 1, isLast);
+            if (!icon) return null;
+            return (
+                <Marker key={`vertex-${i}-${m[0]}-${m[1]}`} position={m} icon={icon} />
+            );
+        });
     }, [markers]);
 
     return (
         <MapContainer
             center={center}
             zoom={18}
-            style={{ width: '100%', height: '100%', background: '#0a1f15' }}
+            style={{ width: '100%', height: '100%', background: '#082840' }}
             zoomControl={false}
             attributionControl={false}
         >
@@ -71,10 +93,10 @@ export default function LeafletMap({ center, polygonCoords, markers, currentLoca
                 <Polygon
                     positions={polygonCoords}
                     pathOptions={{ 
-                        color: '#00DF9A', 
-                        fillColor: '#00DF9A', 
-                        fillOpacity: 0.15, 
-                        weight: 4,
+                        color: '#83DF9C', 
+                        fillColor: '#83DF9C', 
+                        fillOpacity: 0.22, 
+                        weight: 3.5,
                         dashArray: '5, 5',
                         lineJoin: 'round'
                     }}
@@ -87,13 +109,13 @@ export default function LeafletMap({ center, polygonCoords, markers, currentLoca
                 <>
                     <CircleMarker 
                         center={currentLocation} 
-                        radius={12} 
-                        pathOptions={{ color: 'white', fillColor: '#3b82f6', fillOpacity: 0.4, weight: 2 }} 
+                        radius={15} 
+                        pathOptions={{ color: '#83DF9C', fillColor: '#83DF9C', fillOpacity: 0.35, weight: 2 }} 
                     />
                     <CircleMarker 
                         center={currentLocation} 
-                        radius={5} 
-                        pathOptions={{ color: 'white', fillColor: '#3b82f6', fillOpacity: 1, weight: 2 }} 
+                        radius={6} 
+                        pathOptions={{ color: '#ffffff', fillColor: '#0C3C60', fillOpacity: 1, weight: 2.5 }} 
                     />
                 </>
             )}

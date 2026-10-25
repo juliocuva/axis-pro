@@ -273,27 +273,29 @@ export function downloadEudrGeoJson(
       generatedAt: new Date().toISOString(),
       totalVerifiedPlots: validFarms.length
     },
-    features: validFarms.map((f, index) => ({
-      type: 'Feature',
-      id: f.lotCode || `PLOT-${index + 1}`,
-      properties: {
-        ProducerName: f.name || 'Coffee Producer',
-        ProductionPlace: (f.farm || 'Coffee Farm').replace(/\s*-\s*Lote:.*$/i, ''),
-        ProducerCountry: 'CO',
-        LotCode: f.lotCode || `LOT-${index + 1}`,
-        CoffeeVariety: f.variety || 'Arabica',
-        ProcessingMethod: f.process || 'Washed',
-        PlotSizeCategory: 'Under 4 hectares (Point Geolocation Compliant - Art. 9(1)(d))',
-        DeforestationPost2020Ha: 0.0,
-        SentinelVerificationId: f.sentinelCode || 'VERIFIED',
-        EudrStatus: 'CLEARED'
-      },
-      geometry: {
-        type: 'Point',
-        // Estándar RFC 7946 / EU TRACES NT: [Longitud, Latitud] con 6 decimales
-        coordinates: [Number((f.lng as number).toFixed(6)), Number((f.lat as number).toFixed(6))]
-      }
-    }))
+    features: validFarms.map((f, index) => {
+      const lotId = f.lotCode || `LOT-${index + 1}`;
+      return {
+        type: 'Feature',
+        id: lotId,
+        properties: {
+          LotCode: lotId,
+          ProductionPlace: lotId,
+          ProducerCountry: 'CO',
+          CoffeeVariety: f.variety || 'Arabica',
+          ProcessingMethod: f.process || 'Washed',
+          PlotSizeCategory: 'Under 4 hectares (Point Geolocation Compliant - Art. 9(1)(d))',
+          DeforestationPost2020Ha: 0.0,
+          SentinelVerificationId: f.sentinelCode || 'VERIFIED',
+          EudrStatus: 'CLEARED'
+        },
+        geometry: {
+          type: 'Point',
+          // Estándar RFC 7946 / EU TRACES NT: [Longitud, Latitud] con 6 decimales
+          coordinates: [Number((f.lng as number).toFixed(6)), Number((f.lat as number).toFixed(6))]
+        }
+      };
+    })
   };
 
   const blob = new Blob([JSON.stringify(geojson, null, 2)], {
