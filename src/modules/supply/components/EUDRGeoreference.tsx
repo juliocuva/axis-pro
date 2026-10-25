@@ -427,7 +427,7 @@ export default function EUDRGeoreference({
         maxDistanceAwayRef.current = 0;
         setDistanceToStart(null);
 
-        speakVoiceGuidance('Caminata automática iniciada. Camina por el lindero. Se cerrará solo al volver.');
+        speakVoiceGuidance('Caminata automática iniciada. Camina por el lindero. Se registrará un punto cada 10 segundos y se cerrará solo al volver.');
 
         // Request device motion permission on iOS/Android
         if (typeof DeviceMotionEvent !== 'undefined' && (DeviceMotionEvent as any).requestPermission) {
@@ -475,7 +475,7 @@ export default function EUDRGeoreference({
 
             captureIntervalId.current = setInterval(() => {
                 handleAutoCaptureStep();
-            }, 2500);
+            }, 10000);
         } else {
             if (captureIntervalId.current) clearInterval(captureIntervalId.current);
         }
@@ -748,7 +748,7 @@ export default function EUDRGeoreference({
                                     Digital Walk (EUDR)
                                 </span>
                                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-[#83DF9C]/20 text-[#83DF9C] border border-[#83DF9C]/30 font-bold">
-                                    Auto 2.5s
+                                    Auto 10s
                                 </span>
                             </div>
                             <p className="text-[9px] sm:text-[10px] text-white/60 truncate">
@@ -827,7 +827,7 @@ export default function EUDRGeoreference({
                         {isCapturing && (
                             <div className="bg-[#83DF9C] text-[#0C3C60] px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#0C3C60] animate-ping"></span>
-                                <span>Manos libres: 1 punto cada 2.5 seg</span>
+                                <span>Manos libres: 1 punto cada 10 seg</span>
                             </div>
                         )}
 
@@ -1100,7 +1100,7 @@ export default function EUDRGeoreference({
                                     <span>TOCAR PARA INICIAR CAMINATA</span>
                                 </div>
                                 <span className="text-[10px] text-white/70 font-normal lowercase tracking-normal mt-0.5">
-                                    Camina con tu celular. Rastreará tus pasos cada 2.5 seg y se cerrará al volver.
+                                    Camina con tu celular. Rastreará tus pasos cada 10 seg y se cerrará al volver.
                                 </span>
                             </button>
                         ) : (
