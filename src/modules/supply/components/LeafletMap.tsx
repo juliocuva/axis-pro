@@ -108,6 +108,7 @@ export default function LeafletMap({ center, polygonCoords, markers, currentLoca
             <TileLayer
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                 maxZoom={19}
+                crossOrigin="anonymous"
             />
 
             {polygonCoords && polygonCoords.length > 0 && (

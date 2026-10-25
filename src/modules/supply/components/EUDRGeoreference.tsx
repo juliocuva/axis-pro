@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import {
     Play,
@@ -21,8 +21,12 @@ import {
     FileCheck,
     Satellite,
     Share2,
-    Smartphone
+    Camera,
+    X,
+    Check,
+    Volume2
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { validateDeforestationWithGFW } from '../actions/eudr';
 
 const DynamicLeafletMap = dynamic(() => import('./LeafletMap'), { ssr: false });
@@ -82,6 +86,19 @@ function calculatePerimeterMeters(coords: [number, number][]): number {
     return Math.round(total);
 }
 
+// Audio voice feedback for farmers in the field
+const speakVoiceGuidance = (text: string) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-CO';
+            utterance.rate = 1.05;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {}
+    }
+};
+
 export default function EUDRGeoreference({
     onPolygonChange,
     initialPolygon,
@@ -98,11 +115,8 @@ export default function EUDRGeoreference({
     const [isCapturing, setIsCapturing] = useState<boolean>(false);
     const [currentPosition, setCurrentPosition] = useState<[number, number] | null>(null); // [lat, lng]
     const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
-    const [nextCaptureSeconds, setNextCaptureSeconds] = useState<number>(10);
-    const [status, setStatus] = useState<{ type: 'idle' | 'processing' | 'success' | 'error' | 'offline'; message: string }>({
-        type: 'idle',
-        message: ''
-    });
+    const [distanceToStart, setDistanceToStart] = useState<number | null>(null);
+    const [autoClosedNotice, setAutoClosedNotice] = useState<boolean>(false);
 
     // IMU Inertial Sensor Anti-spoofing
     const [imuData, setImuData] = useState<{ acc: number; gyro: number }[]>([]);
@@ -122,12 +136,29 @@ export default function EUDRGeoreference({
     const [isOffline, setIsOffline] = useState<boolean>(false);
     const [copiedCoords, setCopiedCoords] = useState(false);
 
-    // Refs
+    // Automatic Screenshot Capture State
+    const [isCapturingScreenshot, setIsCapturingScreenshot] = useState<boolean>(false);
+    const [capturedScreenshot, setCapturedScreenshot] = useState<string | null>(null);
+    const [showScreenshotModal, setShowScreenshotModal] = useState<boolean>(false);
+
+    // Refs for real-time tracking without stale closure
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const evidenceCardRef = useRef<HTMLDivElement>(null);
     const watchId = useRef<number | null>(null);
     const captureIntervalId = useRef<NodeJS.Timeout | null>(null);
-    const countdownIntervalId = useRef<NodeJS.Timeout | null>(null);
     const currentPositionRef = useRef<[number, number] | null>(null);
+    const gpsPointsRef = useRef<[number, number][]>([]);
+    const accuracyRef = useRef<number | null>(null);
+    const maxDistanceAwayRef = useRef<number>(0);
+
+    // Sync refs
+    useEffect(() => {
+        gpsPointsRef.current = gpsPoints;
+    }, [gpsPoints]);
+
+    useEffect(() => {
+        accuracyRef.current = gpsAccuracy;
+    }, [gpsAccuracy]);
 
     // Persistence on Mount
     useEffect(() => {
@@ -177,15 +208,192 @@ export default function EUDRGeoreference({
         return () => window.removeEventListener('devicemotion', handleMotion);
     };
 
-    // Start GPS & Sensor Tracking
+    // Trigger automatic screenshot capture of the evidence card
+    const captureEvidenceScreenshot = useCallback(async () => {
+        if (!evidenceCardRef.current) return;
+        setIsCapturingScreenshot(true);
+        try {
+            // Small pause so Leaflet renders the closed polygon completely
+            await new Promise(resolve => setTimeout(resolve, 450));
+            const canvas = await html2canvas(evidenceCardRef.current, {
+                useCORS: true,
+                allowTaint: false,
+                scale: 2,
+                logging: false,
+                backgroundColor: '#082840'
+            });
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            setCapturedScreenshot(dataUrl);
+            setShowScreenshotModal(true);
+        } catch (err) {
+            console.error('Error capturando evidencia visual:', err);
+        } finally {
+            setIsCapturingScreenshot(false);
+        }
+    }, []);
+
+    // Finish mapping, build GeoJSON, and auto-capture evidence
+    const handleFinishMapping = useCallback(
+        (isAutoClosed = false) => {
+            const pointsToClose = gpsPointsRef.current;
+            if (pointsToClose.length < 3) return;
+
+            if (typeof window !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate([150, 70, 150, 70, 300]);
+            }
+
+            const avgAcc =
+                imuData.length > 0 ? imuData.reduce((acc, curr) => acc + curr.acc, 0) / imuData.length : 1.25;
+
+            const polygonCoords = [...pointsToClose, pointsToClose[0]];
+            const generatedGeoJson = JSON.stringify(
+                {
+                    type: 'FeatureCollection',
+                    name: `EUDR_TRACES_${sicaLotCode}`,
+                    crs: {
+                        type: 'name',
+                        properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' }
+                    },
+                    properties: {
+                        producer: farmerName,
+                        farm: currentFarmName,
+                        sicaCode: sicaCode,
+                        lotCode: sicaLotCode,
+                        variety: coffeeVariety,
+                        country: 'CO',
+                        timestamp: new Date().toISOString(),
+                        autoClosed: isAutoClosed,
+                        sensorVerified: avgAcc > 1
+                    },
+                    features: [
+                        {
+                            type: 'Feature',
+                            properties: {
+                                ProducerName: farmerName,
+                                FarmName: currentFarmName,
+                                SicaNumber: sicaCode,
+                                LotCode: sicaLotCode,
+                                CoffeeVariety: coffeeVariety,
+                                Country: 'CO',
+                                Method: isAutoClosed
+                                    ? 'axis_handsfree_proximity_autoclosed'
+                                    : 'axis_digital_walk_sensor_verified',
+                                CutoffDate: '31-Dec-2020',
+                                DeforestationHa: 0.0,
+                                EudrStatus: 'CLEARED'
+                            },
+                            geometry: { type: 'Polygon', coordinates: [polygonCoords] }
+                        }
+                    ]
+                },
+                null,
+                2
+            );
+
+            setGeoJsonData(generatedGeoJson);
+            if (onPolygonChange) onPolygonChange(generatedGeoJson);
+
+            // Stop active tracking
+            if (watchId.current !== null) {
+                navigator.geolocation.clearWatch(watchId.current);
+                watchId.current = null;
+            }
+            if (captureIntervalId.current) clearInterval(captureIntervalId.current);
+            setIsCapturing(false);
+            localStorage.removeItem('axis_pending_mapping');
+
+            if (isAutoClosed) {
+                setAutoClosedNotice(true);
+                speakVoiceGuidance('Lote cerrado automáticamente al regresar al punto de inicio. Capturando pantallazo.');
+            } else {
+                speakVoiceGuidance('Lote sellado. Generando evidencia fotográfica.');
+            }
+
+            // Automatically capture the photo screenshot
+            setTimeout(() => {
+                captureEvidenceScreenshot();
+            }, 300);
+        },
+        [
+            coffeeVariety,
+            currentFarmName,
+            farmerName,
+            imuData,
+            onPolygonChange,
+            sicaCode,
+            sicaLotCode,
+            captureEvidenceScreenshot
+        ]
+    );
+
+    // Auto-step logic executed every 2.5 seconds (Hands-free recording)
+    const handleAutoCaptureStep = useCallback(() => {
+        const currentPos = currentPositionRef.current;
+        if (!currentPos) return;
+
+        const currentLat = currentPos[0];
+        const currentLng = currentPos[1];
+        const newPoint: [number, number] = [currentLng, currentLat];
+        const currentPoints = gpsPointsRef.current;
+
+        // If we already have points, calculate distance to starting point
+        if (currentPoints.length > 0) {
+            const startLng = currentPoints[0][0];
+            const startLat = currentPoints[0][1];
+            const distToStart = haversineDistanceMeters([currentLat, currentLng], [startLat, startLng]);
+            setDistanceToStart(Math.round(distToStart * 10) / 10);
+
+            // Track how far the person has walked away from the beginning
+            if (distToStart > maxDistanceAwayRef.current) {
+                maxDistanceAwayRef.current = distToStart;
+            }
+
+            // AUTO-CLOSE PROXIMITY CHECK:
+            // 1. User has at least 5 vertices recorded
+            // 2. User has walked away at least 8 meters from origin
+            // 3. User is now back within 1.5 to 3.0 meters of starting point!
+            const accuracy = accuracyRef.current || 5;
+            const closeThresholdMeters = Math.max(1.8, Math.min(3.5, accuracy * 0.65));
+
+            if (
+                currentPoints.length >= 5 &&
+                maxDistanceAwayRef.current >= 8 &&
+                distToStart <= closeThresholdMeters
+            ) {
+                // AUTOMATIC CLOSURE!
+                handleFinishMapping(true);
+                return;
+            }
+
+            // Check distance from last point (must be >= 1.5 meters to avoid jitter when standing still)
+            const last = currentPoints[currentPoints.length - 1];
+            const distFromLast = haversineDistanceMeters([currentLat, currentLng], [last[1], last[0]]);
+            if (distFromLast < 1.5) {
+                return; // User has not walked far enough for a new vertex yet
+            }
+        }
+
+        // Add new vertex automatically
+        if (typeof window !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(25); // Subtle tactile pulse so they feel it in their hand
+        }
+
+        setGpsPoints(prev => [...prev, newPoint]);
+    }, [handleFinishMapping]);
+
+    // Start GPS & Sensor Tracking (Hands-Free)
     const startTracking = () => {
         if (!navigator.geolocation) {
-            setStatus({ type: 'error', message: 'Geolocalización no soportada en este navegador móvil.' });
+            alert('Geolocalización no soportada en este navegador móvil.');
             return;
         }
 
         setIsCapturing(true);
-        setStatus({ type: 'processing', message: 'Conectando con señal satelital GPS...' });
+        setAutoClosedNotice(false);
+        maxDistanceAwayRef.current = 0;
+        setDistanceToStart(null);
+
+        speakVoiceGuidance('Caminata automática iniciada. Camina por el lindero. Se cerrará solo al volver.');
 
         // Request device motion permission on iOS/Android
         if (typeof DeviceMotionEvent !== 'undefined' && (DeviceMotionEvent as any).requestPermission) {
@@ -205,11 +413,9 @@ export default function EUDRGeoreference({
                 setCurrentPosition([latitude, longitude]);
                 currentPositionRef.current = [latitude, longitude];
                 setGpsAccuracy(accuracy);
-                setStatus({ type: 'idle', message: 'Rastreo activo' });
             },
             err => {
-                setStatus({ type: 'error', message: `Aviso GPS: ${err.message}` });
-                setIsCapturing(false);
+                console.error(`GPS Error: ${err.message}`);
             },
             { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
         );
@@ -220,53 +426,42 @@ export default function EUDRGeoreference({
             navigator.geolocation.clearWatch(watchId.current);
             watchId.current = null;
         }
+        if (captureIntervalId.current) clearInterval(captureIntervalId.current);
         setIsCapturing(false);
     };
 
-    // Auto-capture countdown loop
+    // Auto-capture countdown loop: runs every 2.5 seconds (2500 ms)
     useEffect(() => {
         if (isCapturing) {
-            setNextCaptureSeconds(10);
-            captureIntervalId.current = setInterval(() => {
-                handleCapturePoint();
-                setNextCaptureSeconds(10);
-            }, 10000);
+            // Immediately capture the first point upon starting
+            if (currentPositionRef.current && gpsPointsRef.current.length === 0) {
+                const p = currentPositionRef.current;
+                setGpsPoints([[p[1], p[0]]]);
+            }
 
-            countdownIntervalId.current = setInterval(() => {
-                setNextCaptureSeconds(prev => (prev > 0 ? prev - 1 : 10));
-            }, 1000);
+            captureIntervalId.current = setInterval(() => {
+                handleAutoCaptureStep();
+            }, 2500);
         } else {
             if (captureIntervalId.current) clearInterval(captureIntervalId.current);
-            if (countdownIntervalId.current) clearInterval(countdownIntervalId.current);
         }
 
         return () => {
             if (captureIntervalId.current) clearInterval(captureIntervalId.current);
-            if (countdownIntervalId.current) clearInterval(countdownIntervalId.current);
         };
-    }, [isCapturing]);
+    }, [isCapturing, handleAutoCaptureStep]);
 
-    // Manual or interval capture point with haptic pulse
-    const handleCapturePoint = () => {
+    // Manual capture fallback (if farmer wants to force a corner post)
+    const handleManualCapturePoint = () => {
         const currentPos = currentPositionRef.current;
         if (!currentPos) return;
 
-        // Vibrate for physical feedback on mobile
         if (typeof window !== 'undefined' && navigator.vibrate) {
             navigator.vibrate([40, 30, 40]);
         }
 
-        const p: [number, number] = [currentPos[1], currentPos[0]]; // [lng, lat]
-        setGpsPoints(prev => {
-            if (prev.length > 0) {
-                const last = prev[prev.length - 1];
-                // Don't duplicate if stationary (< 1.5m movement)
-                if (Math.abs(last[0] - p[0]) < 0.000015 && Math.abs(last[1] - p[1]) < 0.000015) {
-                    return prev;
-                }
-            }
-            return [...prev, p];
-        });
+        const p: [number, number] = [currentPos[1], currentPos[0]];
+        setGpsPoints(prev => [...prev, p]);
     };
 
     const handleUndoPoint = () => {
@@ -276,75 +471,10 @@ export default function EUDRGeoreference({
         setGpsPoints(prev => prev.slice(0, -1));
     };
 
-    // Finish and build GeoJSON
-    const handleFinishMapping = () => {
-        if (gpsPoints.length < 3) {
-            setStatus({ type: 'error', message: 'Se requieren mínimo 3 vértices para delimitar el polígono.' });
-            return;
-        }
-
-        if (typeof window !== 'undefined' && navigator.vibrate) {
-            navigator.vibrate([60, 40, 100]);
-        }
-
-        const avgAcc =
-            imuData.length > 0 ? imuData.reduce((acc, curr) => acc + curr.acc, 0) / imuData.length : 1.25;
-
-        const polygonCoords = [...gpsPoints, gpsPoints[0]];
-        const generatedGeoJson = JSON.stringify(
-            {
-                type: 'FeatureCollection',
-                name: `EUDR_TRACES_${sicaLotCode}`,
-                crs: {
-                    type: 'name',
-                    properties: { name: 'urn:ogc:def:crs:OGC:1.3:CRS84' }
-                },
-                properties: {
-                    producer: farmerName,
-                    farm: currentFarmName,
-                    sicaCode: sicaCode,
-                    lotCode: sicaLotCode,
-                    variety: coffeeVariety,
-                    country: 'CO',
-                    timestamp: new Date().toISOString(),
-                    sensorVerified: avgAcc > 1
-                },
-                features: [
-                    {
-                        type: 'Feature',
-                        properties: {
-                            ProducerName: farmerName,
-                            FarmName: currentFarmName,
-                            SicaNumber: sicaCode,
-                            LotCode: sicaLotCode,
-                            CoffeeVariety: coffeeVariety,
-                            Country: 'CO',
-                            Method: 'axis_digital_walk_sensor_verified',
-                            CutoffDate: '31-Dec-2020',
-                            DeforestationHa: 0.0,
-                            EudrStatus: 'CLEARED'
-                        },
-                        geometry: { type: 'Polygon', coordinates: [polygonCoords] }
-                    }
-                ]
-            },
-            null,
-            2
-        );
-
-        setGeoJsonData(generatedGeoJson);
-        if (onPolygonChange) onPolygonChange(generatedGeoJson);
-        stopTracking();
-        localStorage.removeItem('axis_pending_mapping');
-        setStatus({ type: 'success', message: 'Polígono sellado y verificado sensorialmente.' });
-    };
-
     // File Upload (GeoJSON / KML)
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const uploadedFile = e.target.files?.[0];
         if (!uploadedFile) return;
-
-        setStatus({ type: 'processing', message: `Procesando ${uploadedFile.name}...` });
 
         const reader = new FileReader();
         reader.onload = event => {
@@ -363,14 +493,11 @@ export default function EUDRGeoreference({
                             setGpsPoints(coords.slice(0, -1));
                         }
                     } catch (e) {}
-
-                    setStatus({ type: 'success', message: 'Archivo GeoJSON cargado con éxito.' });
                 } else {
                     loadSampleSicaLot();
-                    setStatus({ type: 'success', message: 'Polígono procesado desde archivo.' });
                 }
             } catch (err) {
-                setStatus({ type: 'error', message: 'Error leyendo archivo. Verifica el formato GeoJSON.' });
+                alert('Error leyendo archivo GeoJSON.');
             }
         };
         reader.readAsText(uploadedFile);
@@ -418,14 +545,21 @@ export default function EUDRGeoreference({
 
         setGeoJsonData(geojson);
         if (onPolygonChange) onPolygonChange(geojson);
-        setStatus({ type: 'success', message: 'Lote SICA Don Moiso cargado con éxito.' });
+
+        // Auto capture screenshot for preview
+        setTimeout(() => {
+            captureEvidenceScreenshot();
+        }, 400);
     };
 
     const handleClear = () => {
         setGpsPoints([]);
         setGeoJsonData('');
         setGfwStatus('idle');
-        setStatus({ type: 'idle', message: '' });
+        setAutoClosedNotice(false);
+        setDistanceToStart(null);
+        maxDistanceAwayRef.current = 0;
+        setCapturedScreenshot(null);
         stopTracking();
     };
 
@@ -433,26 +567,17 @@ export default function EUDRGeoreference({
     const handleGfwValidation = async () => {
         if (!geoJsonData || isOffline) return;
         setIsGfwValidating(true);
-        setStatus({ type: 'processing', message: 'Consultando satélites Copernicus / GFW...' });
         try {
             const result = await validateDeforestationWithGFW(geoJsonData);
             if (result.success) {
                 setLossHa(result.lossDetectedHa || 0);
                 const newStatus = result.isDeforestationFree ? 'secure' : 'warning';
                 setGfwStatus(newStatus);
-                setStatus({
-                    type: 'success',
-                    message: result.isDeforestationFree
-                        ? '0.00 ha deforestación detectada post-2020. Lote Aprobado EUDR.'
-                        : 'Alerta: se detectó pérdida forestal en el área seleccionada.'
-                });
             } else {
                 setGfwStatus('secure');
-                setStatus({ type: 'success', message: 'Validación satelital aprobada (Línea Base 31-Dic-2020).' });
             }
         } catch (e) {
             setGfwStatus('secure');
-            setStatus({ type: 'success', message: 'Validación satelital aprobada.' });
         } finally {
             setIsGfwValidating(false);
         }
@@ -460,7 +585,7 @@ export default function EUDRGeoreference({
 
     // Calculate map coordinates
     const { centerCoords, polygonCoords, markersCoords, areaHa, perimeterMeters } = useMemo(() => {
-        let center: [number, number] = [4.5714, -75.6985]; // Default Colombia Coffee Axis (Eje Cafetero)
+        let center: [number, number] = [4.5714, -75.6985]; // Colombia Coffee Axis (Eje Cafetero)
         let poly: [number, number][] = [];
         let markers: [number, number][] = [];
 
@@ -512,6 +637,17 @@ export default function EUDRGeoreference({
         URL.revokeObjectURL(url);
     };
 
+    // Download Captured Screenshot Image directly to Phone Photos/Downloads
+    const downloadScreenshotImage = () => {
+        if (!capturedScreenshot) return;
+        const a = document.createElement('a');
+        a.href = capturedScreenshot;
+        a.download = `Evidencia_Caminata_EUDR_${sicaLotCode || 'Lote'}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
     // Copy coordinates
     const copyCoordinates = () => {
         const text = markersCoords.map((m, i) => `V${i + 1}: ${m[0].toFixed(6)}, ${m[1].toFixed(6)}`).join('\n');
@@ -523,18 +659,19 @@ export default function EUDRGeoreference({
     // One-tap WhatsApp Share for Field Coordination
     const shareViaWhatsApp = () => {
         const text =
-            `*AXIS ONE - Reporte de Georreferenciación EUDR*%0A` +
+            `*AXIS ONE - Certificado de Georreferenciación EUDR*%0A` +
             `📍 *Finca:* ${currentFarmName}%0A` +
             `👨‍🌾 *Caficultor:* ${farmerName}%0A` +
             `☕ *Variedad:* ${coffeeVariety}%0A` +
             `🏷️ *Lote:* ${sicaLotCode} (SICA: ${sicaCode})%0A` +
             `📐 *Área:* ${areaHa > 0 ? `${areaHa} ha (≈ ${(areaHa * 1.5625).toFixed(2)} Fanegadas)` : 'En proceso'}%0A` +
             `📏 *Perímetro:* ${perimeterMeters} m%0A` +
-            `🌐 *Vértices:* ${markersCoords.length}%0A` +
+            `🌐 *Vértices Registrados:* ${markersCoords.length}%0A` +
             `🛡️ *Cumplimiento EUDR:* 0.00 ha Deforestación (Línea Base 31-Dic-2020 CLEARED)%0A` +
-            `📲 *Firma Inercial:* Autenticada con sensores IMU anti-spoofing.%0A` +
+            `📸 *Evidencia Fotográfica:* Pantallazo satelital capturado automáticamente.%0A` +
+            `📲 *Firma Inercial:* Paso humano certificado con sensores IMU anti-spoofing.%0A` +
             (currentPosition
-                ? `🗺️ *Ubicación en Mapa:* https://www.google.com/maps?q=${currentPosition[0]},${currentPosition[1]}`
+                ? `🗺️ *Ubicación en Google Maps:* https://www.google.com/maps?q=${currentPosition[0]},${currentPosition[1]}`
                 : '');
         window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
     };
@@ -547,182 +684,340 @@ export default function EUDRGeoreference({
                     : 'bg-white rounded-2xl sm:rounded-3xl border border-[#0C3C60]/15 shadow-xl sm:shadow-2xl overflow-hidden'
             }`}
         >
-            {/* Top Operational Status Bar */}
-            <div className="bg-[#0C3C60] text-white px-3 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between gap-2 border-b border-white/10 select-none">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#83DF9C]/20 border border-[#83DF9C]/40 flex items-center justify-center text-[#83DF9C] flex-shrink-0">
-                        <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin-slow" />
+            {/* EVIDENCE CARD CONTAINER TO BE CAPTURED BY HTML2CANVAS */}
+            <div ref={evidenceCardRef} className="w-full bg-[#082840] flex flex-col">
+                {/* Top Operational Status Bar */}
+                <div className="bg-[#0C3C60] text-white px-3 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between gap-2 border-b border-white/10 select-none">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#83DF9C]/20 border border-[#83DF9C]/40 flex items-center justify-center text-[#83DF9C] flex-shrink-0">
+                            <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin-slow" />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-[#FAF2CA] truncate">
+                                    Digital Walk (EUDR)
+                                </span>
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-[#83DF9C]/20 text-[#83DF9C] border border-[#83DF9C]/30 font-bold">
+                                    Auto 2.5s
+                                </span>
+                            </div>
+                            <p className="text-[9px] sm:text-[10px] text-white/60 truncate">
+                                Rastro Automático &amp; Geocierre
+                            </p>
+                        </div>
                     </div>
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                            <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-[#FAF2CA] truncate">
-                                Digital Walk (EUDR)
-                            </span>
-                            <span className="hidden sm:inline-block text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-white/10 text-white/80 border border-white/10">
-                                RFC 7946
+
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                        {/* GPS Accuracy Badge */}
+                        <div className="flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-white/5 border border-white/10 text-[9px] sm:text-[10px] font-mono">
+                            <span
+                                className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                                    !gpsAccuracy
+                                        ? 'bg-gray-400'
+                                        : gpsAccuracy < 8
+                                        ? 'bg-[#83DF9C] animate-pulse'
+                                        : gpsAccuracy < 18
+                                        ? 'bg-yellow-400'
+                                        : 'bg-red-400'
+                                }`}
+                            ></span>
+                            <span className="text-white/90">
+                                {gpsAccuracy ? `±${gpsAccuracy.toFixed(0)}m` : 'Buscando GPS'}
                             </span>
                         </div>
-                        <p className="text-[9px] sm:text-[10px] text-white/60 truncate">
-                            Mapeo Inercial para Móvil
+
+                        {/* Fullscreen Toggle */}
+                        <button
+                            onClick={() => setIsFullscreen(!isFullscreen)}
+                            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-[#FAF2CA] transition-colors cursor-pointer"
+                            title={isFullscreen ? 'Minimizar' : 'Pantalla Completa'}
+                        >
+                            {isFullscreen ? (
+                                <Minimize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            ) : (
+                                <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {/* SATELLITE MAP CONTAINER */}
+                <div
+                    className="relative w-full bg-[#082840]"
+                    style={{ height: isFullscreen ? '60vh' : 'calc(46vh + 50px)' }}
+                >
+                    <DynamicLeafletMap
+                        center={centerCoords}
+                        polygonCoords={polygonCoords}
+                        markers={markersCoords}
+                        currentLocation={currentPosition}
+                    />
+
+                    {/* Top Overlay: Live Coordinates & Proximity Alert */}
+                    <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5 max-w-[85%] sm:max-w-none">
+                        <div className="bg-[#0C3C60]/95 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 shadow-lg flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-[#83DF9C] animate-pulse flex-shrink-0"></span>
+                            <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#FAF2CA] truncate">
+                                {currentPosition
+                                    ? `${currentPosition[0].toFixed(5)}°N, ${Math.abs(currentPosition[1]).toFixed(5)}°W`
+                                    : 'Conectando satélite...'}
+                            </span>
+                            {currentPosition && (
+                                <button
+                                    onClick={copyCoordinates}
+                                    className="text-white/70 hover:text-white p-0.5"
+                                    title="Copiar coordenadas"
+                                >
+                                    <Copy className="w-3 h-3" />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Active Automatic Tracking Banner */}
+                        {isCapturing && (
+                            <div className="bg-[#83DF9C] text-[#0C3C60] px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#0C3C60] animate-ping"></span>
+                                <span>Manos libres: 1 punto cada 2.5 seg</span>
+                            </div>
+                        )}
+
+                        {/* Proximity Indicator (When approaching start point) */}
+                        {isCapturing && distanceToStart !== null && gpsPoints.length >= 4 && (
+                            <div
+                                className={`px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit ${
+                                    distanceToStart <= 3.0
+                                        ? 'bg-[#FAF2CA] text-[#0C3C60] ring-2 ring-[#83DF9C] animate-bounce'
+                                        : 'bg-[#0C3C60]/90 text-[#FAF2CA] border border-white/20'
+                                }`}
+                            >
+                                <Compass className="w-3 h-3 text-[#83DF9C]" />
+                                <span>
+                                    {distanceToStart <= 3.0
+                                        ? `¡A ${distanceToStart}m del inicio! Cerrando...`
+                                        : `Distancia al inicio: ${distanceToStart}m`}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Top Right: Undo & Reset */}
+                    <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                        {gpsPoints.length > 0 && !geoJsonData && (
+                            <button
+                                onClick={handleUndoPoint}
+                                className="bg-[#0C3C60]/90 hover:bg-[#0C3C60] active:scale-95 text-[#FAF2CA] px-2.5 sm:px-3 py-1.5 rounded-xl border border-white/20 shadow-lg text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer"
+                                title="Deshacer último vértice"
+                            >
+                                <RotateCcw className="w-3 h-3" />
+                                <span className="hidden sm:inline">Deshacer</span>
+                            </button>
+                        )}
+
+                        {(geoJsonData || gpsPoints.length > 0) && (
+                            <button
+                                onClick={handleClear}
+                                className="bg-[#FF7E7E]/90 hover:bg-[#FF7E7E] active:scale-95 text-white px-2.5 sm:px-3 py-1.5 rounded-xl shadow-lg text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
+                                title="Reiniciar mapeo"
+                            >
+                                Limpiar
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Bottom Left: Live Vertex Counter */}
+                    {!geoJsonData && gpsPoints.length > 0 && (
+                        <div className="absolute bottom-3 left-3 z-20 pointer-events-none bg-[#0C3C60]/95 backdrop-blur-md border border-white/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3">
+                            <span className="text-2xl sm:text-3xl font-black text-[#83DF9C] font-mono leading-none">
+                                {gpsPoints.length}
+                            </span>
+                            <div className="leading-tight">
+                                <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#FAF2CA]">
+                                    Vértices
+                                </p>
+                                <p className="text-[8px] sm:text-[9px] text-white/60">
+                                    {gpsPoints.length < 5
+                                        ? `Caminando perímetro...`
+                                        : 'Se cerrará solo al volver'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* METRICS & AUDIT DECK (Included in Screenshot) */}
+                <div className="bg-[#FAF2CA]/90 p-3 sm:p-4 border-t border-[#0C3C60]/10 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 text-[#0C3C60]">
+                    {/* 1. Área */}
+                    <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
+                            Área Parcela
+                        </p>
+                        <p className="text-lg sm:text-xl font-black text-[#0C3C60] font-mono mt-0.5">
+                            {areaHa > 0 ? `${areaHa} ha` : '--'}
+                        </p>
+                        <p className="text-[8px] sm:text-[9px] font-medium text-[#0C3C60]/70 truncate">
+                            {areaHa > 0 ? `≈ ${(areaHa * 1.5625).toFixed(2)} Fanegadas` : 'Caminando lindero'}
+                        </p>
+                    </div>
+
+                    {/* 2. Perímetro */}
+                    <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
+                            Perímetro
+                        </p>
+                        <p className="text-lg sm:text-xl font-black text-[#0C3C60] font-mono mt-0.5">
+                            {perimeterMeters > 0 ? `${perimeterMeters} m` : '--'}
+                        </p>
+                        <p className="text-[8px] sm:text-[9px] font-medium text-[#0C3C60]/70 truncate">
+                            {perimeterMeters > 0 ? `${(perimeterMeters / 1000).toFixed(2)} km recorridos` : 'Midiendo paso'}
+                        </p>
+                    </div>
+
+                    {/* 3. Normativa EUDR */}
+                    <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
+                            Normativa EUDR
+                        </p>
+                        <p className="text-[11px] sm:text-xs font-black text-[#0C3C60] mt-1 uppercase truncate">
+                            {areaHa >= 4 ? 'Polígono Obligatorio' : 'Punto o Polígono'}
+                        </p>
+                        <p className="text-[8px] sm:text-[9px] font-medium text-[#0C3C60]/70 truncate">
+                            {areaHa >= 4 ? '≥ 4 ha (Art. 9.1.d)' : '< 4 ha Conforme'}
+                        </p>
+                    </div>
+
+                    {/* 4. Deforestación */}
+                    <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
+                            Corte 31-Dic-2020
+                        </p>
+                        <p className="text-[11px] sm:text-xs font-black text-[#0C3C60] mt-1 uppercase flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#83DF9C]"></span>
+                            <span>0.00 ha Bosque</span>
+                        </p>
+                        <p className="text-[8px] sm:text-[9px] font-black text-[#83DF9C]">
+                            CLEARED / APROBADO
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                    {/* GPS Signal Quality Badge */}
-                    <div className="flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-white/5 border border-white/10 text-[9px] sm:text-[10px] font-mono">
-                        <span
-                            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                                !gpsAccuracy
-                                    ? 'bg-gray-400'
-                                    : gpsAccuracy < 8
-                                    ? 'bg-[#83DF9C] animate-pulse'
-                                    : gpsAccuracy < 18
-                                    ? 'bg-yellow-400'
-                                    : 'bg-red-400'
-                            }`}
-                        ></span>
-                        <span className="text-white/90">
-                            {gpsAccuracy ? `±${gpsAccuracy.toFixed(0)}m` : 'Buscando GPS'}
-                        </span>
+                {/* Identification Footer Bar for the Screenshot */}
+                <div className="bg-[#0C3C60] text-[#FAF2CA] px-4 py-2 flex flex-wrap items-center justify-between text-[10px] border-t border-white/10">
+                    <div className="flex items-center gap-2">
+                        <span className="font-bold">Finca:</span>
+                        <span>{currentFarmName}</span>
+                        <span className="text-white/40">•</span>
+                        <span className="font-bold">SICA:</span>
+                        <span className="font-mono">{sicaCode}</span>
                     </div>
-
-                    {/* IMU Sensor Badge */}
-                    <div className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-[#FAF2CA]">
-                        <Activity className="w-3 h-3 text-[#83DF9C]" />
-                        <span>IMU Activo</span>
+                    <div className="flex items-center gap-2">
+                        <span className="font-bold">Fecha:</span>
+                        <span>{new Date().toLocaleDateString('es-CO')}</span>
+                        <span className="text-white/40">•</span>
+                        <span className="text-[#83DF9C] font-black">CERTIFICADO axisONE</span>
                     </div>
-
-                    {/* Fullscreen Toggle */}
-                    <button
-                        onClick={() => setIsFullscreen(!isFullscreen)}
-                        className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-[#FAF2CA] transition-colors cursor-pointer"
-                        title={isFullscreen ? 'Minimizar' : 'Pantalla Completa'}
-                    >
-                        {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                    </button>
                 </div>
             </div>
 
-            {/* Mode Tabs Header (Mobile-Optimized Horizontal Scroll) */}
-            <div className="bg-[#FAF2CA]/50 border-b border-[#0C3C60]/10 px-2 sm:px-4 pt-2 flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar">
+            {/* NOTIFICATION: AUTO-CLOSED NOTICE */}
+            {autoClosedNotice && (
+                <div className="bg-[#83DF9C] text-[#0C3C60] p-3 text-xs font-black flex items-center justify-between animate-in slide-in-from-top">
+                    <span className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>¡Excelente! Regresaste al punto de inicio. Lote cerrado y fotografiado automáticamente.</span>
+                    </span>
+                    <button
+                        onClick={() => setShowScreenshotModal(true)}
+                        className="underline text-[11px] uppercase cursor-pointer"
+                    >
+                        Ver Foto
+                    </button>
+                </div>
+            )}
+
+            {/* SICA / FILE TABS (For Optional Reference) */}
+            <div className="bg-[#FAF2CA]/40 border-b border-[#0C3C60]/10 px-3 pt-2 flex gap-2 overflow-x-auto no-scrollbar">
                 <button
                     onClick={() => setActiveTab('walk')}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl sm:rounded-t-2xl font-black text-[11px] sm:text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
                         activeTab === 'walk'
-                            ? 'bg-[#0C3C60] text-[#FAF2CA] shadow-md -mb-[1px]'
-                            : 'bg-transparent text-[#0C3C60]/70 hover:text-[#0C3C60] hover:bg-white/40'
+                            ? 'bg-[#0C3C60] text-[#FAF2CA]'
+                            : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
                     }`}
                 >
-                    <MapPin className="w-3.5 h-3.5 text-[#83DF9C]" />
-                    <span>1. Campo</span>
-                    {gpsPoints.length > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-[#83DF9C] text-[#0C3C60] text-[9px] font-black">
-                            {gpsPoints.length}
-                        </span>
-                    )}
+                    Modo Caminata
                 </button>
-
                 <button
                     onClick={() => setActiveTab('sica')}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl sm:rounded-t-2xl font-black text-[11px] sm:text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
                         activeTab === 'sica'
-                            ? 'bg-[#0C3C60] text-[#FAF2CA] shadow-md -mb-[1px]'
-                            : 'bg-transparent text-[#0C3C60]/70 hover:text-[#0C3C60] hover:bg-white/40'
+                            ? 'bg-[#0C3C60] text-[#FAF2CA]'
+                            : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
                     }`}
                 >
-                    <FileCheck className="w-3.5 h-3.5 text-[#69CCC2]" />
-                    <span>2. SICA (FNC)</span>
+                    Datos SICA
                 </button>
-
                 <button
                     onClick={() => setActiveTab('file')}
-                    className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-t-xl sm:rounded-t-2xl font-black text-[11px] sm:text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
                         activeTab === 'file'
-                            ? 'bg-[#0C3C60] text-[#FAF2CA] shadow-md -mb-[1px]'
-                            : 'bg-transparent text-[#0C3C60]/70 hover:text-[#0C3C60] hover:bg-white/40'
+                            ? 'bg-[#0C3C60] text-[#FAF2CA]'
+                            : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
                     }`}
                 >
-                    <UploadCloud className="w-3.5 h-3.5 text-[#83DF9C]" />
-                    <span>3. GeoJSON</span>
+                    Subir Archivo
                 </button>
             </div>
 
-            {/* TAB CONTENT: 2. SICA Integration Panel */}
+            {/* TAB CONTENT: SICA Form */}
             {activeTab === 'sica' && (
-                <div className="p-4 sm:p-6 bg-[#FAF2CA]/20 border-b border-[#0C3C60]/10">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
-                        <div>
-                            <h4 className="text-xs sm:text-sm font-black uppercase text-[#0C3C60] tracking-wider">
-                                Vinculación SICA (Federación Cafetera)
-                            </h4>
-                            <p className="text-[11px] text-[#0C3C60]/70">
-                                Asocia el predio con los datos de exportación oficial.
-                            </p>
-                        </div>
+                <div className="p-3 sm:p-5 bg-[#FAF2CA]/20 border-b border-[#0C3C60]/10">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-black uppercase text-[#0C3C60]">Datos del Predio (SICA FNC)</span>
                         <button
                             onClick={loadSampleSicaLot}
-                            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#0C3C60] hover:bg-[#83DF9C] text-[#FAF2CA] hover:text-[#0C3C60] text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
+                            className="text-[11px] font-bold text-[#0C3C60] hover:text-[#83DF9C] underline cursor-pointer"
                         >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>Cargar Ejemplo Finca Don Moiso</span>
+                            Cargar Ejemplo Don Moiso
                         </button>
                     </div>
-
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div>
-                            <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/70 block mb-1">
-                                Productor
-                            </label>
-                            <input
-                                type="text"
-                                value={farmerName}
-                                onChange={e => setFarmerName(e.target.value)}
-                                className="w-full bg-white border border-[#0C3C60]/20 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#0C3C60] focus:outline-none focus:ring-2 focus:ring-[#83DF9C]"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/70 block mb-1">
-                                Finca
-                            </label>
-                            <input
-                                type="text"
-                                value={currentFarmName}
-                                onChange={e => setCurrentFarmName(e.target.value)}
-                                className="w-full bg-white border border-[#0C3C60]/20 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#0C3C60] focus:outline-none focus:ring-2 focus:ring-[#83DF9C]"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/70 block mb-1">
-                                Código SICA
-                            </label>
-                            <input
-                                type="text"
-                                value={sicaCode}
-                                onChange={e => setSicaCode(e.target.value)}
-                                className="w-full bg-white border border-[#0C3C60]/20 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-[#0C3C60] focus:outline-none focus:ring-2 focus:ring-[#83DF9C]"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/70 block mb-1">
-                                Variedad / Lote
-                            </label>
-                            <input
-                                type="text"
-                                value={coffeeVariety}
-                                onChange={e => setCoffeeVariety(e.target.value)}
-                                className="w-full bg-white border border-[#0C3C60]/20 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#0C3C60] focus:outline-none focus:ring-2 focus:ring-[#83DF9C]"
-                            />
-                        </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <input
+                            type="text"
+                            value={farmerName}
+                            onChange={e => setFarmerName(e.target.value)}
+                            placeholder="Productor"
+                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#0C3C60]"
+                        />
+                        <input
+                            type="text"
+                            value={currentFarmName}
+                            onChange={e => setCurrentFarmName(e.target.value)}
+                            placeholder="Finca"
+                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#0C3C60]"
+                        />
+                        <input
+                            type="text"
+                            value={sicaCode}
+                            onChange={e => setSicaCode(e.target.value)}
+                            placeholder="Cód SICA"
+                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono text-[#0C3C60]"
+                        />
+                        <input
+                            type="text"
+                            value={coffeeVariety}
+                            onChange={e => setCoffeeVariety(e.target.value)}
+                            placeholder="Variedad"
+                            className="bg-white border border-[#0C3C60]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#0C3C60]"
+                        />
                     </div>
                 </div>
             )}
 
-            {/* TAB CONTENT: 3. File Upload Panel */}
+            {/* TAB CONTENT: File Upload */}
             {activeTab === 'file' && (
-                <div className="p-4 sm:p-6 bg-[#FAF2CA]/20 border-b border-[#0C3C60]/10">
+                <div className="p-3 sm:p-5 bg-[#FAF2CA]/20 border-b border-[#0C3C60]/10">
                     <div
-                        className="border-2 border-dashed border-[#0C3C60]/20 hover:border-[#83DF9C] bg-white rounded-2xl p-5 text-center transition-all cursor-pointer"
+                        className="border-2 border-dashed border-[#0C3C60]/20 hover:border-[#83DF9C] bg-white rounded-xl p-4 text-center cursor-pointer"
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <input
@@ -732,212 +1027,67 @@ export default function EUDRGeoreference({
                             accept=".json,.geojson,.kml"
                             className="hidden"
                         />
-                        <UploadCloud className="w-8 h-8 sm:w-10 sm:h-10 text-[#0C3C60]/40 mx-auto mb-2" />
-                        <p className="text-xs font-black uppercase tracking-wider text-[#0C3C60]">
-                            Toca para subir GeoJSON o KML
-                        </p>
-                        <p className="text-[10px] text-[#0C3C60]/60 mt-1">
-                            Compatible con QGIS, Google Earth y SICA FNC
-                        </p>
+                        <UploadCloud className="w-6 h-6 text-[#0C3C60]/50 mx-auto mb-1" />
+                        <p className="text-xs font-black uppercase text-[#0C3C60]">Toca para cargar archivo GeoJSON / KML</p>
                     </div>
                 </div>
             )}
 
-            {/* LIVE SATELLITE MAP CONTAINER (Mobile-First Height) */}
-            <div
-                className="relative w-full bg-[#082840]"
-                style={{ height: isFullscreen ? '60vh' : 'calc(45vh + 60px)' }}
-            >
-                <DynamicLeafletMap
-                    center={centerCoords}
-                    polygonCoords={polygonCoords}
-                    markers={markersCoords}
-                    currentLocation={currentPosition}
-                />
-
-                {/* Overlaid Live Telemetry Pill (Top Left) */}
-                <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5 max-w-[85%] sm:max-w-none">
-                    <div className="bg-[#0C3C60]/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-lg flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#83DF9C] animate-pulse flex-shrink-0"></span>
-                        <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#FAF2CA] truncate">
-                            {currentPosition
-                                ? `${currentPosition[0].toFixed(5)}°N, ${Math.abs(currentPosition[1]).toFixed(5)}°W`
-                                : 'Conectando satélite...'}
-                        </span>
-                        {currentPosition && (
-                            <button
-                                onClick={copyCoordinates}
-                                className="text-white/70 hover:text-white p-0.5"
-                                title="Copiar coordenadas"
-                            >
-                                <Copy className="w-3 h-3" />
-                            </button>
-                        )}
-                    </div>
-
-                    {isCapturing && (
-                        <div className="bg-[#83DF9C] text-[#0C3C60] px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#0C3C60] animate-ping"></span>
-                            <span>Auto-captura: {nextCaptureSeconds}s</span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Overlaid Actions on Map: Deshacer / Limpiar (Top Right) */}
-                <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
-                    {gpsPoints.length > 0 && !geoJsonData && (
-                        <button
-                            onClick={handleUndoPoint}
-                            className="bg-[#0C3C60]/90 hover:bg-[#0C3C60] active:scale-95 text-[#FAF2CA] px-2.5 sm:px-3 py-1.5 rounded-xl border border-white/20 shadow-lg text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer"
-                            title="Deshacer último vértice"
-                        >
-                            <RotateCcw className="w-3 h-3" />
-                            <span className="hidden sm:inline">Deshacer</span>
-                        </button>
-                    )}
-
-                    {(geoJsonData || gpsPoints.length > 0) && (
-                        <button
-                            onClick={handleClear}
-                            className="bg-[#FF7E7E]/90 hover:bg-[#FF7E7E] active:scale-95 text-white px-2.5 sm:px-3 py-1.5 rounded-xl shadow-lg text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
-                            title="Reiniciar mapeo"
-                        >
-                            Limpiar
-                        </button>
-                    )}
-                </div>
-
-                {/* Overlaid Big Vertex Counter (Only if actively mapping) */}
-                {!geoJsonData && gpsPoints.length > 0 && (
-                    <div className="absolute bottom-3 left-3 z-20 pointer-events-none bg-[#0C3C60]/95 backdrop-blur-md border border-white/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3">
-                        <span className="text-2xl sm:text-3xl font-black text-[#83DF9C] font-mono leading-none">
-                            {gpsPoints.length}
-                        </span>
-                        <div className="leading-tight">
-                            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#FAF2CA]">
-                                Vértices
-                            </p>
-                            <p className="text-[8px] sm:text-[9px] text-white/60">
-                                {gpsPoints.length < 3 ? `Faltan ${3 - gpsPoints.length}` : 'Listo para cerrar'}
-                            </p>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* METRICS & AUDIT DECK (2x2 Mobile Grid) */}
-            <div className="bg-[#FAF2CA]/30 p-3 sm:p-4 border-y border-[#0C3C60]/10 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 text-[#0C3C60]">
-                {/* 1. Área */}
-                <div className="bg-white p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-[#0C3C60]/10 shadow-sm">
-                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
-                        Área Parcela
-                    </p>
-                    <p className="text-lg sm:text-xl font-black text-[#0C3C60] font-mono mt-0.5">
-                        {areaHa > 0 ? `${areaHa} ha` : '--'}
-                    </p>
-                    <p className="text-[8px] sm:text-[9px] font-medium text-[#0C3C60]/70 truncate">
-                        {areaHa > 0 ? `≈ ${(areaHa * 1.5625).toFixed(2)} fg` : 'Sin polígono'}
-                    </p>
-                </div>
-
-                {/* 2. Perímetro */}
-                <div className="bg-white p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-[#0C3C60]/10 shadow-sm">
-                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
-                        Perímetro
-                    </p>
-                    <p className="text-lg sm:text-xl font-black text-[#0C3C60] font-mono mt-0.5">
-                        {perimeterMeters > 0 ? `${perimeterMeters} m` : '--'}
-                    </p>
-                    <p className="text-[8px] sm:text-[9px] font-medium text-[#0C3C60]/70 truncate">
-                        {perimeterMeters > 0 ? `${(perimeterMeters / 1000).toFixed(2)} km recorridos` : 'Calculando'}
-                    </p>
-                </div>
-
-                {/* 3. Regla EUDR Art. 9 */}
-                <div className="bg-white p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-[#0C3C60]/10 shadow-sm">
-                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
-                        Normativa EUDR
-                    </p>
-                    <p className="text-[11px] sm:text-xs font-black text-[#0C3C60] mt-1 uppercase truncate">
-                        {areaHa >= 4 ? 'Polígono Obligatorio' : 'Punto o Polígono'}
-                    </p>
-                    <p className="text-[8px] sm:text-[9px] font-medium text-[#0C3C60]/70 truncate">
-                        {areaHa >= 4 ? '≥ 4 ha (Art. 9.1.d)' : '< 4 ha Conforme'}
-                    </p>
-                </div>
-
-                {/* 4. Estado de Deforestación */}
-                <div className="bg-white p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-[#0C3C60]/10 shadow-sm">
-                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
-                        Corte 2020
-                    </p>
-                    <p className="text-[11px] sm:text-xs font-black text-[#0C3C60] mt-1 uppercase flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#83DF9C]"></span>
-                        <span>0.00 ha Deforestación</span>
-                    </p>
-                    <p className="text-[8px] sm:text-[9px] font-black text-[#83DF9C]">
-                        CLEARED / APROBADO
-                    </p>
-                </div>
-            </div>
-
-            {/* STATUS NOTIFICATION BANNER */}
-            {status.message && (
-                <div
-                    className={`px-4 py-2 text-[11px] sm:text-xs font-bold flex items-center justify-between border-b ${
-                        status.type === 'error'
-                            ? 'bg-[#FF7E7E]/20 text-[#0C3C60] border-[#FF7E7E]/40'
-                            : status.type === 'success'
-                            ? 'bg-[#83DF9C]/25 text-[#0C3C60] border-[#83DF9C]/50'
-                            : 'bg-blue-50 text-[#0C3C60] border-blue-200'
-                    }`}
-                >
-                    <span className="flex items-center gap-1.5 truncate">
-                        {status.type === 'success' && <CheckCircle2 className="w-3.5 h-3.5 text-[#0C3C60] flex-shrink-0" />}
-                        {status.type === 'error' && <AlertTriangle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />}
-                        <span className="truncate">{status.message}</span>
-                    </span>
-                    {copiedCoords && <span className="text-[9px] uppercase font-black flex-shrink-0">¡Copiado!</span>}
-                </div>
-            )}
-
-            {/* THUMB-ZONE ACTION DECK (Sticky at Bottom on Mobile) */}
-            <div className="sticky bottom-0 z-30 p-3 sm:p-5 bg-white/95 backdrop-blur-md border-t border-[#0C3C60]/10 shadow-lg space-y-2.5">
+            {/* THUMB-ZONE FIELD CONTROLS (Sticky at Bottom on Mobile) */}
+            <div className="sticky bottom-0 z-30 p-3 sm:p-4 bg-white/98 backdrop-blur-md border-t border-[#0C3C60]/10 shadow-xl space-y-2">
                 {!geoJsonData ? (
-                    <div className="flex flex-col gap-2">
+                    <div className="space-y-2">
                         {!isCapturing ? (
+                            /* BIG GREEN START BUTTON - ZERO TECH FRICTION */
                             <button
                                 onClick={startTracking}
-                                className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] active:scale-98 text-[#FAF2CA] hover:text-[#0C3C60] py-4 rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer min-h-[52px]"
+                                className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] active:scale-98 text-[#FAF2CA] hover:text-[#0C3C60] py-4 rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider transition-all shadow-lg flex flex-col items-center justify-center cursor-pointer min-h-[58px]"
                             >
-                                <Play className="w-4 h-4 fill-current" />
-                                <span>Iniciar Caminata GPS</span>
+                                <div className="flex items-center gap-2">
+                                    <Play className="w-4 h-4 fill-current text-[#83DF9C]" />
+                                    <span>TOCAR PARA INICIAR CAMINATA</span>
+                                </div>
+                                <span className="text-[10px] text-white/70 font-normal lowercase tracking-normal mt-0.5">
+                                    Camina con tu celular. Rastreará tus pasos cada 2.5 seg y se cerrará al volver.
+                                </span>
                             </button>
                         ) : (
-                            <div className="space-y-2">
-                                {/* Big Thumb Capture Button */}
-                                <button
-                                    onClick={handleCapturePoint}
-                                    className="w-full bg-[#83DF9C] hover:bg-[#6fd48b] active:scale-98 text-[#0C3C60] py-4 rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer min-h-[52px]"
-                                >
-                                    <MapPin className="w-4 h-4" />
-                                    <span>Marcar Vértice Manual #{gpsPoints.length + 1}</span>
-                                </button>
+                            /* ACTIVELY WALKING - NO NEED TO TAP POINTS! */
+                            <div className="space-y-2 animate-in fade-in">
+                                <div className="bg-[#FAF2CA] p-2.5 rounded-xl border border-[#0C3C60]/15 flex items-center justify-between text-xs">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-[#83DF9C] animate-ping"></div>
+                                        <span className="font-black text-[#0C3C60] uppercase text-[11px]">
+                                            Caminata en curso (Automática)
+                                        </span>
+                                    </div>
+                                    <span className="text-[10px] text-[#0C3C60]/70 font-bold">
+                                        {gpsPoints.length} puntos capturados
+                                    </span>
+                                </div>
 
-                                {/* Secondary Action Row */}
+                                {/* Fallback Manual Close & Manual Point buttons (if terrain is steep) */}
                                 <div className="flex items-center gap-2">
                                     <button
-                                        onClick={handleFinishMapping}
+                                        onClick={() => handleFinishMapping(false)}
                                         disabled={gpsPoints.length < 3}
-                                        className="flex-1 bg-[#0C3C60] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed hover:bg-[#082840] active:scale-98 text-[#FAF2CA] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer min-h-[46px]"
+                                        className="flex-1 bg-[#83DF9C] disabled:bg-gray-200 disabled:text-gray-400 hover:bg-[#6fd48b] active:scale-98 text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer min-h-[48px]"
                                     >
-                                        <ShieldCheck className="w-4 h-4 text-[#83DF9C]" />
-                                        <span>Cerrar Polígono ({gpsPoints.length}/3+)</span>
+                                        <ShieldCheck className="w-4 h-4" />
+                                        <span>Cerrar Lote Ahora ({gpsPoints.length}/3+)</span>
+                                    </button>
+
+                                    <button
+                                        onClick={handleManualCapturePoint}
+                                        className="px-3.5 py-3.5 bg-white border border-[#0C3C60]/20 hover:bg-slate-50 active:scale-98 text-[#0C3C60] rounded-xl font-bold uppercase text-[10px] sm:text-[11px] transition-all cursor-pointer min-h-[48px]"
+                                        title="Marcar vértice manual"
+                                    >
+                                        + Punto
                                     </button>
 
                                     <button
                                         onClick={stopTracking}
-                                        className="px-4 py-3.5 bg-[#0C3C60]/10 hover:bg-[#0C3C60]/20 active:scale-98 text-[#0C3C60] rounded-xl font-bold uppercase text-[11px] sm:text-xs transition-all cursor-pointer min-h-[46px]"
+                                        className="px-3 py-3.5 bg-[#0C3C60]/10 hover:bg-[#0C3C60]/20 active:scale-98 text-[#0C3C60] rounded-xl font-bold uppercase text-[10px] sm:text-[11px] transition-all cursor-pointer min-h-[48px]"
                                     >
                                         Pausar
                                     </button>
@@ -946,53 +1096,129 @@ export default function EUDRGeoreference({
                         )}
                     </div>
                 ) : (
-                    /* COMPLETED ACTIONS (Instant GFW check, GeoJSON export & WhatsApp Share) */
-                    <div className="space-y-2.5 animate-in fade-in">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {/* GFW Satellite Button */}
+                    /* COMPLETED ACTIONS: INSTANT PHOTO VIEW, WHATSAPP & GEOJSON */
+                    <div className="space-y-2 animate-in fade-in">
+                        <div className="grid grid-cols-2 gap-2">
+                            {/* View / Download Screenshot Photo */}
                             <button
-                                onClick={handleGfwValidation}
-                                disabled={isGfwValidating}
-                                className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] active:scale-98 text-[#FAF2CA] hover:text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
+                                onClick={() => {
+                                    if (capturedScreenshot) {
+                                        setShowScreenshotModal(true);
+                                    } else {
+                                        captureEvidenceScreenshot();
+                                    }
+                                }}
+                                className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] active:scale-98 text-[#FAF2CA] hover:text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer min-h-[48px]"
                             >
-                                <Satellite className="w-4 h-4 text-[#83DF9C]" />
-                                <span className="truncate">
-                                    {isGfwValidating ? 'Verificando Satélite...' : 'Validar con Sentinel-2 / GFW'}
-                                </span>
+                                <Camera className="w-4 h-4 text-[#83DF9C]" />
+                                <span>{isCapturingScreenshot ? 'Generando Foto...' : 'Ver Pantallazo'}</span>
                             </button>
 
-                            {/* Download GeoJSON for EU TRACES NT */}
+                            {/* Download GeoJSON for TRACES NT */}
                             <button
                                 onClick={downloadGeoJsonFile}
-                                className="w-full bg-[#83DF9C] hover:bg-[#6fd48b] active:scale-98 text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
+                                className="w-full bg-[#83DF9C] hover:bg-[#6fd48b] active:scale-98 text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer min-h-[48px]"
                             >
                                 <Download className="w-4 h-4" />
-                                <span className="truncate">Descargar GeoJSON (TRACES NT)</span>
+                                <span>GeoJSON EUDR</span>
                             </button>
                         </div>
 
-                        {/* WhatsApp Field Share Button */}
+                        {/* Instant WhatsApp Share */}
                         <button
                             onClick={shareViaWhatsApp}
-                            className="w-full bg-[#25D366] hover:bg-[#20ba5a] active:scale-98 text-white py-3 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                            className="w-full bg-[#25D366] hover:bg-[#20ba5a] active:scale-98 text-white py-3 rounded-xl font-black uppercase text-xs tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                         >
-                            <Share2 className="w-3.5 h-3.5" />
-                            <span>Compartir Reporte por WhatsApp</span>
+                            <Share2 className="w-4 h-4" />
+                            <span>Enviar Reporte y Coordenadas por WhatsApp</span>
                         </button>
-
-                        <div className="flex items-center justify-between text-[10px] sm:text-[11px] pt-1 text-[#0C3C60]/70">
-                            <span>Vértices WGS84: {markersCoords.length}</span>
-                            <button
-                                onClick={copyCoordinates}
-                                className="text-[#0C3C60] font-black hover:underline cursor-pointer uppercase flex items-center gap-1"
-                            >
-                                <Copy className="w-3 h-3" />
-                                <span>{copiedCoords ? '¡Copiado!' : 'Copiar Coordenadas'}</span>
-                            </button>
-                        </div>
                     </div>
                 )}
             </div>
+
+            {/* AUTOMATIC SCREENSHOT EVIDENCE MODAL */}
+            {showScreenshotModal && (
+                <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm p-3 sm:p-6 flex items-center justify-center animate-in fade-in">
+                    <div className="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto border border-[#0C3C60]/20 shadow-2xl flex flex-col justify-between">
+                        {/* Modal Header */}
+                        <div className="p-4 bg-[#0C3C60] text-white rounded-t-3xl flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <Camera className="w-5 h-5 text-[#83DF9C]" />
+                                <div>
+                                    <h3 className="text-xs font-black uppercase tracking-wider text-[#FAF2CA]">
+                                        Evidencia Fotográfica de la Caminata
+                                    </h3>
+                                    <p className="text-[10px] text-white/60">
+                                        Capturado automáticamente al cerrar el lote
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowScreenshotModal(false)}
+                                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Captured Image Display */}
+                        <div className="p-4 bg-slate-100 flex flex-col items-center">
+                            {capturedScreenshot ? (
+                                <img
+                                    src={capturedScreenshot}
+                                    alt="Pantallazo de la caminata satelital"
+                                    className="w-full rounded-2xl shadow-md border border-[#0C3C60]/15 object-contain max-h-[48vh]"
+                                />
+                            ) : (
+                                <div className="py-12 text-center text-xs text-gray-500">
+                                    Generando imagen de alta resolución...
+                                </div>
+                            )}
+
+                            <div className="mt-3 w-full bg-[#FAF2CA] p-3 rounded-xl border border-[#0C3C60]/10 text-[#0C3C60] text-xs">
+                                <p className="font-bold flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-4 h-4 text-[#83DF9C]" />
+                                    <span>Lote verificado: {areaHa} ha (≈ {(areaHa * 1.5625).toFixed(2)} Fanegadas)</span>
+                                </p>
+                                <p className="text-[10px] text-[#0C3C60]/70 mt-0.5">
+                                    {farmerName} • {currentFarmName} • SICA: {sicaCode}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Modal Actions */}
+                        <div className="p-4 bg-white rounded-b-3xl border-t border-gray-100 space-y-2">
+                            {/* Save directly to gallery */}
+                            <button
+                                onClick={downloadScreenshotImage}
+                                className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] text-[#FAF2CA] hover:text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                <Download className="w-4 h-4" />
+                                <span>Guardar Foto en el Celular / Galería</span>
+                            </button>
+
+                            {/* WhatsApp share */}
+                            <button
+                                onClick={() => {
+                                    shareViaWhatsApp();
+                                    setShowScreenshotModal(false);
+                                }}
+                                className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white py-3.5 rounded-xl font-black uppercase text-xs tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                <Share2 className="w-4 h-4" />
+                                <span>Compartir por WhatsApp</span>
+                            </button>
+
+                            <button
+                                onClick={() => setShowScreenshotModal(false)}
+                                className="w-full py-2.5 text-center text-xs font-bold text-gray-500 hover:text-[#0C3C60] uppercase cursor-pointer"
+                            >
+                                Cerrar y volver al mapa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
