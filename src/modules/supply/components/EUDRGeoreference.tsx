@@ -140,6 +140,24 @@ export default function EUDRGeoreference({
     const [isCapturingScreenshot, setIsCapturingScreenshot] = useState<boolean>(false);
     const [capturedScreenshot, setCapturedScreenshot] = useState<string | null>(null);
     const [showScreenshotModal, setShowScreenshotModal] = useState<boolean>(false);
+    const [sealedTimestamp, setSealedTimestamp] = useState<string | null>(null);
+
+    const currentTimestampDisplay = useMemo(() => {
+        if (sealedTimestamp) return sealedTimestamp;
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-CO', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        const timeStr = now.toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+        return `${dateStr}, ${timeStr}`;
+    }, [sealedTimestamp]);
 
     // Refs for real-time tracking without stale closure
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -242,6 +260,21 @@ export default function EUDRGeoreference({
                 navigator.vibrate([150, 70, 150, 70, 300]);
             }
 
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-CO', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            const timeStr = now.toLocaleTimeString('es-CO', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            const formattedStamp = `${dateStr}, ${timeStr}`;
+            setSealedTimestamp(formattedStamp);
+
             const avgAcc =
                 imuData.length > 0 ? imuData.reduce((acc, curr) => acc + curr.acc, 0) / imuData.length : 1.25;
 
@@ -261,7 +294,8 @@ export default function EUDRGeoreference({
                         lotCode: sicaLotCode,
                         variety: coffeeVariety,
                         country: 'CO',
-                        timestamp: new Date().toISOString(),
+                        timestamp: now.toISOString(),
+                        timestampFormatted: formattedStamp,
                         autoClosed: isAutoClosed,
                         sensorVerified: avgAcc > 1
                     },
@@ -546,6 +580,20 @@ export default function EUDRGeoreference({
         setGeoJsonData(geojson);
         if (onPolygonChange) onPolygonChange(geojson);
 
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-CO', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        const timeStr = now.toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+        setSealedTimestamp(`${dateStr}, ${timeStr}`);
+
         // Auto capture screenshot for preview
         setTimeout(() => {
             captureEvidenceScreenshot();
@@ -560,6 +608,7 @@ export default function EUDRGeoreference({
         setDistanceToStart(null);
         maxDistanceAwayRef.current = 0;
         setCapturedScreenshot(null);
+        setSealedTimestamp(null);
         stopTracking();
     };
 
@@ -660,6 +709,7 @@ export default function EUDRGeoreference({
     const shareViaWhatsApp = () => {
         const text =
             `*AXIS ONE - Certificado de Georreferenciación EUDR*%0A` +
+            `⏰ *Fecha y Hora:* ${currentTimestampDisplay}%0A` +
             `📍 *Finca:* ${currentFarmName}%0A` +
             `👨‍🌾 *Caficultor:* ${farmerName}%0A` +
             `☕ *Variedad:* ${coffeeVariety}%0A` +
@@ -668,7 +718,7 @@ export default function EUDRGeoreference({
             `📏 *Perímetro:* ${perimeterMeters} m%0A` +
             `🌐 *Vértices Registrados:* ${markersCoords.length}%0A` +
             `🛡️ *Cumplimiento EUDR:* 0.00 ha Deforestación (Línea Base 31-Dic-2020 CLEARED)%0A` +
-            `📸 *Evidencia Fotográfica:* Pantallazo satelital capturado automáticamente.%0A` +
+            `📸 *Evidencia Fotográfica:* Pantallazo satelital sellado con fecha y hora exacta.%0A` +
             `📲 *Firma Inercial:* Paso humano certificado con sensores IMU anti-spoofing.%0A` +
             (currentPosition
                 ? `🗺️ *Ubicación en Google Maps:* https://www.google.com/maps?q=${currentPosition[0]},${currentPosition[1]}`
@@ -901,17 +951,19 @@ export default function EUDRGeoreference({
                 </div>
 
                 {/* Identification Footer Bar for the Screenshot */}
-                <div className="bg-[#0C3C60] text-[#FAF2CA] px-4 py-2 flex flex-wrap items-center justify-between text-[10px] border-t border-white/10">
-                    <div className="flex items-center gap-2">
+                <div className="bg-[#0C3C60] text-[#FAF2CA] px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-1 text-[10px] border-t border-white/10">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                         <span className="font-bold">Finca:</span>
                         <span>{currentFarmName}</span>
                         <span className="text-white/40">•</span>
                         <span className="font-bold">SICA:</span>
                         <span className="font-mono">{sicaCode}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold">Fecha:</span>
-                        <span>{new Date().toLocaleDateString('es-CO')}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                        <span className="font-bold text-white/80">Fecha y Hora:</span>
+                        <span className="font-mono font-bold text-white bg-white/10 px-2 py-0.5 rounded text-[10px]">
+                            {currentTimestampDisplay}
+                        </span>
                         <span className="text-white/40">•</span>
                         <span className="text-[#83DF9C] font-black">CERTIFICADO axisONE</span>
                     </div>
@@ -1176,10 +1228,15 @@ export default function EUDRGeoreference({
                             )}
 
                             <div className="mt-3 w-full bg-[#FAF2CA] p-3 rounded-xl border border-[#0C3C60]/10 text-[#0C3C60] text-xs">
-                                <p className="font-bold flex items-center gap-1.5">
-                                    <CheckCircle2 className="w-4 h-4 text-[#83DF9C]" />
-                                    <span>Lote verificado: {areaHa} ha (≈ {(areaHa * 1.5625).toFixed(2)} Fanegadas)</span>
-                                </p>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                                    <p className="font-bold flex items-center gap-1.5">
+                                        <CheckCircle2 className="w-4 h-4 text-[#83DF9C] flex-shrink-0" />
+                                        <span>Lote verificado: {areaHa} ha (≈ {(areaHa * 1.5625).toFixed(2)} Fanegadas)</span>
+                                    </p>
+                                    <span className="font-mono text-[10px] bg-[#0C3C60] text-[#FAF2CA] px-2 py-0.5 rounded font-bold w-fit">
+                                        {currentTimestampDisplay}
+                                    </span>
+                                </div>
                                 <p className="text-[10px] text-[#0C3C60]/70 mt-0.5">
                                     {farmerName} • {currentFarmName} • SICA: {sicaCode}
                                 </p>
