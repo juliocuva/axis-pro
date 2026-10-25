@@ -47,13 +47,34 @@ interface LeafletMapProps {
 
 function MapUpdater({ center, polygonCoords, markers }: LeafletMapProps) {
     const map = useMap();
+
+    useEffect(() => {
+        // Invalidate size on mount and window resize (crucial for mobile layout & orientation changes)
+        const timer = setTimeout(() => {
+            map.invalidateSize();
+        }, 200);
+
+        const handleResize = () => {
+            map.invalidateSize();
+        };
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('orientationchange', handleResize);
+        };
+    }, [map]);
+
     useEffect(() => {
         if (polygonCoords && polygonCoords.length > 0) {
             const bounds = L.latLngBounds(polygonCoords);
-            map.fitBounds(bounds, { padding: [40, 40] });
+            map.fitBounds(bounds, { padding: [30, 30] });
         } else if (markers && markers.length > 1) {
             const bounds = L.latLngBounds(markers);
-            map.fitBounds(bounds, { padding: [40, 40], maxZoom: 18 });
+            map.fitBounds(bounds, { padding: [30, 30], maxZoom: 18 });
         } else {
             map.setView(center, 18);
         }
