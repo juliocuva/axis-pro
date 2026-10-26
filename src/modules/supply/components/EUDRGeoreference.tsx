@@ -110,6 +110,7 @@ export default function EUDRGeoreference({
     const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
     const [distanceToStart, setDistanceToStart] = useState<number | null>(null);
     const [autoClosedNotice, setAutoClosedNotice] = useState<boolean>(false);
+    const [countdownSeconds, setCountdownSeconds] = useState<number>(10);
 
     // IMU Inertial Sensor Anti-spoofing
     const [imuData, setImuData] = useState<{ acc: number; gyro: number }[]>([]);
@@ -156,6 +157,10 @@ export default function EUDRGeoreference({
     const gpsPointsRef = useRef<[number, number][]>([]);
     const accuracyRef = useRef<number | null>(null);
     const maxDistanceAwayRef = useRef<number>(0);
+    const isCapturingRef = useRef<boolean>(false);
+    const countdownRef = useRef<number>(10);
+    const handleFinishMappingRef = useRef<(isAutoClosed?: boolean) => void>(() => {});
+    const handleAutoCaptureStepRef = useRef<() => void>(() => {});
 
     // Sync refs
     useEffect(() => {
@@ -165,6 +170,10 @@ export default function EUDRGeoreference({
     useEffect(() => {
         accuracyRef.current = gpsAccuracy;
     }, [gpsAccuracy]);
+
+    useEffect(() => {
+        isCapturingRef.current = isCapturing;
+    }, [isCapturing]);
 
     // Persistence on Mount
     useEffect(() => {
@@ -323,8 +332,14 @@ export default function EUDRGeoreference({
                 navigator.geolocation.clearWatch(watchId.current);
                 watchId.current = null;
             }
-            if (captureIntervalId.current) clearInterval(captureIntervalId.current);
+            if (captureIntervalId.current) {
+                clearInterval(captureIntervalId.current);
+                captureIntervalId.current = null;
+            }
             setIsCapturing(false);
+            isCapturingRef.current = false;
+            countdownRef.current = 10;
+            setCountdownSeconds(10);
             localStorage.removeItem('axis_pending_mapping');
 
             if (isAutoClosed) {
@@ -349,6 +364,36 @@ export default function EUDRGeoreference({
         ]
     );
 
+    handleFinishMappingRef.current = handleFinishMapping;
+
+    // Check proximity to start point and auto-close
+    const checkProximityAndAutoClose = useCallback((currentLat: number, currentLng: number) => {
+        const points = gpsPointsRef.current;
+        if (points.length < 3) return false;
+
+        const startLng = points[0][0];
+        const startLat = points[0][1];
+        const distToStart = haversineDistanceMeters([currentLat, currentLng], [startLat, startLng]);
+        setDistanceToStart(Math.round(distToStart * 10) / 10);
+
+        if (distToStart > maxDistanceAwayRef.current) {
+            maxDistanceAwayRef.current = distToStart;
+        }
+
+        // AUTO-CLOSE PROXIMITY CHECK:
+        // 1. User has at least 3 vertices recorded
+        // 2. User has walked away at least 4.5 meters from origin
+        // 3. User is now back within close threshold (adaptive to GPS accuracy: 2.5m to 4.5m)
+        const accuracy = accuracyRef.current || 5;
+        const closeThresholdMeters = Math.max(2.5, Math.min(4.5, accuracy * 0.75));
+
+        if (maxDistanceAwayRef.current >= 4.5 && distToStart <= closeThresholdMeters) {
+            handleFinishMappingRef.current(true);
+            return true;
+        }
+        return false;
+    }, []);
+
     // Auto-step logic executed every 10 seconds (Hands-free recording)
     const handleAutoCaptureStep = useCallback(() => {
         const currentPos = currentPositionRef.current;
@@ -356,53 +401,34 @@ export default function EUDRGeoreference({
 
         const currentLat = currentPos[0];
         const currentLng = currentPos[1];
-        const newPoint: [number, number] = [currentLng, currentLat];
         const currentPoints = gpsPointsRef.current;
 
-        // If we already have points, calculate distance to starting point
+        // First check proximity closure
+        if (currentPoints.length >= 3) {
+            const closed = checkProximityAndAutoClose(currentLat, currentLng);
+            if (closed) return;
+        }
+
+        // Avoid adding stacked duplicate points if standing completely still (< 0.8m)
         if (currentPoints.length > 0) {
-            const startLng = currentPoints[0][0];
-            const startLat = currentPoints[0][1];
-            const distToStart = haversineDistanceMeters([currentLat, currentLng], [startLat, startLng]);
-            setDistanceToStart(Math.round(distToStart * 10) / 10);
-
-            // Track how far the person has walked away from the beginning
-            if (distToStart > maxDistanceAwayRef.current) {
-                maxDistanceAwayRef.current = distToStart;
-            }
-
-            // AUTO-CLOSE PROXIMITY CHECK:
-            // 1. User has at least 4 vertices recorded
-            // 2. User has walked away at least 8 meters from origin
-            // 3. User is now back within 1.5 to 3.5 meters of starting point!
-            const accuracy = accuracyRef.current || 5;
-            const closeThresholdMeters = Math.max(1.8, Math.min(3.5, accuracy * 0.65));
-
-            if (
-                currentPoints.length >= 4 &&
-                maxDistanceAwayRef.current >= 8 &&
-                distToStart <= closeThresholdMeters
-            ) {
-                // AUTOMATIC CLOSURE!
-                handleFinishMapping(true);
-                return;
-            }
-
-            // Check distance from last point (must be >= 1.5 meters to avoid jitter when standing still)
             const last = currentPoints[currentPoints.length - 1];
             const distFromLast = haversineDistanceMeters([currentLat, currentLng], [last[1], last[0]]);
-            if (distFromLast < 1.5) {
+            if (distFromLast < 0.8) {
                 return;
             }
         }
 
         // Add new vertex automatically
         if (typeof window !== 'undefined' && navigator.vibrate) {
-            navigator.vibrate(25);
+            navigator.vibrate([40, 30, 40]);
         }
 
+        const newPoint: [number, number] = [currentLng, currentLat];
         setGpsPoints(prev => [...prev, newPoint]);
-    }, [handleFinishMapping]);
+        speakVoiceGuidance(`Punto ${currentPoints.length + 1}`);
+    }, [checkProximityAndAutoClose]);
+
+    handleAutoCaptureStepRef.current = handleAutoCaptureStep;
 
     // Start GPS & Sensor Tracking (Hands-Free)
     const startTracking = () => {
@@ -412,12 +438,26 @@ export default function EUDRGeoreference({
         }
 
         setIsCapturing(true);
+        isCapturingRef.current = true;
         setAutoClosedNotice(false);
         maxDistanceAwayRef.current = 0;
         setDistanceToStart(null);
         setGfwStatus('idle');
+        countdownRef.current = 10;
+        setCountdownSeconds(10);
 
-        speakVoiceGuidance('Caminata automática iniciada. Camina por el lindero. Se registrará un punto cada 10 segundos y se cerrará solo al volver.');
+        // If GPS is already fixed, capture Point 1 immediately
+        if (currentPositionRef.current && gpsPointsRef.current.length === 0) {
+            const [lat, lng] = currentPositionRef.current;
+            setGpsPoints([[lng, lat]]);
+            gpsPointsRef.current = [[lng, lat]];
+            if (typeof window !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            speakVoiceGuidance('Punto inicial registrado. Inicia tu caminata.');
+        } else {
+            speakVoiceGuidance('Caminata automática iniciada. Esperando señal GPS.');
+        }
 
         // Request device motion permission on iOS/Android
         if (typeof DeviceMotionEvent !== 'undefined' && (DeviceMotionEvent as any).requestPermission) {
@@ -437,6 +477,26 @@ export default function EUDRGeoreference({
                 setCurrentPosition([latitude, longitude]);
                 currentPositionRef.current = [latitude, longitude];
                 setGpsAccuracy(accuracy);
+
+                if (!isCapturingRef.current) return;
+
+                // Capture Point 1 immediately as soon as GPS fixes if not yet captured
+                if (gpsPointsRef.current.length === 0) {
+                    setGpsPoints([[longitude, latitude]]);
+                    gpsPointsRef.current = [[longitude, latitude]];
+                    countdownRef.current = 10;
+                    setCountdownSeconds(10);
+                    if (typeof window !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                    speakVoiceGuidance('Punto inicial registrado. Camina por el lindero.');
+                    return;
+                }
+
+                // Check proximity on every real-time GPS position update
+                if (gpsPointsRef.current.length >= 3) {
+                    checkProximityAndAutoClose(latitude, longitude);
+                }
             },
             err => {
                 console.error(`GPS Error: ${err.message}`);
@@ -450,29 +510,52 @@ export default function EUDRGeoreference({
             navigator.geolocation.clearWatch(watchId.current);
             watchId.current = null;
         }
-        if (captureIntervalId.current) clearInterval(captureIntervalId.current);
+        if (captureIntervalId.current) {
+            clearInterval(captureIntervalId.current);
+            captureIntervalId.current = null;
+        }
         setIsCapturing(false);
+        isCapturingRef.current = false;
+        countdownRef.current = 10;
+        setCountdownSeconds(10);
     };
 
-    // Auto-capture countdown loop: runs every 10 seconds (10000 ms)
+    // Auto-capture countdown loop: runs every 1000ms countdown for 10-second intervals
     useEffect(() => {
-        if (isCapturing) {
-            if (currentPositionRef.current && gpsPointsRef.current.length === 0) {
-                const p = currentPositionRef.current;
-                setGpsPoints([[p[1], p[0]]]);
+        if (!isCapturing) {
+            if (captureIntervalId.current) {
+                clearInterval(captureIntervalId.current);
+                captureIntervalId.current = null;
             }
-
-            captureIntervalId.current = setInterval(() => {
-                handleAutoCaptureStep();
-            }, 10000);
-        } else {
-            if (captureIntervalId.current) clearInterval(captureIntervalId.current);
+            countdownRef.current = 10;
+            setCountdownSeconds(10);
+            return;
         }
 
+        countdownRef.current = 10;
+        setCountdownSeconds(10);
+
+        captureIntervalId.current = setInterval(() => {
+            // Wait until Point 1 has been recorded
+            if (gpsPointsRef.current.length === 0) return;
+
+            countdownRef.current -= 1;
+            if (countdownRef.current <= 0) {
+                countdownRef.current = 10;
+                setCountdownSeconds(10);
+                handleAutoCaptureStepRef.current();
+            } else {
+                setCountdownSeconds(countdownRef.current);
+            }
+        }, 1000);
+
         return () => {
-            if (captureIntervalId.current) clearInterval(captureIntervalId.current);
+            if (captureIntervalId.current) {
+                clearInterval(captureIntervalId.current);
+                captureIntervalId.current = null;
+            }
         };
-    }, [isCapturing, handleAutoCaptureStep]);
+    }, [isCapturing]);
 
     // Manual capture fallback
     const handleManualCapturePoint = () => {
@@ -808,25 +891,29 @@ export default function EUDRGeoreference({
 
                         {/* Active Automatic Tracking Banner */}
                         {isCapturing && (
-                            <div className="bg-[#83DF9C] text-[#0C3C60] px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#0C3C60] animate-ping"></span>
-                                <span>Manos libres: 1 punto cada 10 seg</span>
+                            <div className="bg-[#83DF9C] text-[#0C3C60] px-3 py-1 rounded-full shadow-lg flex items-center gap-2 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit">
+                                <span className="w-2 h-2 rounded-full bg-[#0C3C60] animate-ping"></span>
+                                <span>
+                                    {gpsPoints.length === 0
+                                        ? 'Conectando satélites para Punto 1...'
+                                        : `Punto en ${countdownSeconds}s • ${gpsPoints.length} vértice${gpsPoints.length === 1 ? '' : 's'}`}
+                                </span>
                             </div>
                         )}
 
                         {/* Proximity Indicator (When approaching start point) */}
-                        {isCapturing && distanceToStart !== null && gpsPoints.length >= 4 && (
+                        {isCapturing && distanceToStart !== null && gpsPoints.length >= 3 && (
                             <div
                                 className={`px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider animate-in fade-in w-fit ${
                                     distanceToStart <= 3.5
-                                        ? 'bg-[#FAF2CA] text-[#0C3C60] ring-2 ring-[#83DF9C] animate-bounce'
+                                        ? 'bg-[#FAF2CA] text-[#0C3C60] ring-2 ring-[#0C3C60] animate-bounce'
                                         : 'bg-[#0C3C60]/90 text-[#FAF2CA] border border-white/20'
                                 }`}
                             >
                                 <Compass className="w-3 h-3 text-[#83DF9C]" />
                                 <span>
                                     {distanceToStart <= 3.5
-                                        ? `¡A ${distanceToStart}m del inicio! Cerrando...`
+                                        ? `¡A ${distanceToStart}m del inicio! Cerrando automáticamente...`
                                         : `Distancia al inicio: ${distanceToStart}m`}
                                 </span>
                             </div>
@@ -1070,15 +1157,31 @@ export default function EUDRGeoreference({
                             /* ACTIVELY WALKING - NO NEED TO TAP POINTS! */
                             <div className="space-y-2 animate-in fade-in">
                                 <div className="bg-[#FAF2CA] p-2.5 rounded-xl border border-[#0C3C60]/15 flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-[#83DF9C] animate-ping"></div>
-                                        <span className="font-black text-[#0C3C60] uppercase text-[11px]">
-                                            Caminata en curso (Automática)
-                                        </span>
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-7 h-7 rounded-full bg-[#0C3C60] text-[#83DF9C] flex items-center justify-center font-mono font-black text-xs shadow-sm shrink-0">
+                                            {gpsPoints.length === 0 ? '···' : countdownSeconds}
+                                        </div>
+                                        <div>
+                                            <span className="font-black text-[#0C3C60] uppercase text-[11px] block leading-tight">
+                                                {gpsPoints.length === 0 ? 'Fijando señal GPS...' : 'Caminata Automática en Curso'}
+                                            </span>
+                                            <span className="text-[10px] text-[#0C3C60]/70 font-semibold block leading-tight mt-0.5">
+                                                {gpsPoints.length === 0
+                                                    ? 'Punto 1 se marcará al capturar coordenadas'
+                                                    : `Próximo punto en ${countdownSeconds}s • Se cierra solo al volver`}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] text-[#0C3C60]/70 font-bold">
-                                        {gpsPoints.length} puntos capturados
-                                    </span>
+                                    <div className="text-right shrink-0">
+                                        <span className="text-[11px] text-[#0C3C60] font-black bg-white px-2 py-0.5 rounded-lg border border-[#0C3C60]/15 inline-block shadow-xs">
+                                            {gpsPoints.length} {gpsPoints.length === 1 ? 'punto' : 'puntos'}
+                                        </span>
+                                        {distanceToStart !== null && gpsPoints.length >= 3 && (
+                                            <p className="text-[9px] text-[#0C3C60]/80 font-bold mt-0.5">
+                                                {distanceToStart}m al inicio
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Fallback Manual Close & Manual Point buttons (if terrain is steep) */}
