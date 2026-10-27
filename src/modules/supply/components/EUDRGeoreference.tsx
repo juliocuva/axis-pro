@@ -21,7 +21,9 @@ import {
     Camera,
     Lock,
     Navigation,
-    X
+    X,
+    Unlock,
+    Smartphone
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { validateDeforestationWithGFW } from '../actions/eudr';
@@ -142,6 +144,12 @@ export default function EUDRGeoreference({
     const [countdownSeconds, setCountdownSeconds] = useState<number>(10);
     const [immutableHash, setImmutableHash] = useState<string | null>(null);
 
+    // Pocket Mode & Wake Lock State
+    const [isPocketMode, setIsPocketMode] = useState<boolean>(false);
+    const [holdProgress, setHoldProgress] = useState<number>(0);
+    const holdIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const wakeLockRef = useRef<any>(null);
+
     // IMU Inertial Sensor Anti-spoofing
     const [imuData, setImuData] = useState<{ acc: number; gyro: number }[]>([]);
 
@@ -209,6 +217,58 @@ export default function EUDRGeoreference({
     useEffect(() => {
         isCapturingRef.current = isCapturing;
     }, [isCapturing]);
+
+    // Screen Wake Lock to prevent phone screen from sleeping during walk
+    const requestWakeLock = async () => {
+        if (typeof window !== 'undefined' && 'wakeLock' in navigator) {
+            try {
+                wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+            } catch (err) {
+                console.warn('Wake Lock notice:', err);
+            }
+        }
+    };
+
+    const releaseWakeLock = () => {
+        if (wakeLockRef.current) {
+            try {
+                wakeLockRef.current.release();
+            } catch (e) {}
+            wakeLockRef.current = null;
+        }
+    };
+
+    // Hold to unlock Pocket Mode
+    const handleStartHold = () => {
+        setHoldProgress(0);
+        let currentP = 0;
+        if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+        holdIntervalRef.current = setInterval(() => {
+            currentP += 10;
+            setHoldProgress(currentP);
+            if (currentP >= 100) {
+                if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+                setIsPocketMode(false);
+                setHoldProgress(0);
+                if (typeof window !== 'undefined' && navigator.vibrate) {
+                    navigator.vibrate([70, 40, 70]);
+                }
+            }
+        }, 120);
+    };
+
+    const handleCancelHold = () => {
+        if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+        setHoldProgress(0);
+    };
+
+    // Release Wake Lock on unmount
+    useEffect(() => {
+        return () => {
+            releaseWakeLock();
+            if (holdIntervalRef.current) clearInterval(holdIntervalRef.current);
+        };
+    }, []);
 
     // Fetch elevation from high-resolution digital elevation model (fallback when GPS altitude is unavailable)
     const fetchElevation = async (lat: number, lng: number) => {
@@ -483,6 +543,8 @@ export default function EUDRGeoreference({
             }
             setIsCapturing(false);
             isCapturingRef.current = false;
+            releaseWakeLock();
+            setIsPocketMode(false);
             countdownRef.current = 10;
             setCountdownSeconds(10);
             localStorage.removeItem('axis_pending_mapping');
@@ -584,6 +646,7 @@ export default function EUDRGeoreference({
 
         setIsCapturing(true);
         isCapturingRef.current = true;
+        requestWakeLock();
         setAutoClosedNotice(false);
         maxDistanceAwayRef.current = 0;
         setDistanceToStart(null);
@@ -669,6 +732,8 @@ export default function EUDRGeoreference({
         }
         setIsCapturing(false);
         isCapturingRef.current = false;
+        releaseWakeLock();
+        setIsPocketMode(false);
         countdownRef.current = 10;
         setCountdownSeconds(10);
     };
@@ -1412,12 +1477,26 @@ export default function EUDRGeoreference({
                                         className="flex-1 bg-[#83DF9C] disabled:bg-gray-200 disabled:text-gray-400 hover:bg-[#6fd48b] active:scale-98 text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer min-h-[48px]"
                                     >
                                         <ShieldCheck className="w-4 h-4" />
-                                        <span>Cerrar Lote Ahora ({gpsPoints.length}/3+)</span>
+                                        <span>Cerrar Lote ({gpsPoints.length}/3+)</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setIsPocketMode(true);
+                                            if (typeof window !== 'undefined' && navigator.vibrate) {
+                                                navigator.vibrate([60, 40, 60]);
+                                            }
+                                        }}
+                                        className="px-3.5 py-3.5 bg-[#0C3C60] hover:bg-[#164e78] active:scale-98 text-[#FAF2CA] rounded-xl font-bold uppercase text-[10px] sm:text-[11px] transition-all cursor-pointer min-h-[48px] flex items-center gap-1.5 shadow-sm border border-white/10"
+                                        title="Modo Bolsillo: Bloquear pantalla táctil mientras caminas seguro"
+                                    >
+                                        <Lock className="w-3.5 h-3.5 text-[#83DF9C]" />
+                                        <span>Bolsillo</span>
                                     </button>
 
                                     <button
                                         onClick={handleManualCapturePoint}
-                                        className="px-3.5 py-3.5 bg-white border border-[#0C3C60]/20 hover:bg-slate-50 active:scale-98 text-[#0C3C60] rounded-xl font-bold uppercase text-[10px] sm:text-[11px] transition-all cursor-pointer min-h-[48px]"
+                                        className="px-3 py-3.5 bg-white border border-[#0C3C60]/20 hover:bg-slate-50 active:scale-98 text-[#0C3C60] rounded-xl font-bold uppercase text-[10px] sm:text-[11px] transition-all cursor-pointer min-h-[48px]"
                                         title="Marcar vértice manual"
                                     >
                                         + Punto
@@ -1595,6 +1674,109 @@ export default function EUDRGeoreference({
                                 Cerrar y volver al mapa
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* FULL-SCREEN POCKET MODE OVERLAY (MODO BOLSILLO ANTI-ROCES) */}
+            {isPocketMode && isCapturing && (
+                <div className="fixed inset-0 z-[300] bg-[#05131e] text-white flex flex-col justify-between p-6 select-none animate-in fade-in">
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-[#83DF9C]/20 border border-[#83DF9C]/40 flex items-center justify-center text-[#83DF9C]">
+                                <Lock className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <h3 className="text-xs font-black uppercase tracking-wider text-[#FAF2CA]">
+                                    Modo Bolsillo Activo
+                                </h3>
+                                <p className="text-[10px] text-white/60">
+                                    Pantalla táctil protegida contra toques de tela
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#83DF9C]/20 text-[#83DF9C] text-[10px] font-mono font-bold border border-[#83DF9C]/30">
+                            <span className="w-2 h-2 rounded-full bg-[#83DF9C] animate-ping" />
+                            <span>GPS Grabando</span>
+                        </div>
+                    </div>
+
+                    {/* Big Live Metrics in Pocket Mode */}
+                    <div className="flex flex-col items-center justify-center text-center my-auto space-y-6">
+                        <div>
+                            <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest block mb-1">
+                                Vértices Registrados
+                            </span>
+                            <div className="text-7xl font-black font-mono text-[#83DF9C]">
+                                {gpsPoints.length}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
+                                <span className="text-[9px] uppercase tracking-wider text-white/50 block font-bold">
+                                    Próximo Punto
+                                </span>
+                                <span className="text-2xl font-black font-mono text-[#FAF2CA]">
+                                    {countdownSeconds}s
+                                </span>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
+                                <span className="text-[9px] uppercase tracking-wider text-white/50 block font-bold">
+                                    Altitud
+                                </span>
+                                <span className="text-2xl font-black font-mono text-white">
+                                    {altitudeMeters ? altitudeMeters.toLocaleString('es-CO') : '--'}
+                                </span>
+                                <span className="text-[9px] text-white/40 block">msnm</span>
+                            </div>
+                        </div>
+
+                        {distanceToStart !== null && gpsPoints.length >= 3 && (
+                            <div className="bg-[#83DF9C]/15 border border-[#83DF9C]/30 rounded-2xl p-3 max-w-xs w-full text-center">
+                                <span className="text-[10px] font-bold text-[#83DF9C] block uppercase tracking-wider">
+                                    {distanceToStart <= 5 ? '🎯 ¡Llegaste al punto de partida!' : `Distancia al inicio: ${distanceToStart}m`}
+                                </span>
+                                <span className="text-[9px] text-white/60 block mt-0.5">
+                                    Se cerrará automáticamente al volver
+                                </span>
+                            </div>
+                        )}
+
+                        <div className="flex items-center gap-2 text-[10px] text-white/50 bg-white/5 px-3 py-1.5 rounded-full">
+                            <Smartphone className="w-3.5 h-3.5 text-[#83DF9C]" />
+                            <span>Vibra suave en tu bolsillo en cada punto capturado</span>
+                        </div>
+                    </div>
+
+                    {/* Unlock Action: Hold for 1.2s to prevent accidental unlocks in pocket */}
+                    <div className="space-y-2">
+                        <div className="relative overflow-hidden rounded-2xl">
+                            {/* Visual Progress Bar while holding */}
+                            <div
+                                className="absolute inset-0 bg-[#83DF9C] transition-all duration-100 ease-linear"
+                                style={{ width: `${holdProgress}%` }}
+                            />
+                            <button
+                                onTouchStart={handleStartHold}
+                                onTouchEnd={handleCancelHold}
+                                onMouseDown={handleStartHold}
+                                onMouseUp={handleCancelHold}
+                                onMouseLeave={handleCancelHold}
+                                className="relative w-full py-4 bg-white/10 hover:bg-white/15 active:bg-white/20 border border-white/20 rounded-2xl font-black uppercase text-xs tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer select-none text-white shadow-lg"
+                            >
+                                <Unlock className="w-4 h-4 text-[#FAF2CA]" />
+                                <span>
+                                    {holdProgress > 0
+                                        ? `Soltando en ${Math.max(1, Math.round((100 - holdProgress) / 10))}...`
+                                        : 'Mantén presionado para desbloquear'}
+                                </span>
+                            </button>
+                        </div>
+                        <p className="text-[10px] text-center text-white/50">
+                            Guarda el celular en tu bolsillo y camina libremente con ambas manos seguras.
+                        </p>
                     </div>
                 </div>
             )}
