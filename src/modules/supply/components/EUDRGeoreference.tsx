@@ -135,6 +135,7 @@ export default function EUDRGeoreference({
     const [isCapturing, setIsCapturing] = useState<boolean>(false);
     const [currentPosition, setCurrentPosition] = useState<[number, number] | null>(null); // [lat, lng]
     const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+    const [altitudeMeters, setAltitudeMeters] = useState<number | null>(null);
     const [distanceToStart, setDistanceToStart] = useState<number | null>(null);
     const [autoClosedNotice, setAutoClosedNotice] = useState<boolean>(false);
     const [countdownSeconds, setCountdownSeconds] = useState<number>(10);
@@ -184,6 +185,7 @@ export default function EUDRGeoreference({
     const currentPositionRef = useRef<[number, number] | null>(null);
     const gpsPointsRef = useRef<[number, number][]>([]);
     const accuracyRef = useRef<number | null>(null);
+    const altitudeMetersRef = useRef<number | null>(null);
     const maxDistanceAwayRef = useRef<number>(0);
     const isCapturingRef = useRef<boolean>(false);
     const countdownRef = useRef<number>(10);
@@ -200,8 +202,54 @@ export default function EUDRGeoreference({
     }, [gpsAccuracy]);
 
     useEffect(() => {
+        altitudeMetersRef.current = altitudeMeters;
+    }, [altitudeMeters]);
+
+    useEffect(() => {
         isCapturingRef.current = isCapturing;
     }, [isCapturing]);
+
+    // Fetch elevation from high-resolution digital elevation model (fallback when GPS altitude is unavailable)
+    const fetchElevation = async (lat: number, lng: number) => {
+        try {
+            const res = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && Array.isArray(data.elevation) && data.elevation.length > 0) {
+                    const elev = Math.round(data.elevation[0]);
+                    if (elev > 0) {
+                        setAltitudeMeters(elev);
+                        altitudeMetersRef.current = elev;
+                    }
+                }
+            }
+        } catch (e) {
+            // silent fallback
+        }
+    };
+
+    // Initial GPS Location & Altitude on Mount
+    useEffect(() => {
+        if (typeof window !== 'undefined' && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const { latitude, longitude, accuracy, altitude } = pos.coords;
+                    setCurrentPosition([latitude, longitude]);
+                    currentPositionRef.current = [latitude, longitude];
+                    setGpsAccuracy(accuracy);
+                    if (altitude !== null && altitude !== undefined && altitude > 0) {
+                        const alt = Math.round(altitude);
+                        setAltitudeMeters(alt);
+                        altitudeMetersRef.current = alt;
+                    } else {
+                        fetchElevation(latitude, longitude);
+                    }
+                },
+                () => {},
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+            );
+        }
+    }, []);
 
     // Persistence on Mount
     useEffect(() => {
@@ -313,6 +361,7 @@ export default function EUDRGeoreference({
                 timestamp: now.toISOString(),
                 areaHa: calculatedArea,
                 perimeterMeters: calculatedPerimeter,
+                altitudeMeters: altitudeMeters,
                 sensorVerified: avgAcc > 1
             });
             const sha256 = await calculatePolygonSha256(hashPayload);
@@ -330,6 +379,8 @@ export default function EUDRGeoreference({
                         lotId: currentLotId,
                         timestamp: now.toISOString(),
                         timestampFormatted: formattedStamp,
+                        altitudeMeters: altitudeMeters,
+                        elevationUnit: 'm.s.n.m.',
                         autoClosed: isAutoClosed,
                         sensorVerified: avgAcc > 1,
                         immutableHash: `SHA256:${sha256}`,
@@ -341,6 +392,7 @@ export default function EUDRGeoreference({
                             type: 'Feature',
                             properties: {
                                 LotCode: currentLotId,
+                                AltitudeMsnm: altitudeMeters,
                                 Method: isAutoClosed
                                     ? 'axis_handsfree_proximity_autoclosed'
                                     : 'axis_digital_walk_sensor_verified',
@@ -520,10 +572,18 @@ export default function EUDRGeoreference({
 
         watchId.current = navigator.geolocation.watchPosition(
             pos => {
-                const { latitude, longitude, accuracy } = pos.coords;
+                const { latitude, longitude, accuracy, altitude } = pos.coords;
                 setCurrentPosition([latitude, longitude]);
                 currentPositionRef.current = [latitude, longitude];
                 setGpsAccuracy(accuracy);
+
+                if (altitude !== null && altitude !== undefined && altitude > 0) {
+                    const alt = Math.round(altitude);
+                    setAltitudeMeters(alt);
+                    altitudeMetersRef.current = alt;
+                } else if (altitudeMetersRef.current === null) {
+                    fetchElevation(latitude, longitude);
+                }
 
                 if (!isCapturingRef.current) return;
 
@@ -696,6 +756,8 @@ export default function EUDRGeoreference({
         setGeoJsonData(geojson);
         if (onPolygonChange) onPolygonChange(geojson);
         calculatePolygonSha256(geojson).then(hash => setImmutableHash(hash));
+        setAltitudeMeters(1485);
+        altitudeMetersRef.current = 1485;
 
         const now = new Date();
         const dateStr = now.toLocaleDateString('es-CO', {
@@ -728,6 +790,8 @@ export default function EUDRGeoreference({
         setCapturedScreenshot(null);
         setSealedTimestamp(null);
         setImmutableHash(null);
+        setAltitudeMeters(null);
+        altitudeMetersRef.current = null;
         stopTracking();
     };
 
@@ -830,6 +894,7 @@ export default function EUDRGeoreference({
             `*AXIS ONE - Certificado de Georreferenciación EUDR*%0A` +
             `⏰ *Fecha y Hora:* ${currentTimestampDisplay}%0A` +
             `🏷️ *Lote:* ${currentLotId}%0A` +
+            (altitudeMeters ? `⛰️ *Altitud:* ${altitudeMeters.toLocaleString('es-CO')} m.s.n.m.%0A` : '') +
             `📐 *Área:* ${areaHa > 0 ? `${areaHa} ha (≈ ${(areaHa * 1.5625).toFixed(2)} Fanegadas)` : 'En proceso'}%0A` +
             `📏 *Perímetro:* ${perimeterMeters} m%0A` +
             `🌐 *Vértices Registrados:* ${markersCoords.length}%0A` +
@@ -930,6 +995,14 @@ export default function EUDRGeoreference({
                                     ? `${currentPosition[0].toFixed(5)}°N, ${Math.abs(currentPosition[1]).toFixed(5)}°W`
                                     : 'Conectando satélite...'}
                             </span>
+                            {altitudeMeters && (
+                                <>
+                                    <span className="text-white/30 text-[9px]">•</span>
+                                    <span className="text-[10px] font-mono font-black text-[#83DF9C] shrink-0">
+                                        {altitudeMeters.toLocaleString('es-CO')} msnm
+                                    </span>
+                                </>
+                            )}
                             {currentPosition && (
                                 <button
                                     onClick={copyCoordinates}
@@ -1017,7 +1090,7 @@ export default function EUDRGeoreference({
                 </div>
 
                 {/* METRICS & AUDIT DECK (Included in Screenshot) */}
-                <div className="bg-[#FAF2CA]/90 p-3 sm:p-4 border-t border-[#0C3C60]/10 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 text-[#0C3C60]">
+                <div className="bg-[#FAF2CA]/90 p-3 sm:p-4 border-t border-[#0C3C60]/10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 text-[#0C3C60]">
                     {/* 1. Área */}
                     <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
                         <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
@@ -1044,7 +1117,20 @@ export default function EUDRGeoreference({
                         </p>
                     </div>
 
-                    {/* 3. Normativa EUDR */}
+                    {/* 3. Altitud / Elevación */}
+                    <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
+                            Altitud Promedio
+                        </p>
+                        <p className="text-lg sm:text-xl font-black text-[#0C3C60] font-mono mt-0.5">
+                            {altitudeMeters ? `${altitudeMeters.toLocaleString('es-CO')} m` : '--'}
+                        </p>
+                        <p className="text-[8px] sm:text-[9px] font-medium text-[#0C3C60]/70 truncate">
+                            {altitudeMeters ? `${altitudeMeters.toLocaleString('es-CO')} m.s.n.m.` : 'Midiendo elevación'}
+                        </p>
+                    </div>
+
+                    {/* 4. Normativa EUDR */}
                     <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
                         <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
                             Normativa EUDR
@@ -1057,8 +1143,8 @@ export default function EUDRGeoreference({
                         </p>
                     </div>
 
-                    {/* 4. Deforestación Dinámica */}
-                    <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
+                    {/* 5. Deforestación Dinámica */}
+                    <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm col-span-2 sm:col-span-1">
                         <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
                             Corte 31-Dic-2020
                         </p>
@@ -1122,6 +1208,14 @@ export default function EUDRGeoreference({
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         <span className="font-bold">Lote:</span>
                         <span className="font-mono text-white font-bold">{currentLotId}</span>
+                        {altitudeMeters && (
+                            <>
+                                <span className="text-white/40">•</span>
+                                <span className="text-[#83DF9C] font-mono font-bold">
+                                    {altitudeMeters.toLocaleString('es-CO')} msnm
+                                </span>
+                            </>
+                        )}
                         <span className="text-white/40">•</span>
                         <span className="text-white/80">Delimitación GPS Terrestre</span>
                     </div>
@@ -1368,14 +1462,17 @@ export default function EUDRGeoreference({
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                                     <p className="font-bold flex items-center gap-1.5">
                                         <CheckCircle2 className="w-4 h-4 text-[#83DF9C] flex-shrink-0" />
-                                        <span>Lote verificado: {areaHa} ha (≈ {(areaHa * 1.5625).toFixed(2)} Fanegadas)</span>
+                                        <span>
+                                            Lote verificado: {areaHa} ha (≈ {(areaHa * 1.5625).toFixed(2)} Fanegadas)
+                                            {altitudeMeters && ` • ${altitudeMeters.toLocaleString('es-CO')} msnm`}
+                                        </span>
                                     </p>
                                     <span className="font-mono text-[10px] bg-[#0C3C60] text-[#FAF2CA] px-2 py-0.5 rounded font-bold w-fit">
                                         {currentTimestampDisplay}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-[#0C3C60]/70">
-                                    Identificador: {currentLotId} • Coordenadas WGS84 RFC 7946
+                                    Identificador: {currentLotId} {altitudeMeters && `• Altitud: ${altitudeMeters.toLocaleString('es-CO')} m.s.n.m. `}• Coordenadas WGS84 RFC 7946
                                 </p>
 
                                 {/* Immutability Certificate Seal in Modal */}
