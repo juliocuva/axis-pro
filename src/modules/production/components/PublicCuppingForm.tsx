@@ -210,6 +210,65 @@ const QualityCircles = ({ label, value, onChange, disabled }: { label: string, v
     );
 };
 
+
+const TouchIntensitySlider = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => {
+    return (
+        <div className="flex flex-col gap-2 w-full bg-gray-50/90 p-3.5 rounded-2xl border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-center">
+                <span className="text-[11px] font-black uppercase text-brand-navy tracking-wider">{label}</span>
+                <span className="text-xs font-black text-white bg-brand-navy px-2.5 py-0.5 rounded-full">
+                    {value.toFixed(1)} / 15
+                </span>
+            </div>
+            <div className="flex items-center gap-3 w-full pt-1">
+                <input
+                    type="range"
+                    min="0"
+                    max="15"
+                    step="0.25"
+                    value={value}
+                    disabled={disabled}
+                    onChange={(e) => onChange(parseFloat(e.target.value))}
+                    className={`flex-1 h-3 bg-gray-200 rounded-lg appearance-none accent-brand-green outline-none ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                />
+            </div>
+        </div>
+    );
+};
+
+const TouchQualitySelector = ({ label, value, onChange, disabled }: { label: string, value: number, onChange: (v: number) => void, disabled?: boolean }) => {
+    return (
+        <div className="flex flex-col gap-2 w-full bg-gray-50/90 p-3.5 rounded-2xl border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-center">
+                <span className="text-[11px] font-black uppercase text-brand-navy tracking-wider">{label} (Calidad)</span>
+                <span className="text-[11px] font-black text-brand-navy bg-brand-green/30 px-2.5 py-0.5 rounded-full border border-brand-green/50">
+                    {value ? `${value} pts` : '5 pts'}
+                </span>
+            </div>
+            <div className="grid grid-cols-9 gap-1 w-full pt-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+                    const isSelected = Math.floor(value) === num;
+                    return (
+                        <button
+                            key={num}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onChange(num)}
+                            className={`h-10 rounded-xl border flex items-center justify-center text-xs font-black transition-all ${
+                                isSelected
+                                    ? 'bg-brand-navy border-brand-navy text-white shadow-md scale-105'
+                                    : 'bg-white border-gray-300 text-brand-navy hover:bg-gray-100 active:scale-95'
+                            } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                        >
+                            {num}
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
 export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave, onCuppingComplete, isReadOnly, isPublic, onPublicSubmit }: CVAAssessmentFormProps) {
   const { t } = useLanguage();
   const resolvedCompanyId = companyId || user?.companyId || '';
@@ -217,6 +276,17 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
   const [isLoading, setIsLoading] = useState(true);
   const [isAlreadySealed, setIsAlreadySealed] = useState(false);
   const [activeTab, setActiveTab] = useState<'intrinsic' | 'extrinsic'>('intrinsic');
+  const [mobileTabIndex, setMobileTabIndex] = useState<number>(0);
+  const mobileTabs = [
+    { id: 0, label: 'Muestra', icon: '📋' },
+    { id: 1, label: 'Fragancia', icon: '👃' },
+    { id: 2, label: 'Sabor', icon: '☕' },
+    { id: 3, label: 'Acidez & Dulzor', icon: '🍋' },
+    { id: 4, label: 'Cuerpo', icon: '🥄' },
+    { id: 5, label: 'Defectos', icon: '⚠️' },
+    { id: 6, label: 'Reporte', icon: '📊' }
+  ];
+
   const [data, setData] = useState<CVAData>({
     descriptive: {
         fragranceIntensity: 0,
@@ -514,7 +584,433 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
 
         <div className="flex flex-col gap-6 animate-in slide-in-from-left duration-500 relative">
             
-            {/* NEW HEADER BLOCK WITH SCORE */}
+                        {/* MOBILE TABS VIEW (< md) */}
+            <div className="flex md:hidden flex-col gap-4 export-mobile">
+                {/* STICKY HEADER WITH SCORE AND STEP NAVIGATION */}
+                <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-2 pb-3 border-b border-gray-200 -mx-2 px-2 shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center px-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider">
+                                {mobileTabs[mobileTabIndex].icon} Paso {mobileTabIndex + 1} de {mobileTabs.length}
+                            </span>
+                            <span className="text-xs font-black text-brand-navy uppercase">
+                                {mobileTabs[mobileTabIndex].label}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-brand-navy text-white px-3 py-1 rounded-full shadow-sm">
+                            <span className="text-[9px] font-bold uppercase text-white/70">LAB</span>
+                            <span className="text-sm font-black text-brand-green tracking-tight">{totalScore.toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    {/* HORIZONTAL PILLS SCROLLER */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-1">
+                        {mobileTabs.map((tab) => {
+                            const isActive = mobileTabIndex === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    onClick={() => setMobileTabIndex(tab.id)}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all flex-shrink-0 ${
+                                        isActive
+                                            ? 'bg-brand-navy text-white shadow-md'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <span>{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* TAB 0: INFORMACIÓN DE MUESTRA */}
+                {mobileTabIndex === 0 && (
+                    <div className="flex flex-col gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm animate-in fade-in">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                            Datos del Lote y Catador
+                        </h4>
+                        <div className="flex flex-col gap-3">
+                            <div>
+                                <label className="text-[10px] font-bold uppercase text-gray-600 mb-1 block">Catador / Head Taster</label>
+                                <input type="text" className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-navy outline-none focus:border-brand-navy" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isReadOnly} placeholder="Nombre del catador" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold uppercase text-gray-600 mb-1 block">Fecha de Evaluación</label>
+                                <input type="date" className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-navy outline-none focus:border-brand-navy" value={data.date || new Date().toISOString().split('T')[0]} onChange={(e) => setData({...data, date: e.target.value})} disabled={isReadOnly} />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold uppercase text-gray-600 mb-1 block">Objetivo</label>
+                                <input type="text" className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-navy outline-none focus:border-brand-navy" value={data.objective || ''} onChange={(e) => setData({...data, objective: e.target.value})} disabled={isReadOnly} placeholder="Ej: Control de Calidad / Compra" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold uppercase text-gray-600 mb-1 block">Varietal</label>
+                                <input type="text" className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-navy outline-none focus:border-brand-navy" value={data.variety || ''} onChange={(e) => setData({...data, variety: e.target.value})} disabled={isReadOnly} placeholder="Ej: Castillo, Geisha, Caturra" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold uppercase text-gray-600 mb-1 block">Proceso</label>
+                                <input type="text" className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-navy outline-none focus:border-brand-navy" value={data.process || ''} onChange={(e) => setData({...data, process: e.target.value})} disabled={isReadOnly} placeholder="Ej: Lavado, Natural, Honey" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold uppercase text-gray-600 mb-1 block">Nivel de Tostión</label>
+                                <input type="text" className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-navy outline-none focus:border-brand-navy" value={data.roastType || ''} onChange={(e) => setData({...data, roastType: e.target.value})} disabled={isReadOnly} placeholder="Ej: Media (Agtron 65)" />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB 1: FRAGANCIA Y AROMA */}
+                {mobileTabIndex === 1 && (
+                    <div className="flex flex-col gap-4 animate-in fade-in">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Fragancia (En Seco)
+                            </h4>
+                            <TouchIntensitySlider label="Intensidad Fragancia" value={data.descriptive.fragranceIntensity} onChange={(v) => handleIntensityChange('fragranceIntensity', v)} disabled={isReadOnly} />
+                            <TouchQualitySelector label="Calidad Fragancia" value={data.affective.fragranceQuality} onChange={(v) => handleQualityChange('fragranceQuality', v)} disabled={isReadOnly} />
+                        </div>
+
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Aroma (Al Quebrar Taza)
+                            </h4>
+                            <TouchIntensitySlider label="Intensidad Aroma" value={data.descriptive.aromaIntensity} onChange={(v) => handleIntensityChange('aromaIntensity', v)} disabled={isReadOnly} />
+                            <TouchQualitySelector label="Calidad Aroma" value={data.affective.aromaQuality} onChange={(v) => handleQualityChange('aromaQuality', v)} disabled={isReadOnly} />
+                        </div>
+
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-3">
+                            <DescriptiveMarkerGroup 
+                                label={t('cuppingForm', 'fragranceAromaNotes')}
+                                options={[
+                                    { label: 'Floral' },
+                                    { label: 'Fruity', subOptions: ['Berries', 'Dried Fruit', 'Citrus'] },
+                                    { label: 'Sour/Fermented', subOptions: ['Sour', 'Fermented'] },
+                                    { label: 'Green/Vegetative' },
+                                    { label: 'Roasted', subOptions: ['Cereal', 'Burnt', 'Tobacco'] },
+                                    { label: 'Nutty/Cocoa', subOptions: ['Nuts', 'Cocoa'] },
+                                    { label: 'Spices' },
+                                    { label: 'Sweet', subOptions: ['Vanilla', 'Brown Sugar'] },
+                                    { label: 'Other', subOptions: ['Chemical', 'Earthy', 'Woody'] }
+                                ]}
+                                selected={data.descriptive.descriptors.fragrance}
+                                onToggle={(v) => toggleDescriptor('fragrance', v)}
+                                disabled={isReadOnly}
+                            />
+                            <div className="flex flex-col gap-1 mt-2">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Notas de Fragancia/Aroma</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs text-brand-navy resize-none outline-none focus:border-brand-navy min-h-[70px]" value={data.descriptive.notes.fragranceAroma} onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, fragranceAroma: e.target.value } } })} disabled={isReadOnly} placeholder="Detalles de fragancia en seco y aroma infusionado..." />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB 2: SABOR Y POSTGUSTO */}
+                {mobileTabIndex === 2 && (
+                    <div className="flex flex-col gap-4 animate-in fade-in">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Sabor (Flavor)
+                            </h4>
+                            <TouchIntensitySlider label="Intensidad Sabor" value={data.descriptive.flavorIntensity} onChange={(v) => handleIntensityChange('flavorIntensity', v)} disabled={isReadOnly} />
+                            <TouchQualitySelector label="Calidad Sabor" value={data.affective.flavorQuality} onChange={(v) => handleQualityChange('flavorQuality', v)} disabled={isReadOnly} />
+                        </div>
+
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Postgusto (Aftertaste)
+                            </h4>
+                            <TouchIntensitySlider label="Intensidad Postgusto" value={data.descriptive.aftertasteIntensity} onChange={(v) => handleIntensityChange('aftertasteIntensity', v)} disabled={isReadOnly} />
+                            <TouchQualitySelector label="Calidad Postgusto" value={data.affective.aftertasteQuality} onChange={(v) => handleQualityChange('aftertasteQuality', v)} disabled={isReadOnly} />
+                        </div>
+
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-3">
+                            <DescriptiveMarkerGroup 
+                                label={t('cuppingForm', 'flavorNotes')}
+                                options={[
+                                    { label: 'Floral' },
+                                    { label: 'Fruity', subOptions: ['Berries', 'Dried Fruit', 'Citrus'] },
+                                    { label: 'Sour/Fermented', subOptions: ['Sour', 'Fermented'] },
+                                    { label: 'Roasted', subOptions: ['Cereal', 'Burnt', 'Tobacco'] },
+                                    { label: 'Nutty/Cocoa', subOptions: ['Nuts', 'Cocoa'] },
+                                    { label: 'Sweet', subOptions: ['Vanilla', 'Brown Sugar'] }
+                                ]}
+                                selected={data.descriptive.descriptors.flavor}
+                                onToggle={(v) => toggleDescriptor('flavor', v)}
+                                disabled={isReadOnly}
+                            />
+                            <DescriptiveMarkerGroup 
+                                label={t('cuppingForm', 'predominantGusts')}
+                                options={['Salty', 'Sour', 'Sweet', 'Bitter', 'Umami']}
+                                selected={data.descriptive.predominantGusts}
+                                onToggle={toggleGust}
+                                disabled={isReadOnly}
+                            />
+                            <div className="flex flex-col gap-1 mt-2">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Notas de Sabor y Postgusto</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs text-brand-navy resize-none outline-none focus:border-brand-navy min-h-[70px]" value={data.descriptive.notes.flavorAftertaste} onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, flavorAftertaste: e.target.value } } })} disabled={isReadOnly} placeholder="Descriptores percibidos en taza..." />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB 3: ACIDEZ Y DULZOR */}
+                {mobileTabIndex === 3 && (
+                    <div className="flex flex-col gap-4 animate-in fade-in">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Acidez
+                            </h4>
+                            <TouchIntensitySlider label="Intensidad Acidez" value={data.descriptive.acidityIntensity} onChange={(v) => handleIntensityChange('acidityIntensity', v)} disabled={isReadOnly} />
+                            <TouchQualitySelector label="Calidad Acidez" value={data.affective.acidityQuality} onChange={(v) => handleQualityChange('acidityQuality', v)} disabled={isReadOnly} />
+                            <DescriptiveMarkerGroup 
+                                label={t('cuppingForm', 'acidityCharacter')}
+                                options={['Citrus', 'Malic', 'Phosphoric', 'Acetic', 'Lactic', 'Vibrant', 'Complex']}
+                                selected={data.descriptive.descriptors.acidity}
+                                onToggle={(v) => toggleDescriptor('acidity', v)}
+                                disabled={isReadOnly}
+                            />
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Notas de Acidez</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 text-xs text-brand-navy resize-none outline-none focus:border-brand-navy min-h-[60px]" value={data.descriptive.notes.acidity} onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, acidity: e.target.value } } })} disabled={isReadOnly} placeholder="Brillante, jugosa, cítrica..." />
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Dulzor
+                            </h4>
+                            <TouchIntensitySlider label="Intensidad Dulzor" value={data.descriptive.sweetnessIntensity} onChange={(v) => handleIntensityChange('sweetnessIntensity', v)} disabled={isReadOnly} />
+                            <TouchQualitySelector label="Calidad Dulzor" value={data.affective.sweetnessQuality} onChange={(v) => handleQualityChange('sweetnessQuality', v)} disabled={isReadOnly} />
+                            <DescriptiveMarkerGroup 
+                                label={t('cuppingForm', 'sweetnessCharacter')}
+                                options={['Honey', 'Brown Sugar', 'Syrup', 'Molasses', 'Floral', 'Fruity']}
+                                selected={data.descriptive.descriptors.sweetness}
+                                onToggle={(v) => toggleDescriptor('sweetness', v)}
+                                disabled={isReadOnly}
+                            />
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Notas de Dulzor</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2 text-xs text-brand-navy resize-none outline-none focus:border-brand-navy min-h-[60px]" value={data.descriptive.notes.sweetness} onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, sweetness: e.target.value } } })} disabled={isReadOnly} placeholder="Panela, miel de caña, caramelo..." />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB 4: SENSACIÓN EN BOCA (CUERPO) */}
+                {mobileTabIndex === 4 && (
+                    <div className="flex flex-col gap-4 animate-in fade-in">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Sensación en Boca / Cuerpo
+                            </h4>
+                            <TouchIntensitySlider label="Intensidad Cuerpo" value={data.descriptive.mouthfeelIntensity} onChange={(v) => handleIntensityChange('mouthfeelIntensity', v)} disabled={isReadOnly} />
+                            <TouchQualitySelector label="Calidad Sensación en Boca" value={data.affective.mouthfeelQuality} onChange={(v) => handleQualityChange('mouthfeelQuality', v)} disabled={isReadOnly} />
+                            <DescriptiveMarkerGroup 
+                                label={t('cuppingForm', 'mouthfeelCharacter')}
+                                options={['Rough', 'Oily', 'Smooth', 'Astringent', 'Metallic', 'Creamy', 'Silky', 'Syrupy']}
+                                selected={data.descriptive.descriptors.mouthfeel}
+                                onToggle={(v) => toggleDescriptor('mouthfeel', v)}
+                                disabled={isReadOnly}
+                            />
+                            <div className="flex flex-col gap-1 mt-2">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Notas de Cuerpo</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs text-brand-navy resize-none outline-none focus:border-brand-navy min-h-[70px]" value={data.descriptive.notes.mouthfeel} onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, mouthfeel: e.target.value } } })} disabled={isReadOnly} placeholder="Sensación táctil, sedosidad, densidad..." />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB 5: DEFECTOS & IMPRESIÓN GENERAL */}
+                {mobileTabIndex === 5 && (
+                    <div className="flex flex-col gap-4 animate-in fade-in">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Impresión General (Overall)
+                            </h4>
+                            <TouchQualitySelector label="Impresión General" value={data.affective.overallImpression} onChange={(v) => handleQualityChange('overallImpression', v)} disabled={isReadOnly} />
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Notas de Impresión General</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs text-brand-navy resize-none outline-none focus:border-brand-navy min-h-[70px]" value={data.affective.notes.overall} onChange={(e) => setData({ ...data, affective: { ...data.affective, notes: { ...data.affective.notes, overall: e.target.value } } })} disabled={isReadOnly} placeholder="Armonía, balance y consistencia..." />
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs font-black uppercase tracking-wider text-brand-navy pb-2 border-b border-gray-200">
+                                Evaluación de Tazas y Defectos
+                            </h4>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Tazas No Uniformes (Non-Uniform Cups)</label>
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map(num => (
+                                        <button
+                                            key={num}
+                                            type="button"
+                                            disabled={isReadOnly}
+                                            onClick={() => setData({...data, defects: {...data.defects, nonUniformCups: data.defects.nonUniformCups === num ? 0 : num}})}
+                                            className={`flex-1 h-10 rounded-xl border font-black text-xs transition-all ${
+                                                num <= data.defects.nonUniformCups ? 'bg-brand-navy text-white border-brand-navy shadow-sm' : 'bg-gray-50 text-gray-700 border-gray-300'
+                                            }`}
+                                        >
+                                            {num}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Tazas Defectuosas (Defective Cups)</label>
+                                <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map(num => (
+                                        <button
+                                            key={num}
+                                            type="button"
+                                            disabled={isReadOnly}
+                                            onClick={() => setData({...data, defects: {...data.defects, defectiveCups: data.defects.defectiveCups === num ? 0 : num}})}
+                                            className={`flex-1 h-10 rounded-xl border font-black text-xs transition-all ${
+                                                num <= data.defects.defectiveCups ? 'bg-brand-red text-white border-brand-red shadow-sm' : 'bg-gray-50 text-gray-700 border-gray-300'
+                                            }`}
+                                        >
+                                            {num}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Tipo de Defecto</label>
+                                <div className="flex gap-2">
+                                    {[{id:'Mohoso', label:'MOLDY'}, {id:'Fenólico', label:'PHENOLIC'}, {id:'Papa', label:'POTATO'}].map(defect => (
+                                        <button
+                                            key={defect.id}
+                                            type="button"
+                                            disabled={isReadOnly}
+                                            onClick={() => toggleDefectType(defect.id)}
+                                            className={`flex-1 py-2.5 px-2 rounded-xl border text-[10px] font-black uppercase transition-all ${
+                                                data.defects.type.includes(defect.id) ? 'bg-brand-navy text-white border-brand-navy' : 'bg-white text-brand-navy border-gray-300'
+                                            }`}
+                                        >
+                                            {defect.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-1 mt-2">
+                                <label className="text-[10px] font-bold text-brand-navy uppercase">Otras Observaciones</label>
+                                <textarea className="w-full bg-gray-50 border border-gray-300 rounded-xl p-2.5 text-xs text-brand-navy resize-none outline-none focus:border-brand-navy min-h-[70px]" value={data.descriptive.notes.other} onChange={(e) => setData({ ...data, descriptive: { ...data.descriptive, notes: { ...data.descriptive.notes, other: e.target.value } } })} disabled={isReadOnly} placeholder="Observaciones adicionales de taza o fermentación..." />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB 6: REPORTE & RESUMEN FINAL */}
+                {mobileTabIndex === 6 && (
+                    <div className="flex flex-col gap-4 animate-in fade-in">
+                        {/* SCORE CARD */}
+                        <div className="bg-brand-navy text-white p-6 rounded-3xl shadow-xl flex flex-col items-center text-center">
+                            <span className="text-[11px] font-black uppercase tracking-widest text-brand-green mb-1">Puntaje SCA CVA Final</span>
+                            <div className="text-6xl font-black text-white tracking-tighter my-2">{totalScore.toFixed(2)}</div>
+                            <span className="text-xs text-white/70 font-medium">
+                                Base SCA (30.0) + Evaluación Afectiva ({totalAffectiveScore.toFixed(2)})
+                            </span>
+                        </div>
+
+                        {/* RADAR SENSORIAL */}
+                        <div className="bg-white p-4 rounded-3xl border border-gray-200 shadow-sm flex flex-col items-center">
+                            <h4 className="text-xs font-black uppercase text-brand-navy tracking-wider mb-2">Huella Sensorial (Radar)</h4>
+                            <div className="w-full h-[280px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RadarChart cx="50%" cy="50%" outerRadius="75%" data={chartData}>
+                                        <PolarGrid stroke="#00000020" />
+                                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#1A1A1A', fontSize: 9, fontWeight: '900' }} />
+                                        <Radar 
+                                            name="Calidad" 
+                                            dataKey="A" 
+                                            stroke="#000000" 
+                                            fill="#000000" 
+                                            fillOpacity={0.15} 
+                                            dot={{ fill: '#000000', r: 3 }}
+                                        />
+                                    </RadarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* NOTAS FINALES */}
+                        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-3">
+                            <div>
+                                <label className="text-[10px] font-bold text-brand-navy uppercase mb-1 block">Catador Principal (Head Taster)</label>
+                                <input type="text" value={data.tasterName} onChange={(e) => setData({...data, tasterName: e.target.value})} disabled={isReadOnly} className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-xs font-bold text-brand-navy outline-none" placeholder="Nombre y certificación Q-Grader" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-brand-navy uppercase mb-1 block">Conclusión y Notas de Laboratorio</label>
+                                <textarea value={data.notes} onChange={(e) => setData({...data, notes: e.target.value})} disabled={isReadOnly} className="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-xs font-bold text-brand-navy outline-none resize-none min-h-[100px]" placeholder="Dictamen final y perfil descriptivo..." />
+                            </div>
+                        </div>
+
+                        {/* BOTÓN SELLAR EN MÓVIL */}
+                        {!isReadOnly && (
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="w-full py-4 rounded-2xl font-black uppercase text-xs transition-all flex items-center justify-center gap-2 bg-brand-green hover:bg-brand-green-bright text-brand-navy shadow-lg active:scale-[0.98] mt-2"
+                            >
+                                {isSaving ? (
+                                    <div className="w-4 h-4 border-2 border-brand-navy/30 border-t-brand-navy rounded-full animate-spin" />
+                                ) : (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                )}
+                                {isPublic ? 'GENERAR REPORTE CVA CERTIFICADO' : 'GUARDAR CVA'}
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* MOBILE BOTTOM NAVIGATION BAR */}
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-200 mt-2 pb-4">
+                    <button
+                        type="button"
+                        disabled={mobileTabIndex === 0}
+                        onClick={() => setMobileTabIndex(prev => Math.max(0, prev - 1))}
+                        className={`px-4 py-3 rounded-xl font-black text-xs uppercase flex items-center gap-1.5 transition-all ${
+                            mobileTabIndex === 0
+                                ? 'opacity-30 cursor-not-allowed bg-gray-100 text-gray-400'
+                                : 'bg-gray-100 text-brand-navy hover:bg-gray-200 active:scale-95'
+                        }`}
+                    >
+                        ← Anterior
+                    </button>
+
+                    <div className="text-[10px] font-black uppercase text-gray-400">
+                        {mobileTabIndex + 1} / {mobileTabs.length}
+                    </div>
+
+                    {mobileTabIndex < mobileTabs.length - 1 ? (
+                        <button
+                            type="button"
+                            onClick={() => setMobileTabIndex(prev => Math.min(mobileTabs.length - 1, prev + 1))}
+                            className="px-5 py-3 rounded-xl font-black text-xs uppercase bg-brand-navy text-white hover:bg-black transition-all flex items-center gap-1.5 shadow-md active:scale-95"
+                        >
+                            Siguiente →
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setMobileTabIndex(0)}
+                            className="px-4 py-3 rounded-xl font-black text-xs uppercase bg-gray-100 text-brand-navy hover:bg-gray-200 transition-all"
+                        >
+                            Ver Inicio ↺
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* DESKTOP / TABLET LAB SHEET VIEW (>= md) */}
+            <div className="hidden md:flex flex-col gap-6 export-desktop">
+                {/* NEW HEADER BLOCK WITH SCORE */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-2 mb-2 mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 flex-1 w-full">
                     <div className="flex items-end gap-2 border-b border-gray-400 pb-1">
@@ -944,7 +1440,8 @@ export default function CVAAssessmentForm({ inventoryId, companyId, user, onSave
                     </button>
                 </div>
             )}
-        </div>
+        
+            </div> {/* END DESKTOP export-desktop */}</div>
 
     </div>
   );

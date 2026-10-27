@@ -41,6 +41,10 @@ export default function PublicCaminataDigitalPage() {
         {
             q: '¿Cómo se integra este archivo con la plataforma EU TRACES NT?',
             a: 'Al finalizar la caminata, el botón "Descargar GeoJSON Oficial" genera un archivo con la estructura CRS84 y propiedades reconocidas por el sistema aduanero europeo TRACES NT, listo para anexar a la Declaración de Diligencia Debida (DDS).'
+        },
+        {
+            q: '¿Por qué es inmutable este registro y cómo protege contra fraude?',
+            a: 'Al sellar la caminata, axisONE calcula una huella criptográfica SHA-256 única que vincula matemáticamente las coordenadas del polígono, el área, la firma del sensor y la fecha/hora exacta. Si alguien intenta alterar un solo decimal de las coordenadas, el hash se invalida ante aduanas y compradores, garantizando la inmutabilidad física del origen.'
         }
     ];
 
@@ -169,8 +173,8 @@ export default function PublicCaminataDigitalPage() {
                             04
                         </div>
                         <div>
-                            <p className="text-[11px] sm:text-xs font-black uppercase text-[#0C3C60]">EU TRACES NT</p>
-                            <p className="text-[10px] text-[#0C3C60]/70 mt-0.5 leading-tight">Descarga GeoJSON con estándar oficial listo para aduanas.</p>
+                            <p className="text-[11px] sm:text-xs font-black uppercase text-[#0C3C60]">Sello Inmutable &amp; TRACES</p>
+                            <p className="text-[10px] text-[#0C3C60]/70 mt-0.5 leading-tight">Huella SHA-256 inalterable y GeoJSON listo para aduanas UE.</p>
                         </div>
                     </div>
                 </div>

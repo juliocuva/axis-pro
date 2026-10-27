@@ -86,6 +86,14 @@ export default function ExportReportButton({ elementId, fileName }: { elementId:
                 scrollX: 0,
                 scrollY: 0,
                 onclone: (clonedDoc, clonedEl) => {
+                    // Ensure desktop cupping view is captured and mobile tabs are hidden in export
+                    const mobileEls = clonedEl.querySelectorAll('.export-mobile');
+                    mobileEls.forEach((el: any) => el.parentNode?.removeChild(el));
+                    const desktopEls = clonedEl.querySelectorAll('.export-desktop');
+                    desktopEls.forEach((el: any) => {
+                        el.style.setProperty('display', 'block', 'important');
+                        el.classList.remove('hidden');
+                    });
                     // Force charts to have non-zero dimensions
                     const charts = clonedEl.querySelectorAll('.recharts-responsive-container');
                     charts.forEach((chart: any) => {
