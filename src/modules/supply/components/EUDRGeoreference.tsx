@@ -155,6 +155,7 @@ export default function EUDRGeoreference({
 
     const [customLotName, setCustomLotName] = useState<string>(lotId || 'LOTE-01');
     const currentLotId = customLotName.trim() || 'LOTE-01';
+    const [recenterKey, setRecenterKey] = useState<number>(0);
 
     // GeoJSON and Validation State
     const [geoJsonData, setGeoJsonData] = useState<string>(initialPolygon || '');
@@ -202,6 +203,7 @@ export default function EUDRGeoreference({
     const countdownRef = useRef<number>(10);
     const handleFinishMappingRef = useRef<(isAutoClosed?: boolean) => void | Promise<void>>(() => {});
     const handleAutoCaptureStepRef = useRef<() => void>(() => {});
+    const processGpsUpdateRef = useRef<(lat: number, lng: number, acc: number, alt?: number | null) => void>(() => {});
 
     // Sync refs
     useEffect(() => {
@@ -291,44 +293,25 @@ export default function EUDRGeoreference({
         }
     };
 
-    // Start live location watching on Mount so map immediately centers on user's active location
+    // Start live location watching on Mount (Single persistent high-precision watch)
     useEffect(() => {
         if (typeof window === 'undefined' || !navigator.geolocation) return;
 
-        // 1. Fast instant position check (network / cellular / cache)
+        // 1. Fast instant position check (cellular / cache)
         navigator.geolocation.getCurrentPosition(
             pos => {
                 const { latitude, longitude, accuracy, altitude } = pos.coords;
-                setCurrentPosition([latitude, longitude]);
-                currentPositionRef.current = [latitude, longitude];
-                setGpsAccuracy(accuracy);
-                if (altitude !== null && altitude !== undefined && altitude > 0) {
-                    const alt = Math.round(altitude);
-                    setAltitudeMeters(alt);
-                    altitudeMetersRef.current = alt;
-                } else {
-                    fetchElevation(latitude, longitude);
-                }
+                processGpsUpdateRef.current(latitude, longitude, accuracy, altitude);
             },
             () => {},
             { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
         );
 
-        // 2. High-precision continuous watch so location is live and active before and during walk
+        // 2. High-precision continuous watch (Single unified watcher)
         const mountWatchId = navigator.geolocation.watchPosition(
             pos => {
                 const { latitude, longitude, accuracy, altitude } = pos.coords;
-                setCurrentPosition([latitude, longitude]);
-                currentPositionRef.current = [latitude, longitude];
-                setGpsAccuracy(accuracy);
-
-                if (altitude !== null && altitude !== undefined && altitude > 0) {
-                    const alt = Math.round(altitude);
-                    setAltitudeMeters(alt);
-                    altitudeMetersRef.current = alt;
-                } else if (altitudeMetersRef.current === null) {
-                    fetchElevation(latitude, longitude);
-                }
+                processGpsUpdateRef.current(latitude, longitude, accuracy, altitude);
             },
             err => {
                 console.warn('GPS initial lock notice:', err.message);
@@ -343,14 +326,12 @@ export default function EUDRGeoreference({
 
     // Manual re-center to user's active location
     const handleRecenterLocation = () => {
+        setRecenterKey(prev => prev + 1);
         if (typeof window === 'undefined' || !navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition(
             pos => {
                 const { latitude, longitude, accuracy, altitude } = pos.coords;
-                setCurrentPosition([latitude, longitude]);
-                currentPositionRef.current = [latitude, longitude];
-                setGpsAccuracy(accuracy);
-                if (altitude && altitude > 0) setAltitudeMeters(Math.round(altitude));
+                processGpsUpdateRef.current(latitude, longitude, accuracy, altitude);
             },
             err => {
                 console.warn('Recenter notice:', err.message);
@@ -639,6 +620,62 @@ export default function EUDRGeoreference({
 
     handleAutoCaptureStepRef.current = handleAutoCaptureStep;
 
+    // GPS Filter & Deadband Smoothing: eliminates wild jumps and stationary GNSS jitter
+    const processGpsUpdate = useCallback(
+        (latitude: number, longitude: number, accuracy: number, altitude?: number | null) => {
+            // Live accuracy badge update
+            setGpsAccuracy(accuracy);
+
+            // Filter 1: If reading has poor accuracy (> 35m) and we already have a reliable fix (< 25m), don't jump position
+            if (accuracyRef.current !== null && accuracyRef.current < 25 && accuracy > 35) {
+                return;
+            }
+
+            accuracyRef.current = accuracy;
+
+            // Filter 2: Deadband filter — if user moved < 1.2m, ignore GNSS stationary jitter
+            const prev = currentPositionRef.current;
+            if (prev) {
+                const dist = haversineDistanceMeters([latitude, longitude], prev);
+                if (dist < 1.2) {
+                    return;
+                }
+            }
+
+            setCurrentPosition([latitude, longitude]);
+            currentPositionRef.current = [latitude, longitude];
+
+            if (altitude !== null && altitude !== undefined && altitude > 0) {
+                const alt = Math.round(altitude);
+                setAltitudeMeters(alt);
+                altitudeMetersRef.current = alt;
+            } else if (altitudeMetersRef.current === null) {
+                fetchElevation(latitude, longitude);
+            }
+
+            // Real-time walk events: Point 1 capture & proximity auto-close
+            if (isCapturingRef.current) {
+                if (gpsPointsRef.current.length === 0) {
+                    setGpsPoints([[longitude, latitude]]);
+                    gpsPointsRef.current = [[longitude, latitude]];
+                    countdownRef.current = 10;
+                    setCountdownSeconds(10);
+                    if (typeof window !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                    speakVoiceGuidance('Punto inicial registrado. Camina por el lindero.');
+                } else if (gpsPointsRef.current.length >= 3) {
+                    checkProximityAndAutoClose(latitude, longitude);
+                }
+            }
+        },
+        [checkProximityAndAutoClose]
+    );
+
+    useEffect(() => {
+        processGpsUpdateRef.current = processGpsUpdate;
+    }, [processGpsUpdate]);
+
     // Start GPS & Sensor Tracking (Hands-Free)
     const startTracking = () => {
         if (!navigator.geolocation) {
@@ -680,54 +717,9 @@ export default function EUDRGeoreference({
         } else {
             setupImuListeners();
         }
-
-        watchId.current = navigator.geolocation.watchPosition(
-            pos => {
-                const { latitude, longitude, accuracy, altitude } = pos.coords;
-                setCurrentPosition([latitude, longitude]);
-                currentPositionRef.current = [latitude, longitude];
-                setGpsAccuracy(accuracy);
-
-                if (altitude !== null && altitude !== undefined && altitude > 0) {
-                    const alt = Math.round(altitude);
-                    setAltitudeMeters(alt);
-                    altitudeMetersRef.current = alt;
-                } else if (altitudeMetersRef.current === null) {
-                    fetchElevation(latitude, longitude);
-                }
-
-                if (!isCapturingRef.current) return;
-
-                // Capture Point 1 immediately as soon as GPS fixes if not yet captured
-                if (gpsPointsRef.current.length === 0) {
-                    setGpsPoints([[longitude, latitude]]);
-                    gpsPointsRef.current = [[longitude, latitude]];
-                    countdownRef.current = 10;
-                    setCountdownSeconds(10);
-                    if (typeof window !== 'undefined' && navigator.vibrate) {
-                        navigator.vibrate([100, 50, 100]);
-                    }
-                    speakVoiceGuidance('Punto inicial registrado. Camina por el lindero.');
-                    return;
-                }
-
-                // Check proximity on every real-time GPS position update
-                if (gpsPointsRef.current.length >= 3) {
-                    checkProximityAndAutoClose(latitude, longitude);
-                }
-            },
-            err => {
-                console.error(`GPS Error: ${err.message}`);
-            },
-            { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
-        );
     };
 
     const stopTracking = () => {
-        if (watchId.current !== null) {
-            navigator.geolocation.clearWatch(watchId.current);
-            watchId.current = null;
-        }
         if (captureIntervalId.current) {
             clearInterval(captureIntervalId.current);
             captureIntervalId.current = null;
@@ -1097,6 +1089,7 @@ export default function EUDRGeoreference({
                         polygonCoords={polygonCoords}
                         markers={markersCoords}
                         currentLocation={currentPosition}
+                        recenterKey={recenterKey}
                     />
 
                     {/* Top Overlay: Live Coordinates & Proximity Alert */}

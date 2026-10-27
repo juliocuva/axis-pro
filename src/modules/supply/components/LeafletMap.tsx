@@ -43,10 +43,13 @@ interface LeafletMapProps {
     polygonCoords?: [number, number][]; // [lat, lng][]
     markers?: [number, number][]; // [lat, lng][]
     currentLocation?: [number, number] | null;
+    recenterKey?: number;
 }
 
-function MapUpdater({ center, polygonCoords, markers, currentLocation }: LeafletMapProps) {
+function MapUpdater({ center, polygonCoords, markers, currentLocation, recenterKey }: LeafletMapProps) {
     const map = useMap();
+    const hasCenteredInitial = React.useRef(false);
+    const lastRecenterKey = React.useRef(recenterKey);
 
     useEffect(() => {
         // Invalidate size on mount and window resize (crucial for mobile layout & orientation changes)
@@ -68,6 +71,18 @@ function MapUpdater({ center, polygonCoords, markers, currentLocation }: Leaflet
         };
     }, [map]);
 
+    // Handle manual re-center triggered by user pressing "Mi Ubicación"
+    useEffect(() => {
+        if (recenterKey !== undefined && recenterKey !== lastRecenterKey.current) {
+            lastRecenterKey.current = recenterKey;
+            const target = currentLocation || center;
+            if (target) {
+                map.setView(target, 18, { animate: true });
+            }
+        }
+    }, [recenterKey, currentLocation, center, map]);
+
+    // Handle bounds and initial one-time centering
     useEffect(() => {
         if (polygonCoords && polygonCoords.length > 0) {
             const bounds = L.latLngBounds(polygonCoords);
@@ -75,17 +90,17 @@ function MapUpdater({ center, polygonCoords, markers, currentLocation }: Leaflet
         } else if (markers && markers.length > 1) {
             const bounds = L.latLngBounds(markers);
             map.fitBounds(bounds, { padding: [30, 30], maxZoom: 18 });
-        } else if (currentLocation) {
-            map.setView(currentLocation, 18, { animate: true });
-        } else if (center) {
-            map.setView(center, 18);
+        } else if (!hasCenteredInitial.current && (currentLocation || center)) {
+            // Only center ONCE automatically so map doesn't jerk continuously
+            hasCenteredInitial.current = true;
+            map.setView(currentLocation || center, 18);
         }
-    }, [center, polygonCoords, markers, currentLocation, map]);
+    }, [polygonCoords, markers, currentLocation, center, map]);
 
     return null;
 }
 
-export default function LeafletMap({ center, polygonCoords, markers, currentLocation }: LeafletMapProps) {
+export default function LeafletMap({ center, polygonCoords, markers, currentLocation, recenterKey }: LeafletMapProps) {
     // Memoize markers with custom numbered vertex pills
     const markerElements = useMemo(() => {
         if (!markers || markers.length === 0) return null;
@@ -144,7 +159,7 @@ export default function LeafletMap({ center, polygonCoords, markers, currentLoca
                 </>
             )}
 
-            <MapUpdater center={center} polygonCoords={polygonCoords} markers={markers} currentLocation={currentLocation} />
+            <MapUpdater center={center} polygonCoords={polygonCoords} markers={markers} currentLocation={currentLocation} recenterKey={recenterKey} />
         </MapContainer>
     );
 }
