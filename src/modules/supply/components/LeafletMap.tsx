@@ -45,7 +45,7 @@ interface LeafletMapProps {
     currentLocation?: [number, number] | null;
 }
 
-function MapUpdater({ center, polygonCoords, markers }: LeafletMapProps) {
+function MapUpdater({ center, polygonCoords, markers, currentLocation }: LeafletMapProps) {
     const map = useMap();
 
     useEffect(() => {
@@ -75,10 +75,12 @@ function MapUpdater({ center, polygonCoords, markers }: LeafletMapProps) {
         } else if (markers && markers.length > 1) {
             const bounds = L.latLngBounds(markers);
             map.fitBounds(bounds, { padding: [30, 30], maxZoom: 18 });
-        } else {
+        } else if (currentLocation) {
+            map.setView(currentLocation, 18, { animate: true });
+        } else if (center) {
             map.setView(center, 18);
         }
-    }, [center, polygonCoords, markers, map]);
+    }, [center, polygonCoords, markers, currentLocation, map]);
 
     return null;
 }
@@ -142,7 +144,7 @@ export default function LeafletMap({ center, polygonCoords, markers, currentLoca
                 </>
             )}
 
-            <MapUpdater center={center} polygonCoords={polygonCoords} markers={markers} />
+            <MapUpdater center={center} polygonCoords={polygonCoords} markers={markers} currentLocation={currentLocation} />
         </MapContainer>
     );
 }

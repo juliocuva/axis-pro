@@ -20,6 +20,7 @@ import {
     Share2,
     Camera,
     Lock,
+    Navigation,
     X
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
@@ -228,28 +229,73 @@ export default function EUDRGeoreference({
         }
     };
 
-    // Initial GPS Location & Altitude on Mount
+    // Start live location watching on Mount so map immediately centers on user's active location
     useEffect(() => {
-        if (typeof window !== 'undefined' && navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    const { latitude, longitude, accuracy, altitude } = pos.coords;
-                    setCurrentPosition([latitude, longitude]);
-                    currentPositionRef.current = [latitude, longitude];
-                    setGpsAccuracy(accuracy);
-                    if (altitude !== null && altitude !== undefined && altitude > 0) {
-                        const alt = Math.round(altitude);
-                        setAltitudeMeters(alt);
-                        altitudeMetersRef.current = alt;
-                    } else {
-                        fetchElevation(latitude, longitude);
-                    }
-                },
-                () => {},
-                { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
-            );
-        }
+        if (typeof window === 'undefined' || !navigator.geolocation) return;
+
+        // 1. Fast instant position check (network / cellular / cache)
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const { latitude, longitude, accuracy, altitude } = pos.coords;
+                setCurrentPosition([latitude, longitude]);
+                currentPositionRef.current = [latitude, longitude];
+                setGpsAccuracy(accuracy);
+                if (altitude !== null && altitude !== undefined && altitude > 0) {
+                    const alt = Math.round(altitude);
+                    setAltitudeMeters(alt);
+                    altitudeMetersRef.current = alt;
+                } else {
+                    fetchElevation(latitude, longitude);
+                }
+            },
+            () => {},
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+        );
+
+        // 2. High-precision continuous watch so location is live and active before and during walk
+        const mountWatchId = navigator.geolocation.watchPosition(
+            pos => {
+                const { latitude, longitude, accuracy, altitude } = pos.coords;
+                setCurrentPosition([latitude, longitude]);
+                currentPositionRef.current = [latitude, longitude];
+                setGpsAccuracy(accuracy);
+
+                if (altitude !== null && altitude !== undefined && altitude > 0) {
+                    const alt = Math.round(altitude);
+                    setAltitudeMeters(alt);
+                    altitudeMetersRef.current = alt;
+                } else if (altitudeMetersRef.current === null) {
+                    fetchElevation(latitude, longitude);
+                }
+            },
+            err => {
+                console.warn('GPS initial lock notice:', err.message);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 2000 }
+        );
+
+        return () => {
+            navigator.geolocation.clearWatch(mountWatchId);
+        };
     }, []);
+
+    // Manual re-center to user's active location
+    const handleRecenterLocation = () => {
+        if (typeof window === 'undefined' || !navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const { latitude, longitude, accuracy, altitude } = pos.coords;
+                setCurrentPosition([latitude, longitude]);
+                currentPositionRef.current = [latitude, longitude];
+                setGpsAccuracy(accuracy);
+                if (altitude && altitude > 0) setAltitudeMeters(Math.round(altitude));
+            },
+            err => {
+                console.warn('Recenter notice:', err.message);
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+    };
 
     // Persistence on Mount
     useEffect(() => {
@@ -817,11 +863,9 @@ export default function EUDRGeoreference({
 
     // Calculate map coordinates
     const { centerCoords, polygonCoords, markersCoords, areaHa, perimeterMeters } = useMemo(() => {
-        let center: [number, number] = [4.5714, -75.6985];
+        let center: [number, number] = currentPosition || [4.5714, -75.6985];
         let poly: [number, number][] = [];
         let markers: [number, number][] = [];
-
-        if (currentPosition) center = currentPosition;
 
         if (geoJsonData) {
             try {
@@ -840,7 +884,9 @@ export default function EUDRGeoreference({
             if (gpsPoints.length >= 3) {
                 poly = [...markers, markers[0]];
             }
-            center = markers[markers.length - 1];
+            center = currentPosition || markers[markers.length - 1];
+        } else if (currentPosition) {
+            center = currentPosition;
         }
 
         const area = poly.length >= 3 ? calculatePolygonAreaHa(poly) : 0;
@@ -1045,8 +1091,17 @@ export default function EUDRGeoreference({
                         )}
                     </div>
 
-                    {/* Top Right: Undo & Reset */}
+                    {/* Top Right: Re-center, Undo & Reset */}
                     <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                        <button
+                            onClick={handleRecenterLocation}
+                            className="bg-[#0C3C60]/95 hover:bg-[#83DF9C] hover:text-[#0C3C60] active:scale-95 text-[#FAF2CA] px-2.5 sm:px-3 py-1.5 rounded-xl border border-white/20 shadow-lg text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer"
+                            title="Centrar mapa en mi ubicación activa"
+                        >
+                            <Navigation className="w-3 h-3 fill-current text-[#83DF9C]" />
+                            <span className="hidden sm:inline">Mi Ubicación</span>
+                        </button>
+
                         {gpsPoints.length > 0 && !geoJsonData && (
                             <button
                                 onClick={handleUndoPoint}
