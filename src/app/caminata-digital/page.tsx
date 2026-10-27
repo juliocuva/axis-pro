@@ -117,9 +117,14 @@ export default function PublicCaminataDigitalPage() {
             </div>
 
             {/* Main Content */}
-            <main className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-3 sm:py-8 md:py-12 flex-1 w-full space-y-6 sm:space-y-10">
-                {/* Desktop Hero Title (Hidden on Mobile Map View to prioritize the screen real estate) */}
-                <div className={`${mobileView === 'map' ? 'hidden md:block' : 'block'} text-center max-w-3xl mx-auto space-y-2 sm:space-y-3`}>
+            <main className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-6 md:py-8 flex-1 w-full space-y-6 sm:space-y-8">
+                {/* THE CORE DIGITAL WALK FIELD APPLICATION (Front and Center - Instant Access) */}
+                <div className={`${mobileView === 'guide' ? 'hidden md:block' : 'block'} max-w-5xl mx-auto`}>
+                    <EUDRGeoreference />
+                </div>
+
+                {/* Desktop Hero Title & Context (Placed below the interactive tool to prioritize field action) */}
+                <div className={`${mobileView === 'map' ? 'hidden md:block' : 'block'} text-center max-w-3xl mx-auto space-y-2 pt-2 sm:pt-4`}>
                     <div className="inline-flex items-center gap-2 bg-[#0C3C60] px-3.5 py-1 rounded-full shadow-sm">
                         <span className="w-2 h-2 rounded-full bg-[#83DF9C] animate-pulse"></span>
                         <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#FAF2CA] uppercase">
@@ -127,12 +132,12 @@ export default function PublicCaminataDigitalPage() {
                         </span>
                     </div>
 
-                    <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-[#0C3C60] tracking-tight uppercase">
+                    <h1 className="text-xl sm:text-2xl md:text-4xl font-black text-[#0C3C60] tracking-tight uppercase">
                         Digital Walk <span className="text-[#0C3C60]/50 font-light">/</span> Caminata Digital
                     </h1>
 
-                    <p className="text-[#0C3C60]/80 text-xs sm:text-sm md:text-base leading-relaxed font-medium px-2">
-                        Mapea el perímetro de tus lotes desde tu celular con validación inercial humana (IMU), cálculo instantáneo de hectáreas y verificación satelital contra Global Forest Watch.
+                    <p className="text-[#0C3C60]/80 text-xs sm:text-sm leading-relaxed font-medium px-2">
+                        Mapeo perimetral terrestre de alta precisión con validación inercial humana (IMU), cálculo instantáneo de hectáreas, altitud y verificación satelital contra Global Forest Watch.
                     </p>
                 </div>
 
@@ -177,11 +182,6 @@ export default function PublicCaminataDigitalPage() {
                             <p className="text-[10px] text-[#0C3C60]/70 mt-0.5 leading-tight">Huella SHA-256 inalterable y GeoJSON listo para aduanas UE.</p>
                         </div>
                     </div>
-                </div>
-
-                {/* THE CORE DIGITAL WALK FIELD APPLICATION (Always visible on Desktop or when mobileView === 'map') */}
-                <div className={`${mobileView === 'guide' ? 'hidden md:block' : 'block'} max-w-5xl mx-auto`}>
-                    <EUDRGeoreference />
                 </div>
 
                 {/* Technical Specs & Regulation FAQs Accordion (Visible on Desktop or when mobileView === 'guide') */}

@@ -153,10 +153,12 @@ export default function EUDRGeoreference({
     // IMU Inertial Sensor Anti-spoofing
     const [imuData, setImuData] = useState<{ acc: number; gyro: number }[]>([]);
 
-    const currentLotId = lotId || 'LOTE-01';
+    const [customLotName, setCustomLotName] = useState<string>(lotId || 'LOTE-01');
+    const currentLotId = customLotName.trim() || 'LOTE-01';
 
     // GeoJSON and Validation State
     const [geoJsonData, setGeoJsonData] = useState<string>(initialPolygon || '');
+    const isCompleted = Boolean(geoJsonData && !isCapturing);
     const [isGfwValidating, setIsGfwValidating] = useState<boolean>(false);
     const [gfwStatus, setGfwStatus] = useState<'idle' | 'secure' | 'warning' | 'error'>('idle');
     const [lossHa, setLossHa] = useState<number>(0);
@@ -1209,8 +1211,10 @@ export default function EUDRGeoreference({
                     )}
                 </div>
 
-                {/* METRICS & AUDIT DECK (Included in Screenshot) */}
-                <div className="bg-[#FAF2CA]/90 p-3 sm:p-4 border-t border-[#0C3C60]/10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 text-[#0C3C60]">
+                {/* METRICS & AUDIT DECK (Included in Screenshot) - ONLY SHOWN AFTER MAPPING IS COMPLETED */}
+                {isCompleted && (
+                    <>
+                        <div className="bg-[#FAF2CA]/90 p-3 sm:p-4 border-t border-[#0C3C60]/10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 text-[#0C3C60] animate-in fade-in">
                     {/* 1. Área */}
                     <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-[#0C3C60]/10 shadow-sm">
                         <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#0C3C60]/60">
@@ -1348,6 +1352,8 @@ export default function EUDRGeoreference({
                         <span className="text-[#83DF9C] font-black">CERTIFICADO axisONE</span>
                     </div>
                 </div>
+                    </>
+                )}
             </div>
 
             {/* NOTIFICATION: AUTO-CLOSED NOTICE */}
@@ -1366,78 +1372,82 @@ export default function EUDRGeoreference({
                 </div>
             )}
 
-            {/* TABS: CAMINATA vs SUBIR ARCHIVO */}
-            <div className="bg-[#FAF2CA]/40 border-b border-[#0C3C60]/10 px-3 pt-2 flex items-center justify-between text-xs">
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setActiveTab('walk')}
-                        className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-                            activeTab === 'walk'
-                                ? 'bg-[#0C3C60] text-[#FAF2CA]'
-                                : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
-                        }`}
-                    >
-                        Modo Caminata GPS
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('file')}
-                        className={`px-3 py-1.5 rounded-t-xl font-black text-[11px] uppercase tracking-wider transition-all cursor-pointer ${
-                            activeTab === 'file'
-                                ? 'bg-[#0C3C60] text-[#FAF2CA]'
-                                : 'text-[#0C3C60]/70 hover:text-[#0C3C60]'
-                        }`}
-                    >
-                        Subir Archivo (GeoJSON / KML)
-                    </button>
-                </div>
-                {activeTab === 'file' && (
-                    <button
-                        onClick={loadSampleLot}
-                        className="text-[10px] font-bold text-[#0C3C60] hover:text-[#83DF9C] underline cursor-pointer"
-                    >
-                        Cargar Lote de Prueba
-                    </button>
-                )}
-            </div>
-
-            {/* TAB CONTENT: File Upload */}
-            {activeTab === 'file' && (
-                <div className="p-3 sm:p-5 bg-[#FAF2CA]/20 border-b border-[#0C3C60]/10">
-                    <div
-                        className="border-2 border-dashed border-[#0C3C60]/20 hover:border-[#83DF9C] bg-white rounded-xl p-4 text-center cursor-pointer"
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileUpload}
-                            accept=".json,.geojson,.kml"
-                            className="hidden"
-                        />
-                        <UploadCloud className="w-6 h-6 text-[#0C3C60]/50 mx-auto mb-1" />
-                        <p className="text-xs font-black uppercase text-[#0C3C60]">Toca para cargar archivo GeoJSON / KML</p>
-                    </div>
-                </div>
-            )}
-
             {/* THUMB-ZONE FIELD CONTROLS (Sticky at Bottom on Mobile) */}
             <div className="sticky bottom-0 z-30 p-3 sm:p-4 bg-white/98 backdrop-blur-md border-t border-[#0C3C60]/10 shadow-xl space-y-2">
                 {!geoJsonData ? (
                     <div className="space-y-2">
                         {!isCapturing ? (
-                            /* BIG GREEN START BUTTON - ZERO TECH FRICTION */
-                            <button
-                                onClick={startTracking}
-                                className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] active:scale-98 text-[#FAF2CA] hover:text-[#0C3C60] py-4 rounded-2xl font-black uppercase text-xs sm:text-sm tracking-wider transition-all shadow-lg flex flex-col items-center justify-center cursor-pointer min-h-[58px]"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Play className="w-4 h-4 fill-current text-[#83DF9C]" />
-                                    <span>TOCAR PARA INICIAR CAMINATA</span>
+                            /* MOMENTO 1: INICIO LIMPIO (ANTES DE CAMINAR) */
+                            <div className="space-y-3 p-1">
+                                {/* Simple Lot & GPS Bar */}
+                                <div className="flex flex-wrap items-center justify-between gap-2 bg-[#FAF2CA]/50 p-2.5 rounded-2xl border border-[#0C3C60]/10">
+                                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-[#0C3C60]/15 shadow-xs flex-1 min-w-[180px]">
+                                        <span className="text-[10px] font-black uppercase text-[#0C3C60]/70 shrink-0">Lote:</span>
+                                        <input
+                                            type="text"
+                                            value={customLotName}
+                                            onChange={e => setCustomLotName(e.target.value)}
+                                            placeholder="Ej: LOTE-01 / Don Manolo"
+                                            className="w-full text-xs font-bold text-[#0C3C60] outline-none bg-transparent"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-[#0C3C60]/15 text-[10px] font-bold text-[#0C3C60]">
+                                        <span
+                                            className={`w-2 h-2 rounded-full ${
+                                                !gpsAccuracy
+                                                    ? 'bg-amber-400 animate-pulse'
+                                                    : gpsAccuracy < 10
+                                                    ? 'bg-[#83DF9C] animate-pulse'
+                                                    : 'bg-yellow-400'
+                                            }`}
+                                        />
+                                        <span>
+                                            {!gpsAccuracy ? 'Buscando GPS...' : `GPS Listo (±${gpsAccuracy.toFixed(0)}m)`}
+                                        </span>
+                                    </div>
                                 </div>
-                                <span className="text-[10px] text-white/70 font-normal lowercase tracking-normal mt-0.5">
-                                    Camina con tu celular. Rastreará tus pasos cada 10 seg y se cerrará al volver.
-                                </span>
-                            </button>
+
+                                {/* BIG GREEN START BUTTON - HERO ACTION */}
+                                <button
+                                    onClick={startTracking}
+                                    className="w-full bg-[#83DF9C] hover:bg-[#6ed38a] active:scale-98 text-[#0C3C60] py-4 sm:py-5 px-6 rounded-2xl font-black uppercase text-sm sm:text-base tracking-wider transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 cursor-pointer min-h-[64px]"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-[#0C3C60] text-[#83DF9C] flex items-center justify-center shrink-0 shadow-md">
+                                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                                    </div>
+                                    <div className="text-left">
+                                        <span className="block text-sm sm:text-base font-black leading-tight">
+                                            INICIAR CAMINATA
+                                        </span>
+                                        <span className="block text-[10px] text-[#0C3C60]/80 font-bold leading-tight lowercase">
+                                            camina el lindero • se cierra solo al volver
+                                        </span>
+                                    </div>
+                                </button>
+
+                                {/* Discreet secondary actions */}
+                                <div className="flex items-center justify-between text-[11px] text-[#0C3C60]/70 px-1 pt-0.5">
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="hover:text-[#0C3C60] underline font-bold cursor-pointer"
+                                    >
+                                        📁 Cargar archivo KML o GeoJSON
+                                    </button>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileUpload}
+                                        accept=".json,.geojson,.kml"
+                                        className="hidden"
+                                    />
+                                    <button
+                                        onClick={loadSampleLot}
+                                        className="hover:text-[#0C3C60] underline font-bold cursor-pointer"
+                                    >
+                                        Ver lote de prueba
+                                    </button>
+                                </div>
+                            </div>
                         ) : (
                             /* ACTIVELY WALKING - NO NEED TO TAP POINTS! */
                             <div className="space-y-2 animate-in fade-in">
@@ -1513,8 +1523,30 @@ export default function EUDRGeoreference({
                         )}
                     </div>
                 ) : (
-                    /* COMPLETED ACTIONS: INSTANT PHOTO VIEW, WHATSAPP & GEOJSON */
-                    <div className="space-y-2 animate-in fade-in">
+                    /* MOMENTO 3: LOTE CERRADO Y ACCIONES DE VALOR */
+                    <div className="space-y-2.5 animate-in fade-in">
+                        <div className="bg-[#83DF9C]/20 border border-[#83DF9C]/40 p-3 rounded-2xl flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-8 h-8 rounded-full bg-[#83DF9C] text-[#0C3C60] flex items-center justify-center shrink-0 shadow-xs">
+                                    <CheckCircle2 className="w-5 h-5" />
+                                </div>
+                                <div className="min-w-0">
+                                    <h4 className="text-xs font-black uppercase text-[#0C3C60] tracking-wider truncate">
+                                        ¡Lote Mapeado con Éxito!
+                                    </h4>
+                                    <p className="text-[10px] text-[#0C3C60]/80 font-bold truncate">
+                                        {areaHa > 0 ? `${areaHa} ha` : ''} • {perimeterMeters}m recorrido {altitudeMeters ? `• ${altitudeMeters.toLocaleString('es-CO')} msnm` : ''}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleClear}
+                                className="text-[10px] font-black uppercase text-[#0C3C60] hover:bg-[#0C3C60]/10 bg-white px-2.5 py-1.5 rounded-xl border border-[#0C3C60]/15 shadow-xs shrink-0 cursor-pointer transition-colors"
+                            >
+                                Mapear Otro
+                            </button>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-2">
                             {/* View / Download Screenshot Photo */}
                             <button
@@ -1528,7 +1560,7 @@ export default function EUDRGeoreference({
                                 className="w-full bg-[#0C3C60] hover:bg-[#83DF9C] active:scale-98 text-[#FAF2CA] hover:text-[#0C3C60] py-3.5 rounded-xl font-black uppercase text-[11px] sm:text-xs tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer min-h-[48px]"
                             >
                                 <Camera className="w-4 h-4 text-[#83DF9C]" />
-                                <span>{isCapturingScreenshot ? 'Generando Foto...' : 'Ver Pantallazo'}</span>
+                                <span>{isCapturingScreenshot ? 'Generando Foto...' : 'Ver Foto Oficial'}</span>
                             </button>
 
                             {/* Download GeoJSON for TRACES NT */}
@@ -1544,10 +1576,10 @@ export default function EUDRGeoreference({
                         {/* Instant WhatsApp Share */}
                         <button
                             onClick={shareViaWhatsApp}
-                            className="w-full bg-[#25D366] hover:bg-[#20ba5a] active:scale-98 text-white py-3 rounded-xl font-black uppercase text-xs tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                            className="w-full bg-[#25D366] hover:bg-[#20ba5a] active:scale-98 text-white py-3.5 rounded-xl font-black uppercase text-xs tracking-wider transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <Share2 className="w-4 h-4" />
-                            <span>Enviar Reporte y Coordenadas por WhatsApp</span>
+                            <span>Enviar Reporte Oficial por WhatsApp</span>
                         </button>
                     </div>
                 )}
